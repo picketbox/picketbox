@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <parent>
+      <groupId>org.jboss.security</groupId>
+      <artifactId>jboss-security-spi-parent</artifactId>
+      <version>2.1.0.20091223-SNAPSHOT</version>
+      <relativePath>../parent</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <artifactId>authorization-spi</artifactId>
+   <packaging>jar</packaging>
+   <name>JBoss Security Authorization SPI</name>
+   <url>http://labs.jboss.org/portal/jbosssecurity/</url>
+   <description>JBoss Security is a cross cutting project that handles security for the JEMS projects</description>
+    <licenses>
+       <license>
+          <name>lgpl</name>
+          <url>http://repository.jboss.com/licenses/lgpl.txt</url>
+       </license>
+    </licenses>
+    <organization>
+       <name>JBoss Inc.</name>
+       <url>http://www.jboss.org</url>
+    </organization>
+    <scm>
+      <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/security/security-spi/tags/2.1.0.20091223-SNAPSHOT</connection>
+      <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/security/security-spi/tags/2.1.0.20091223-SNAPSHOT</developerConnection>
+      <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbossas/projects/security/security-spi/tags/2.1.0.20091223-SNAPSHOT</url>
+    </scm>
+   <dependencies>
+     <dependency>
+        <groupId>org.jboss.security</groupId>
+        <artifactId>identity-spi</artifactId>
+     </dependency>
+     <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <scope>test</scope>
+     </dependency>
+  </dependencies>
+   <reporting>
+    <plugins>
+     <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-surefire-report-plugin</artifactId>
+     </plugin>
+     <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-javadoc-plugin</artifactId>
+       <configuration>
+         <aggregate>true</aggregate>
+       </configuration>
+     </plugin>
+    </plugins>
+   </reporting>
+</project>
