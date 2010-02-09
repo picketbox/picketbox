@@ -1,0 +1,57 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <parent>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-parent</artifactId>
+      <version>3</version>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.jboss.security</groupId>
+   <artifactId>jbosssx-client</artifactId>
+   <version>2.1.0.20091223-SNAPSHOT</version>
+   <packaging>jar</packaging>
+   <name>JBoss Security Client</name>
+   <url>http://www.jboss.org</url>
+   <description>JBoss Security Client Library</description>
+   <build>
+   <plugins>
+      <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-jar-plugin</artifactId>
+         <version>2.3</version>
+         <executions>
+            <execution>
+               <goals>
+                 <goal>jar</goal>
+               </goals>
+            </execution>
+         </executions>
+         <configuration>
+          <archive>
+             <manifest>
+               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+               <addDefaultSpecificationEntries />
+             </manifest>
+          </archive>
+          <classesDirectory>../jbosssx/target/classes</classesDirectory>
+          <includes>
+             <include>JBossORG-EULA.txt</include>
+             <include>org/jboss/crypto/JBossSXProvider.class</include>
+             <include>org/jboss/crypto/CryptoUtil.class</include>
+             <include>org/jboss/crypto/digest/*</include>
+             <include>org/jboss/security/*</include>
+             <include>org/jboss/security/auth/callback/*</include>
+             <include>org/jboss/security/auth/login/*</include>
+             <include>org/jboss/security/client/*</include>
+             <include>org/jboss/security/auth/login/XMLLoginConfig.class</include>
+             <include>org/jboss/security/auth/login/XMLLoginConfigMBean.class</include>
+             <include>org/jboss/security/plugins/PBEUtils.class</include>
+             <include>org/jboss/security/ssl/ClientSocketFactory.class</include>
+             <include>org/jboss/security/ssl/RMISSLClientSocketFactory.class</include>
+             <include>org/jboss/security/plugins/*SecurityContext*.class</include>                              
+             <include>org/jboss/security/plugins/DefaultSecurityManagement.class</include>                              
+             <include>org/jboss/resource/security/*.class</include>                        </includes>
+         </configuration>
+     </plugin>
+    </plugins>
+ </build>
+</project>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+
+   <!-- the security management bean -->
+   <bean name="JNDIBasedSecurityManagement" 
+   				class="org.jboss.test.security.microcontainer.metadata.support.MockSecurityManagement"/>
+
+   <!-- invalid application policy: declares both types of authentication at the same time -->
+   <application-policy xmlns="urn:jboss:security-beans:1.0" name="InvalidPolicy2">
+      <authentication>
+         <login-module code="org.jboss.security.auth.AuthModule1" flag="required">
+            <module-option name="authOption1">value1</module-option>
+            <module-option name="authOption2">value2</module-option>
+         </login-module>
+         <login-module code="org.jboss.security.auth.AuthModule2" flag="optional">
+            <module-option name="authOption3">value3</module-option>
+            <module-option name="authOption4">value4</module-option>
+         </login-module>
+      </authentication>
+      <authentication-jaspi>
+         <login-module-stack name="ModuleStack1">
+            <login-module code="org.jboss.security.auth.AuthModule3" flag="required">
+               <module-option name="authOption5">value5</module-option>
+            </login-module>
+            <login-module code="org.jboss.security.auth.AuthModule4" flag="optional"/>
+         </login-module-stack>
+         <login-module-stack name="ModuleStack2">
+            <login-module code="org.jboss.security.auth.AuthModule5" flag="required">
+               <module-option name="authOption6">value6</module-option>
+               <module-option name="authOption7">value7</module-option>
+            </login-module>
+         </login-module-stack>
+         <auth-module code="org.jboss.security.auth.AuthModule1" login-module-stack-ref="ModuleStack2">
+            <module-option name="authOption1">value1</module-option>
+            <module-option name="authOption2">value2</module-option>
+         </auth-module>
+      </authentication-jaspi>
+   </application-policy>
+</deployment>

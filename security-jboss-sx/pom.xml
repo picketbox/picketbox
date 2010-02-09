@@ -1,0 +1,94 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <parent>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-parent</artifactId>
+      <version>3</version>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.jboss.security</groupId>
+   <artifactId>jbosssx-pom</artifactId>
+   <version>2.1.0.20091223-SNAPSHOT</version>
+   <packaging>pom</packaging>
+   <name>JBoss Security Implementation for the JBAS - Parent</name>
+   <url>http://labs.jboss.org/portal/jbosssecurity/</url>
+   <description>JBoss Security is a cross cutting project that handles security for the JEMS projects</description>
+   <licenses>
+      <license>
+         <name>lgpl</name>
+         <url>http://repository.jboss.com/licenses/lgpl.txt</url>
+      </license>
+   </licenses>
+   <organization>
+      <name>JBoss Inc.</name>
+      <url>http://www.jboss.org</url>
+   </organization>
+   <scm>
+      <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/security/security-jboss-sx/tags/2.1.0.20091223-SNAPSHOT</connection>
+      <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/security/security-jboss-sx/tags/2.1.0.20091223-SNAPSHOT</developerConnection>
+   </scm>
+   <repositories>
+    <repository>
+      <id>repository.jboss.org</id>
+      <name>JBoss Repository</name>
+      <layout>default</layout>
+      <url>http://repository.jboss.org/maven2/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+    <repository>
+      <id>snapshots.jboss.org</id>
+      <name>JBoss Snapshots Repository</name>
+      <layout>default</layout>
+      <url>http://snapshots.jboss.org/maven2/</url>
+      <snapshots>
+         <enabled>true</enabled>
+      </snapshots>
+      <releases>
+         <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
+  
+   <modules>
+     <module>parent</module>
+     <module>identity</module>
+     <module>acl</module>
+     <module>jbosssx</module>
+     <module>jbosssx-client</module>
+     <module>jbosssx-mc-int</module>
+     <module>assembly</module>
+   </modules>
+  
+   <profiles>
+    <!-- Specify heap size for ACL tests -->
+    <profile>
+      <id>acl-heap-profile</id>
+      <activation>
+         <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+         <surefire.jvm.args>-Xms512m -Xmx1024m</surefire.jvm.args>
+      </properties>
+      <modules>
+        <module>acl</module>
+      </modules>
+    </profile>
+   </profiles>
+  
+   <distributionManagement>
+    <repository>
+      <!-- Copy the distribution jar file to a local checkout of the maven repositry
+        -  This variable can be set in $MAVEN_HOME/conf/settings.xml -->
+      <id>repository.jboss.org</id>
+      <url>file://${maven.repository.root}</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshots.jboss.org</id>
+      <name>JBoss Inc. Repository</name>
+      <layout>default</layout>
+      <url>dav:https://snapshots.jboss.org/maven2/</url>
+    </snapshotRepository>
+   </distributionManagement>
+</project>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+
+   <!-- the security management bean -->
+   <bean name="JNDIBasedSecurityManagement" 
+   				class="org.jboss.test.security.microcontainer.metadata.support.MockSecurityManagement"/>
+
+
+   <!--  a regular application policy -->
+   <application-policy xmlns="urn:jboss:security-beans:1.0" name="TestPolicy1">
+      <authentication>
+         <login-module code="org.jboss.security.auth.AuthModule1" flag="required">
+            <module-option name="authOption1">value1</module-option>
+            <module-option name="authOption2">value2</module-option>
+         </login-module>
+      </authentication>
+      <authorization>
+         <policy-module code="org.jboss.security.authz.AuthorizationModule1" flag="required">
+            <module-option name="authzOption1">value1</module-option>
+            <module-option name="authzOption2">value2</module-option>
+         </policy-module>
+      </authorization>
+      <rolemapping>
+         <mapping-module code="org.jboss.security.mapping.RoleMappingModule1">
+            <module-option name="mappingOption1">value1</module-option>
+            <module-option name="mappingOption2">value2</module-option>
+         </mapping-module>
+         <mapping-module code="org.jboss.security.mapping.RoleMappingModule2">
+            <module-option name="mappingOption3">value3</module-option>
+            <module-option name="mappingOption4">value4</module-option>
+         </mapping-module>
+      </rolemapping>
+      <audit>
+         <provider-module code="org.jboss.security.audit.AuditModule1">
+            <module-option name="auditOption1">value1</module-option>
+         </provider-module>
+      </audit>
+      <identity-trust>
+         <trust-module code="org.jboss.security.trust.IdentityTrustModule1" flag="required">
+            <module-option name="trustOption1">value1</module-option>
+            <module-option name="trustOption2">value2</module-option>
+         </trust-module>
+      </identity-trust>
+   </application-policy>
+
+   <!-- a test bean where we inject the security managers -->
+   <bean name="TestBean" class="org.jboss.test.security.microcontainer.metadata.support.TestBean">
+      <property name="authenticationManager"><inject bean="TestPolicy1" property="authenticationManager"/></property>
+      <property name="authorizationManager"><inject bean="TestPolicy1" property="authorizationManager"/></property>
+      <property name="mappingManager"><inject bean="TestPolicy1" property="mappingManager"/></property>
+      <property name="auditManager"><inject bean="TestPolicy1" property="auditManager"/></property>
+      <property name="identityTrustManager"><inject bean="TestPolicy1" property="identityTrustManager"/></property>
+   </bean>
+
+</deployment>

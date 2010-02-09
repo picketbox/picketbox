@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <parent>
+      <groupId>org.jboss.security</groupId>
+      <artifactId>jbosssx-parent</artifactId>
+      <version>2.1.0.20091223-SNAPSHOT</version>
+      <relativePath>../parent</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <artifactId>jboss-security-acl-impl</artifactId>
+   <packaging>jar</packaging>
+   <name>JBoss Security ACL Implementation</name>
+   <url>http://labs.jboss.org/portal/jbosssecurity/</url>
+   <description>JBoss Security is a cross cutting project that handles security for the JEMS projects</description>
+   <licenses>
+      <license>
+         <name>lgpl</name>
+         <url>http://repository.jboss.com/licenses/lgpl.txt</url>
+      </license>
+   </licenses>
+   <organization>
+      <name>JBoss Inc.</name>
+      <url>http://www.jboss.org</url>
+   </organization>
+   <profiles>
+    <!--    mvn install -Psecurity-manager    -->
+    <profile>
+      <id>security-manager</id>
+      <activation>
+         <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+         <test.env>-Dtest.basedir=${basedir}/target/test-classes</test.env>
+         <policy.file>${basedir}/src/tests/resources/java.policy</policy.file>
+         <surefire.jvm.args>-Djava.security.manager -Djava.security.policy=${policy.file} ${test.env}</surefire.jvm.args>
+      </properties>
+    </profile>
+    <!--     mvn install -Psecurity-manager-debug   -->
+    <!-- Best Practice:    mvn install -Psecurity-manager-debug  2>&1 > logfile2>&1 > logfile -->
+    <profile>
+      <id>security-manager-debug</id>
+      <activation>
+         <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+         <test.env>-Dtest.basedir=${basedir}/target/test-classes</test.env>
+         <policy.file>${basedir}/src/tests/resources/java.policy</policy.file>
+         <surefire.jvm.args>-Djava.security.manager -Djava.security.policy=${policy.file} -Djava.security.debug=failure,access ${test.env}</surefire.jvm.args>
+      </properties>
+    </profile>
+   </profiles>
+   <dependencies> 
+      <dependency>
+         <groupId>org.jboss.logging</groupId>
+         <artifactId>jboss-logging-spi</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.hibernate</groupId>
+         <artifactId>hibernate</artifactId>
+         <version>3.2.4.sp1</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.hibernate</groupId>
+         <artifactId>hibernate-annotations</artifactId>
+         <version>3.3.0.ga</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.hibernate</groupId>
+         <artifactId>hibernate-entitymanager</artifactId>
+         <version>3.3.1.ga</version>
+         <scope>compile</scope>
+         <exclusions>
+           <exclusion>
+             <groupId>org.jboss</groupId>
+             <artifactId>jboss-common-core</artifactId>
+           </exclusion>
+         </exclusions>
+      </dependency>
+      <dependency>
+         <groupId>hsqldb</groupId>
+         <artifactId>hsqldb</artifactId>
+         <version>1.8.0.2</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.jboss</groupId>
+         <artifactId>jboss-common-core</artifactId>
+         <version>2.2.17.GA</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.jboss.security</groupId>
+         <artifactId>acl-spi</artifactId>
+         <version>${project.version}</version>
+         <scope>compile</scope>
+      </dependency>    
+      <dependency>
+         <groupId>org.jboss.security</groupId>
+         <artifactId>identity-impl</artifactId>
+         <version>${project.version}</version>
+         <scope>compile</scope>
+      </dependency>    
+   </dependencies>
+</project>

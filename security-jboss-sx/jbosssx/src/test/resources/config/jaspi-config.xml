@@ -1,0 +1,52 @@
+<?xml version='1.0'?> 
+ 
+<policy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="urn:jboss:security-config:5.0"
+         xmlns="urn:jboss:security-config:5.0">
+   
+   <application-policy name="conf-jaspi"> 
+     <authentication-jaspi>
+      <login-module-stack name="lm-stack">
+         <login-module
+            code="org.jboss.test.authentication.jaspi.TestLoginModule"
+            flag="optional">
+            <module-option name="principal">anil</module-option>
+            <module-option name="pass">anilpwd</module-option>
+         </login-module>
+      </login-module-stack>
+      <auth-module code="org.jboss.security.auth.container.modules.SimpleServerAuthModule">
+         <module-option name="principal">anil</module-option>
+         <module-option name="pass">anilpwd</module-option> 
+      </auth-module>  
+      <auth-module code="org.jboss.test.authentication.jaspi.TestServerAuthModule" 
+                   login-module-stack-ref="lm-stack"/>  
+    </authentication-jaspi> 
+   </application-policy> 
+   
+   <application-policy name="conf-jaspi-2"> 
+     <authentication-jaspi>  
+      <auth-module code="org.jboss.test.authentication.jaspi.LoginModuleServerAuthModule">
+          <module-option name="login-module-delegate">org.jboss.security.auth.spi.UsersRolesLoginModule</module-option>
+          <module-option name="usersProperties">users.properties</module-option>
+         <module-option name="rolesProperties">roles.properties</module-option>
+      </auth-module> 
+    </authentication-jaspi> 
+   </application-policy> 
+   
+   <application-policy name="web-jaspi"> 
+     <authentication-jaspi> 
+       <login-module-stack name="jaas-lm-stack">
+         <login-module
+            code="org.jboss.security.auth.spi.UsersRolesLoginModule" flag="required">
+            <module-option name="usersProperties">users.properties</module-option>
+             <module-option name="rolesProperties">roles.properties</module-option>
+         </login-module>
+      </login-module-stack> 
+      <auth-module code="org.jboss.security.auth.container.modules.HttpServletServerAuthModule"
+                   login-module-stack-ref="jaas-lm-stack">
+          <module-option name="userNameParam">j_username</module-option>
+         <module-option name="passwordParam">j_password</module-option>
+      </auth-module> 
+    </authentication-jaspi> 
+   </application-policy> 
+</policy> 
