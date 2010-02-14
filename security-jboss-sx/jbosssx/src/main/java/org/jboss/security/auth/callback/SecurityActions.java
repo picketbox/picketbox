@@ -83,7 +83,7 @@ public class SecurityActions
    }
 
    static CallbackHandler getContextCallbackHandler()
-      throws PolicyContextException
+      throws Exception
    {
       if(System.getSecurityManager() == null)
       {
@@ -94,5 +94,4 @@ public class SecurityActions
          return PolicyContextActions.PRIVILEGED.getContextCallbackHandler();
       }
    }
-
 }
