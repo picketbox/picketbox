@@ -7,7 +7,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.jboss.security</groupId>
    <artifactId>jbosssx-client</artifactId>
-   <version>3.0.0-SNAPSHOT</version>
+   <version>3.0.0.Beta1</version>
    <packaging>jar</packaging>
    <name>JBoss Security Client</name>
    <url>http://www.jboss.org</url>
