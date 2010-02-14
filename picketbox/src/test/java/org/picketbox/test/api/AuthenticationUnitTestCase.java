@@ -28,6 +28,9 @@ import javax.security.auth.Subject;
 import junit.framework.TestCase;
 
 import org.jboss.security.AuthenticationManager; 
+import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityContextAssociation;
+import org.jboss.security.SecurityContextFactory;
 import org.picketbox.config.PicketBoxConfiguration;
 import org.picketbox.factories.SecurityFactory;
 
@@ -44,8 +47,7 @@ public class AuthenticationUnitTestCase extends TestCase
    { 
       SecurityFactory.prepare();
       try
-      {
-
+      { 
          String configFile = "config/authentication.conf";
          PicketBoxConfiguration idtrustConfig = new PicketBoxConfiguration();
          idtrustConfig.load(configFile);
@@ -86,6 +88,41 @@ public class AuthenticationUnitTestCase extends TestCase
 
          boolean result = am.isValid(principal, credential); 
          assertFalse("Valid Auth", result);
+      }
+      finally
+      {
+         SecurityFactory.release();
+      }
+   }
+   
+   public void testAuthenticationUsingSecurityContext() throws Exception
+   {
+      SecurityFactory.prepare();
+      try
+      { 
+         String configFile = "config/authentication.conf";
+         PicketBoxConfiguration idtrustConfig = new PicketBoxConfiguration();
+         idtrustConfig.load(configFile);
+
+         SecurityContext securityContext = SecurityContextFactory.createSecurityContext(securityDomainName);
+         SecurityContextAssociation.setSecurityContext(securityContext);
+         
+         AuthenticationManager am = securityContext.getAuthenticationManager(); 
+         assertNotNull(am);
+
+         Subject subject = new Subject();
+         Principal principal = getPrincipal("anil");
+         Object credential = new String("pass");
+         
+         boolean result = am.isValid(principal, credential); 
+         assertTrue("Valid Auth", result);
+         result = am.isValid(principal, credential, subject);
+         assertTrue("Valid Auth", result);
+         assertTrue("Subject has principals", subject.getPrincipals().size() > 0); 
+         
+         securityContext.getUtil().createSubjectInfo(principal, credential, subject);
+         assertEquals("UserName == anil", "anil", securityContext.getUtil().getUserName());
+         assertEquals("subject is equal", subject, securityContext.getUtil().getSubject());
       }
       finally
       {
