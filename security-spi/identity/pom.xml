@@ -2,7 +2,7 @@
    <parent>
       <groupId>org.jboss.security</groupId>
       <artifactId>jboss-security-spi-parent</artifactId>
-      <version>2.1.0.20091223-SNAPSHOT</version>
+      <version>3.0.0-SNAPSHOT</version>
       <relativePath>../parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
@@ -22,9 +22,9 @@
        <url>http://www.jboss.org</url>
     </organization>
     <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/security/security-spi/tags/2.1.0.20091223-SNAPSHOT</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/security/security-spi/tags/2.1.0.20091223-SNAPSHOT</developerConnection>
-      <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbossas/projects/security/security-spi/tags/2.1.0.20091223-SNAPSHOT</url>
+      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/security-spi/tags/3.0.0-SNAPSHOT</connection>
+      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/security-spi/tags/3.0.0-SNAPSHOT</developerConnection>
+      <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/picketbox/security-spi/tags/3.0.0-SNAPSHOT</url>
     </scm>
     <reporting>
       <plugins>
