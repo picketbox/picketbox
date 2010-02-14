@@ -123,7 +123,7 @@ public class SecurityAssociationHandler implements CallbackHandler
                   return;
                }
             }
-            catch (PolicyContextException e)
+            catch (Exception e)
             {
             }
             throw new UnsupportedCallbackException(c, "Unrecognized Callback");

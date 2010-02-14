@@ -31,7 +31,6 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.jacc.PolicyContextException;
 
 /**
  * Serializable Callback Handler
@@ -109,7 +108,6 @@ public class JBossCallbackHandler implements CallbackHandler, Serializable
          }
          else
          {
-            // Try the JACC context CallbackHandler 
             try
             {
                CallbackHandler handler = SecurityActions.getContextCallbackHandler();
@@ -120,9 +118,10 @@ public class JBossCallbackHandler implements CallbackHandler, Serializable
                   return;
                }
             }
-            catch (PolicyContextException e)
+            catch (Exception e)
             {
-            }
+            } 
+
             throw new UnsupportedCallbackException(c, "Unrecognized Callback");
          }
       }
@@ -168,5 +167,5 @@ public class JBossCallbackHandler implements CallbackHandler, Serializable
          }
       }
       return password;
-   } 
+   }  
 }
