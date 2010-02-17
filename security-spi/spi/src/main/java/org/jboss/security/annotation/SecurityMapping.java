@@ -28,21 +28,28 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 /**
- * <p>
- * Annotation for specifying the JBoss security domain for EJBs.
- * </p>
- * 
- * @author <a href="mailto:bill@jboss.org">Bill Burke</a>
- * @author <a href="mailto:sguilhen@redhat.com">Stefan Guilhen</a>
+ * Annotation for the mapping functionality (Principal, Role, Attribute)
+ * @author Anil.Saldhana@redhat.com
+ * @since Feb 14, 2010
  */
 @Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SecurityDomain 
+public @interface SecurityMapping 
 {
-   String value();
+   /**
+    * ROLE, PRINCIPAL or ATTRIBUTE
+    * @return
+    */
+   String type() default "ROLE";
+   
+   /**
+    * Example, X509 can have SubjectDNMapper
+    * @return
+    */
+   String mappingClassName() default "";
 
-   String unauthenticatedPrincipal() default "";
 }

@@ -29,20 +29,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>
- * Annotation for specifying the JBoss security domain for EJBs.
- * </p>
- * 
- * @author <a href="mailto:bill@jboss.org">Bill Burke</a>
- * @author <a href="mailto:sguilhen@redhat.com">Stefan Guilhen</a>
+ * @author Anil.Saldhana@redhat.com
+ * @since Feb 16, 2010
  */
 @Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SecurityDomain 
+public @interface SecurityConfig 
 {
-   String value();
-
-   String unauthenticatedPrincipal() default "";
+   String fileName(); 
 }
