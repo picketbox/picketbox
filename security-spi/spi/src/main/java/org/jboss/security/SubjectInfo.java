@@ -32,7 +32,6 @@ import org.jboss.security.identity.Identity;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.extensions.CredentialIdentityFactory;
 
-//$Id$
 
 /**
  *  Holds information - principal, credential and subject
