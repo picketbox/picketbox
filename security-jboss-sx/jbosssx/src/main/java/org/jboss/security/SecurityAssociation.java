@@ -864,7 +864,7 @@ public final class SecurityAssociation
             local = new ArrayListInheritableLocal();
       }
       
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({"unchecked", "unused"})
       int size()
       {
          ArrayList stack = (ArrayList) local.get();
@@ -878,7 +878,7 @@ public final class SecurityAssociation
          stack.add(runAs);
       }
 
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({"unchecked", "unused"})
       RunAsIdentity pop()
       {
          ArrayList stack = (ArrayList) local.get();
@@ -894,7 +894,7 @@ public final class SecurityAssociation
        * with the value at depth.
        * @return The run-as identity if one exists, null otherwise.
        */
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({"unchecked", "unused"})
       RunAsIdentity peek(int depth)
       {
          ArrayList stack = (ArrayList) local.get();
@@ -1001,6 +1001,7 @@ public final class SecurityAssociation
             local = new ArrayListInheritableLocal();
       }
       
+      @SuppressWarnings("unused")
       int size()
       {
          ArrayList stack = (ArrayList) local.get();
@@ -1115,6 +1116,7 @@ public final class SecurityAssociation
        * @param parentValue - the parent HashMap
        * @return a copy of the parent thread map
        */
+      @SuppressWarnings("unused")
       protected HashMap<String,Object> childValue(Object parentValue)
       {
          HashMap<String,Object> map = (HashMap<String,Object>) parentValue;

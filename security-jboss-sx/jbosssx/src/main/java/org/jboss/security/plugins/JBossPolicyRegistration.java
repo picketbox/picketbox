@@ -192,6 +192,7 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
    /**
     * @see PolicyRegistration#registerPolicyConfig(String, String, Object)
     */
+   @SuppressWarnings("unchecked")
    public <P> void registerPolicyConfig(String contextId, String type, P objectModel)
    {
       if (PolicyRegistration.XACML.equalsIgnoreCase(type))

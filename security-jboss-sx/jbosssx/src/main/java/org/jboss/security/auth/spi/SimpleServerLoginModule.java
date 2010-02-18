@@ -23,7 +23,6 @@ package org.jboss.security.auth.spi;
 
 import java.security.Principal;
 import java.security.acl.Group;
-import java.util.Set;
 
 import javax.security.auth.login.LoginException;
 

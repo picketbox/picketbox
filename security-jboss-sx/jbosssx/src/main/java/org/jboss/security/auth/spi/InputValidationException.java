@@ -30,6 +30,7 @@ package org.jboss.security.auth.spi;
  * 
  * @author <a href="mailto:sguilhen@redhat.com">Stefan Guilhen</a>
  */
+@SuppressWarnings("serial")
 public class InputValidationException extends Exception
 {
 

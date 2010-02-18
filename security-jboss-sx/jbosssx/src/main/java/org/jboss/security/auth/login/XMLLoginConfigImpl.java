@@ -324,6 +324,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
     * Called to try to load the config from the java.security.auth.login.config property value when there is no
     * loginConfigURL.
     */
+   @SuppressWarnings("deprecation")
    public void loadConfig()
    {
       // Try to load the java.security.auth.login.config property

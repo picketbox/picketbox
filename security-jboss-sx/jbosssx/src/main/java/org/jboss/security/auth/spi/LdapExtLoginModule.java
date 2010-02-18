@@ -221,6 +221,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
 
    private transient SimpleGroup userRoles = new SimpleGroup("Roles");
    
+   @SuppressWarnings("unchecked")
    public void initialize(Subject subject, CallbackHandler callbackHandler, Map sharedState, Map options)
    {
       super.initialize(subject, callbackHandler, sharedState, options);

@@ -25,16 +25,14 @@ import java.security.acl.Group;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import javax.naming.InitialContext;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
-import javax.security.auth.login.FailedLoginException;
-import javax.transaction.Transaction;
 
-import org.jboss.security.plugins.HostThreadLocal;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.SimplePrincipal;
+import org.jboss.security.plugins.HostThreadLocal;
 
 
 /**
@@ -65,6 +63,7 @@ public class RemoteHostTrustLoginModule extends UsernamePasswordLoginModule
     * trustedHosts: a comma delimited list of trusted hosts allowed to pass principals without credentials and be "trusted"
     * roles: automatically granted to any users authenticated
     */
+   @SuppressWarnings("unchecked")
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map sharedState, Map options)
    {
