@@ -22,9 +22,7 @@
 package org.jboss.security;
 
 import java.io.Serializable;
-import java.security.AccessController;
 import java.security.Principal;
-import java.security.PrivilegedAction;
 
 /**
  * A simple String based implementation of Principal. Typically a SimplePrincipal is created given a userID which is
@@ -49,19 +47,13 @@ public class SimplePrincipal implements Principal, Serializable
     * org.jboss.security.simpleprincipal.equals.override is set to true will only
     * compare instances of SimplePrincipals.
     * @return true if name equals another.getName();
-    */
+    */ 
    @Override
    public boolean equals(Object another)
    {
       if (!(another instanceof Principal))
          return false;
-      if ("true".equals(AccessController.doPrivileged(new PrivilegedAction()
-      {
-         public Object run()
-         {
-            return System.getProperty(OVERRIDE_EQUALS_BEHAVIOR, "false");
-         }
-      })))
+      if ("true".equals(SecurityActions.getProperty(OVERRIDE_EQUALS_BEHAVIOR, "false")))
       {
          if (!(another instanceof SimplePrincipal))
             return false;
