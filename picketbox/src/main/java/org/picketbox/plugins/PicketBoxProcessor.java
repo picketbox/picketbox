@@ -22,10 +22,12 @@
 package org.picketbox.plugins;
 
 import java.security.Principal;
+import java.security.PrivilegedActionException;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
 import org.jboss.security.SecurityConstants;
@@ -36,6 +38,7 @@ import org.jboss.security.annotation.SecurityDomain;
 import org.jboss.security.callbacks.SecurityContextCallbackHandler;
 import org.jboss.security.identity.RoleGroup;
 import org.picketbox.config.PicketBoxConfiguration;
+import org.picketbox.exceptions.PicketBoxProcessingException;
 import org.picketbox.factories.SecurityFactory;
 
 /**
@@ -44,6 +47,8 @@ import org.picketbox.factories.SecurityFactory;
  */
 public class PicketBoxProcessor
 {
+   private static Logger log = Logger.getLogger(PicketBoxProcessor.class);
+   
    Principal principal = null;
    Object credential = null;
    
@@ -51,42 +56,92 @@ public class PicketBoxProcessor
    {   
    } 
    
+   /**
+    * Set the username/credential
+    * @param username
+    * @param credential
+    */
    public void setSecurityInfo(String username, Object credential)
    {
       this.principal = new SimplePrincipal(username);
       this.credential = credential; 
    }
    
-   public Principal getCallerPrincipal() throws Exception
+   /**
+    * Get the authenticated principal
+    * @return 
+    * @throws PicketBoxProcessingException 
+    */
+   public Principal getCallerPrincipal() throws PicketBoxProcessingException
    {
       Principal principal = null;
       
-      SecurityContext securityContext =  SecurityActions.getSecurityContext();
+      SecurityContext securityContext = null;
+      try
+      {
+         securityContext = SecurityActions.getSecurityContext();
+      }
+      catch (PrivilegedActionException pae)
+      {
+         throw new PicketBoxProcessingException(pae.getCause());
+      }
       if(securityContext != null)
          principal = securityContext.getUtil().getUserPrincipal(); 
       return principal;
    }
    
-   public RoleGroup getCallerRoles() throws Exception
+   /**
+    * Get the caller roles
+    * @return 
+    * @throws PicketBoxProcessingException 
+    */
+   public RoleGroup getCallerRoles() throws PicketBoxProcessingException
    {
       RoleGroup roleGroup = null;
       
-      SecurityContext securityContext =  SecurityActions.getSecurityContext();
+      SecurityContext securityContext = null;
+      try
+      {
+         securityContext = SecurityActions.getSecurityContext();
+      }
+      catch (PrivilegedActionException pae)
+      {
+         throw new PicketBoxProcessingException(pae.getCause());
+      }
       if(securityContext != null)
          roleGroup = securityContext.getUtil().getRoles(); 
       return roleGroup;
    }
    
-   public Subject getCallerSubject() throws Exception
+   /**
+    * Get the caller subject
+    * @return 
+    * @throws PicketBoxProcessingException 
+    */
+   public Subject getCallerSubject() throws PicketBoxProcessingException
    {
       Subject subject = new Subject();
-      SecurityContext securityContext =  SecurityActions.getSecurityContext();
+      SecurityContext securityContext = null;
+      try
+      {
+         securityContext = SecurityActions.getSecurityContext();
+      }
+      catch (PrivilegedActionException pae)
+      {
+         throw new PicketBoxProcessingException(pae.getCause());
+      }
       if(securityContext != null)
          subject = securityContext.getUtil().getSubject();
       return subject;
    }
    
-   public void process(Object pojo) throws Exception
+   /**
+    * Process the POJO for security annotations
+    * @param pojo
+    * @throws PicketBoxProcessingException 
+    * @throws LoginException
+    */
+   public void process(Object pojo) throws LoginException, PicketBoxProcessingException
    {
       String securityDomain = SecurityConstants.DEFAULT_APPLICATION_POLICY;
       
@@ -124,6 +179,12 @@ public class PicketBoxProcessor
          RoleGroup roles = authzMgr.getSubjectRoles(subject, cbh); 
          if(roles == null)
             throw new RuntimeException("Roles from subject is null");  
+      }
+      catch(PrivilegedActionException pae)
+      {
+         if(log.isTraceEnabled())
+            log.trace("Exception in processing:",pae);
+         throw new PicketBoxProcessingException(pae.getCause());
       }
       finally
       {
