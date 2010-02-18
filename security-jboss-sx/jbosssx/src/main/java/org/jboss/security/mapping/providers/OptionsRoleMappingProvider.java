@@ -26,7 +26,7 @@ import org.jboss.security.mapping.MappingResult;
  *  @since  Aug 24, 2006
  */
 public class OptionsRoleMappingProvider implements MappingProvider<RoleGroup> 
-{ 
+{   
    //Standard Strings
    private static final String REPLACE_ROLES_STRING = "replaceRoles";
    private static final String ROLES_MAP = "rolesMap";
@@ -35,7 +35,7 @@ public class OptionsRoleMappingProvider implements MappingProvider<RoleGroup>
 
    private Map<String,Object> options = null;
    
-   private Properties roleMapProperties = null;
+   private Properties roleMapProperties = new Properties();
    
    /**
     * Specifies
@@ -64,7 +64,7 @@ public class OptionsRoleMappingProvider implements MappingProvider<RoleGroup>
    }
    
    public void performMapping(Map<String,Object> contextMap, RoleGroup mappedObject)
-   { 
+   {   
       ArrayList<Role> removeMembers = new ArrayList<Role>();
       ArrayList<Role> addMembers = new ArrayList<Role>(); 
 
