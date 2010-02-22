@@ -115,7 +115,7 @@ public class MBeanServerLocator
       {
          MBeanServer server = (MBeanServer) i.next();
          String domain = server.getDefaultDomain();
-         if (domain.equals("jboss") || domain.equals("DefaultDomain"))
+         if (domain != null && (domain.equals("jboss") || domain.equals("DefaultDomain")))
          {
             return server;
          }
