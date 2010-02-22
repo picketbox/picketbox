@@ -114,7 +114,8 @@ public class MBeanServerLocator
       for (Iterator<?> i = MBeanServerFactory.findMBeanServer(null).iterator(); i.hasNext(); )
       {
          MBeanServer server = (MBeanServer) i.next();
-         if (server.getDefaultDomain().equals("jboss"))
+         String domain = server.getDefaultDomain();
+         if (domain.equals("jboss") || domain.equals("DefaultDomain"))
          {
             return server;
          }
