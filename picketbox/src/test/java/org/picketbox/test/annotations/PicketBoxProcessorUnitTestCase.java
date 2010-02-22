@@ -25,6 +25,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.security.Principal;
+
+import javax.security.auth.Subject;
+
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
@@ -33,13 +37,14 @@ import org.picketbox.plugins.PicketBoxProcessor;
 import org.picketbox.test.pojos.SecurityMappingAnnotationRolePOJO;
 
 /**
+ * <p> Unit test the {@code PicketBoxProcessor} </p>
  * @author Anil.Saldhana@redhat.com
  * @since Feb 16, 2010
  */ 
 public class PicketBoxProcessorUnitTestCase
 {
    @Test
-   public void testSecurityMappingRoleAnnotation() throws Exception
+   public void testAPI() throws Exception
    {
       SecurityMappingAnnotationRolePOJO pojo = new SecurityMappingAnnotationRolePOJO();
       
@@ -47,8 +52,11 @@ public class PicketBoxProcessorUnitTestCase
       processor.setSecurityInfo("anil", "pass");
       processor.process(pojo);
       
-      assertEquals("Principal == anil", new SimplePrincipal("anil"), processor.getCallerPrincipal());
-      assertNotNull("Subject is not null", processor.getCallerSubject());
+      Principal anil = new SimplePrincipal("anil");
+      assertEquals("Principal == anil", anil, processor.getCallerPrincipal());
+      Subject callerSubject = processor.getCallerSubject();
+      assertNotNull("Subject is not null", callerSubject);
+      assertTrue("Subject contains principal anil", callerSubject.getPrincipals().contains(anil));
       RoleGroup callerRoles = processor.getCallerRoles();
       assertTrue("InternalUser is a role", callerRoles.containsRole(new SimpleRole("InternalUser")));
       assertTrue("AuthorizedUser is a role", callerRoles.containsRole(new SimpleRole("AuthorizedUser")));

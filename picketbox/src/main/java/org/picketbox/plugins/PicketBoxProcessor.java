@@ -42,28 +42,41 @@ import org.picketbox.exceptions.PicketBoxProcessingException;
 import org.picketbox.factories.SecurityFactory;
 
 /**
- * Process the security annotations on a POJO
+ * <p> Process the security annotations on a POJO.</p>
+ * <p>
+ * Additionally, there are various useful methods such as {@code #getCallerPrincipal()} to
+ * get the authenticated principal, {@code #getCallerSubject()} to get the authenticated
+ * subject and {@code #getCallerRoles()} to get the roles for the authenticated subject.
+ * </p>
  * @since Feb 16, 2010
  */
 public class PicketBoxProcessor
 {
    private static Logger log = Logger.getLogger(PicketBoxProcessor.class);
    
-   Principal principal = null;
-   Object credential = null;
+   private Principal principal = null;
+   private Object credential = null;
    
    public PicketBoxProcessor()
    {   
    } 
    
    /**
-    * Set the username/credential
-    * @param username
+    * <p>
+    * Set the user name/ Credential
+    * </p>
+    * 
+    * <p>
+    * In the case of X509 certificates, they can be passed
+    * as the Credential into this method.
+    * </p>
+    * 
+    * @param userName
     * @param credential
     */
-   public void setSecurityInfo(String username, Object credential)
+   public void setSecurityInfo(String userName, Object credential)
    {
-      this.principal = new SimplePrincipal(username);
+      this.principal = new SimplePrincipal(userName);
       this.credential = credential; 
    }
    
@@ -176,9 +189,11 @@ public class PicketBoxProcessor
          AuthorizationManager authzMgr = SecurityFactory.getAuthorizationManager(securityDomain);
          SecurityContextCallbackHandler cbh = new SecurityContextCallbackHandler(securityContext);
          
+         //We try to get the roles of the current authenticated subject. This internally will also
+         //apply the role mapping logic if it is configured at the security domain level
          RoleGroup roles = authzMgr.getSubjectRoles(subject, cbh); 
          if(roles == null)
-            throw new RuntimeException("Roles from subject is null");  
+            throw new PicketBoxProcessingException("Roles from subject is null");  
       }
       catch(PrivilegedActionException pae)
       {

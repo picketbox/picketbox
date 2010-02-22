@@ -30,7 +30,14 @@ import java.security.Principal;
 public interface HandlerContract
 {
    /**
-    * Set the security context
+    * <p>
+    * Set the security context.
+    * </p>
+    * 
+    * <p>
+    * For X509 Certificates, they can be passed as the Credential.
+    * </p>
+    * 
     * @param principal Principal to be used
     * @param credential Credential to be used
     */
