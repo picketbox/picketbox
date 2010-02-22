@@ -23,13 +23,11 @@ package org.picketbox.test.pojos;
 
 import org.jboss.security.annotation.SecurityConfig;
 import org.jboss.security.annotation.SecurityDomain;
-import org.jboss.security.annotation.SecurityMapping;
 
 /**
  * @author Anil.Saldhana@redhat.com
  * @since Feb 16, 2010
- */
-@SecurityMapping(type="ROLE")
+ */ 
 @SecurityDomain(value="role-mapping-test")
 @SecurityConfig(fileName="config/mapping.conf")
 public class SecurityMappingAnnotationRolePOJO
