@@ -28,7 +28,9 @@ import javax.security.auth.login.Configuration;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
 import org.jboss.security.ISecurityManagement;
-import org.jboss.security.audit.AuditManager; 
+import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityContextFactory;
+import org.jboss.security.audit.AuditManager;
 import org.jboss.security.config.ApplicationPolicyRegistration;
 import org.jboss.security.config.StandaloneConfiguration;
 import org.jboss.security.mapping.MappingManager;
@@ -143,6 +145,25 @@ public class SecurityFactory
          Configuration.setConfiguration(standaloneConfiguration);
       }
       setLog4JLogger();
+   }
+   
+   /**
+    * Establish a security context on the thread
+    * @param securityDomainName
+    */
+   public static SecurityContext establishSecurityContext(String securityDomainName)
+   { 
+      SecurityContext securityContext = null;
+      try
+      {
+         securityContext = SecurityContextFactory.createSecurityContext(securityDomainName);
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
+      SecurityActions.setSecurityContext(securityContext);
+      return securityContext;
    }
    
    /**

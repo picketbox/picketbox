@@ -27,10 +27,8 @@ import javax.security.auth.Subject;
 
 import junit.framework.TestCase;
 
-import org.jboss.security.AuthenticationManager; 
+import org.jboss.security.AuthenticationManager;
 import org.jboss.security.SecurityContext;
-import org.jboss.security.SecurityContextAssociation;
-import org.jboss.security.SecurityContextFactory;
 import org.picketbox.config.PicketBoxConfiguration;
 import org.picketbox.factories.SecurityFactory;
 
@@ -103,9 +101,8 @@ public class AuthenticationUnitTestCase extends TestCase
          String configFile = "config/authentication.conf";
          PicketBoxConfiguration idtrustConfig = new PicketBoxConfiguration();
          idtrustConfig.load(configFile);
-
-         SecurityContext securityContext = SecurityContextFactory.createSecurityContext(securityDomainName);
-         SecurityContextAssociation.setSecurityContext(securityContext);
+         
+         SecurityContext securityContext = SecurityFactory.establishSecurityContext(securityDomainName); 
          
          AuthenticationManager am = securityContext.getAuthenticationManager(); 
          assertNotNull(am);

@@ -26,6 +26,9 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
+import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityContextAssociation;
+
 /**
  * Privileged Blocks
  * @author Anil.Saldhana@redhat.com
@@ -68,4 +71,17 @@ class SecurityActions
          }
       });
    }
+   
+   static void setSecurityContext(final SecurityContext sc)
+   {
+      AccessController.doPrivileged(new PrivilegedAction<Object>()
+      {
+         public Object run()
+         {
+            SecurityContextAssociation.setSecurityContext(sc);
+            return null;
+         }
+      });
+   }
+   
 }
