@@ -34,6 +34,7 @@ import javax.security.auth.login.LoginContext;
 
 import org.jboss.security.auth.callback.AppCallbackHandler;
 import org.jboss.security.auth.spi.LdapLoginModule;
+import org.jboss.security.util.MBeanServerLocator;
 import org.jboss.test.security.ldap.OpenDSUnitTestCase;
 
 /**
@@ -50,6 +51,7 @@ public class LdapLoginModuleDecodeActionUnitTestCase extends OpenDSUnitTestCase
    }
 
 
+   @SuppressWarnings("deprecation")
    @Override
    protected void setUp() throws Exception
    {
@@ -95,11 +97,11 @@ public class LdapLoginModuleDecodeActionUnitTestCase extends OpenDSUnitTestCase
       
       //Setup MBeanServer
       MBeanServer jbossMBeanServer = MBeanServerFactory.createMBeanServer("jboss");
+      MBeanServerLocator.setJBoss(jbossMBeanServer); 
       try
       {
          Test test = new Test();
-         jbossMBeanServer.registerMBean(test, new ObjectName(oname));
-         //jbossMBeanServer.createMBean(Test.class.getName(), new ObjectName(oname), getClass().getClassLoader()); 
+         jbossMBeanServer.registerMBean(test, new ObjectName(oname)); 
       }
       catch(Exception e)
       {
