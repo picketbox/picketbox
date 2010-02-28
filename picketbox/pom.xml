@@ -45,5 +45,18 @@
          <version>4.8.1</version>
          <scope>test</scope>
       </dependency>
+      <!-- these dependencies are needed because ACL impl classes are annotated - this must be fixed as we don't want to bring these deps in -->
+      <dependency>
+         <groupId>javax.persistence</groupId>
+         <artifactId>persistence-api</artifactId>
+         <version>1.0</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.hibernate</groupId>
+         <artifactId>hibernate-annotations</artifactId>
+         <version>3.3.0.ga</version>
+         <scope>test</scope>
+      </dependency>
     </dependencies>
 </project>
