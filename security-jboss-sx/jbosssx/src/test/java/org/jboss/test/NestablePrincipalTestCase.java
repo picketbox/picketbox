@@ -125,7 +125,7 @@ public class NestablePrincipalTestCase extends TestCase
     /** Test of members method, of class org.jboss.security.NestablePrincipal. */
     private void testMembers()
     {       
-        Enumeration members = principal.members();
+        Enumeration<Principal> members = principal.members();
         while( members.hasMoreElements() )
         {
             Principal user = (Principal) members.nextElement();

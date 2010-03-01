@@ -228,24 +228,20 @@ public class ACLProviderImpl implements ACLProvider
    public boolean isAccessGranted(Resource resource, Identity identity, ACLPermission permission)
          throws AuthorizationException
    {
-      if (this.strategy != null)
+      ACL acl = strategy.getACL(resource);
+      if (acl != null)
       {
-         ACL acl = strategy.getACL(resource);
-         if (acl != null)
+         ACLEntry entry = acl.getEntry(identity);
+         if (entry != null)
          {
-            ACLEntry entry = acl.getEntry(identity);
-            if (entry != null)
-            {
-               // check the permission associated with the identity.
-               return entry.checkPermission(permission);
-            }
-            // no entry for identity = deny access
-            return false;
+            // check the permission associated with the identity.
+            return entry.checkPermission(permission);
          }
-         else
-            throw new AuthorizationException("Unable to locate an ACL for the resource " + resource);
+         // no entry for identity = deny access
+         return false;
       }
-      throw new AuthorizationException("Unable to retrieve ACL: persistece strategy not set");
+      else
+         throw new AuthorizationException("Unable to locate an ACL for the resource " + resource);
    }
 
    /*

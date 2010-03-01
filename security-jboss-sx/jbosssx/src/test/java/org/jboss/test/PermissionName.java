@@ -35,9 +35,11 @@ by NamespacePermissions.
 @author Scott.Stark@jboss.org
 @version $Revision$
 */
-public class PermissionName implements Comparable, Serializable
+public class PermissionName implements Comparable<PermissionName>, Serializable
 {
-	/** The Properties used for the project directory heirarchical names */
+   private static final long serialVersionUID = -4344522894000320121L;
+
+   /** The Properties used for the project directory heirarchical names */
 	static Name emptyName;
 	static Properties nameSyntax = new Properties();
 	static
@@ -58,12 +60,10 @@ public class PermissionName implements Comparable, Serializable
         length(longer names before shorter names) to ensure that the most
         precise names are seen first.
     */
-    public static class NameLengthComparator implements Comparator
+    public static class NameLengthComparator implements Comparator<PermissionName>
     {
-        public int compare(Object o1, Object o2)
+        public int compare(PermissionName p1, PermissionName p2)
         {
-            PermissionName p1 = (PermissionName) o1;
-            PermissionName p2 = (PermissionName) o2;
             // if p1 is longer than p2, its < p2 -> < 0
             int compare = p2.size() - p1.size();
             if( compare == 0 )
@@ -89,9 +89,8 @@ public class PermissionName implements Comparable, Serializable
         this.name = name;
     }
 
-    public int compareTo(Object obj)
+    public int compareTo(PermissionName pn)
     {
-        PermissionName pn = (PermissionName) obj;
         /* Each level must be compared. The first level to not be equals
          determines the ordering of the names.
         */
@@ -106,11 +105,21 @@ public class PermissionName implements Comparable, Serializable
         return compare;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     public boolean equals(Object obj)
     {
-        return compareTo(obj) == 0;
+       if(obj instanceof PermissionName)
+          return compareTo((PermissionName) obj) == 0;
+       return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     public int hashCode()
     {
         return name.hashCode();

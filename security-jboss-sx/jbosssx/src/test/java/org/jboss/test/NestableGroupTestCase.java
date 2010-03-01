@@ -147,7 +147,7 @@ public class NestableGroupTestCase extends TestCase
     private void testMembers(int grpNo)
     {
         String user = "user."+grpNo+'.';
-        HashSet memberSet = new HashSet();
+        HashSet<Principal> memberSet = new HashSet<Principal>();
         for(int m = 0; m < 4; m ++)
         {
             Principal p = new SimplePrincipal(user+m);
@@ -155,7 +155,7 @@ public class NestableGroupTestCase extends TestCase
             memberSet.add(p);
         }
         
-        Enumeration members = group.members();
+        Enumeration<Principal> members = group.members();
         while( members.hasMoreElements() )
         {
             Principal member = (Principal) members.nextElement();

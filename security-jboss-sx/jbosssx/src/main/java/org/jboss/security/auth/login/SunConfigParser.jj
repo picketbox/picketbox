@@ -36,6 +36,7 @@ import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 16662 $
  */
+@SuppressWarnings("all")
 public class SunConfigParser
 {
    private XMLLoginConfigImpl loginConfig;
@@ -183,7 +184,7 @@ void appConfig() :
    Token t = null;
    String appName;
    AppConfigurationEntry entry;
-   ArrayList entries = new ArrayList();
+   ArrayList<AppConfigurationEntry> entries = new ArrayList<AppConfigurationEntry>();
 }
 {
    t=<IDENTIFIER> { appName = t.image; } <OPEN_BKT>
@@ -205,7 +206,7 @@ AppConfigurationEntry loginModuleConfig() :
 {
    Token t = null;
    String loginModuleClassName;
-   HashMap optionsMap = new HashMap();
+   HashMap<String, String> optionsMap = new HashMap<String, String>();
    LoginModuleControlFlag controlFlag;
    AppConfigurationEntry entry;
 }
@@ -240,7 +241,7 @@ LoginModuleControlFlag controlFlag() :
    }
 }
 
-void moduleOptions(HashMap optionsMap) :
+void moduleOptions(HashMap<String, String> optionsMap) :
 {
    Token t;
    String name, value;

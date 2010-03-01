@@ -40,7 +40,7 @@ public class AbstractJBossSXTest extends AbstractTestCaseWithSetup
       super(name); 
    }
    
-   public static AbstractTestDelegate getDelegate(Class clazz) throws Exception
+   public static AbstractTestDelegate getDelegate(Class<?> clazz) throws Exception
    {
       return new JBossSXTestDelegate(clazz);
    }

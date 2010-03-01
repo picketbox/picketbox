@@ -42,6 +42,7 @@ public class TestLoginModule implements LoginModule
    {
    }
 
+   @SuppressWarnings("unchecked")
    public void initialize(Subject subject, CallbackHandler handler, Map sharedState, Map options)
    {
       this.subject = subject;

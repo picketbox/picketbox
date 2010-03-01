@@ -31,7 +31,7 @@ package org.jboss.test;
  */
 public class JBossSXTestDelegate extends AbstractTestDelegate
 { 
-   public JBossSXTestDelegate(Class clazz)
+   public JBossSXTestDelegate(Class<?> clazz)
    {
       super(clazz); 
    } 

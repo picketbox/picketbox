@@ -45,7 +45,7 @@ public class TestJCE
       Provider[] providers = Security.getProviders();
       for(int p = 0; p < providers.length; p ++)
       {
-         Iterator iter = providers[p].keySet().iterator();
+         Iterator<Object> iter = providers[p].keySet().iterator();
          System.out.println("Provider: "+providers[p].getInfo());
          while( iter.hasNext() )
          {
@@ -122,6 +122,8 @@ public class TestJCE
       System.out.println("key2.Algorithm = "+key.getAlgorithm());
       System.out.println("key2.Format = "+key.getFormat());
       System.out.println("key2.Encoded Size = "+kbytes.length);
+      System.out.println("keySpec.Algorithm = " + keySpec.getAlgorithm());
+      System.out.println("keySpec.Format = " + keySpec.getFormat());
    }
    
    public static void main(String[] args)
@@ -129,10 +131,9 @@ public class TestJCE
       try
       {
          System.setOut(System.err);
-         TestJCE tst = new TestJCE();
-         tst.showProviders();
+         TestJCE.showProviders();
          //tst.testKey();
-         tst.testBlowfish();
+         TestJCE.testBlowfish();
       }
       catch(Throwable t)
       {

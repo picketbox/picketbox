@@ -91,7 +91,7 @@ public class TstTimedCache
             System.out.println("get(3) -> "+cache.get("3"));
             try
             {
-                Thread.currentThread().sleep(3*1000);
+                Thread.sleep(3*1000);
             }
             catch(InterruptedException e)
             {

@@ -41,7 +41,7 @@ public class SecurityActions
 {
    public static void addPrincipalToSubject(final Subject subj, final Principal p)
    {
-      AccessController.doPrivileged(new PrivilegedAction()
+      AccessController.doPrivileged(new PrivilegedAction<Object>()
       {
          public Object run()
          {
@@ -53,7 +53,7 @@ public class SecurityActions
    
    public static void setJAASConfiguration(final Configuration configuration)
    {
-      AccessController.doPrivileged(new PrivilegedAction()
+      AccessController.doPrivileged(new PrivilegedAction<Object>()
       {
          public Object run()
          {
@@ -65,7 +65,7 @@ public class SecurityActions
    
    public static void setPolicyContextID(final String contextID)
    {
-      AccessController.doPrivileged(new PrivilegedAction()
+      AccessController.doPrivileged(new PrivilegedAction<Object>()
       {
          public Object run()
          {

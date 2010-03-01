@@ -38,6 +38,7 @@ import javax.security.auth.message.config.ClientAuthContext;
 public class TestClientAuthConfig implements ClientAuthConfig
 {
 
+   @SuppressWarnings("unchecked")
    public ClientAuthContext getAuthContext(String authContextID,
          Subject clientSubject, Map properties) 
    throws AuthException

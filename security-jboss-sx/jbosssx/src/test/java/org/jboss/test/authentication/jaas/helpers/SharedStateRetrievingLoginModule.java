@@ -39,7 +39,6 @@ extends AbstractServerLoginModule
 {
    private String username = null;
 
-   @SuppressWarnings("unchecked")
    @Override
    public boolean login() throws LoginException
    {

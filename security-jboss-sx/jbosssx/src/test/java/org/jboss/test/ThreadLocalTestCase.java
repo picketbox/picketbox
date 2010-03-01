@@ -21,6 +21,8 @@
 */
 package org.jboss.test;
 
+import java.security.Principal;
+
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -34,8 +36,8 @@ InheritableThreadLocal.
 */
 public class ThreadLocalTestCase extends TestCase
 {
-    private static InheritableThreadLocal thread_principal = new InheritableThreadLocal();
-    private static InheritableThreadLocal thread_credential = new InheritableThreadLocal();
+    private static InheritableThreadLocal<Principal> thread_principal = new InheritableThreadLocal<Principal>();
+    private static InheritableThreadLocal<Object> thread_credential = new InheritableThreadLocal<Object>();
     private static String USER = "jduke";
     private static String PASSWORD = "theduke";
 

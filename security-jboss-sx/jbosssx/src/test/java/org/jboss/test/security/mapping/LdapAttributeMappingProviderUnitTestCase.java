@@ -74,7 +74,7 @@ public class LdapAttributeMappingProviderUnitTestCase extends OpenDSUnitTestsAda
       
       //Let us add the ldapAttributes.ldif
       String fileName = targetDir + "ldap" + fs + "ldapAttributes.ldif";
-      boolean op = util.addLDIF(serverHost, port, adminDN, adminPW, new File(fileName).toURL());
+      boolean op = util.addLDIF(serverHost, port, adminDN, adminPW, new File(fileName).toURI().toURL());
       assertTrue(op);
    }
    

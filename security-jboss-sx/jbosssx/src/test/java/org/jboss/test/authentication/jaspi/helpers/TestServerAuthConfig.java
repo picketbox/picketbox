@@ -36,6 +36,7 @@ import javax.security.auth.message.config.ServerAuthContext;
  *  @since  Jul 11, 2007 
  *  @version $Revision$
  */
+@SuppressWarnings("unchecked")
 public class TestServerAuthConfig implements ServerAuthConfig
 {
    public ServerAuthContext getAuthContext(String authContextID,

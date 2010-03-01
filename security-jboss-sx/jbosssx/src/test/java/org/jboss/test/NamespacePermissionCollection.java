@@ -26,6 +26,7 @@ import java.security.PermissionCollection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
@@ -39,8 +40,10 @@ import java.util.TreeMap;
 public class NamespacePermissionCollection extends PermissionCollection
 { 
    private static final long serialVersionUID = 1L;
-   private TreeMap namespacePerms = new TreeMap();
-    private TreeMap namespaceKeys = new TreeMap(new PermissionName.NameLengthComparator());
+   private TreeMap<PermissionName, List<NamespacePermission>> namespacePerms = 
+      new TreeMap<PermissionName, List<NamespacePermission>>();
+   private TreeMap<PermissionName, PermissionName> namespaceKeys = 
+      new TreeMap<PermissionName, PermissionName>(new PermissionName.NameLengthComparator());
 
     /** Creates new NamespacePermission */
     public NamespacePermissionCollection()
@@ -55,10 +58,10 @@ public class NamespacePermissionCollection extends PermissionCollection
             throw new IllegalArgumentException("Only NamespacePermission can be added, invalid="+permission);
         NamespacePermission np = (NamespacePermission) permission;
         PermissionName key = np.getFullName();
-        ArrayList tmp = (ArrayList) namespacePerms.get(key);
+        List<NamespacePermission> tmp = namespacePerms.get(key);
         if( tmp == null )
         {
-            tmp = new ArrayList();
+            tmp = new ArrayList<NamespacePermission>();
             namespacePerms.put(key, tmp);
             namespaceKeys.put(key, key);
         }
@@ -77,15 +80,15 @@ public class NamespacePermissionCollection extends PermissionCollection
         NamespacePermission np = (NamespacePermission) permission;
         // See if there is an exact permission for the name
         PermissionName key = np.getFullName();
-        ArrayList tmp = (ArrayList) namespacePerms.get(key);
+        List<NamespacePermission> tmp = namespacePerms.get(key);
         if( tmp == null )
         {   // Find the closest parent position.
-            SortedMap headMap = namespacePerms.headMap(key);
+            SortedMap<PermissionName, List<NamespacePermission>> headMap = namespacePerms.headMap(key);
             try
             {
                 PermissionName lastKey = (PermissionName) headMap.lastKey();
                 if( lastKey.isParent(key) == true )
-                    tmp = (ArrayList) namespacePerms.get(lastKey);
+                    tmp = namespacePerms.get(lastKey);
                 else
                 {
                     PermissionName[] keys = {};
@@ -95,7 +98,7 @@ public class NamespacePermissionCollection extends PermissionCollection
                         lastKey = keys[k];
                         if( lastKey.isParent(key) == true )
                         {
-                            tmp = (ArrayList) namespacePerms.get(lastKey);
+                            tmp = namespacePerms.get(lastKey);
                             break;
                         }
                     }
@@ -112,18 +115,23 @@ public class NamespacePermissionCollection extends PermissionCollection
         // See if the permission is implied by any we found
         if( tmp != null )
             implies = isImplied(tmp, np);
-//System.out.println("NPC["+this+"].implies("+np+") -> "+implies);
+        //System.out.println("NPC["+this+"].implies("+np+") -> "+implies);
         return implies;
     }
 
-    public Enumeration elements()
+    public Enumeration<Permission> elements()
     {
-        Set s = namespaceKeys.keySet();
-        final Iterator iter = s.iterator();
-        Enumeration elements = new Enumeration()
+        Set<PermissionName> s = namespaceKeys.keySet();
+        final Iterator<PermissionName> iter = s.iterator();
+        Enumeration<Permission> elements = new Enumeration<Permission>()
         {
-            ArrayList activeEntry;
+            List<NamespacePermission> activeEntry;
             int index;
+            
+            /*
+             * (non-Javadoc)
+             * @see java.util.Enumeration#hasMoreElements()
+             */
             public boolean hasMoreElements()
             {
                 boolean hasMoreElements = true;
@@ -134,13 +142,18 @@ public class NamespacePermissionCollection extends PermissionCollection
                 }
                 return hasMoreElements;
             }
-            public Object nextElement()
+            
+            /*
+             * (non-Javadoc)
+             * @see java.util.Enumeration#nextElement()
+             */
+            public NamespacePermission nextElement()
             {
-                Object next = null;
+               NamespacePermission next = null;
                 if( activeEntry == null )
                 {
                     Object key = iter.next();
-                    activeEntry = (ArrayList) namespacePerms.get(key);
+                    activeEntry = namespacePerms.get(key);
                     index = 0;
                     next = activeEntry.get(index ++);
                 }
@@ -155,7 +168,7 @@ public class NamespacePermissionCollection extends PermissionCollection
     }
 
 
-    private boolean isImplied(ArrayList permissions, NamespacePermission np)
+    private boolean isImplied(List<NamespacePermission> permissions, NamespacePermission np)
     {
         boolean isImplied = false;
         for(int p = 0; p < permissions.size(); p ++)

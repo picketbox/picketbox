@@ -40,6 +40,7 @@ import org.jboss.security.SimplePrincipal;
  *  @since  Jul 26, 2007 
  *  @version $Revision$
  */
+@SuppressWarnings("unused")
 public class TestLoginModule implements LoginModule
 { 
    private Subject subject;

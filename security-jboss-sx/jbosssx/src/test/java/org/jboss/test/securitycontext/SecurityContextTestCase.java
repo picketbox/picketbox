@@ -83,7 +83,7 @@ public class SecurityContextTestCase extends SecurityContextBaseTest
       JBossSecurityContext sc = getSC(securityDomain);
       ISecurityManagement ism = sc.getSecurityManagement();
       assertNotNull("Security Management is not null", ism);
-      MappingContext<RoleGroup> mc = sc.getMappingManager().getMappingContext(RoleGroup.class);
+      MappingContext<RoleGroup> mc = sc.getMappingManager().getMappingContext("role");
       assertNotNull("Mapping Context is not null", mc); 
       List<?> modules = mc.getModules();
       assertNotNull("Mapping modules not null", modules);

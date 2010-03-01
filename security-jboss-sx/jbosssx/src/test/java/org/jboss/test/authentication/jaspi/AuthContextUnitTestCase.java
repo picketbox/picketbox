@@ -220,11 +220,12 @@ public class AuthContextUnitTestCase extends JBossTestCase
     */
    private static class TestCallbackHandler implements CallbackHandler
    { 
-      public void setSecurityInfo(Principal p, Object cred)
-      {}
+      @SuppressWarnings("unused")
+      public void setSecurityInfo(Principal principal, Object credential)
+      {
+      }
       
-      public void handle(Callback[] arg0) 
-      throws IOException, UnsupportedCallbackException
+      public void handle(Callback[] arg0) throws IOException, UnsupportedCallbackException
       {
       } 
    } 

@@ -67,12 +67,12 @@ public class DelegatingPolicyTestCase extends TestCase
 
       String provider = "org.jboss.security.jacc.DelegatingPolicy";
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Class providerClass = loader.loadClass(provider);
+      Class<?> providerClass = loader.loadClass(provider);
       try
       {
          // Look for a ctor(Policy) signature
-         Class[] ctorSig = {Policy.class};
-         Constructor ctor = providerClass.getConstructor(ctorSig);
+         Class<?>[] ctorSig = {Policy.class};
+         Constructor<?> ctor = providerClass.getConstructor(ctorSig);
          Object[] ctorArgs = {oldPolicy};
          jaccPolicy = (Policy) ctor.newInstance(ctorArgs);
       }
@@ -179,7 +179,7 @@ public class DelegatingPolicyTestCase extends TestCase
       final EJBMethodPermission methodX = new EJBMethodPermission("someEJB", "methodX");
       final Subject caller = new Subject();
       caller.getPrincipals().add(new SimplePrincipal("callerX"));
-      Set principalsSet = caller.getPrincipals();
+      Set<Principal> principalsSet = caller.getPrincipals();
       Principal[] principals = new Principal[principalsSet.size()];
       principalsSet.toArray(principals);
       CodeSource cs = getClass().getProtectionDomain().getCodeSource();
@@ -190,9 +190,9 @@ public class DelegatingPolicyTestCase extends TestCase
                new SubjectDomainCombiner(caller));
       */
 
-      Boolean allowed = (Boolean) Subject.doAsPrivileged(caller, new PrivilegedAction()
+      Boolean allowed = (Boolean) Subject.doAsPrivileged(caller, new PrivilegedAction<Boolean>()
          {
-            public Object run()
+            public Boolean run()
             {
                AccessControlContext acc = AccessController.getContext();
                Boolean ok = Boolean.FALSE;

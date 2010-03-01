@@ -53,6 +53,7 @@ import org.jboss.test.SecurityActions;
  * @since Jul 27, 2007
  * @version $Revision$
  */
+@SuppressWarnings("unchecked")
 public class JASPILoginModuleDelgateUnitTestCase extends TestCase
 {
    AuthConfigFactory factory = null;

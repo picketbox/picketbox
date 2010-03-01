@@ -106,7 +106,7 @@ public class OpenDSUnitTestCase extends JBossTestCase
    public void testLDAPAddDelete() throws Exception
    {
       String fileName = targetDir + "ldap" + fs + "example1.ldif";
-      boolean op = util.addLDIF(serverHost, port, adminDN, adminPW, new File(fileName).toURL());
+      boolean op = util.addLDIF(serverHost, port, adminDN, adminPW, new File(fileName).toURI().toURL());
       assertTrue(op);
       
       DirContext dc = null;
