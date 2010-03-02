@@ -48,9 +48,13 @@ public class ACLProviderImpl implements ACLProvider
 
    private static final String PERSISTENCE_STRATEGY_OPTION = "persistenceStrategy";
 
+   private static final String CHECK_PARENT_ACL_OPTION = "checkParentACL";
+   
    /** persistence strategy used to retrieve the ACLs */
    protected ACLPersistenceStrategy strategy;
 
+   private boolean checkParentACL;
+   
    /*
     * (non-Javadoc)
     * 
@@ -62,6 +66,8 @@ public class ACLProviderImpl implements ACLProvider
       if (strategyClassName == null)
          strategyClassName = "org.jboss.security.acl.JPAPersistenceStrategy";
 
+      this.checkParentACL = Boolean.valueOf((String) options.get(CHECK_PARENT_ACL_OPTION)); 
+         
       try
       {
          Class<?> strategyClass = this.loadClass(strategyClassName);
@@ -228,7 +234,7 @@ public class ACLProviderImpl implements ACLProvider
    public boolean isAccessGranted(Resource resource, Identity identity, ACLPermission permission)
          throws AuthorizationException
    {
-      ACL acl = strategy.getACL(resource);
+      ACL acl = this.retrieveACL(resource);
       if (acl != null)
       {
          ACLEntry entry = acl.getEntry(identity);
@@ -244,6 +250,37 @@ public class ACLProviderImpl implements ACLProvider
          throw new AuthorizationException("Unable to locate an ACL for the resource " + resource);
    }
 
+   /**
+    * <p>
+    * Retrieves the ACL that is to be used to perform authorization decisions on the specified resource. If an ACL
+    * for the specified resource can be located by the strategy, this will be the returned ACL. On the other hand,
+    * if no ACL can be located for the resource then the method verifies if the {@code checkParentACL} property has
+    * been set:
+    * <ol>
+    *   <li>if {@code checkParentACL} is true, then check if the resource has a parent resource and try to locate an
+    *   ACL for the parent resource recursively. The idea here is that child resources "inherit" the permissions from
+    *   the parent resources (instead of providing an ACL that would be a copy of the parent ACL).</li>
+    *   <li>if {@code checkParentACL} is false, then {@code null} is returned.</li>
+    * </ol>
+    * 
+    * </p>
+    * 
+    * @param resource the {@code Resource} that is the target of the authorization decision.
+    * @return the {@code ACL} that is to be used to perform authorization decisions on the resource; {@code null} if
+    * no ACL can be found for the specified resource.
+    */
+   private ACL retrieveACL(Resource resource)
+   {
+      ACL acl = this.strategy.getACL(resource);
+      if (acl == null && this.checkParentACL)
+      {
+         Resource parent = (Resource) resource.getMap().get(ResourceKeys.PARENT_RESOURCE);
+         if (parent != null)
+            acl = retrieveACL(parent);
+      }
+      return acl;
+   }
+   
    /*
     * (non-Javadoc)
     * 
