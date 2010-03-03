@@ -28,17 +28,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
- * Annotation for the mapping functionality (Principal, Role, Attribute)
+ * Annotation to provide configuration for authentication
  * @author Anil.Saldhana@redhat.com
- * @since Feb 14, 2010
- */
+ * @since Mar 2, 2010
+ */ 
 @Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SecurityMapping 
-{
+public @interface Authentication 
+{ 
+   /**
+    * Get an array of <code>Module</code>
+    * @return
+    */
    Module[] modules(); 
 }

@@ -34,6 +34,8 @@ import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
 import org.junit.Test;
 import org.picketbox.plugins.PicketBoxProcessor;
+import org.picketbox.test.pojos.AuthPlusMappingAnnotatedPOJO;
+import org.picketbox.test.pojos.AuthenticationAnnotatedPOJO;
 import org.picketbox.test.pojos.SecurityMappingAnnotationRolePOJO;
 
 /**
@@ -47,6 +49,42 @@ public class PicketBoxProcessorUnitTestCase
    public void testAPI() throws Exception
    {
       SecurityMappingAnnotationRolePOJO pojo = new SecurityMappingAnnotationRolePOJO();
+      
+      PicketBoxProcessor processor = new PicketBoxProcessor(); 
+      processor.setSecurityInfo("anil", "pass");
+      processor.process(pojo);
+      
+      Principal anil = new SimplePrincipal("anil");
+      assertEquals("Principal == anil", anil, processor.getCallerPrincipal());
+      Subject callerSubject = processor.getCallerSubject();
+      assertNotNull("Subject is not null", callerSubject);
+      assertTrue("Subject contains principal anil", callerSubject.getPrincipals().contains(anil));
+      RoleGroup callerRoles = processor.getCallerRoles();
+      assertTrue("InternalUser is a role", callerRoles.containsRole(new SimpleRole("InternalUser")));
+      assertTrue("AuthorizedUser is a role", callerRoles.containsRole(new SimpleRole("AuthorizedUser")));
+   }
+   
+   @Test
+   public void testAuthenticationAnnotation() throws Exception
+   {
+      AuthenticationAnnotatedPOJO pojo = new AuthenticationAnnotatedPOJO();
+      
+      PicketBoxProcessor processor = new PicketBoxProcessor(); 
+      processor.setSecurityInfo("anil", "pass");
+      processor.process(pojo);
+      
+
+      Principal anil = new SimplePrincipal("anil");
+      assertEquals("Principal == anil", anil, processor.getCallerPrincipal());
+      Subject callerSubject = processor.getCallerSubject();
+      assertNotNull("Subject is not null", callerSubject);
+      assertTrue("Subject contains principal anil", callerSubject.getPrincipals().contains(anil));  
+   }
+   
+   @Test
+   public void testAuthenticationAndMappingAnnotation() throws Exception
+   {
+      AuthPlusMappingAnnotatedPOJO pojo = new AuthPlusMappingAnnotatedPOJO();
       
       PicketBoxProcessor processor = new PicketBoxProcessor(); 
       processor.setSecurityInfo("anil", "pass");

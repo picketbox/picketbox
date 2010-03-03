@@ -19,26 +19,19 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.security.annotation;
+package org.picketbox.test.pojos;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import org.jboss.security.annotation.Authentication;
+import org.jboss.security.annotation.Module;
+import org.jboss.security.annotation.ModuleOption;
 
 /**
- * Annotation for the mapping functionality (Principal, Role, Attribute)
+ * Pojo with the <code>Authentication</code> annotation
  * @author Anil.Saldhana@redhat.com
- * @since Feb 14, 2010
+ * @since Mar 2, 2010
  */
-@Inherited
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface SecurityMapping 
-{
-   Module[] modules(); 
+@Authentication(modules={@Module(code = "org.jboss.security.auth.spi.UsersRolesLoginModule", options =
+{@ModuleOption})})
+public class AuthenticationAnnotatedPOJO
+{ 
 }

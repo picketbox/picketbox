@@ -28,17 +28,24 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
- * Annotation for the mapping functionality (Principal, Role, Attribute)
+ * Represents a Module Option
  * @author Anil.Saldhana@redhat.com
- * @since Feb 14, 2010
+ * @since Mar 2, 2010
  */
 @Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SecurityMapping 
+public @interface ModuleOption 
 {
-   Module[] modules(); 
+   public enum VALUE_TYPE { REGULAR, JAVA_PROPERTIES};
+   
+   String key() default "";
+   String value() default ""; 
+   
+   /** Specify the type of the value. If it is regular, then accept it as a String value. If
+    * it is Java Property, then the value represents a Java Property.
+    */
+   VALUE_TYPE valueType() default VALUE_TYPE.REGULAR;
 }

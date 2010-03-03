@@ -28,17 +28,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
- * Annotation for the mapping functionality (Principal, Role, Attribute)
+ * Annotation indicating that all security events
+ * are to be audited
  * @author Anil.Saldhana@redhat.com
- * @since Feb 14, 2010
- */
+ * @since Mar 2, 2010
+ */ 
 @Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SecurityMapping 
-{
-   Module[] modules(); 
+public @interface SecurityAudit 
+{ 
+   Module[] modules();
 }

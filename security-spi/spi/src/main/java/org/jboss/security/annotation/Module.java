@@ -28,17 +28,38 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
- * Annotation for the mapping functionality (Principal, Role, Attribute)
+ * Represents a Module
  * @author Anil.Saldhana@redhat.com
- * @since Feb 14, 2010
- */
+ * @since Mar 2, 2010
+ */ 
 @Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SecurityMapping 
+public @interface Module 
 {
-   Module[] modules(); 
+   /**
+    * The FQN of the module
+    * @return
+    */
+   String code(); 
+   
+   /**
+    * Get the FLAG (REQUIRED, REQUISITE, SUFFICIENT or OPTIONAL)
+    * satisfying the JAAS Configuration semantics
+    * @return
+    */
+   String flag() default "REQUIRED";
+   
+   /**
+    * Mainly used by mapping modules
+    * @return
+    */
+   String type() default "";
+   /**
+    * Get an array of <code>ModuleOption</code>
+    * @return
+    */
+   ModuleOption[] options();
 }
