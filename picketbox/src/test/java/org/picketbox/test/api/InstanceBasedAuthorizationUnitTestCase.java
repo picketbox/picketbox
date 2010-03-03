@@ -51,7 +51,7 @@ import org.jboss.security.authorization.ResourceType;
 import org.jboss.security.identity.plugins.IdentityFactory;
 import org.picketbox.config.PicketBoxConfiguration;
 import org.picketbox.factories.SecurityFactory;
-import org.picketbox.test.pojos.MemoryOnlyACLStrategy;
+import org.picketbox.test.acl.MemoryOnlyACLStrategy;
 
 /**
  * <p>
