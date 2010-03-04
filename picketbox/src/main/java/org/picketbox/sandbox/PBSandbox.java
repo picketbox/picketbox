@@ -155,7 +155,7 @@ public class PBSandbox
       {
        public ResourceType getLayer()
        {
-          return ResourceType.IDTRUST;
+          return ResourceType.POJO;
        }
 
        public Map<String, Object> getMap()

@@ -29,5 +29,5 @@ package org.jboss.security.authorization;
  */
 public enum ResourceType
 {
-   WEB,EJB,ACL,IDTRUST;
+   WEB,EJB,ACL,POJO;
 }

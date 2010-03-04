@@ -126,7 +126,7 @@ public class AuthorizationUnitTestCase extends TestCase
       {
        public ResourceType getLayer()
        {
-          return ResourceType.IDTRUST;
+          return ResourceType.POJO;
        }
 
        public Map<String, Object> getMap()

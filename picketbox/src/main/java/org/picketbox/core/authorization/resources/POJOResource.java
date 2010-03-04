@@ -46,7 +46,7 @@ public class POJOResource implements Resource
 
    public ResourceType getLayer()
    { 
-      return ResourceType.IDTRUST;
+      return ResourceType.POJO;
    }
 
    public void add(Map<String,Object> m)
