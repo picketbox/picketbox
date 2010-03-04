@@ -7,7 +7,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.jboss.security</groupId>
    <artifactId>jbosssx-pom</artifactId>
-   <version>3.0.0.Beta2</version>
+   <version>3.0.0.Beta2-SNAPSHOT</version>
    <packaging>pom</packaging>
    <name>JBoss Security Implementation for the JBAS - Parent</name>
    <url>http://labs.jboss.org/portal/jbosssecurity/</url>
@@ -23,8 +23,8 @@
       <url>http://www.jboss.org</url>
    </organization>
    <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/security/security-jboss-sx/tags/3.0.0.Beta2</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/security/security-jboss-sx/tags/3.0.0.Beta2</developerConnection>
+      <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/security/security-jboss-sx/tags/3.0.0.Beta2-SNAPSHOT</connection>
+      <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/security/security-jboss-sx/tags/3.0.0.Beta2-SNAPSHOT</developerConnection>
    </scm>
    <repositories>
     <repository>
