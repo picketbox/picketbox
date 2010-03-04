@@ -50,10 +50,10 @@ import org.jboss.security.annotation.SecurityConfig;
 import org.jboss.security.annotation.SecurityDomain;
 import org.jboss.security.annotation.SecurityMapping;
 import org.jboss.security.annotation.ModuleOption.VALUE_TYPE;
-import org.jboss.security.audit.AuditManager;
-import org.jboss.security.audit.config.AuditConfigEntryHolder;
 import org.jboss.security.audit.config.AuditProviderEntry;
 import org.jboss.security.auth.login.AuthenticationInfo;
+import org.jboss.security.authorization.AuthorizationContext;
+import org.jboss.security.authorization.AuthorizationException;
 import org.jboss.security.authorization.config.AuthorizationModuleEntry;
 import org.jboss.security.callbacks.SecurityContextCallbackHandler;
 import org.jboss.security.config.ApplicationPolicy;
@@ -65,6 +65,7 @@ import org.jboss.security.config.MappingInfo;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.mapping.config.MappingModuleEntry;
 import org.picketbox.config.PicketBoxConfiguration;
+import org.picketbox.core.authorization.resources.POJOResource;
 import org.picketbox.exceptions.PicketBoxProcessingException;
 import org.picketbox.factories.SecurityFactory;
 
@@ -194,6 +195,8 @@ public class PicketBoxProcessor
       SecurityFactory.prepare();
       try
       {
+         boolean needAuthorization = false;
+         
          SecurityConfig securityConfig = objectClass.getAnnotation(SecurityConfig.class);
          Authentication authenticationAnnotation = objectClass.getAnnotation(Authentication.class);
          
@@ -221,6 +224,8 @@ public class PicketBoxProcessor
             {
                AuthorizationInfo authorizationInfo = getAuthorizationInfo(authorizationAnnotation, securityDomain);
                aPolicy.setAuthorizationInfo(authorizationInfo);
+               
+               needAuthorization = true;
             }
             
             if(auditAnnotation != null)
@@ -264,13 +269,32 @@ public class PicketBoxProcessor
          //apply the role mapping logic if it is configured at the security domain level
          RoleGroup roles = authzMgr.getSubjectRoles(subject, cbh); 
          if(roles == null)
-            throw new PicketBoxProcessingException("Roles from subject is null");   
+            throw new PicketBoxProcessingException("Roles from subject is null");     
+         
+         if(needAuthorization)
+         {
+            int permit =  authzMgr.authorize(new POJOResource(pojo), subject, roles);
+            if(permit != AuthorizationContext.PERMIT)
+               throw new AuthorizationException("Authorization failed"); 
+         }
       }
       catch(PrivilegedActionException pae)
       {
          if(log.isTraceEnabled())
             log.trace("Exception in processing:",pae);
          throw new PicketBoxProcessingException(pae.getCause());
+      }
+      catch (AuthorizationException e)
+      {
+         if(log.isTraceEnabled())
+            log.trace("Authorization Exception:",e);
+         throw new PicketBoxProcessingException(e);
+      } 
+      catch (Exception e)
+      {
+         if(log.isTraceEnabled())
+            log.trace("Exception in processing:",e);
+         throw new PicketBoxProcessingException(e);
       }
       finally
       {
