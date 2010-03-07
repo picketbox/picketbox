@@ -43,7 +43,7 @@ public @interface Module
     * The FQN of the module
     * @return
     */
-   String code(); 
+   Class<?> code(); 
    
    /**
     * Get the FLAG (REQUIRED, REQUISITE, SUFFICIENT or OPTIONAL)

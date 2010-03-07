@@ -26,17 +26,19 @@ import org.jboss.security.annotation.Module;
 import org.jboss.security.annotation.ModuleOption;
 import org.jboss.security.annotation.SecurityMapping;
 import org.jboss.security.annotation.ModuleOption.VALUE_TYPE;
+import org.jboss.security.auth.spi.UsersRolesLoginModule;
+import org.jboss.security.mapping.providers.OptionsRoleMappingProvider;
 
 /**
+ * POJO with Authentication and SecurityMapping annotations
  * @author Anil.Saldhana@redhat.com
  * @since Mar 2, 2010
  */
-@Authentication(modules =
-{@Module(code = "org.jboss.security.auth.spi.UsersRolesLoginModule", options =
+@Authentication(modules={@Module(code = UsersRolesLoginModule.class, options =
 {@ModuleOption})})
 
 @SecurityMapping(modules =
-{@Module(code = "org.jboss.security.mapping.providers.OptionsRoleMappingProvider", type="role", options =
+{@Module(code = OptionsRoleMappingProvider.class, type="role", options =
 {@ModuleOption(key="rolesMap",value="validuser=AuthorizedUser,InternalUser", valueType=VALUE_TYPE.JAVA_PROPERTIES),
       @ModuleOption(key="replaceRoles", value="false")})})
 public class AuthPlusMappingAnnotatedPOJO

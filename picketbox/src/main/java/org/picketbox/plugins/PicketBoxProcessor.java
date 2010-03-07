@@ -311,7 +311,7 @@ public class PicketBoxProcessor
       {
          for(Module module: modules)
          {
-            String code = module.code(); 
+            String code = module.code().getCanonicalName(); 
             String type = module.type();
              
             Map<String,Object> map = new HashMap<String,Object>();
@@ -359,7 +359,7 @@ public class PicketBoxProcessor
       {
          for(Module module: modules)
          {
-            String code = module.code(); 
+            String code = module.code().getCanonicalName(); 
              
             Map<String,Object> map = new HashMap<String,Object>();
             
@@ -393,7 +393,7 @@ public class PicketBoxProcessor
       {
          for(Module module: modules)
          {
-            String code = module.code();
+            String code = module.code().getCanonicalName();
             String flag = module.flag();
              
             Map<String,Object> map = new HashMap<String,Object>();
@@ -429,7 +429,7 @@ public class PicketBoxProcessor
       {
          for(Module module: modules)
          {
-            String code = module.code();
+            String code = module.code().getCanonicalName();
             String flag = module.flag();
              
             Map<String,Object> map = new HashMap<String,Object>();

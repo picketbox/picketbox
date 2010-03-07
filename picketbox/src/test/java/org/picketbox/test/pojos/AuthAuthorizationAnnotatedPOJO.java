@@ -25,6 +25,8 @@ import org.jboss.security.annotation.Authentication;
 import org.jboss.security.annotation.Authorization;
 import org.jboss.security.annotation.Module;
 import org.jboss.security.annotation.ModuleOption;
+import org.jboss.security.auth.spi.UsersRolesLoginModule;
+import org.picketbox.plugins.authorization.PicketBoxAuthorizationModule;
 
 /**
  * POJO with both Authentication and Authorization
@@ -32,9 +34,9 @@ import org.jboss.security.annotation.ModuleOption;
  * @author Anil.Saldhana@redhat.com
  * @since Mar 4, 2010
  */
-@Authentication(modules={@Module(code = "org.jboss.security.auth.spi.UsersRolesLoginModule", options =
+@Authentication(modules={@Module(code = UsersRolesLoginModule.class, options =
 {@ModuleOption})})
-@Authorization(modules ={@Module(code = "org.picketbox.plugins.authorization.PicketBoxAuthorizationModule", options =
+@Authorization(modules ={@Module(code = PicketBoxAuthorizationModule.class, options =
 {@ModuleOption(key="roles",value="validuser")})})
 public class AuthAuthorizationAnnotatedPOJO
 {

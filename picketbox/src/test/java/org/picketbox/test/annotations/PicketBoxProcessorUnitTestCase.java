@@ -116,5 +116,6 @@ public class PicketBoxProcessorUnitTestCase
       assertNotNull("Subject is not null", callerSubject);
       assertTrue("Subject contains principal anil", callerSubject.getPrincipals().contains(anil));
       RoleGroup callerRoles = processor.getCallerRoles();
+      assertNotNull("Roles are not null", callerRoles);
    }
 }
