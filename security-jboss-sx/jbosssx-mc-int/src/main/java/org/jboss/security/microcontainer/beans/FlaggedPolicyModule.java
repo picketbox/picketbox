@@ -66,7 +66,8 @@ public class FlaggedPolicyModule extends BasePolicyModule
    public void setFlag(String flag)
    {
       if (flag == null)
-         throw new IllegalArgumentException("Invalid null module flag");
+         flag = "required";
+      
       // set the control flag using the string representation specified.
       flag = flag.toLowerCase();
       if (AppConfigurationEntry.LoginModuleControlFlag.REQUIRED.toString().indexOf(flag) > 0)

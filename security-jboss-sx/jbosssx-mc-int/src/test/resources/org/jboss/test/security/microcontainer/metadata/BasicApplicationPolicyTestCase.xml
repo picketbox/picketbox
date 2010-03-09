@@ -9,7 +9,7 @@
    <!-- an application policy that specifies an authentication configuration -->
    <application-policy xmlns="urn:jboss:security-beans:1.0" name="TestPolicy1">
       <authentication>
-         <login-module code="org.jboss.security.auth.AuthModule1" flag="required">
+         <login-module code="org.jboss.security.auth.AuthModule1">
             <module-option name="authOption1">value1</module-option>
             <module-option name="authOption2">value2</module-option>
          </login-module>
