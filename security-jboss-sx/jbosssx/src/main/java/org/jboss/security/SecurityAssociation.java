@@ -499,6 +499,12 @@ public final class SecurityAssociation
 
       if(key == null)
          throw new IllegalArgumentException("key is null");
+      //SECURITY-459 get it from the current security context
+      SecurityContext sc = SecurityAssociationActions.getSecurityContext();
+      if(sc != null)
+         return sc.getData().get(key); 
+      
+      //fall back
       HashMap<String,Object> contextInfo = (HashMap<String,Object>) threadContextMap.get();
       return contextInfo != null ? contextInfo.get(key) : null;
    }
@@ -851,6 +857,7 @@ public final class SecurityAssociation
     * and implements push, pop and peek stack operations on the thread local
     * ArrayList.
     */
+   @SuppressWarnings("unused")
    private static class RunAsThreadLocalStack
    {
       @SuppressWarnings("unchecked")
@@ -988,7 +995,7 @@ public final class SecurityAssociation
       }
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "unused"})
    private static class SubjectThreadLocalStack
    {
       ThreadLocal local;
@@ -1106,7 +1113,7 @@ public final class SecurityAssociation
       
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked","unused"})
    private static class HashMapInheritableLocal<T> 
    extends InheritableThreadLocal<HashMap<String,Object>>
    {

@@ -28,6 +28,7 @@ import org.jboss.security.RunAsIdentity;
 import org.jboss.security.SecurityAssociation;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
+import org.jboss.security.SecurityContextFactory;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.SecurityAssociation.SubjectContext;
 import org.jboss.security.plugins.JBossSecurityContext;
@@ -170,7 +171,29 @@ public class LegacySecurityAssociationTestCase extends AbstractJBossSXTest
       subjectContext = SecurityAssociation.peekSubjectContext();
       assertTrue("SubjectContext is not null", subjectContext != null);
    }
-
+   
+   /**
+    * SECURITY-459: {@code SecurityAssociation#getContextInfo(String)} 
+    * should return what is there on the current security context
+    * @throws Exception
+    */
+   public void testGetContextAPI() throws Exception
+   {
+      String contextKey = "SomeContextKey"; 
+      assertNull("SecurityAssociation.getContextInfo should return null", SecurityAssociation.getContextInfo(contextKey));
+      SecurityContext sc = SecurityContextFactory.createSecurityContext("test");
+      SecurityContextAssociation.setSecurityContext(sc);
+      
+      //Let us just put a principal object in the context map
+      Principal somePrincipal = new SimplePrincipal("someprincipal");
+      sc.getData().put(contextKey, somePrincipal);
+      
+      Object contextObject = SecurityAssociation.getContextInfo(contextKey);
+      
+      assertEquals("Context Object is the principal?", contextObject, somePrincipal); 
+      assertEquals("Principal name matches", "someprincipal", ((Principal)contextObject).getName());
+   }
+   
    private void checkSA(boolean threaded)
    {
       SecurityAssociation.setPrincipal(new SimplePrincipal("Anil"));
