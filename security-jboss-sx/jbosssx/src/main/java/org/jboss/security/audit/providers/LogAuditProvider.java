@@ -33,10 +33,14 @@ public class LogAuditProvider extends AbstractAuditProvider
    {  
       Exception e = auditEvent.getUnderlyingException();
       if(e != null)
+      {
          if(trace)
             log.trace(auditEvent, e);
+      }
       else
+      {
          if(trace)
             log.trace(auditEvent);
+      }
    } 
 }
