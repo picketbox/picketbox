@@ -33,9 +33,7 @@ import org.jboss.security.SimplePrincipal;
 import org.jboss.security.SecurityAssociation.SubjectContext;
 import org.jboss.security.plugins.JBossSecurityContext;
 import org.jboss.test.AbstractJBossSXTest;
-
-//$Id$
-
+ 
 /**
  *  Legacy SecurityAssociation deeper integration test case
  *  @author Anil.Saldhana@redhat.com
@@ -113,6 +111,29 @@ public class LegacySecurityAssociationTestCase extends AbstractJBossSXTest
       sc.setIncomingRunAs(ras);
       SecurityContextAssociation.setSecurityContext(sc);
       assertEquals("CallerPrincipal=anil",p,SecurityAssociation.getCallerPrincipal()); 
+   }
+   
+   /**
+    * SECURITY-480 :  maintain backwards compatibility 
+    */
+   @SuppressWarnings("deprecation")
+   public void testGetContextInfo()
+   {
+      Object key = new String("testKey");
+      String val = new String("value");
+      
+      SecurityAssociation.setContextInfo(key, val);
+      
+      String returnedValue = (String) SecurityAssociation.getContextInfo(key);
+      assertEquals("Value should be the same", val, returnedValue);
+      
+      String keyStr = "key2";
+      String VAL = "value2";
+      
+      SecurityAssociation.setContextInfo(keyStr, VAL);
+      
+      returnedValue = (String) SecurityAssociation.getContextInfo(keyStr);
+      assertEquals("Value should be the same", VAL, returnedValue);
    }
    
    public void testSetPrincipal()

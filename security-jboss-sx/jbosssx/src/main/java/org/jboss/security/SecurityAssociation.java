@@ -481,6 +481,22 @@ public final class SecurityAssociation
             sctx.getUtil().createSubjectInfo(null, null, subject);
       }
    }
+   
+   /**
+    * Introduced for backward compatibility with older versions of security
+    * @deprecated
+    * @see {@code SecurityAssociation#getContextInfo(String)}
+    * @param key
+    * @return
+    * @throws IllegalArgumentException if the passed key is not of type String
+    */
+   public static Object getContextInfo(Object key)
+   {
+      if(key instanceof String ==  false)
+         throw new IllegalArgumentException("Key should be of type String");
+      
+      return getContextInfo((String)key);
+   }
 
    /**
     * Get the current thread context info. If a security manager is present,
@@ -508,6 +524,23 @@ public final class SecurityAssociation
       HashMap<String,Object> contextInfo = (HashMap<String,Object>) threadContextMap.get();
       return contextInfo != null ? contextInfo.get(key) : null;
    }
+   
+   /**
+    * Maintain backwards compatibility
+    * @deprecated
+    * @see {@code SecurityAssociation#setContextInfo(String, Object)}
+    * @param key
+    * @param value
+    * @return
+    * @throws IllegalArgumentException if the passed key is not of type String
+    */
+   public static Object setContextInfo(Object key, Object value)
+   {
+      if(key instanceof String == false)
+         throw new IllegalArgumentException("key should be of type String");
+      String keyStr = (String) key;
+      return setContextInfo(keyStr, value);
+   }
 
    /**
     * Set the current thread context info. If a security manager is present,
@@ -525,6 +558,10 @@ public final class SecurityAssociation
       if (sm != null)
          sm.checkPermission(setContextInfo);
 
+      SecurityContext sc = SecurityAssociationActions.getSecurityContext();
+      if(sc != null)
+         return sc.getData().put(key, value);
+      
       HashMap<String,Object> contextInfo = (HashMap<String,Object>) threadContextMap.get();
       return contextInfo.put(key, value);
    }
