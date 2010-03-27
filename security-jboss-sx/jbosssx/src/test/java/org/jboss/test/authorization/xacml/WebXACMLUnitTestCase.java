@@ -128,7 +128,7 @@ public class WebXACMLUnitTestCase extends TestCase
    private RoleGroup getRoleGroup()
    { 
       SimpleRoleGroup srg = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
-      srg.getRoles().add(new SimpleRole("ServletUserRole"));
+      srg.addRole(new SimpleRole("ServletUserRole"));
       return srg;
    } 
    

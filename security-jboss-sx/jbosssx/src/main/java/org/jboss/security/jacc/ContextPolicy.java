@@ -255,7 +255,11 @@ public class ContextPolicy
    void removeRole(String roleName)
       throws PolicyContextException
    {
-      rolePermissions.remove(roleName);
+      // JACC 1.4 spec: if "*" is used as the role name and no role by this name exists in the config, remove all roles.
+      if ("*".equals(roleName) && !this.rolePermissions.containsKey("*"))
+         this.rolePermissions.clear();
+      else
+         this.rolePermissions.remove(roleName);
    }
 
    void removeUncheckedPolicy()

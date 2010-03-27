@@ -34,8 +34,12 @@ import java.util.List;
 public interface RoleGroup extends Role
 {  
    /**
-    * Get the roles contained
-    * @return
+    * <p>
+    * Get the roles contained in the {@code RoleGroup}. The returned {@code List} should be unmodifiable as the
+    * {@code RoleGroup} interface provides methods to add and remove roles.
+    * </p>
+    * 
+    * @return a unmodifiable {@code List} containing the {@code RoleGroup}'s roles.
     */
    public List<Role> getRoles(); 
    
@@ -44,6 +48,15 @@ public interface RoleGroup extends Role
     * @param aRole
     */
    public void addRole(Role aRole);
+   
+   /**
+    * <p>
+    * Adds all specified roles to the role group.
+    * </p>
+    * 
+    * @param roles the list of roles to be added.
+    */
+   public void addAll(List<Role> roles);
    
    /**
     * Clear all the roles

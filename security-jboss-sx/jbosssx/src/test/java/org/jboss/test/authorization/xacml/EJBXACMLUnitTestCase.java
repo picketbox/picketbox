@@ -158,7 +158,7 @@ public class EJBXACMLUnitTestCase extends TestCase
    private RoleGroup getRoleGroup()
    {
       SimpleRoleGroup srg = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
-      srg.getRoles().add(new SimpleRole("ProjectUser")); 
+      srg.addRole(new SimpleRole("ProjectUser")); 
       return srg;
    } 
    

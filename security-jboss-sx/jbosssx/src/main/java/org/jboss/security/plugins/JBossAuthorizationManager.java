@@ -509,7 +509,7 @@ implements AuthorizationManager
       Enumeration<? extends Principal> principals = roleGroup.members();
       while(principals.hasMoreElements())
       {
-         srg.getRoles().add(new SimpleRole(principals.nextElement().getName()));
+         srg.addRole(new SimpleRole(principals.nextElement().getName()));
       }
       return srg;  
    }

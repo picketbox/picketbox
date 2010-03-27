@@ -100,7 +100,7 @@ public class StandaloneJBossAMgrUnitTestCase extends TestCase
    private RoleGroup getRoleGroup()
    {
       RoleGroup rg = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
-      rg.getRoles().add(new SimpleRole("ServletUserRole")); 
+      rg.addRole(new SimpleRole("ServletUserRole")); 
       return rg;
    }
 }

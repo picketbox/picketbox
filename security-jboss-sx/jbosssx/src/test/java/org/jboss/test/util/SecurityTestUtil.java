@@ -22,7 +22,6 @@
 package org.jboss.test.util;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.jboss.security.SecurityConstants;
@@ -32,7 +31,6 @@ import org.jboss.security.authorization.modules.DelegatingAuthorizationModule;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.AuthorizationInfo;
 import org.jboss.security.config.SecurityConfiguration;
-import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
 import org.jboss.security.identity.plugins.SimpleRoleGroup;
@@ -50,11 +48,9 @@ public class SecurityTestUtil
    {
       SimpleRoleGroup srg = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
 
-      List<Role> roleList = srg.getRoles(); 
-      
       for(String role:roles)
       {
-         roleList.add(new SimpleRole(role));   
+         srg.addRole(new SimpleRole(role));   
       }
       return srg;
    }
@@ -62,7 +58,7 @@ public class SecurityTestUtil
    public static RoleGroup getRoleGroup(String rolename)
    {
       SimpleRoleGroup srg = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
-      srg.getRoles().add(new SimpleRole(rolename));
+      srg.addRole(new SimpleRole(rolename));
       return srg;
    }
    

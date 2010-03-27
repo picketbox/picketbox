@@ -57,13 +57,13 @@ public class RoleUnitTestCase extends TestCase
    public void testSimpleRoleGroupContains() throws Exception
    {
       SimpleRoleGroup firstRoleGroup = new SimpleRoleGroup("firstrg");
-      firstRoleGroup.getRoles().add(new SimpleRole("A"));
-      firstRoleGroup.getRoles().add(new SimpleRole("B"));
-      firstRoleGroup.getRoles().add(new SimpleRole("C"));
+      firstRoleGroup.addRole(new SimpleRole("A"));
+      firstRoleGroup.addRole(new SimpleRole("B"));
+      firstRoleGroup.addRole(new SimpleRole("C"));
 
       SimpleRoleGroup secondRoleGroup = new SimpleRoleGroup("secondrg");
-      secondRoleGroup.getRoles().add(new SimpleRole("A"));
-      secondRoleGroup.getRoles().add(new SimpleRole("B"));
+      secondRoleGroup.addRole(new SimpleRole("A"));
+      secondRoleGroup.addRole(new SimpleRole("B"));
 
       assertTrue(firstRoleGroup.containsAll(firstRoleGroup));
       assertTrue(secondRoleGroup.containsAll(secondRoleGroup));

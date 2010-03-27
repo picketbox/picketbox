@@ -132,7 +132,7 @@ public class DeploymentRolesMappingProvider implements MappingProvider<RoleGroup
          }
          
          mappedObject.clearRoles();
-         mappedObject.getRoles().addAll(newRoles.getRoles()); 
+         mappedObject.addAll(newRoles.getRoles()); 
       } 
       return mappedObject;
    } 

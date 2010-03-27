@@ -23,7 +23,6 @@ package org.jboss.test.authorization.ejb;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,7 +37,6 @@ import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.ResourceKeys;
 import org.jboss.security.authorization.modules.ejb.EJBPolicyModuleDelegate;
 import org.jboss.security.authorization.resources.EJBResource;
-import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
 import org.jboss.security.identity.plugins.SimpleRoleGroup;
@@ -272,12 +270,9 @@ public class EJBPolicyModuleDelegateUnitTestCase extends TestCase
    private RoleGroup getRoleGroup(String[] roles)
    {
       SimpleRoleGroup srg = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
-
-      List<Role> roleList = srg.getRoles(); 
-      
       for(String role:roles)
       {
-         roleList.add(new SimpleRole(role));   
+         srg.addRole(new SimpleRole(role));   
       }
       return srg;
    }

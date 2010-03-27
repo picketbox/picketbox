@@ -24,6 +24,7 @@ package org.jboss.security.identity.plugins;
 import java.security.Principal;
 import java.security.acl.Group;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
@@ -56,8 +57,6 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
    public SimpleRoleGroup(String roleName, List<Role> roles)
    {
       super(roleName);
-      if (this.roles == null)
-         this.roles = new ArrayList<Role>();
       this.roles.addAll(roles);
    }
 
@@ -80,44 +79,67 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       }
    }
 
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.plugins.SimpleRole#getType()
+    */
    @Override
    public RoleType getType()
    {
       return RoleType.group;
    }
 
-   /**
-    * @see RoleGroup#addRole(Role)
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.RoleGroup#addRole(org.jboss.security.identity.Role)
     */
-   public void addRole(Role role)
+   public synchronized void addRole(Role role)
    {
       this.roles.add(role);
    }
 
-   /**
-    * @see RoleGroup#removeRole(Role)
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.RoleGroup#addAll(java.util.List)
     */
-   public void removeRole(Role role)
+   public synchronized void addAll(List<Role> roles)
+   {
+      if (roles != null)
+         this.roles.addAll(roles);
+   }
+
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.RoleGroup#removeRole(org.jboss.security.identity.Role)
+    */
+   public synchronized void removeRole(Role role)
    {
       this.roles.remove(role);
    }
 
-   /**
-    * @see RoleGroup#clearRoles()
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.RoleGroup#clearRoles()
     */
-   public void clearRoles()
+   public synchronized void clearRoles()
    {
       this.roles.clear();
    }
 
-   /**
-    * @see RoleGroup#getRoles()
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.RoleGroup#getRoles()
     */
    public List<Role> getRoles()
    {
-      return roles;
+      // unmodifiable view: clients must update the roles through the addRole and removeRole methods.
+      return Collections.unmodifiableList(roles);
    }
 
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.plugins.SimpleRole#clone()
+    */
    @SuppressWarnings("unchecked")
    public synchronized Object clone() throws CloneNotSupportedException
    {
@@ -127,6 +149,10 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       return clone;
    }
 
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.plugins.SimpleRole#containsAll(org.jboss.security.identity.Role)
+    */
    @Override
    public boolean containsAll(Role anotherRole)
    {
@@ -134,11 +160,15 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
 
       if (anotherRole.getType() == RoleType.simple)
       {
-         for (Role r : roles)
+         // synchronize iteration to avoid concurrent modification exception.
+         synchronized (this)
          {
-            isContained = r.containsAll(anotherRole);
-            if (isContained)
-               return true;
+            for (Role r : roles)
+            {
+               isContained = r.containsAll(anotherRole);
+               if (isContained)
+                  return true;
+            }
          }
       }
       else
@@ -157,8 +187,9 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       return false;
    }
 
-   /**
-    * @see RoleGroup#containsAtleastOneRole(RoleGroup)
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.RoleGroup#containsAtleastOneRole(org.jboss.security.identity.RoleGroup)
     */
    public boolean containsAtleastOneRole(RoleGroup anotherRole)
    {
@@ -173,11 +204,13 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       return false;
    }
 
-   /**
-    * @see RoleGroup#containsRole(Role)
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.RoleGroup#containsRole(org.jboss.security.identity.Role)
     */
-   public boolean containsRole(Role role)
+   public synchronized boolean containsRole(Role role)
    {
+      // synchronize iteration to avoid concurrent modification exception.
       for (Role r : roles)
       {
          if (r.containsAll(role))
@@ -186,6 +219,10 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       return false;
    }
 
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.identity.plugins.SimpleRole#toString()
+    */
    @Override
    public String toString()
    {
