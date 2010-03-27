@@ -33,7 +33,6 @@ import org.jboss.security.mapping.MappingContext;
 import org.jboss.security.mapping.MappingManager;
 import org.jboss.security.mapping.MappingProvider;
 import org.jboss.security.mapping.config.MappingModuleEntry;
-import org.jboss.security.plugins.JBossSecurityContext;
 
 
 /**
@@ -44,7 +43,7 @@ import org.jboss.security.plugins.JBossSecurityContext;
  */
 public class JBossMappingManager implements MappingManager
 {   
-   protected static final Logger log = Logger.getLogger(JBossSecurityContext.class); 
+   protected static final Logger log = Logger.getLogger(JBossMappingManager.class); 
    protected boolean trace = log.isTraceEnabled();  
    
    private String securityDomain;
