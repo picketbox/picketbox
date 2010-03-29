@@ -229,9 +229,12 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       StringBuilder builder = new StringBuilder();
       builder.append(this.getRoleName());
       builder.append("(");
-      for (Role role : roles)
+      synchronized (this)
       {
-         builder.append(role.toString()).append(",");
+         for (Role role : roles)
+         {
+            builder.append(role.toString()).append(",");
+         }
       }
       builder.append(")");
       return builder.toString();
