@@ -278,12 +278,13 @@ implements AuthorizationManager
       if(ac == null)
          throw new IllegalArgumentException("AuthorizationContext is null");
       lock.lock();
+
+      String sc = ac.getSecurityDomain();
+      if(this.securityDomain.equals(sc) == false)
+         throw new IllegalArgumentException("The Security Domain "+ sc 
+               + " does not match with " + this.securityDomain);
       try
-      {  
-         String sc = ac.getSecurityDomain();
-         if(this.securityDomain.equals(sc) == false)
-            throw new IllegalArgumentException("The Security Domain "+ sc 
-                  + " does not match with " + this.securityDomain);
+      { 
          this.authorizationContext = ac;  
       }
       finally
@@ -466,17 +467,9 @@ implements AuthorizationManager
          RoleGroup role)
    throws AuthorizationException
    {
-      lock.lock();
-      try
-      {
-         if(this.authorizationContext == null)
-            this.authorizationContext = new JBossAuthorizationContext(this.securityDomain);
-         return this.authorizationContext.authorize(resource, subject, role); 
-      }
-      finally
-      {
-         lock.unlock();
-      } 
+      if(this.authorizationContext == null)
+         this.setAuthorizationContext( new JBossAuthorizationContext(this.securityDomain) );
+      return this.authorizationContext.authorize(resource, subject, role); 
    }
    
    /**
