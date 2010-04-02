@@ -24,6 +24,7 @@ package org.jboss.security.plugins.authorization;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -136,6 +137,8 @@ public class JBossAuthorizationContext extends AuthorizationContext
       {
          try
          {
+            //Increase the counter of authorizations in use
+            JBossAuthorizationContextManagement.increase();
             this.authenticatedSubject = subject;
             initializeModules(resource, callerRoles);
          }
@@ -174,9 +177,8 @@ public class JBossAuthorizationContext extends AuthorizationContext
       }
       finally
       {
-         // clear the modules and control flags lists.
-         super.modules.clear();
-         super.controlFlags.clear();
+         //Decrease the counter of authorizations in use and if it reaches 0, clear the lists
+         JBossAuthorizationContextManagement.release(modules, controlFlags); 
       }
    }
 
@@ -372,5 +374,41 @@ public class JBossAuthorizationContext extends AuthorizationContext
       if (e != null)
          msg.append(e.getLocalizedMessage());
       return msg.toString();
+   }
+    
+   /**
+    * <p>An internal static class that maintains a counter of authorizations in action.</p>
+    * <p>Once the counter reaches 0, it is safe to clear the authorization modules and control flags,
+    * to avoid the memory leaks.</p>
+    * @author anil 
+    */
+   private static class JBossAuthorizationContextManagement
+   {
+      private static Logger log = Logger.getLogger(JBossAuthorizationContextManagement.class);
+      private static boolean trace = log.isTraceEnabled();
+      
+      private static int userCount = 0;
+ 
+      public synchronized static void increase()
+      {
+         if(trace)
+            log.trace("Increasing the count by 1.Count Will be:" + ( userCount + 1) );
+         userCount++;
+      }
+      
+      @SuppressWarnings("unchecked")
+      public synchronized static void release(List  modules,  List controlFlags)
+      {
+         --userCount;
+         if(userCount == 0)
+         {
+            if(trace)
+               log.trace("Count is 0. Will be clearing the modules and control flags" );
+            
+            // clear the modules and control flags lists.
+            modules.clear();
+            controlFlags.clear(); 
+         }
+      }
    }
 }

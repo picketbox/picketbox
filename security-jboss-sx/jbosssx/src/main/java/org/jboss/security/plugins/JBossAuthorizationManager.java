@@ -64,7 +64,7 @@ import org.jboss.security.mapping.MappingContext;
 import org.jboss.security.mapping.MappingManager;
 import org.jboss.security.mapping.MappingType;
 import org.jboss.security.plugins.acl.JBossACLContext;
-import org.jboss.security.plugins.authorization.JBossAuthorizationContext; 
+import org.jboss.security.plugins.authorization.JBossAuthorizationContext;
 
 //$Id$
 
@@ -470,15 +470,7 @@ implements AuthorizationManager
    {
       if(this.authorizationContext == null)
          this.setAuthorizationContext( new JBossAuthorizationContext(this.securityDomain) );
-      lock.lock();
-      try
-      {
-         return this.authorizationContext.authorize(resource, subject, role); 
-      } 
-      finally
-      {
-         lock.unlock();
-      }
+       return this.authorizationContext.authorize(resource, subject, role); 
    }
    
    /**
