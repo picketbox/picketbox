@@ -24,6 +24,7 @@ package org.jboss.security.plugins.authorization;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,6 +79,9 @@ public class JBossAuthorizationContext extends AuthorizationContext
 
    //Application Policy can be injected
    private ApplicationPolicy applicationPolicy = null;
+   
+   //Clazz instance cache map to minimize load class synchronization
+   private static Map< String,Class<?> > clazzMap = new HashMap<String, Class<?>>();
 
    public JBossAuthorizationContext(String name)
    {
@@ -306,7 +310,13 @@ public class JBossAuthorizationContext extends AuthorizationContext
       ClassLoader tcl = SecurityActions.getContextClassLoader();
       try
       {
-         Class<?> clazz = tcl.loadClass(name);
+         Class<?> clazz = clazzMap.get(name);
+         if(clazz == null)
+         {
+            clazz = tcl.loadClass(name);
+            clazzMap.put(name, clazz);
+         }   
+            
          am = (AuthorizationModule) clazz.newInstance();
       }
       catch (Exception e)
