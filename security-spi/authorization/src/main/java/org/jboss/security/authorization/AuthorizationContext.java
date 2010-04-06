@@ -21,15 +21,12 @@
  */
 package org.jboss.security.authorization;
   
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
-import org.jboss.security.config.ControlFlag;
 import org.jboss.security.identity.RoleGroup;
  
 
@@ -54,21 +51,8 @@ import org.jboss.security.identity.RoleGroup;
 public abstract class AuthorizationContext
 {   
    protected String securityDomainName = null;
-   protected CallbackHandler callbackHandler = null;
-   //protected Subject authenticatedSubject = null;
+   protected CallbackHandler callbackHandler = null; 
    protected Map<String,Object> sharedState = new HashMap<String,Object>(); 
-   
-   /**
-    * Roles of the Subject
-    */
-  // protected Role subjectRoles = null;
-   
-   protected List<AuthorizationModule> modules = new ArrayList<AuthorizationModule>();
-   
-   /**
-    * Control Flags for the individual modules
-    */
-   protected List<ControlFlag> controlFlags = new ArrayList<ControlFlag>();
    
    public static final int PERMIT = 1;
    public static final int DENY = -1;  

@@ -24,6 +24,7 @@ package org.jboss.security.plugins.authorization;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
 
    public JBossAuthorizationContext(String name)
    {
-      this.securityDomainName = name;
+      this.securityDomainName = name; 
    }
 
    public JBossAuthorizationContext(String name, CallbackHandler handler)
@@ -136,58 +137,53 @@ public class JBossAuthorizationContext extends AuthorizationContext
     */
    public int authorize(final Resource resource, final Subject subject, final RoleGroup callerRoles)
          throws AuthorizationException
-   {
+   {  
+      final List<AuthorizationModule> modules = new ArrayList<AuthorizationModule>();
+      final List<ControlFlag> controlFlags = new ArrayList<ControlFlag>();
+      
       try
       {
-         try
+         this.authenticatedSubject = subject;
+
+         initializeModules(resource, callerRoles, modules, controlFlags); 
+
+         AccessController.doPrivileged(new PrivilegedExceptionAction<Object>()
          {
-            //Increase the counter of authorizations in use
-            JBossAuthorizationContextManagement.increase();
-            this.authenticatedSubject = subject;
-            initializeModules(resource, callerRoles);
-         }
-         catch (PrivilegedActionException e1)
-         {
-            throw new RuntimeException(e1);
-         }
-         //Do a PrivilegedAction
-         try
-         {
-            AccessController.doPrivileged(new PrivilegedExceptionAction<Object>()
+            public Object run() throws AuthorizationException
             {
-               public Object run() throws AuthorizationException
+               int result = invokeAuthorize(resource, modules, controlFlags);
+               if (result == PERMIT)
+                  invokeCommit( modules, controlFlags );
+               if (result == DENY)
                {
-                  int result = invokeAuthorize(resource);
-                  if (result == PERMIT)
-                     invokeCommit();
-                  if (result == DENY)
-                  {
-                     invokeAbort();
-                     throw new AuthorizationException("Denied");
-                  }
-                  return null;
+                  invokeAbort( modules, controlFlags );
+                  throw new AuthorizationException("Denied");
                }
-            });
-         }
-         catch (PrivilegedActionException e)
-         {
-            Exception exc = e.getException();
-            if (trace)
-               log.trace("Error in authorize:", exc);
-            invokeAbort();
-            throw ((AuthorizationException) exc);
-         }
-         return PERMIT;
+               return null;
+            }
+         });
+      }
+      catch (PrivilegedActionException e)
+      {
+         Exception exc = e.getException();
+         if (trace)
+            log.trace("Error in authorize:", exc);
+         invokeAbort( modules, controlFlags );
+         throw ((AuthorizationException) exc);
       }
       finally
-      {
-         //Decrease the counter of authorizations in use and if it reaches 0, clear the lists
-         JBossAuthorizationContextManagement.release(modules, controlFlags); 
+      { 
+         if(modules != null)
+            modules.clear();
+         if(controlFlags != null )
+            controlFlags.clear();  
       }
+      return PERMIT;
    }
 
    //Private Methods  
-   private void initializeModules(Resource resource, RoleGroup role) throws PrivilegedActionException
+   private void initializeModules(Resource resource, RoleGroup role, List<AuthorizationModule> modules,
+         List<ControlFlag> controlFlags) throws PrivilegedActionException
    {
       AuthorizationInfo authzInfo = getAuthorizationInfo(securityDomainName, resource);
       if (authzInfo == null)
@@ -207,12 +203,13 @@ public class JBossAuthorizationContext extends AuthorizationContext
          else if (trace)
             log.trace("Control flag for entry:" + entry + "is:[" + flag + "]");
 
-         super.controlFlags.add(flag);
-         super.modules.add(instantiateModule(entry.getPolicyModuleName(), entry.getOptions(), role));
+         controlFlags.add(flag);
+         modules.add(instantiateModule(entry.getPolicyModuleName(), entry.getOptions(), role));
       }
    }
 
-   private int invokeAuthorize(Resource resource) throws AuthorizationException
+   private int invokeAuthorize(Resource resource, List<AuthorizationModule> modules,
+         List<ControlFlag> controlFlags) throws AuthorizationException
    {
       //Control Flag behavior
       boolean encounteredRequiredError = false;
@@ -220,11 +217,11 @@ public class JBossAuthorizationContext extends AuthorizationContext
       AuthorizationException moduleException = null;
       int overallDecision = DENY;
 
-      int length = super.modules.size();
+      int length = modules.size();
       for (int i = 0; i < length; i++)
       {
-         AuthorizationModule module = (AuthorizationModule) super.modules.get(i);
-         ControlFlag flag = (ControlFlag) super.controlFlags.get(i);
+         AuthorizationModule module = (AuthorizationModule) modules.get(i);
+         ControlFlag flag = (ControlFlag) controlFlags.get(i);
          int decision = DENY;
          try
          {
@@ -279,24 +276,26 @@ public class JBossAuthorizationContext extends AuthorizationContext
       return PERMIT;
    }
 
-   private void invokeCommit() throws AuthorizationException
+   private void invokeCommit( List<AuthorizationModule> modules,
+         List<ControlFlag> controlFlags ) throws AuthorizationException
    {
-      int length = super.modules.size();
+      int length = modules.size();
       for (int i = 0; i < length; i++)
       {
-         AuthorizationModule module = (AuthorizationModule) super.modules.get(i);
+         AuthorizationModule module = (AuthorizationModule) modules.get(i);
          boolean bool = module.commit();
          if (!bool)
             throw new AuthorizationException("commit on modules failed:" + module.getClass());
       }
    }
 
-   private void invokeAbort() throws AuthorizationException
+   private void invokeAbort( List<AuthorizationModule> modules,
+         List<ControlFlag> controlFlags ) throws AuthorizationException
    {
-      int length = super.modules.size();
+      int length = modules.size();
       for (int i = 0; i < length; i++)
       {
-         AuthorizationModule module = (AuthorizationModule) super.modules.get(i);
+         AuthorizationModule module = (AuthorizationModule) modules.get(i);
          boolean bool = module.abort();
          if (!bool)
             throw new AuthorizationException("abort on modules failed:" + module.getClass());
@@ -384,41 +383,5 @@ public class JBossAuthorizationContext extends AuthorizationContext
       if (e != null)
          msg.append(e.getLocalizedMessage());
       return msg.toString();
-   }
-    
-   /**
-    * <p>An internal static class that maintains a counter of authorizations in action.</p>
-    * <p>Once the counter reaches 0, it is safe to clear the authorization modules and control flags,
-    * to avoid the memory leaks.</p>
-    * @author anil 
-    */
-   private static class JBossAuthorizationContextManagement
-   {
-      private static Logger log = Logger.getLogger(JBossAuthorizationContextManagement.class);
-      private static boolean trace = log.isTraceEnabled();
-      
-      private static int userCount = 0;
- 
-      public synchronized static void increase()
-      {
-         if(trace)
-            log.trace("Increasing the count by 1.Count Will be:" + ( userCount + 1) );
-         userCount++;
-      }
-      
-      @SuppressWarnings("unchecked")
-      public synchronized static void release(List  modules,  List controlFlags)
-      {
-         --userCount;
-         if(userCount == 0)
-         {
-            if(trace)
-               log.trace("Count is 0. Will be clearing the modules and control flags" );
-            
-            // clear the modules and control flags lists.
-            modules.clear();
-            controlFlags.clear(); 
-         }
-      }
-   }
+   } 
 }
