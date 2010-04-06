@@ -36,7 +36,10 @@ public class SecurityHelperFactory
    
    private static String EjbAuthorizationHelperClass = 
       "org.jboss.security.plugins.javaee.EJBAuthorizationHelper";
-
+   
+   private static Class<?> webAuthorizationHelperClazz;
+   private static Class<?> ejbAuthorizationHelperClazz;
+      
    /**
     * Get the EJB Authentication Helper given a security context
     * @param sc
@@ -56,8 +59,12 @@ public class SecurityHelperFactory
    public static AbstractWebAuthorizationHelper getWebAuthorizationHelper(SecurityContext sc) 
    throws Exception
    {
-      Class<?> clazz = SecurityActions.loadClass(WebAuthorizationHelperClass);
-      AbstractWebAuthorizationHelper awh = (AbstractWebAuthorizationHelper) clazz.newInstance();
+      if(webAuthorizationHelperClazz == null)
+      {
+         webAuthorizationHelperClazz = SecurityActions.loadClass(WebAuthorizationHelperClass);
+      } 
+      
+      AbstractWebAuthorizationHelper awh = (AbstractWebAuthorizationHelper) webAuthorizationHelperClazz.newInstance();
       awh.setSecurityContext(sc);
       return awh;
    }
@@ -71,8 +78,11 @@ public class SecurityHelperFactory
    public static AbstractEJBAuthorizationHelper getEJBAuthorizationHelper(SecurityContext sc) 
    throws Exception
    {
-      Class<?> clazz = SecurityActions.loadClass(EjbAuthorizationHelperClass);
-      AbstractEJBAuthorizationHelper awh = (AbstractEJBAuthorizationHelper) clazz.newInstance();
+      if(ejbAuthorizationHelperClazz == null)
+      {
+         ejbAuthorizationHelperClazz = SecurityActions.loadClass(EjbAuthorizationHelperClass);
+      }
+      AbstractEJBAuthorizationHelper awh = (AbstractEJBAuthorizationHelper) ejbAuthorizationHelperClazz.newInstance();
       awh.setSecurityContext(sc);
       return awh;
    }
@@ -84,6 +94,7 @@ public class SecurityHelperFactory
    public static void setEJBAuthorizationHelperClass(String fqn)
    {
       EjbAuthorizationHelperClass = fqn;
+      ejbAuthorizationHelperClazz = null;
    }
    
    /**
@@ -93,5 +104,6 @@ public class SecurityHelperFactory
    public static void setWebAuthorizationHelperClass(String fqn)
    {
       WebAuthorizationHelperClass = fqn;
+      webAuthorizationHelperClazz = null;
    }
 }
