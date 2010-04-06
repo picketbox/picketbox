@@ -24,11 +24,12 @@ package org.jboss.security.identity.plugins;
 import java.lang.reflect.Constructor;
 import java.security.Principal;
 import java.security.acl.Group;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.jboss.security.identity.Identity;
 import org.jboss.security.identity.Role;
 
-//$Id$
 
 /**
  *  Factory to create customized principal and group
@@ -44,6 +45,8 @@ public class IdentityFactory
    public static final String PRINCIPAL_CLASS = "org.jboss.security.SimplePrincipal";
 
    public static final String GROUP_CLASS = "org.jboss.security.SimpleGroup";
+   
+   private static Map<String, Class<?> > clazzMap = new WeakHashMap<String, Class<?>>();
 
    public static Principal createPrincipal(String name) throws Exception
    {
@@ -87,7 +90,12 @@ public class IdentityFactory
 
    private static Object loadClass(String className, String ctorArg) throws Exception
    {
-      Class<?> clazz = SecurityActions.getClass(className);
+      Class<?> clazz = clazzMap.get(className);
+      if( clazz == null )
+      {
+         clazz = SecurityActions.getClass(className);
+         clazzMap.put(className, clazz); 
+      }
       Constructor<?> ctr = clazz.getConstructor(new Class[]
       {String.class});
       return ctr.newInstance(new Object[]
@@ -96,7 +104,13 @@ public class IdentityFactory
 
    private static Object loadClass(String className, String ctorArg1, String ctorArg2) throws Exception
    {
-      Class<?> clazz = SecurityActions.getClass(className);
+      Class<?> clazz = clazzMap.get(className);
+      if( clazz == null )
+      {
+         clazz = SecurityActions.getClass(className);
+         clazzMap.put(className, clazz); 
+      }
+      
       Constructor<?> ctr = clazz.getConstructor(new Class[]
       {String.class, String.class});
       return ctr.newInstance(new Object[]
@@ -105,11 +119,15 @@ public class IdentityFactory
 
    private static Object loadClass(String className, String ctorArg1, Role ctorArg2) throws Exception
    {
-      Class<?> clazz = SecurityActions.getClass(className);
+      Class<?> clazz = clazzMap.get(className);
+      if( clazz == null )
+      {
+         clazz = SecurityActions.getClass(className);
+         clazzMap.put(className, clazz); 
+      }
       Constructor<?> ctr = clazz.getConstructor(new Class[]
       {String.class, Role.class});
       return ctr.newInstance(new Object[]
       {ctorArg1, ctorArg2});
    }
-
 }
