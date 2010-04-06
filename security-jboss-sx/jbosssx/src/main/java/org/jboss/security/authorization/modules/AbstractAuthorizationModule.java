@@ -59,6 +59,9 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
    /** Map of delegates for the various layers */
    protected Map<ResourceType,String> delegateMap = new HashMap<ResourceType,String>();
    
+   /** A map that is available to reduce the loadClass synchronization */
+   protected static Map<String, Class<?> > clazzMap = new HashMap<String, Class<?> >();
+   
    /**
     * @see AuthorizationModule#authorize(Resource)
     */
@@ -162,7 +165,13 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
    throws Exception
    {
       ClassLoader tcl = SecurityActions.getContextClassLoader();
-      Class<?> clazz = tcl.loadClass(delegateStr);
+      Class<?> clazz = clazzMap.get(delegateStr);
+      if(clazz == null)
+      {
+         clazz = tcl.loadClass(delegateStr);
+         clazzMap.put(delegateStr, clazz); 
+      } 
+      
       return (AuthorizationModuleDelegate)clazz.newInstance();
    }
    
