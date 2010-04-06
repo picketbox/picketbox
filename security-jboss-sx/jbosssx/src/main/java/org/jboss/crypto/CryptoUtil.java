@@ -35,6 +35,9 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Random;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.jboss.crypto.digest.DigestCallback;
 import org.jboss.logging.Logger;
 import org.jboss.security.Base64Encoder;
@@ -472,9 +475,8 @@ public class CryptoUtil
    {
       boolean hasUnlimitedCrypto = false;
       try
-      {
-         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-         Class<?> keyGenClass = loader.loadClass("javax.crypto.KeyGenerator");
+      { 
+         Class<?> keyGenClass = KeyGenerator.class;
          Class<?>[] sig = {String.class};
          Object[] args = {"Blowfish"};
          Method kgenInstance = keyGenClass.getDeclaredMethod("getInstance", sig);
@@ -504,9 +506,8 @@ public class CryptoUtil
       Object[] args = {key, cipherAlgorithm};
       Object secretKey = null;
       try
-      {
-          ClassLoader loader = Thread.currentThread().getContextClassLoader();
-          Class<?> secretKeySpecClass = loader.loadClass("javax.crypto.spec.SecretKeySpec");
+      { 
+          Class<?> secretKeySpecClass = SecretKeySpec.class;  
           Constructor<?> ctor = secretKeySpecClass.getDeclaredConstructor(signature);
           secretKey = ctor.newInstance(args);
       }
