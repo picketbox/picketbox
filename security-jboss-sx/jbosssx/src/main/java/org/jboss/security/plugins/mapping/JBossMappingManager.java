@@ -22,13 +22,15 @@
 package org.jboss.security.plugins.mapping;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.MappingInfo;
-import org.jboss.security.config.SecurityConfiguration;
+import org.jboss.security.config.SecurityConfiguration; 
 import org.jboss.security.mapping.MappingContext;
 import org.jboss.security.mapping.MappingManager;
 import org.jboss.security.mapping.MappingProvider;
@@ -47,6 +49,8 @@ public class JBossMappingManager implements MappingManager
    protected boolean trace = log.isTraceEnabled();  
    
    private String securityDomain;
+
+   private static Map<String, Class<?> > clazzMap = new WeakHashMap<String, Class<?>>();
 
    public JBossMappingManager(String domain)
    {
@@ -138,8 +142,13 @@ public class JBossMappingManager implements MappingManager
       try
       {
          String fqn = mme.getMappingModuleName();
-         Class<?> cl = SecurityActions.loadClass(fqn,tcl);
-         mp = (MappingProvider<T>) cl.newInstance();
+         Class<?> clazz = clazzMap.get(fqn);
+         if( clazz == null )
+         {
+            clazz = tcl.loadClass(fqn);
+            clazzMap.put(fqn, clazz); 
+         } 
+         mp = (MappingProvider<T>) clazz.newInstance();
          mp.init(mme.getOptions());
       }
       catch(Exception e)

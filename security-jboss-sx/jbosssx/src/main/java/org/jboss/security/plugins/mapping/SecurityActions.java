@@ -23,8 +23,6 @@ package org.jboss.security.plugins.mapping;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
  
 /**
  *  Privileged Blocks
@@ -43,17 +41,5 @@ class SecurityActions
            return Thread.currentThread().getContextClassLoader();
         }
      });
-  }
-  
-  static Class<?> loadClass(final String fqn, final ClassLoader tcl) 
-  throws PrivilegedActionException
-  {
-     return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>()
-     { 
-        public Class<?> run() throws PrivilegedActionException, ClassNotFoundException
-        {
-           return tcl.loadClass(fqn);
-        }
-     });   
-  }
+  } 
 }
