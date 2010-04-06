@@ -9,6 +9,8 @@ package org.jboss.security.plugins.audit;
 import java.security.PrivilegedActionException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
@@ -20,7 +22,7 @@ import org.jboss.security.audit.config.AuditProviderEntry;
 import org.jboss.security.audit.providers.LogAuditProvider;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.AuditInfo;
-import org.jboss.security.config.SecurityConfiguration;
+import org.jboss.security.config.SecurityConfiguration; 
 
 /**
  *  Manages a set of AuditContext
@@ -35,6 +37,8 @@ public class JBossAuditManager implements AuditManager
    private static ConcurrentHashMap<String,AuditContext> contexts = new ConcurrentHashMap<String,AuditContext>();
    
    private static AuditContext defaultContext = null;
+   
+   private static Map<String, Class<?> > clazzMap = new WeakHashMap<String, Class<?>>();
    
    static
    {
@@ -68,7 +72,14 @@ public class JBossAuditManager implements AuditManager
                   String pname = ape.getName();
                   try
                   {
-                     ac.addProvider((AuditProvider) SecurityActions.loadClass(pname).newInstance());
+                     Class<?> clazz = clazzMap.get(pname);
+                     if( clazz == null )
+                     {
+                        clazz = SecurityActions.loadClass(pname);
+                        clazzMap.put(pname, clazz); 
+                     }
+                     
+                     ac.addProvider((AuditProvider) clazz.newInstance());
                   }
                   catch (Exception e)
                   {
