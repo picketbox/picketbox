@@ -25,6 +25,8 @@ import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Map;
+import java.util.WeakHashMap;
  
 /**
  *  Factory to create roles
@@ -37,14 +39,21 @@ public class RoleFactory
    private static String SIMPLE_ROLE_CLASS = "org.jboss.security.identity.plugins.SimpleRole";
    private static String SIMPLE_ROLEGROUP_CLASS = "org.jboss.security.identity.plugins.SimpleRoleGroup";
    
+   private static Map<String, Class<?> > clazzMap = new WeakHashMap<String, Class<?>>();
+   
    public static Role createRole(final String name) throws PrivilegedActionException
    {
      return AccessController.doPrivileged(new PrivilegedExceptionAction<Role>()
      { 
       public Role run() throws Exception
       { 
-         ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-         Class<?> clazz = tcl.loadClass(SIMPLE_ROLE_CLASS);
+         Class<?> clazz = clazzMap.get(SIMPLE_ROLE_CLASS);
+         if( clazz == null )
+         {
+            ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+            clazz = tcl.loadClass(SIMPLE_ROLE_CLASS); 
+         }
+         
          Constructor<?> ctr = clazz.getConstructor(new Class[] {String.class});
          return (Role) ctr.newInstance(new Object[]{name});
       }  
@@ -57,8 +66,13 @@ public class RoleFactory
      { 
       public RoleGroup run() throws Exception
       { 
-         ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-         Class<?> clazz = tcl.loadClass(SIMPLE_ROLEGROUP_CLASS);
+         Class<?> clazz = clazzMap.get(SIMPLE_ROLEGROUP_CLASS);
+         if( clazz == null )
+         {
+            ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+            clazz = tcl.loadClass(SIMPLE_ROLEGROUP_CLASS); 
+         }
+          
          Constructor<?> ctr = clazz.getConstructor(new Class[] {String.class});
          return (RoleGroup) ctr.newInstance(new Object[]{name});
       }  
