@@ -25,9 +25,9 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -82,7 +82,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
    private ApplicationPolicy applicationPolicy = null;
    
    //Clazz instance cache map to minimize load class synchronization
-   private static Map< String,Class<?> > clazzMap = new HashMap<String, Class<?>>();
+   private static Map< String,Class<?> > clazzMap = new WeakHashMap<String, Class<?>>();
 
    public JBossAuthorizationContext(String name)
    {
