@@ -233,7 +233,7 @@ public class JaasSecurityManagerBase
     */
    public JaasSecurityManagerBase(String securityDomain, CallbackHandler handler)
    {
-      this.securityDomain = securityDomain;
+      this.securityDomain = SecurityUtil.unprefixSecurityDomain( securityDomain );
       this.handler = handler;
       String categoryName = getClass().getName()+'.'+securityDomain;
       this.log = Logger.getLogger(categoryName);

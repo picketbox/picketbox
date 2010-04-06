@@ -47,6 +47,7 @@ import org.jboss.security.RunAs;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityRolesAssociation;
+import org.jboss.security.SecurityUtil;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.acl.ACLContext;
 import org.jboss.security.authorization.AuthorizationContext;
@@ -92,7 +93,7 @@ implements AuthorizationManager
    
    public JBossAuthorizationManager(String securityDomainName)
    {
-      this.securityDomain = securityDomainName;
+      this.securityDomain = SecurityUtil.unprefixSecurityDomain( securityDomainName );
    } 
    
    /**

@@ -14,6 +14,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.SecurityUtil;
 import org.jboss.security.audit.AuditContext;
 import org.jboss.security.audit.AuditEvent;
 import org.jboss.security.audit.AuditManager;
@@ -50,7 +51,7 @@ public class JBossAuditManager implements AuditManager
    
    public JBossAuditManager(String secDomain)
    {
-      this.securityDomain = secDomain;
+      this.securityDomain = SecurityUtil.unprefixSecurityDomain(secDomain);  
    }
    
    public AuditContext getAuditContext() throws PrivilegedActionException

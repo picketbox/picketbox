@@ -28,6 +28,7 @@ import java.util.WeakHashMap;
 import org.jboss.logging.Logger;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityUtil;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.MappingInfo;
 import org.jboss.security.config.SecurityConfiguration; 
@@ -54,7 +55,7 @@ public class JBossMappingManager implements MappingManager
 
    public JBossMappingManager(String domain)
    {
-     this.securityDomain = domain;   
+      this.securityDomain = SecurityUtil.unprefixSecurityDomain(domain);  
    }
    
    
