@@ -53,7 +53,8 @@ public class ModuleOption
    }
    public void setValue(Object value)
    {
-      this.value = value;
+      if (value != null) // SECURITY-503
+         this.value = value;
    }
 
 }
