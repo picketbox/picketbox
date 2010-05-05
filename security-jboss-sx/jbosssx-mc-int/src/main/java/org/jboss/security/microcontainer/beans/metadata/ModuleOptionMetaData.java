@@ -73,7 +73,9 @@ public class ModuleOptionMetaData
     */
    public String getValue()
    {
-      return value;
+      if (this.value == null)
+         return "";
+      return this.value;
    }
 
    /**

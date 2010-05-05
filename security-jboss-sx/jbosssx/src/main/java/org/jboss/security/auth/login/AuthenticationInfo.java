@@ -114,7 +114,7 @@ public class AuthenticationInfo extends BaseAuthenticationInfo
          {
             Entry e = (Entry) iter.next();
             String name = (String) e.getKey();
-            String value = e.getValue().toString();
+            String value = e.getValue() == null ? "" : e.getValue().toString();
             if (name.toLowerCase().equals("password") || name.toLowerCase().equals("bindcredential")
                   || name.toLowerCase().equals(Context.SECURITY_CREDENTIALS))
                value = "****";
