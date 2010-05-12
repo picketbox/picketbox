@@ -2,16 +2,16 @@
    <parent>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-parent</artifactId>
-      <version>4</version>
+      <version>5</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.jboss.security</groupId>
-   <artifactId>jboss-security-spi-parent</artifactId>
+   <groupId>org.picketbox</groupId>
+   <artifactId>picketbox-spi-parent</artifactId>
    <packaging>pom</packaging>
    <version>3.0.0.Beta5-SNAPSHOT</version>
-   <name>JBoss Security SPI - Parent</name>
-   <url>http://labs.jboss.org/portal/jbosssecurity/</url>
-   <description>JBoss Security is a cross cutting project that handles security for the JEMS projects</description>
+   <name>PicketBox SPI - Parent</name>
+   <url>http://jboss.org/picketbox</url>
+   <description>PicketBox is a security project for Java Applications.</description>
    <licenses>
       <license>
          <name>lgpl</name>
@@ -91,12 +91,12 @@
          <scope>compile</scope>
       </dependency>
       <dependency>
-         <groupId>org.jboss.security</groupId>
+         <groupId>org.picketbox</groupId>
          <artifactId>identity-spi</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>
-         <groupId>org.jboss.security</groupId>
+         <groupId>org.picketbox</groupId>
          <artifactId>authorization-spi</artifactId>
          <version>${project.version}</version>
       </dependency>

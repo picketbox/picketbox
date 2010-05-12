@@ -1,16 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
    <parent>
-      <groupId>org.jboss.security</groupId>
-      <artifactId>jboss-security-spi-parent</artifactId>
+      <groupId>org.picketbox</groupId>
+      <artifactId>picketbox-spi-parent</artifactId>
       <version>3.0.0.Beta5-SNAPSHOT</version>
       <relativePath>../parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-   <artifactId>jboss-security-spi-bare</artifactId>
+   <artifactId>picketbox-spi-bare</artifactId>
    <packaging>jar</packaging>
-   <name>JBoss Security SPI</name>
-   <url>http://labs.jboss.org/portal/jbosssecurity/</url>
-   <description>JBoss Security is a cross cutting project that handles security for the JEMS projects. The SPI Bare contains the SPI excluding the Authorization SPI.</description>
+   <name>Picketbox SPI</name>
+   <url>http://jboss.org/picketbox</url>
+   <description>The SPI Bare contains the SPI excluding the Authorization SPI.</description>
    <licenses>
       <license>
          <name>lgpl</name>
@@ -42,11 +42,11 @@
          <artifactId>jboss-jaspi-api</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.jboss.security</groupId>
+         <groupId>org.picketbox</groupId>
          <artifactId>identity-spi</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.jboss.security</groupId>
+         <groupId>org.picketbox</groupId>
          <artifactId>authorization-spi</artifactId>
       </dependency>
       <dependency>

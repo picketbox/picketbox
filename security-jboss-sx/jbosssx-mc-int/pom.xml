@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <groupId>org.jboss.security</groupId>
+    <groupId>org.picketbox</groupId>
     <artifactId>jbosssx-parent</artifactId>
     <version>3.0.0.Beta5-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
@@ -8,31 +8,31 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jbosssx-mc-int</artifactId>
   <packaging>jar</packaging>
-  <name>JBoss Microcontainer Security Integration</name>
-  <url>http://labs.jboss.org/portal/jbosssecurity/</url>
-  <description>JBoss Security is a cross cutting project that handles security for the JEMS projects</description>
+  <name>PicketBox JBoss Microcontainer Security Integration</name>
+  <url>http://jboss.org/picketbox</url>
+  <description>PicketBox is a security project for Java Applications.</description>
   <dependencies>
     <!-- Global dependencies -->
     <dependency>
-      <groupId>org.jboss.security</groupId>
+      <groupId>org.picketbox</groupId>
       <artifactId>jbosssx-bare</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.security</groupId>
-      <artifactId>jboss-security-spi-bare</artifactId>
+      <groupId>org.picketbox</groupId>
+      <artifactId>picketbox-spi-bare</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.security</groupId>
+      <groupId>org.picketbox</groupId>
       <artifactId>acl-spi</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.security</groupId>
+      <groupId>org.picketbox</groupId>
       <artifactId>identity-spi</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>

@@ -5,13 +5,13 @@
       <version>3</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.jboss.security</groupId>
+   <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-pom</artifactId>
    <version>3.0.0.Beta5-SNAPSHOT</version>
    <packaging>pom</packaging>
-   <name>JBoss Security Implementation for the JBAS - Parent</name>
-   <url>http://labs.jboss.org/portal/jbosssecurity/</url>
-   <description>JBoss Security is a cross cutting project that handles security for the JEMS projects</description>
+   <name>PicketBox Implementation - Parent</name>
+   <url>http://jboss.org/picketbox</url>
+   <description>PicketBox is a security project for Java Applications.</description>
    <licenses>
       <license>
          <name>lgpl</name>

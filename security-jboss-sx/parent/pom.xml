@@ -2,16 +2,16 @@
    <parent>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-parent</artifactId>
-      <version>4</version>
+      <version>5</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.jboss.security</groupId>
+   <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-parent</artifactId>
    <packaging>pom</packaging>
    <version>3.0.0.Beta5-SNAPSHOT</version>
    <name>JBossSX - Parent</name>
-   <url>http://labs.jboss.org/portal/jbosssecurity/</url>
-   <description>JBoss Security is a cross cutting project that handles security for the JEMS projects</description>
+   <url>http://jboss.org/picketbox</url>
+   <description>PicketBox is a security project for Java Applications.</description>
    <licenses>
       <license>
          <name>lgpl</name>
@@ -109,23 +109,6 @@
          <artifactId>jboss-jaspi-api</artifactId>
          <version>1.0.0.${org.jboss.javaee.version}</version>
          <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>stax</groupId>
-         <artifactId>stax-api</artifactId>
-         <version>1.0.1</version>
-      </dependency>
-      <dependency>
-         <groupId>sun-jaxb</groupId>
-         <artifactId>jaxb-api</artifactId>
-         <version>2.1.9</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>sun-jaxb</groupId>
-         <artifactId>jaxb-impl</artifactId>
-         <version>2.1.9</version>
-         <scope>runtime</scope>
       </dependency>
       <dependency>
          <groupId>junit</groupId>

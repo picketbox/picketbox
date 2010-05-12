@@ -1,11 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <groupId>org.jboss.security</groupId>
+    <groupId>org.picketbox</groupId>
     <artifactId>jbosssx-parent</artifactId>
     <version>3.0.0.Beta5-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jboss.security</groupId>
   <artifactId>jbosssx</artifactId>
   <packaging>pom</packaging>
   <name>JBoss Security Implementation for the JBAS - Assembly</name>
@@ -39,14 +38,14 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Specification-Title>JBoss Security Implementation for the JBAS</Specification-Title>
+              <Specification-Title>PicketBox security for Java Applications.</Specification-Title>
               <Specification-Version>${project.version}</Specification-Version>
               <Specification-Vendor>Red Hat Middleware LLC</Specification-Vendor>
               <Implementation-Title>JBoss Security Implementation for the JBAS</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>
-              <Implementation-VendorId>org.jboss.security</Implementation-VendorId>
+              <Implementation-VendorId>org.picketbox</Implementation-VendorId>
               <Implementation-Vendor>Red Hat Middleware LLC</Implementation-Vendor>
-              <Implementation-URL>http://labs.jboss.org/portal/jbosssecurity/</Implementation-URL>
+              <Implementation-URL>http://jboss.org/picketbox</Implementation-URL>
             </manifestEntries>
           </archive>
           <descriptors>

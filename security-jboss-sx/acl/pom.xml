@@ -1,16 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
    <parent>
-      <groupId>org.jboss.security</groupId>
+      <groupId>org.picketbox</groupId>
       <artifactId>jbosssx-parent</artifactId>
       <version>3.0.0.Beta5-SNAPSHOT</version>
       <relativePath>../parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-   <artifactId>jboss-security-acl-impl</artifactId>
+   <artifactId>picketbox-acl-impl</artifactId>
    <packaging>jar</packaging>
-   <name>JBoss Security ACL Implementation</name>
-   <url>http://labs.jboss.org/portal/jbosssecurity/</url>
-   <description>JBoss Security is a cross cutting project that handles security for the JEMS projects</description>
+   <name>PicketBox ACL Implementation</name>
+   <url>http://jboss.org/picketbox</url>
+   <description>PicketBox is a security project for Java Applications.</description>
    <licenses>
       <license>
          <name>lgpl</name>
@@ -95,13 +95,13 @@
          <scope>test</scope>
       </dependency>
       <dependency>
-         <groupId>org.jboss.security</groupId>
+         <groupId>org.picketbox</groupId>
          <artifactId>acl-spi</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>
       </dependency>    
       <dependency>
-         <groupId>org.jboss.security</groupId>
+         <groupId>org.picketbox</groupId>
          <artifactId>identity-impl</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>
