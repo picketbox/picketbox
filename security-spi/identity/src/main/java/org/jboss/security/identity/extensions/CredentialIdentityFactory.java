@@ -27,6 +27,7 @@ import java.security.acl.Group;
 import org.jboss.security.identity.IdentityFactory;
 import org.jboss.security.identity.Role;
  
+ 
 /**
  *  Factory to create Credential Identity
  *  @author Anil.Saldhana@redhat.com
@@ -34,7 +35,13 @@ import org.jboss.security.identity.Role;
  *  @version $Revision$
  */
 public class CredentialIdentityFactory extends IdentityFactory
-{
+{ 
+   /**
+    * An empty identity
+    */
+   @SuppressWarnings("unchecked")
+   public static final CredentialIdentity NULL_IDENTITY = CredentialIdentityFactory.createIdentity( null, null );
+   
    private static CredentialIdentityFactory _instance = null;
    
    protected CredentialIdentityFactory()
@@ -48,9 +55,12 @@ public class CredentialIdentityFactory extends IdentityFactory
       return _instance;
    }
    
+   @SuppressWarnings("unchecked")
    public static CredentialIdentity<Object> createIdentity(final Principal principal, 
          final Object cred)
    {
+      if( principal == null && cred == null )
+         return NULL_IDENTITY;
       return createIdentity(principal,cred, null);
    }
    

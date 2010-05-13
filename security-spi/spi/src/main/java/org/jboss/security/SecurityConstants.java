@@ -21,6 +21,7 @@
   */
 package org.jboss.security;
 
+
 //$Id: SecurityConstants.java 58038 2006-11-03 04:39:59Z anil.saldhana@jboss.com $
 
 /**

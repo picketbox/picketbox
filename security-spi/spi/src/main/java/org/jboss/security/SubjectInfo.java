@@ -29,7 +29,8 @@ import java.util.Set;
 import javax.security.auth.Subject;
 
 import org.jboss.security.identity.Identity;
-import org.jboss.security.identity.RoleGroup;
+import org.jboss.security.identity.IdentityFactory;
+import org.jboss.security.identity.RoleGroup; 
 import org.jboss.security.identity.extensions.CredentialIdentityFactory;
 
 
@@ -52,7 +53,7 @@ public class SubjectInfo implements Serializable
    
    SubjectInfo(Principal principal, Object credential,Subject subject)
    { 
-      this.addIdentity(CredentialIdentityFactory.createIdentity(principal, credential));
+      this.addIdentity( IdentityFactory.getIdentity(principal, credential ) );
       this.authenticatedSubject = subject;
    }  
    
@@ -91,17 +92,31 @@ public class SubjectInfo implements Serializable
    {
       if(identities == null)
          identities = new HashSet<Identity>();
+      if( id != null )
+      {
+         Identity identity = getIdentity( id.getClass() );
+         if( identity == CredentialIdentityFactory.NULL_IDENTITY )
+            removeIdentity( identity );  
+      }
+      
       identities.add(id);   
    }
    
    @SuppressWarnings("unchecked")
    public <T> T getIdentity(Class<T> clazz)
    {
+      if( clazz == null )
+         throw new IllegalArgumentException( "clazz is null" );
       if(this.identities != null)
       {
          for(Identity id:identities)
          {
-            if(clazz.isAssignableFrom(id.getClass()))
+            if( id == null )
+               break;
+            Class<?> idClass = id.getClass();
+            if( idClass == null )
+               throw new RuntimeException( id + " has null class " );
+            if(clazz.isAssignableFrom( idClass ))
                return (T) id; 
          }
       }
@@ -118,6 +133,15 @@ public class SubjectInfo implements Serializable
       if(identities == null)
          identities = new HashSet<Identity>();
       identities.addAll(ids);
+   }
+   
+   /**
+    * Remove an identity
+    * @param id
+    */
+   public void removeIdentity( Identity id )
+   {
+      identities.remove( id );
    }
 
    @Override

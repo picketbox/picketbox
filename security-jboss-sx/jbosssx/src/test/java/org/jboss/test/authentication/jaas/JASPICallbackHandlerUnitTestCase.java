@@ -108,7 +108,8 @@ public class JASPICallbackHandlerUnitTestCase
       assertEquals( subject, currentSC.getUtil().getSubject() ); 
       
       Set<Identity> identities = currentSC.getUtil().getIdentities( CredentialIdentity.class );
-      assertEquals( 2, identities.size() ); 
+      assertEquals( 1, identities.size() ); 
+      assertEquals( principal , currentSC.getUtil().getUserPrincipal() );
    }
    
    @Test
