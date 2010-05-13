@@ -2,7 +2,7 @@
    <parent>
      <groupId>org.picketbox</groupId>
      <artifactId>picketbox-parent</artifactId>
-     <version>3.0.0.Beta6</version>
+     <version>3.0.0.Beta6-SNAPSHOT</version>
      <relativePath>parent</relativePath>
    </parent>
 
