@@ -18,5 +18,6 @@
      <module>security-spi</module>
      <module>security-jboss-sx</module>
      <module>picketbox</module>
+     <module>assembly</module>
    </modules>
 </project>

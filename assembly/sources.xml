@@ -1,0 +1,30 @@
+<assembly>
+  <id>sources</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>../security-spi/assembly/target/</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>jboss-security-spi-${project.version}-sources.jar</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>../security-jboss-sx/assembly/target/</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>jbosssx-${project.version}-sources.jar</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>../picketbox/target/</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>picketbox-bare-${project.version}-sources.jar</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>
