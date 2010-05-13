@@ -23,12 +23,16 @@ package org.jboss.security.auth.callback;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.jacc.PolicyContext;
 import javax.security.jacc.PolicyContextException;
+
+import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityContextAssociation;
 
 /**
  Security actions for the callback package
@@ -93,5 +97,17 @@ public class SecurityActions
       {
          return PolicyContextActions.PRIVILEGED.getContextCallbackHandler();
       }
+   }
+   
+   static SecurityContext getCurrentSecurityContext()
+   {
+      return AccessController.doPrivileged( new PrivilegedAction<SecurityContext>() 
+      {
+
+		public SecurityContext run() 
+		{
+			return SecurityContextAssociation.getSecurityContext();
+		}
+      });
    }
 }

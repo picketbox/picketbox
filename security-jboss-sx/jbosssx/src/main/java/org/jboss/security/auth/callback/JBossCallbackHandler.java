@@ -81,50 +81,61 @@ public class JBossCallbackHandler implements CallbackHandler, Serializable
    {
       for (int i = 0; i < callbacks.length; i++)
       {
-         Callback c = callbacks[i];
-         if (c instanceof SecurityAssociationCallback)
-         {
-            SecurityAssociationCallback sac = (SecurityAssociationCallback) c;
-            sac.setPrincipal(principal);
-            sac.setCredential(credential);
-         }
-         else if (c instanceof ObjectCallback)
-         {
-            ObjectCallback oc = (ObjectCallback) c;
-            oc.setCredential(credential);
-         }
-         else if (c instanceof NameCallback)
-         {
-            NameCallback nc = (NameCallback) c;
-            if (principal != null)
-               nc.setName(principal.getName());
-         }
-         else if (c instanceof PasswordCallback)
-         {
-            PasswordCallback pc = (PasswordCallback) c;
-            char[] password = getPassword();
-            if (password != null)
-               pc.setPassword(password);
-         }
-         else
-         {
-            try
-            {
-               CallbackHandler handler = SecurityActions.getContextCallbackHandler();
-               if( handler != null )
-               {
-                  Callback[] unknown = {c};
-                  handler.handle(unknown);
-                  return;
-               }
-            }
-            catch (Exception e)
-            {
-            } 
-
-            throw new UnsupportedCallbackException(c, "Unrecognized Callback");
-         }
+         Callback callback = callbacks[i];
+         this.handleCallBack( callback ); 
       }
+   }
+  
+   /**
+    * Handle a {@code Callback}
+    * @param c callback
+    * @throws UnsupportedCallbackException If the callback is not supported by this handler
+    */
+   protected void handleCallBack( Callback c ) throws UnsupportedCallbackException
+   {
+      if (c instanceof SecurityAssociationCallback)
+      {
+         SecurityAssociationCallback sac = (SecurityAssociationCallback) c;
+         sac.setPrincipal(principal);
+         sac.setCredential(credential);
+      }
+      else if (c instanceof ObjectCallback)
+      {
+         ObjectCallback oc = (ObjectCallback) c;
+         oc.setCredential(credential);
+      }
+      else if (c instanceof NameCallback)
+      {
+         NameCallback nc = (NameCallback) c;
+         if (principal != null)
+            nc.setName(principal.getName());
+      }
+      else if (c instanceof PasswordCallback)
+      {
+         PasswordCallback pc = (PasswordCallback) c;
+         char[] password = getPassword();
+         if (password != null)
+            pc.setPassword(password);
+      }
+      else
+      {
+         try
+         {
+            CallbackHandler handler = SecurityActions.getContextCallbackHandler();
+            if( handler != null )
+            {
+               Callback[] unknown = {c};
+               handler.handle(unknown);
+               return;
+            }
+         }
+         catch (Exception e)
+         {
+         } 
+
+         throw new UnsupportedCallbackException(c, "Unrecognized Callback");
+      }
+      
    }
 
    /** Try to convert the credential value into a char[] using the
