@@ -134,7 +134,7 @@
       </dependency>
       <dependency>
          <groupId>org.picketbox</groupId>
-         <artifactId>identity-impl</artifactId>
+         <artifactId>picketbox-identity-impl</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>
       </dependency>
