@@ -6,7 +6,7 @@
       <relativePath>../parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-   <artifactId>identity-impl</artifactId>
+   <artifactId>picketbox-identity-impl</artifactId>
    <packaging>jar</packaging>
    <name>PicketBox Identity Implementation</name>
    <url>http://jboss.org/picketbox</url>

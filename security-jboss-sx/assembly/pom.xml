@@ -7,9 +7,9 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jbosssx</artifactId>
   <packaging>pom</packaging>
-  <name>JBoss Security Implementation for the JBAS - Assembly</name>
-  <url>http://labs.jboss.org/portal/jbosssecurity/</url>
-  <description>JBoss Security is a cross cutting project that handles security for the JEMS projects</description>
+  <name>PicketBox Implementation - Assembly</name>
+  <url>http://jboss.org/picketbox</url>
+  <description>PicketBox is a security framework for Java Applications</description>
   <licenses>
     <license>
       <name>lgpl</name>

@@ -122,6 +122,24 @@
       </dependency>
       <dependency>
          <groupId>org.picketbox</groupId>
+         <artifactId>authorization-spi</artifactId>
+         <version>${project.version}</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.picketbox</groupId>
+         <artifactId>identity-spi</artifactId>
+         <version>${project.version}</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.picketbox</groupId>
+         <artifactId>identity-impl</artifactId>
+         <version>${project.version}</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.picketbox</groupId>
          <artifactId>picketbox-acl-impl</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>

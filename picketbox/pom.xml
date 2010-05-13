@@ -16,14 +16,38 @@
 
     <dependencies>
       <dependency>
-         <groupId>org.jboss.security</groupId>
-         <artifactId>jboss-security-spi</artifactId>
+         <groupId>org.picketbox</groupId>
+         <artifactId>identity-spi</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>
       </dependency>
       <dependency>
-         <groupId>org.jboss.security</groupId>
-         <artifactId>jbosssx</artifactId>
+         <groupId>org.picketbox</groupId>
+         <artifactId>authorization-spi</artifactId>
+         <version>${project.version}</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.picketbox</groupId>
+         <artifactId>acl-spi</artifactId>
+         <version>${project.version}</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.picketbox</groupId>
+         <artifactId>jbosssx-bare</artifactId>
+         <version>${project.version}</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.picketbox</groupId>
+         <artifactId>picketbox-acl-impl</artifactId>
+         <version>${project.version}</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.picketbox</groupId>
+         <artifactId>picketbox-identity-impl</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>
       </dependency>
