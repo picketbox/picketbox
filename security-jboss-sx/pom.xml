@@ -7,7 +7,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-pom</artifactId>
-   <version>3.0.0.Beta5-SNAPSHOT</version>
+   <version>3.0.0.Beta6</version>
    <packaging>pom</packaging>
    <name>PicketBox Implementation - Parent</name>
    <url>http://jboss.org/picketbox</url>
@@ -22,10 +22,6 @@
       <name>JBoss Inc.</name>
       <url>http://www.jboss.org</url>
    </organization>
-   <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/security/security-jboss-sx/tags/3.0.0.Beta5-SNAPSHOT</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/security/security-jboss-sx/tags/3.0.0.Beta5-SNAPSHOT</developerConnection>
-   </scm>
    <repositories>
     <repository>
       <id>repository.jboss.org</id>
