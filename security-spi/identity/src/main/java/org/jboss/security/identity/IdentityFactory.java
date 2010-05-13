@@ -21,6 +21,9 @@
   */
 package org.jboss.security.identity;
 
+import java.security.Principal;
+import java.security.cert.X509Certificate;
+
 import org.jboss.security.identity.extensions.CertificateIdentityFactory;
 import org.jboss.security.identity.extensions.CredentialIdentityFactory;
  
@@ -42,4 +45,16 @@ public class IdentityFactory
       
       throw new RuntimeException("Not Yet Implemented:"+type.name());
    } 
+   
+   public static Identity getIdentity( Principal principal, Object credential )
+   {
+      return CredentialIdentityFactory.createIdentity( principal, credential ); 
+   }
+   
+   public  static Identity  getIdentity(final Principal principal,
+         final X509Certificate[] certs, final Role roles)
+   {
+      CertificateIdentityFactory identityFactory = CertificateIdentityFactory.getInstance();
+      return identityFactory.createIdentity(principal, certs, roles); 
+   }
 }
