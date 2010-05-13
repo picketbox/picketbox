@@ -48,6 +48,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ * SECURITY-508: JASPI callback handler
  * @author Anil.Saldhana@redhat.com
  * @since May 12, 2010
  */
