@@ -42,6 +42,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.security.SimpleGroup;
+import org.jboss.security.Util;
 
 /**
  The org.jboss.security.auth.spi.LdapExtLoginModule, added in jboss-4.0.3, is an
@@ -180,6 +181,9 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    private static final String SEARCH_SCOPE_OPT = "searchScope";
 
    private static final String SECURITY_DOMAIN_OPT = "jaasSecurityDomain";
+
+   private static final String DISTINGUISHED_NAME_ATTRIBUTE_OPT = "distinguishedNameAttribute";
+
    private static final String ROLES_ONLY = "authorizeOnly";
    private static final String PRINCIPAL_IS_DN = "principalIsDN";
    private static final String REMOVE_PRINCIPAL_ELEMENTS = "removePrincipalElements";
@@ -212,6 +216,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
 
    protected int searchScope = SearchControls.SUBTREE_SCOPE; 
    
+   protected String distinguishedNameAttribute;
+
    // simple flag to indicate is the validatePassword method was called
    protected boolean isPasswordValidated = false;
 
@@ -363,7 +369,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       bindDN = (String) options.get(BIND_DN);
       bindCredential = (String) options.get(BIND_CREDENTIAL);
       if ((bindCredential != null) && bindCredential.startsWith("{EXT}"))
-         bindCredential = new String(org.jboss.security.Util.loadPassword(bindCredential));
+         bindCredential = new String(Util.loadPassword(bindCredential));
       String securityDomain = (String) options.get(SECURITY_DOMAIN_OPT);
       if (securityDomain != null)
       {
@@ -418,6 +424,10 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       if ("SUBTREE_SCOPE".equalsIgnoreCase(scope))
          searchScope = SearchControls.SUBTREE_SCOPE;
 
+      distinguishedNameAttribute = (String) options.get(DISTINGUISHED_NAME_ATTRIBUTE_OPT);
+      if (distinguishedNameAttribute == null)
+          distinguishedNameAttribute = "distinguishedName";
+
       // Get the admin context for searching
       InitialLdapContext ctx = null;
       try
@@ -460,6 +470,9 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       constraints.setReturningAttributes(new String[0]);
       constraints.setTimeLimit(searchTimeLimit);
 
+      String attrList[] = {distinguishedNameAttribute};
+      constraints.setReturningAttributes(attrList);
+
       NamingEnumeration results = null;
 
       Object[] filterArgs = {user};
@@ -473,10 +486,22 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       SearchResult sr = (SearchResult) results.next();
       String name = sr.getName();
       String userDN = null;
-      if (sr.isRelative() == true)
-         userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
-      else
-         throw new NamingException("Can't follow referal for authentication: " + name);
+      Attributes attrs = sr.getAttributes();
+      if (attrs != null)
+      {
+          Attribute dn = attrs.get(distinguishedNameAttribute);
+          if (dn != null)
+          {
+                  userDN = (String) dn.get();
+          }
+      }
+      if (userDN == null)
+      {
+          if (sr.isRelative() == true)
+                  userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
+          else
+                  throw new NamingException("Can't follow referal for authentication: " + name);
+      }
 
       results.close();
       results = null;
