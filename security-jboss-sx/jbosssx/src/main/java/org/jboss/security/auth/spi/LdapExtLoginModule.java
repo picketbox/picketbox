@@ -731,6 +731,5 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
         }
         return false;
      }
-  
  
 }
