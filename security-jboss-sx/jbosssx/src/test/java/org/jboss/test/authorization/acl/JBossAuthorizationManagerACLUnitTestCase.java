@@ -109,8 +109,8 @@ public class JBossAuthorizationManagerACLUnitTestCase extends TestCase
       Collection<Resource> childResources = new ArrayList<Resource>();
       // resource 1 has resource 2 as child.
       childResources.add(resource2);
-      resource1.getMap().put(ResourceKeys.CHILD_RESOURCES, childResources);
-      resource2.getMap().put(ResourceKeys.PARENT_RESOURCE, resource1);
+      resource1.add( ResourceKeys.CHILD_RESOURCES, childResources );
+      resource2.add( ResourceKeys.PARENT_RESOURCE, resource1 );
 
       // using the authorization manager, check the entitlements assigned to some of the identities.
       JBossAuthorizationManager jam = new JBossAuthorizationManager("test-acl");

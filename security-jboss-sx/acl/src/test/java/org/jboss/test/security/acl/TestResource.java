@@ -151,4 +151,9 @@ public class TestResource implements Resource, Serializable
    {
       return this.name;
    }
+
+   public void add(String key, Object value)
+   {
+      this.contextMap.put(key, value);
+   }
 }

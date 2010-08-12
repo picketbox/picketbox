@@ -23,6 +23,7 @@ package org.jboss.security.authorization.resources;
 
 import java.security.CodeSource;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -60,11 +61,21 @@ public abstract class JavaEEResource implements Resource
    public abstract ResourceType getLayer(); 
 
    /**
+    * Add a key value to the context map
+    * @param key
+    * @param value
+    */
+   public void add( String key, Object value )
+   {
+      map.put(key, value);
+   }
+   
+   /**
     * @see Resource#getMap()
     */
    public Map<String, Object> getMap()
    { 
-      return map;
+      return Collections.unmodifiableMap( map );
    }
    
    /**

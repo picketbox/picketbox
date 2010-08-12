@@ -95,11 +95,11 @@ public abstract class AbstractJavaEEHelper
       //Authorization Exception stacktrace is huge. Scale it down
       //as the original stack trace can be seen in server.log (if needed)
       String exceptionMessage = e != null ? e.getLocalizedMessage() : "";  
-      Map<String,Object> cmap = new HashMap<String,Object>();
-      cmap.putAll(resource.getMap());
-      cmap.put("Resource:", resource.toString());
-      cmap.put("Exception:", exceptionMessage);
-      audit(level,cmap,null);
+      Map<String,Object> auditContextMap = new HashMap<String,Object>();
+      auditContextMap.putAll(resource.getMap());
+      auditContextMap.put("Resource:", resource.toString());
+      auditContextMap.put("Exception:", exceptionMessage);
+      audit(level,auditContextMap,null);
    }  
    
    protected void audit(String level,

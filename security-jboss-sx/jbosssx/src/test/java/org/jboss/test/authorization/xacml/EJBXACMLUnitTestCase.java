@@ -101,8 +101,8 @@ public class EJBXACMLUnitTestCase extends TestCase
       
       er.setPolicyContextID(contextID);
       er.setPrincipal(new SimplePrincipal("baduser"));
-      er.getMap().put(ResourceKeys.ROLEREF_PERM_CHECK, true);
-      er.getMap().put(ResourceKeys.ROLENAME, "employee");
+      er.add(ResourceKeys.ROLEREF_PERM_CHECK, true);
+      er.add(ResourceKeys.ROLENAME, "employee");
 
       Set<SecurityRoleRef> roleRefSet = new HashSet<SecurityRoleRef>();
       roleRefSet.add(this.getSecurityRoleRef("employee", "ProjectUser"));
@@ -122,8 +122,8 @@ public class EJBXACMLUnitTestCase extends TestCase
       
       er.setPolicyContextID(contextID);
       er.setPrincipal(new SimplePrincipal("baduser"));
-      er.getMap().put(ResourceKeys.ROLEREF_PERM_CHECK, true);
-      er.getMap().put(ResourceKeys.ROLENAME, "employee");
+      er.add(ResourceKeys.ROLEREF_PERM_CHECK, true);
+      er.add(ResourceKeys.ROLENAME, "employee");
 
       Set<SecurityRoleRef> roleRefSet = new HashSet<SecurityRoleRef>();
       roleRefSet.add(this.getSecurityRoleRef("employee", "baduser"));

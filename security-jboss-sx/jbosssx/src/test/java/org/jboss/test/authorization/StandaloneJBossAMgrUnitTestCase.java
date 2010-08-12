@@ -65,6 +65,8 @@ public class StandaloneJBossAMgrUnitTestCase extends TestCase
       final HashMap<String, Object> cmap = new HashMap<String,Object>();
       Resource testResource = new Resource()
       {
+         HashMap<String,Object> contextMap = new HashMap<String,Object>();
+         
          public ResourceType getLayer()
          {
             return ResourceType.WEB;
@@ -73,6 +75,11 @@ public class StandaloneJBossAMgrUnitTestCase extends TestCase
          public Map<String, Object> getMap()
          {
             return Collections.unmodifiableMap(cmap);
+         }
+
+         public void add(String key, Object value)
+         {
+            contextMap.put(key, value);
          }
       }; 
       assertEquals(AuthorizationContext.PERMIT, jam.authorize(testResource, subject, getRoleGroup()));

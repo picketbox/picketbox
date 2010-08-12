@@ -40,7 +40,7 @@ public class ACLTestResource implements Resource
 
    private final int id;
 
-   private final Map<String, Object> context = new HashMap<String, Object>();
+   private final Map<String, Object> contextMap = new HashMap<String, Object>();
    
    /**
     * <p>
@@ -69,7 +69,7 @@ public class ACLTestResource implements Resource
     */
    public Map<String, Object> getMap()
    {
-      return this.context;
+      return this.contextMap;
    }
    
    /**
@@ -82,5 +82,10 @@ public class ACLTestResource implements Resource
    public int getId()
    {
       return this.id;
+   }
+
+   public void add(String key, Object value)
+   {
+      this.contextMap.put(key, value);
    }
 }

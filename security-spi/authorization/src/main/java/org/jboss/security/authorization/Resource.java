@@ -38,4 +38,11 @@ public interface Resource
    
    //Return the contextual map
    public Map<String,Object> getMap(); 
+   
+   /**
+    * Add key value to context map
+    * @param key
+    * @param value
+    */
+   public void add( String key, Object value );
 }

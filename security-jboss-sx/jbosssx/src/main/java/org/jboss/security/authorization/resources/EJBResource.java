@@ -41,7 +41,7 @@ public class EJBResource extends JavaEEResource
    private Method ejbMethod = null;
    private String ejbName = null;
    private String ejbMethodInterface = null;   
-   private RoleGroup ejbMethodRoles = null;
+   private RoleGroup ejbMethodRoles = null;  
    
    public static final String EJB_VERSION_1_1 = "1.1";
    public static final String EJB_VERSION_2_0 = "2.0";
@@ -180,7 +180,7 @@ public class EJBResource extends JavaEEResource
    public void setEjbVersion(String version)
    {
       this.version = version;
-   }
+   } 
 
    public String toString()
    {

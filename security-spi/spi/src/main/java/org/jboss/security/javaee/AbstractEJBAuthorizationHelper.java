@@ -29,7 +29,10 @@ import java.util.Set;
 import javax.security.auth.Subject;
 
 import org.jboss.security.RunAs;
+import org.jboss.security.authorization.Resource;
 import org.jboss.security.identity.RoleGroup;
+import org.jboss.security.javaee.exceptions.MissingArgumentsException;
+import org.jboss.security.javaee.exceptions.WrongEEResourceException;
 
 /**
  *  EJB Authorization Helper
@@ -53,6 +56,14 @@ extends AbstractJavaEEHelper
     * @param ejbVersion
     */
    public abstract void setEJBVersion(String ejbVersion);
+   
+   /**
+    * Authorize the EJB
+    * @param resource 
+    * @return
+    * @throws {@code WrongEEResourceException} if the resource is not EJB resource
+    */
+   public abstract boolean authorize( Resource resource ) throws WrongEEResourceException;
     
    /**
     * Authorize the EJB Invocation
@@ -67,7 +78,9 @@ extends AbstractJavaEEHelper
     * @param methodRoles
     * @return true - subject is authorized
     * @throws IllegalStateException Authorization Manager from SecurityContext is null
-    * @throws IllegalArgumentException ejbName, ejbMethod, ejbCS, contextID is null
+    * @throws IllegalArgumentException ejbName, ejbMethod, ejbCS or contextID is null
+    * @deprecated
+    * @see #authorize(Resource)
     */
    public abstract boolean authorize(String ejbName, 
          Method ejbMethod, 
@@ -88,8 +101,26 @@ extends AbstractJavaEEHelper
     * @param contextID
     * @param securityRoleRefs
     * @return true - caller is in the role
+    * @throws WrongEEResourceException when resource is not EJB Resource
+    * @throws MissingArgumentsException roleName, ejbName or contextID is null 
+    */
+   public abstract boolean isCallerInRole( Resource resource, String roleName )
+   throws WrongEEResourceException, MissingArgumentsException;
+   
+   
+   /**
+    * Check if the caller is in any of the roles
+    * @param roleName
+    * @param ejbName
+    * @param ejbPrincipal
+    * @param callerSubject
+    * @param contextID
+    * @param securityRoleRefs
+    * @return true - caller is in the role
     * @throws IllegalStateException Authorization Manager from SecurityContext is null
     * @throws IllegalArgumentException roleName, ejbName, contextID is null
+    * @deprecated
+    * @see #isCallerInRole(Resource, String)
     */
    public abstract boolean isCallerInRole(String roleName,
          String ejbName, 
@@ -112,6 +143,8 @@ extends AbstractJavaEEHelper
     * @return true - caller is in the role
     * @throws IllegalStateException Authorization Manager from SecurityContext is null
     * @throws IllegalArgumentException roleName, ejbName, contextID is null
+    * @deprecated 
+    * @see #isCallerInRole(Resource, String)
     */
    public abstract boolean isCallerInRole(String roleName,
          String ejbName, 

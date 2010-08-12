@@ -19,49 +19,36 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.picketbox.core.authorization.resources;
+package org.jboss.security.javaee.exceptions;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jboss.security.authorization.Resource;
-import org.jboss.security.authorization.ResourceType;
+import java.security.GeneralSecurityException;
 
 /**
- * A resource denoting a POJO
+ * A security exception to indicate the wrong type of EE resource
  * @author Anil.Saldhana@redhat.com
- * @since Mar 4, 2010
+ * @since Aug 11, 2010
  */
-public class POJOResource implements Resource
+public class WrongEEResourceException extends GeneralSecurityException
 {
-   private Map<String,Object> map = new HashMap<String, Object>();
-   
-   @SuppressWarnings("unused")
-   private Object pojo = null;
-   
-   public POJOResource(Object obj)
+   private static final long serialVersionUID = 1L;
+
+   public WrongEEResourceException()
    {
-      this.pojo = obj;
+      super(); 
    }
 
-   public ResourceType getLayer()
-   { 
-      return ResourceType.POJO;
+   public WrongEEResourceException(String message, Throwable cause)
+   {
+      super(message, cause); 
    }
 
-   public void add(Map<String,Object> m)
+   public WrongEEResourceException(String msg)
    {
-      this.map.putAll(m);
-   }
-   
-   public Map<String, Object> getMap()
-   { 
-      return Collections.unmodifiableMap( map );
+      super(msg); 
    }
 
-   public void add(String key, Object value)
+   public WrongEEResourceException(Throwable cause)
    {
-      map.put(key, value);
+      super(cause); 
    } 
 }

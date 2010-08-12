@@ -19,49 +19,34 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.picketbox.core.authorization.resources;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jboss.security.authorization.Resource;
-import org.jboss.security.authorization.ResourceType;
+package org.jboss.security.javaee.exceptions;
 
 /**
- * A resource denoting a POJO
+ * An exception indicating there are missing arguments
  * @author Anil.Saldhana@redhat.com
- * @since Mar 4, 2010
+ * @since Aug 12, 2010
  */
-public class POJOResource implements Resource
+public class MissingArgumentsException extends IllegalArgumentException
 {
-   private Map<String,Object> map = new HashMap<String, Object>();
-   
-   @SuppressWarnings("unused")
-   private Object pojo = null;
-   
-   public POJOResource(Object obj)
+   private static final long serialVersionUID = 1L;
+
+   public MissingArgumentsException()
    {
-      this.pojo = obj;
+      super(); 
    }
 
-   public ResourceType getLayer()
-   { 
-      return ResourceType.POJO;
+   public MissingArgumentsException(String message, Throwable cause)
+   {
+      super(message, cause); 
    }
 
-   public void add(Map<String,Object> m)
+   public MissingArgumentsException(String s)
    {
-      this.map.putAll(m);
-   }
-   
-   public Map<String, Object> getMap()
-   { 
-      return Collections.unmodifiableMap( map );
+      super(s); 
    }
 
-   public void add(String key, Object value)
+   public MissingArgumentsException(Throwable cause)
    {
-      map.put(key, value);
+      super(cause); 
    } 
 }

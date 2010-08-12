@@ -96,6 +96,8 @@ public class JBossAuthZMgrSafetyUnitTestCase extends TestCase
    
    private class TestResource implements Resource
    { 
+      HashMap<String,Object> contextMap = new HashMap<String,Object>();
+      
       public ResourceType getLayer()
       {
          return ResourceType.WEB;
@@ -103,7 +105,12 @@ public class JBossAuthZMgrSafetyUnitTestCase extends TestCase
 
       public Map<String, Object> getMap()
       {
-         return new HashMap<String,Object>();
+         return contextMap;
+      }
+
+      public void add(String key, Object value)
+      {
+         contextMap.put(key, value);    
       } 
    }  
 }

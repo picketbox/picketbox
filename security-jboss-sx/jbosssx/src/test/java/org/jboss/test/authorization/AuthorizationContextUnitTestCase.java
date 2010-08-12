@@ -184,6 +184,8 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
       {
          result =  aContext.authorize(new Resource()
          { 
+            HashMap<String,Object> contextMap = new HashMap<String,Object>();
+            
             public ResourceType getLayer()
             {
                return ResourceType.WEB;
@@ -192,7 +194,12 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
             @SuppressWarnings("unchecked")
             public Map getMap()
             {
-               return new HashMap();
+               return contextMap;
+            }
+
+            public void add(String key, Object value)
+            {
+               contextMap.put(key, value);
             }
          });
       }

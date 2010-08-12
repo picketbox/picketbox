@@ -124,15 +124,22 @@ public class AuthorizationUnitTestCase extends TestCase
    {
       return new Resource()
       {
-       public ResourceType getLayer()
-       {
-          return ResourceType.POJO;
-       }
+         HashMap<String,Object> contextMap = new HashMap<String, Object>();
 
-       public Map<String, Object> getMap()
-       {
-          return new HashMap<String,Object>();
-       }
+         public ResourceType getLayer()
+         {
+            return ResourceType.POJO;
+         }
+
+         public Map<String, Object> getMap()
+         {
+            return contextMap;
+         }
+
+         public void add(String key, Object value)
+         {
+            contextMap.put(key, value);
+         }
       };
    }
 }

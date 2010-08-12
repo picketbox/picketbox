@@ -374,5 +374,10 @@ public class InstanceBasedAuthorizationUnitTestCase extends TestCase
       {
          return this.resourceURI.toString();
       }
+
+      public void add(String key, Object value)
+      {
+         this.contextMap.put(key, value);
+      }
    }
 }

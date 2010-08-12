@@ -36,12 +36,15 @@ import org.jboss.security.RunAs;
 import org.jboss.security.audit.AuditLevel;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
+import org.jboss.security.authorization.Resource;
 import org.jboss.security.authorization.ResourceKeys;
 import org.jboss.security.authorization.resources.EJBResource;
 import org.jboss.security.callbacks.SecurityContextCallbackHandler;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.javaee.AbstractEJBAuthorizationHelper;
 import org.jboss.security.javaee.SecurityRoleRef;
+import org.jboss.security.javaee.exceptions.MissingArgumentsException;
+import org.jboss.security.javaee.exceptions.WrongEEResourceException;
 
 
 /**
@@ -53,6 +56,8 @@ import org.jboss.security.javaee.SecurityRoleRef;
 public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
 {
    protected static Logger log = Logger.getLogger(EJBAuthorizationHelper.class);
+   
+   protected String POLICY_REGISTRATION_JNDI = "java:/policyRegistration";
    
    @Override
    public boolean authorize(
@@ -141,6 +146,58 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       return this.isCallerInRole(roleName, ejbName, ejbPrincipal, 
             callerSubject, contextID, securityRoleRefs, false); 
    }
+   
+   public boolean isCallerInRole( Resource resource, String roleName ) throws WrongEEResourceException,MissingArgumentsException
+   {
+      boolean isAuthorized = false;
+      EJBResource ejbResource = (EJBResource) resource;
+
+      if(roleName == null)
+         throw new IllegalArgumentException("roleName is null");
+      if( ejbResource.getEjbName() == null)
+         throw new IllegalArgumentException("ejbName is null"); 
+      if( ejbResource.getPolicyContextID() == null)
+         throw new IllegalArgumentException("ContextID is null"); 
+      
+      AuthorizationManager am = securityContext.getAuthorizationManager();
+
+      Subject callerSubject = ejbResource.getCallerSubject();
+      
+      if(am == null)
+         throw new IllegalStateException("AuthorizationManager is null");
+      
+      try
+      {
+         if(this.policyRegistration == null)
+            this.policyRegistration = getPolicyRegistrationFromJNDI(); 
+      }
+      catch(Exception e)
+      {
+         log.error("Error getting Policy Registration",e);
+      }
+      
+      ejbResource.add( ResourceKeys.POLICY_REGISTRATION, this.policyRegistration );
+      
+      ejbResource.add( ResourceKeys.ROLENAME, roleName );
+      ejbResource.add( ResourceKeys.ROLEREF_PERM_CHECK, Boolean.TRUE); 
+      
+      SecurityContextCallbackHandler sch = new SecurityContextCallbackHandler(this.securityContext); 
+      RoleGroup callerRoles = am.getSubjectRoles( callerSubject, sch);
+      
+      try
+      {
+         int check = am.authorize(ejbResource, callerSubject, callerRoles);
+         isAuthorized = (check == AuthorizationContext.PERMIT);
+      } 
+      catch (Exception e)
+      {
+         isAuthorized = false; 
+         if(log.isTraceEnabled()) 
+            log.trace(roleName + "::isCallerInRole check failed:"+e.getLocalizedMessage(), e); 
+         authorizationAudit(AuditLevel.ERROR,ejbResource,e);  
+      } 
+      return isAuthorized;  
+   }
 
    @Override
    public boolean isCallerInRole(String roleName, String ejbName, Principal ejbPrincipal, Subject callerSubject,
@@ -170,6 +227,8 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       {
          log.error("Error getting Policy Registration",e);
       }
+      
+      
       
       map.put(ResourceKeys.POLICY_REGISTRATION, this.policyRegistration);
       
@@ -228,10 +287,74 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       else
          throw new IllegalArgumentException("Invalid ejbVersion:" + ejbVersion);
    }
+
+   @Override
+   public boolean authorize( Resource resource ) 
+   throws WrongEEResourceException, MissingArgumentsException
+   {
+      if( resource instanceof EJBResource == false )
+        throw new WrongEEResourceException( "resource is not of type EJBResource" );
+      EJBResource ejbResource = (EJBResource) resource;
+      validateEJBResource( ejbResource );
+      
+      AuthorizationManager am = securityContext.getAuthorizationManager();
+      if(am == null)
+         throw new IllegalStateException("Authorization Manager is null");
+
+      try
+      {
+         if(this.policyRegistration == null)
+            this.policyRegistration = getPolicyRegistrationFromJNDI(); 
+      }
+      catch(Exception e)
+      {
+         log.error("Error getting Policy Registration",e);
+      }
+      Subject callerSubject = ejbResource.getCallerSubject();
+      
+      ejbResource.add( ResourceKeys.POLICY_REGISTRATION, this.policyRegistration );  
+      SecurityContextCallbackHandler sch = new SecurityContextCallbackHandler( this.securityContext ); 
+      RoleGroup callerRoles = am.getSubjectRoles( callerSubject, sch );
+      
+      boolean isAuthorized = false;
+      try
+      {
+         int check = am.authorize(ejbResource, callerSubject, callerRoles);
+         isAuthorized = (check == AuthorizationContext.PERMIT);
+         authorizationAudit((isAuthorized ? AuditLevel.SUCCESS : AuditLevel.FAILURE)
+                             ,ejbResource, null);
+      }
+      catch (Exception e)
+      {
+         isAuthorized = false;
+         if(log.isTraceEnabled())
+            log.trace("Error in authorization:",e); 
+         authorizationAudit(AuditLevel.ERROR,ejbResource,e);
+      } 
+      
+      return isAuthorized;
+   }
    
-   
+   /**
+    * Validate that the EJBResource has all the parameters to make a decision
+    * @param ejbResource
+    */
+   private void validateEJBResource( EJBResource ejbResource ) throws MissingArgumentsException
+   {
+      if( ejbResource.getEjbName() == null )
+         throw new MissingArgumentsException( "ejbName is null" );
+      if( ejbResource.getEjbMethod() == null )
+         throw new MissingArgumentsException( "ejbMethod is null" );
+      if( ejbResource.getCodeSource() == null )
+         throw new MissingArgumentsException("EJB CodeSource is null");
+      if( ejbResource.getPolicyContextID() == null )
+         throw new MissingArgumentsException("ContextID is null");
+      if( ejbResource.getCallerSubject() == null && ejbResource.getCallerRunAsIdentity() == null )
+         throw new MissingArgumentsException("Either callerSubject or callerRunAs should be non-null"); 
+   }
+  
    private PolicyRegistration getPolicyRegistrationFromJNDI() throws Exception
    {
-      return (PolicyRegistration) (new InitialContext()).lookup("java:/policyRegistration");
+      return (PolicyRegistration) (new InitialContext()).lookup(POLICY_REGISTRATION_JNDI);
    }
 }
