@@ -111,7 +111,7 @@ public class EJBXACMLPolicyModuleDelegate extends EJBPolicyModuleDelegate
       try
       {
          RequestContext requestCtx = util.createXACMLRequest(this.ejbName,
-               this.ejbMethod.getName(),this.ejbPrincipal, callerRoles);
+               this.ejbMethod, this.ejbPrincipal, callerRoles);
          
          PolicyDecisionPoint pdp = util.getPDP(policyRegistration, this.policyContextID); 
          if(pdp == null)

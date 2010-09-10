@@ -10,7 +10,8 @@
     <Rule RuleId="urn:oasis:names:tc:xacml:2.0:jboss-test:XVI:rule"
           Effect="Permit">
         <Description>
-        scott can create,remove and invoke echo method of StatelessSession EJB when he has a role of ProjectUser 
+        scott can create,remove and invoke echo method of StatelessSession EJB when he has a role of ProjectUser.
+        He can invoke "largeMethod" operation with a particular signature only
         </Description>
         <Target>
             <Subjects>
@@ -76,6 +77,16 @@
                               DataType="http://www.w3.org/2001/XMLSchema#string"/>
                     </ActionMatch>
                 </Action>
+                <Action>
+                    <ActionMatch
+                          MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue
+                              DataType="http://www.w3.org/2001/XMLSchema#string">largeMethod(String,int[],String[])</AttributeValue>
+                        <ActionAttributeDesignator
+                              AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id"
+                              DataType="http://www.w3.org/2001/XMLSchema#string"/>
+                    </ActionMatch>
+                </Action> 
             </Actions>
         </Target> 
     </Rule>

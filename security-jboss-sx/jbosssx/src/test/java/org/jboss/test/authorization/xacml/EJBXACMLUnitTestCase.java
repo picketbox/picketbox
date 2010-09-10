@@ -133,14 +133,74 @@ public class EJBXACMLUnitTestCase extends TestCase
       assertEquals(AuthorizationContext.DENY, res);
    }
    
-   private EJBResource getEJBResource(PolicyRegistration policyRegistration)
+   /**
+    * Test whether the EJBXACMLPolicyDelegate will permit calls to particular overloaded method
+    * 
+    * NOTE: the policy only provides success for <i> public void largeMethod( String a, int[] b, String[] c ) </i>
+    * @throws Exception
+    */
+   public void testEJBOverloadedMethodsSuccessCase() throws Exception
+   {
+      EJBXACMLPolicyModuleDelegate pc = new EJBXACMLPolicyModuleDelegate();
+
+      PolicyRegistration policyRegistration = new JBossPolicyRegistration();
+      registerPolicy(policyRegistration);  
+      
+      HashMap<String,Object> map = new HashMap<String,Object>(); 
+      map.put(ResourceKeys.POLICY_REGISTRATION, policyRegistration);
+      
+      EJBResource er = new EJBResource(map);
+      er.setEjbName("StatelessSession");
+      er.setEjbMethod(StatelessSession.class.getDeclaredMethod( "largeMethod", new Class[] { String.class, int[].class,
+            String[].class } )); 
+      
+      er.setPrincipal(p); 
+      
+      er.setPolicyContextID(contextID);
+      int res = pc.authorize(er, new Subject(), getRoleGroup());
+      assertEquals(AuthorizationContext.PERMIT, res);
+   }
+   
+   /**
+    * Test whether the EJBXACMLPolicyDelegate will deny calls to particular overloaded methods
+    * 
+    * NOTE: the policy only provides success for <i> public void largeMethod( String a, int[] b, String[] c ) </i>
+    * @throws Exception
+    */
+   public void testEJBOverloadedMethodsUnsuccessCase() throws Exception
+   {
+      EJBXACMLPolicyModuleDelegate pc = new EJBXACMLPolicyModuleDelegate();
+
+      PolicyRegistration policyRegistration = new JBossPolicyRegistration();
+      registerPolicy(policyRegistration);  
+      
+      HashMap<String,Object> map = new HashMap<String,Object>(); 
+      map.put(ResourceKeys.POLICY_REGISTRATION, policyRegistration);
+      
+      EJBResource er = new EJBResource(map);
+      er.setEjbName("StatelessSession");
+      er.setEjbMethod(StatelessSession.class.getDeclaredMethod( "largeMethod", new Class[] { String.class , int[].class } )); 
+      
+      er.setPrincipal(p); 
+      
+      er.setPolicyContextID(contextID);
+      int res = pc.authorize(er, new Subject(), getRoleGroup());
+      assertEquals(AuthorizationContext.DENY, res);
+      
+      //Lets try the no-arg method
+      er.setEjbMethod(StatelessSession.class.getDeclaredMethod( "largeMethod", new Class[0] ));
+      res = pc.authorize(er, new Subject(), getRoleGroup());
+      assertEquals(AuthorizationContext.DENY, res); 
+   }
+   
+   private EJBResource getEJBResource(PolicyRegistration policyRegistration) throws Exception
    {
       HashMap<String,Object> map = new HashMap<String,Object>(); 
       map.put(ResourceKeys.POLICY_REGISTRATION, policyRegistration);
       
       EJBResource er = new EJBResource(map);
       er.setEjbName("StatelessSession");
-      er.setEjbMethod(StatelessSession.class.getMethods()[0]);
+      er.setEjbMethod(StatelessSession.class.getDeclaredMethod( "echo", new Class[0] ));
       er.setPrincipal(p); 
       return er;
    }
@@ -172,8 +232,17 @@ public class EJBXACMLUnitTestCase extends TestCase
       return new SecurityRoleRef(roleName, roleLink);
    }
    
+   /**
+    * A simple POJO whose methods we use reflectively 
+    */
    public class StatelessSession
    {
       public void echo(){}
+      
+      public void largeMethod(){}
+      
+      public void largeMethod( String a, int[] b ) {}
+      
+      public void largeMethod( String a, int[] b, String[] c ) {} 
    } 
 }

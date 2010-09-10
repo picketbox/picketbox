@@ -22,6 +22,8 @@
 package org.jboss.security.authorization.modules.ejb;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.List;
 
@@ -52,75 +54,160 @@ public class EJBXACMLUtil extends JBossXACMLUtil
 {
    private static Logger log = Logger.getLogger(EJBXACMLUtil.class);
    private boolean trace = log.isTraceEnabled();
- 
+   
+   public RequestContext createXACMLRequest( String ejbName, Method ejbMethod, Principal principal, RoleGroup callerRoles )
+   throws Exception
+   {
+      String action = ejbMethod.getName();
+      
+      //Let us look at the number of arguments
+      Class<?>[] paramTypes = ejbMethod.getParameterTypes();
+      if( paramTypes.length == 0 )
+         return this.createXACMLRequest(ejbName, action, principal, callerRoles );
+      
+      StringBuilder builder = new StringBuilder( "(" ); 
+      int i = 0;
+      for( Class<?> paramClass: paramTypes )
+      { 
+         if( i > 0 )
+            builder.append( "," );
+         builder.append( paramClass.getSimpleName() ); 
+         i++;
+      }
+      
+      builder.append( ")" );
+      
+      //Create an action type
+      ActionType actionType = getActionType( action + builder.toString() );
+      //actionType.
+
+      RequestContext requestCtx = this.getRequestContext( ejbName, actionType, principal, callerRoles );
+  
+      if(trace)
+      {
+         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+         requestCtx.marshall(baos);
+         log.trace(new String(baos.toByteArray()));         
+      }
+      return requestCtx;
+   }
+
+   /**
+    * 
+    * @param ejbName
+    * @param methodName
+    * @param principal
+    * @param callerRoles
+    * @return
+    * @throws Exception
+    */
    public RequestContext createXACMLRequest(String ejbName, String methodName,
          Principal principal, RoleGroup callerRoles) throws Exception
    {  
-      if(principal == null)
-         throw new IllegalArgumentException("principal is null");
+      String action = methodName;
+      //Create an action type
+      ActionType actionType = getActionType( action );
 
-      String action = methodName; 
+      RequestContext requestCtx = this.getRequestContext(ejbName, actionType, principal, callerRoles);
+  
+      if(trace)
+      {
+         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+         requestCtx.marshall(baos);
+         log.trace(new String(baos.toByteArray()));         
+      }
+      return requestCtx;
+  }
+   
+   private RequestContext getRequestContext( String ejbName, ActionType actionType,
+         Principal principal, RoleGroup callerRoles ) throws IOException
+   {
+      if(principal == null)
+         throw new IllegalArgumentException("principal is null"); 
 
       RequestContext requestCtx = RequestResponseContextFactory.createRequestCtx();
 
       //Create a subject type
-      SubjectType subject = new SubjectType();
-      subject.getAttribute().add(
-            RequestAttributeFactory.createStringAttributeType(
-                  XACMLConstants.ATTRIBUTEID_SUBJECT_ID, "jboss.org",
-                  principal.getName()));
-
-      List<Role> rolesList = callerRoles.getRoles();
-      if(rolesList != null)
-      {
-         for(Role role:rolesList)
-         {
-            String roleName = role.getRoleName(); 
-            AttributeType attSubjectID = RequestAttributeFactory.createStringAttributeType(
-                  XACMLConstants.ATTRIBUTEID_ROLE, "jboss.org", roleName);
-            subject.getAttribute().add(attSubjectID);
-         }
-      } 
+      SubjectType subject = this.getSubjectType( principal, callerRoles ); 
 
       //Create a resource type
-      ResourceType resourceType = new ResourceType();
-      resourceType.getAttribute().add(
-            RequestAttributeFactory.createStringAttributeType(
-                  XACMLConstants.ATTRIBUTEID_RESOURCE_ID, 
-                  null, 
-                  ejbName));
-
-      //Create an action type
-      ActionType actionType = new ActionType();
-      actionType.getAttribute().add(
-            RequestAttributeFactory.createStringAttributeType(
-                  XACMLConstants.ATTRIBUTEID_ACTION_ID, 
-                  "jboss.org", 
-                  action));  
+      ResourceType resourceType = getResourceType( ejbName ); 
 
       //Create an Environment Type (Optional)
-      EnvironmentType environmentType = new EnvironmentType();
-      environmentType.getAttribute().add( 
-            RequestAttributeFactory.createDateTimeAttributeType(
-            XACMLConstants.ATTRIBUTEID_CURRENT_TIME, null));
+      EnvironmentType environmentType = getEnvironmentType();
 
       //Create a Request Type
+      RequestType requestType = getRequestType( subject, resourceType, actionType, environmentType );
+
+      requestCtx.setRequest( requestType );
+      
+      return requestCtx; 
+   }
+
+   private RequestType getRequestType(SubjectType subject, ResourceType resourceType, ActionType actionType,
+         EnvironmentType environmentType)
+   {
       RequestType requestType = new RequestType();
       requestType.getSubject().add(subject);
       requestType.getResource().add(resourceType);
       requestType.setAction(actionType);
       requestType.setEnvironment(environmentType);
+      return requestType;
+   }
 
-      requestCtx.setRequest(requestType);
+   private EnvironmentType getEnvironmentType()
+   {
+      EnvironmentType environmentType = new EnvironmentType();
+      environmentType.getAttribute().add( 
+            RequestAttributeFactory.createDateTimeAttributeType(
+            XACMLConstants.ATTRIBUTEID_CURRENT_TIME, null));
+      return environmentType;
+   }
 
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+   private ActionType getActionType(String action)
+   {
+      String actionID_NS = XACMLConstants.ATTRIBUTEID_ACTION_ID;
+      
+      AttributeType actionAttribute = RequestAttributeFactory.createStringAttributeType( actionID_NS , "jboss.org", action ); 
+      ActionType actionType = new ActionType();
+      actionType.getAttribute().add( actionAttribute );
+      return actionType;
+   }
 
-      if(trace)
-      {
-         requestCtx.marshall(baos);
-         log.trace(new String(baos.toByteArray()));         
-      }
-      return requestCtx;
-  }   
-
+   private ResourceType getResourceType(String ejbName)
+   {
+      String resourceID_NS = XACMLConstants.ATTRIBUTEID_RESOURCE_ID;
+      
+      ResourceType resourceType = new ResourceType();
+      AttributeType resourceAttribute =  RequestAttributeFactory.createStringAttributeType( resourceID_NS, null, ejbName ); 
+      resourceType.getAttribute().add( resourceAttribute );
+      return resourceType;
+   }    
+   
+  private SubjectType getSubjectType( Principal principal, RoleGroup callerRoles )
+  {
+     String subjectID_NS =  XACMLConstants.ATTRIBUTEID_SUBJECT_ID;
+     String roleID_NS = XACMLConstants.ATTRIBUTEID_ROLE;
+     String principalName = principal.getName();
+     
+     //Create a subject type
+     SubjectType subject = new SubjectType();
+     AttributeType attribute = RequestAttributeFactory.createStringAttributeType( subjectID_NS, "jboss.org", principalName );
+     
+     subject.getAttribute().add( attribute ); 
+     
+     List<Role> rolesList = callerRoles.getRoles();
+     if(rolesList != null)
+     {
+        for(Role role:rolesList)
+        {
+           String roleName = role.getRoleName(); 
+           AttributeType attSubjectID = RequestAttributeFactory.createStringAttributeType( roleID_NS , "jboss.org", roleName );
+           subject.getAttribute().add(attSubjectID);
+        }
+     }  
+     return subject;
+  }  
 }
