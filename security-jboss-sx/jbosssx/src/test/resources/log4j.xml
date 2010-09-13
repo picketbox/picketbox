@@ -22,7 +22,7 @@
 
   <!-- A time/date based rolling appender -->
   <appender name="FILE" class="org.jboss.logging.appender.DailyRollingFileAppender">
-    <param name="File" value="${basedir}/target/test.log"/>
+    <param name="File" value="target/test.log"/>
     <param name="Append" value="true"/>
 
     <!-- Rollover at midnight each day -->
