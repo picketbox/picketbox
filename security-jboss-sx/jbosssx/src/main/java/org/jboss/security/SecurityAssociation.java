@@ -894,10 +894,9 @@ public final class SecurityAssociation
     * and implements push, pop and peek stack operations on the thread local
     * ArrayList.
     */
-   @SuppressWarnings("unused")
+   @SuppressWarnings( {"unchecked","unused", "rawtypes" } )
    private static class RunAsThreadLocalStack
-   {
-      @SuppressWarnings("unchecked")
+   {  
       ThreadLocal local;
 
       RunAsThreadLocalStack(boolean threadLocal)
@@ -908,21 +907,18 @@ public final class SecurityAssociation
             local = new ArrayListInheritableLocal();
       }
       
-      @SuppressWarnings({"unchecked"})
       int size()
       {
          ArrayList stack = (ArrayList) local.get();
          return stack.size();
       }
 
-      @SuppressWarnings("unchecked")
       void push(RunAsIdentity runAs)
       {
          ArrayList stack = (ArrayList) local.get();
          stack.add(runAs);
       }
-
-      @SuppressWarnings({"unchecked"})
+ 
       RunAsIdentity pop()
       {
          ArrayList stack = (ArrayList) local.get();
@@ -938,7 +934,6 @@ public final class SecurityAssociation
        * with the value at depth.
        * @return The run-as identity if one exists, null otherwise.
        */
-      @SuppressWarnings({"unchecked"})
       RunAsIdentity peek(int depth)
       {
          ArrayList stack = (ArrayList) local.get();
@@ -1032,7 +1027,7 @@ public final class SecurityAssociation
       }
    }
 
-   @SuppressWarnings({"unchecked", "unused"})
+   @SuppressWarnings({"unchecked", "rawtypes", "unused"})
    private static class SubjectThreadLocalStack
    {
       ThreadLocal local;
@@ -1050,7 +1045,7 @@ public final class SecurityAssociation
          ArrayList stack = (ArrayList) local.get();
          return stack.size();
       }
-
+ 
       void push(SubjectContext context)
       {
          ArrayList stack = (ArrayList) local.get();
@@ -1104,7 +1099,7 @@ public final class SecurityAssociation
       }
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    private static class ArrayListLocal extends ThreadLocal
    {
       protected Object initialValue()
@@ -1114,7 +1109,7 @@ public final class SecurityAssociation
       
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    private static class ArrayListInheritableLocal extends InheritableThreadLocal
    {
       /**
@@ -1149,17 +1144,18 @@ public final class SecurityAssociation
       
    }
 
-   @SuppressWarnings({"unchecked","unused"})
    private static class HashMapInheritableLocal<T> 
    extends InheritableThreadLocal<HashMap<String,Object>>
    {
+      
       /**
        * Override to make a copy of the parent as not doing so results in multiple
        * threads sharing the unsynchronized map of the parent thread.
        * @param parentValue - the parent HashMap
        * @return a copy of the parent thread map
-       */ 
-      protected HashMap<String,Object> childValue(Object parentValue)
+       */
+      @Override
+      protected HashMap<String, Object> childValue(HashMap<String, Object> parentValue)
       {
          HashMap<String,Object> map = (HashMap<String,Object>) parentValue;
          /* It seems there are scenarios where the size can change during the copy so there is
@@ -1181,7 +1177,6 @@ public final class SecurityAssociation
       protected HashMap<String,Object> initialValue()
       {
          return new HashMap<String,Object>();
-      }
-      
+      }      
    }
 }
