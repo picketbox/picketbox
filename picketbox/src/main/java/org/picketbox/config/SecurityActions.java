@@ -34,25 +34,23 @@ import java.security.PrivilegedExceptionAction;
  *  @version $Revision$
  */
 class SecurityActions
-{
-  @SuppressWarnings("unchecked")
+{ 
   static ClassLoader getContextClassLoader() throws PrivilegedActionException
   {
-     return (ClassLoader) AccessController.doPrivileged(new PrivilegedExceptionAction()
+     return AccessController.doPrivileged(new PrivilegedExceptionAction<ClassLoader>()
      { 
-        public Object run() throws Exception
+        public ClassLoader run() throws Exception
         {
           return Thread.currentThread().getContextClassLoader();
         }
      });
   }
-  
-  @SuppressWarnings("unchecked")
-  static Class<Object> loadClass(final String fqn) throws PrivilegedActionException
+   
+  static Class<?> loadClass(final String fqn) throws PrivilegedActionException
   {
-     return (Class) AccessController.doPrivileged(new PrivilegedExceptionAction()
+     return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?> >()
      { 
-        public Object run() throws Exception
+        public Class<?> run() throws Exception
         {
            ClassLoader tcl = Thread.currentThread().getContextClassLoader();
            return tcl.loadClass(fqn);
