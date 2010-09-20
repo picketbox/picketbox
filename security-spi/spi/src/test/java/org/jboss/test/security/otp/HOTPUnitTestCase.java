@@ -70,7 +70,7 @@ public class HOTPUnitTestCase
       //System.out.println( "OTP Generated at " + currentDateTime);
       
       System.out.println( "We are going to sleep for " + SLEEP_TIME + " secs" );
-      Thread.sleep( SLEEP_TIME * 1000 ); //20 secs
+      Thread.sleep( SLEEP_TIME * 1000 ); //10 secs
       
       assertTrue( HOTPUtil.validate( otp1, secret,  2 ) );
    }

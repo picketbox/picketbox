@@ -21,8 +21,7 @@
  */
 package org.jboss.security.otp;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -41,10 +40,9 @@ public class HOTPUtil
     * @param secret Shared secret
     * @param timeValueInMins How many mins back we need to check?
     * @return
-    * @throws InvalidKeyException
-    * @throws NoSuchAlgorithmException
+    * @throws GeneralSecurityException 
     */
-   public static boolean validate( String submittedOTP, byte[] secret, int timeValueInMins ) throws InvalidKeyException, NoSuchAlgorithmException
+   public static boolean validate( String submittedOTP, byte[] secret, int timeValueInMins ) throws GeneralSecurityException
    {
       int codeDigits = 6;
       boolean addChecksum = false;
