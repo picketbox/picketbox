@@ -70,13 +70,12 @@ import org.jboss.security.SimplePrincipal;
  *@author Scott.Stark@jboss.org
  *@version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public abstract class AbstractServerLoginModule implements LoginModule
 {
    protected Subject subject;
-   protected CallbackHandler callbackHandler;
-   @SuppressWarnings("unchecked")
-   protected Map sharedState;
-   @SuppressWarnings("unchecked")
+   protected CallbackHandler callbackHandler; 
+   protected Map sharedState; 
    protected Map options;
    protected Logger log;
    protected boolean trace = false;

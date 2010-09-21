@@ -48,6 +48,7 @@ import org.jboss.security.plugins.HostThreadLocal;
  * @author Andrew C. Oliver acoliver@gmail.com
  * @version $Revision: 0 $
  */
+@SuppressWarnings("rawtypes")
 public class RemoteHostTrustLoginModule extends UsernamePasswordLoginModule
 {
    private final static String OPTION_TRUSTED_HOSTS = "trustedHosts";

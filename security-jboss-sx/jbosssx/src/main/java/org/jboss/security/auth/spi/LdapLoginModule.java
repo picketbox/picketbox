@@ -163,6 +163,7 @@ import org.jboss.security.SimpleGroup;
  * @author Scott.Stark@jboss.org
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public class LdapLoginModule extends UsernamePasswordLoginModule
 {
    private static final String PRINCIPAL_DN_PREFIX_OPT = "principalDNPrefix";
@@ -260,8 +261,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
       }
       return isValid;
    }
-
-   @SuppressWarnings("unchecked")
+   
    private void createLdapInitContext(String username, Object credential) throws Exception
    {
       boolean trace = log.isTraceEnabled();

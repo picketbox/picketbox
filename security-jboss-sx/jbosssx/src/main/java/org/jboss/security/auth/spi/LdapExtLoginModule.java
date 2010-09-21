@@ -152,6 +152,7 @@ import org.jboss.security.Util;
  @author Andy Oliver
  @author Scott.Stark@jboss.org
  @version $Revision$ */
+@SuppressWarnings("rawtypes")
 public class LdapExtLoginModule extends UsernamePasswordLoginModule
 {
    private static final String ROLES_CTX_DN_OPT = "rolesCtxDN";
@@ -460,8 +461,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     @param filter - the search filter string
     @return the userDN string for the successful authentication 
     @throws NamingException
-    */
-   @SuppressWarnings("unchecked")
+    */ 
    protected String bindDNAuthentication(InitialLdapContext ctx, String user, Object credential, String baseDN,
          String filter) throws NamingException
    {
@@ -524,8 +524,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     @param recursionMax
     @param nesting
     @throws NamingException
-    */
-   @SuppressWarnings("unchecked")
+    */ 
    protected void rolesSearch(InitialLdapContext ctx, SearchControls constraints, String user, String userDN,
          int recursionMax, int nesting) throws NamingException
    {
@@ -609,8 +608,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       }
 
    }
-
-   @SuppressWarnings("unchecked")
+ 
    private InitialLdapContext constructInitialLdapContext(String dn, Object credential) throws NamingException
    {
       Properties env = new Properties();
