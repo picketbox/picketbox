@@ -53,6 +53,9 @@ public class TestHttpServletRequest implements HttpServletRequest
    
    private Map<String,Object> parameterMap = new HashMap<String,Object>();
    
+   public TestHttpServletRequest()
+   {   
+   }
    public TestHttpServletRequest(Principal p, String uri, String meth)
    {
       this.p = p; 
@@ -326,4 +329,10 @@ public class TestHttpServletRequest implements HttpServletRequest
    public void setCharacterEncoding(String arg0) throws UnsupportedEncodingException
    { 
    } 
+   
+   //Non-standard methods
+   public void setParameter( String key, Object value )
+   {
+      parameterMap.put(key, value);
+   }
 }

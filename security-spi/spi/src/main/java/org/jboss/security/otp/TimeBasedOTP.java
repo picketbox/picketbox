@@ -40,11 +40,11 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class TimeBasedOTP
 {
-   private static final String HMAC_SHA1 = "HmacSHA1";
+   public static final String HMAC_SHA1 = "HmacSHA1";
 
-   private static final String HMAC_SHA256 = "HmacSHA256";
+   public static final String HMAC_SHA256 = "HmacSHA256";
    
-   private static final String HMAC_SHA512 = "HmacSHA512";
+   public static final String HMAC_SHA512 = "HmacSHA512";
    
    // 0 1  2   3    4     5      6       7        8
    private static final int[] DIGITS_POWER  = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 }; 
@@ -74,6 +74,52 @@ public class TimeBasedOTP
       while(steps.length() < 16) 
          steps = "0" + steps;
       return TimeBasedOTP.generateTOTP( key, steps, returnDigits); 
+   }
+   
+   /**
+    * Generate a TOTP value using HMAC_SHA256
+    * @param key
+    * @param returnDigits
+    * @return
+    * @throws GeneralSecurityException
+    */
+   public static String generateTOTP256( String key, int returnDigits ) throws GeneralSecurityException
+   {
+      TimeZone utc = TimeZone.getTimeZone( "UTC" );
+      Calendar currentDateTime = Calendar.getInstance( utc );
+      long timeInMilis = currentDateTime.getTimeInMillis();
+       
+      String steps = "0";
+      long T = ( timeInMilis - TIME_ZERO ) /  TIME_SLICE_X ; 
+      steps = Long.toHexString( T ).toUpperCase();
+      
+      // Just get a 16 digit string
+      while(steps.length() < 16) 
+         steps = "0" + steps;
+      return TimeBasedOTP.generateTOTP256( key, steps, returnDigits); 
+   }
+   
+   /**
+    * Generate a TOTP value using HMAC_SHA512
+    * @param key
+    * @param returnDigits
+    * @return
+    * @throws GeneralSecurityException
+    */
+   public static String generateTOTP512( String key, int returnDigits ) throws GeneralSecurityException
+   {
+      TimeZone utc = TimeZone.getTimeZone( "UTC" );
+      Calendar currentDateTime = Calendar.getInstance( utc );
+      long timeInMilis = currentDateTime.getTimeInMillis();
+       
+      String steps = "0";
+      long T = ( timeInMilis - TIME_ZERO ) /  TIME_SLICE_X ; 
+      steps = Long.toHexString( T ).toUpperCase();
+      
+      // Just get a 16 digit string
+      while(steps.length() < 16) 
+         steps = "0" + steps;
+      return TimeBasedOTP.generateTOTP512( key, steps, returnDigits); 
    }
    
    /**

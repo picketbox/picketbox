@@ -22,6 +22,8 @@
 package org.jboss.security.otp;
 
 import java.security.GeneralSecurityException;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * Utility class associated with the {@code TimeBasedOTP} class
@@ -30,6 +32,8 @@ import java.security.GeneralSecurityException;
  */
 public class TimeBasedOTPUtil
 {   
+   private static long TIME_INTERVAL = 30 * 1000; //30 secs
+   
    /**
    * Validate a submitted OTP string
    * @param submittedOTP OTP string to validate
@@ -39,9 +43,108 @@ public class TimeBasedOTPUtil
    */
   public static boolean validate( String submittedOTP, byte[] secret, int numDigits ) throws GeneralSecurityException
   {
-     String generatedTOTP = TimeBasedOTP.generateTOTP( new String( secret ) , numDigits ); 
+     TimeZone utc = TimeZone.getTimeZone( "UTC" );
+     Calendar currentDateTime = Calendar.getInstance( utc );
      
-     System.out.println( "Generated[" + generatedTOTP + "]::Submitted[" + submittedOTP );
-     return generatedTOTP.equals( submittedOTP ); 
-  } 
+     String generatedTOTP = TimeBasedOTP.generateTOTP( new String( secret ) , numDigits );
+     boolean result =  generatedTOTP.equals( submittedOTP );
+     
+     if( !result )
+     {
+        //Step back time interval
+        long timeInMilis = currentDateTime.getTimeInMillis();
+        
+        timeInMilis -= TIME_INTERVAL;
+        
+        generatedTOTP = TimeBasedOTP.generateTOTP( new String( secret ) , "" + timeInMilis, numDigits );
+        result =  generatedTOTP.equals( submittedOTP );
+     }
+     
+     if( !result )
+     {
+        //Step ahead time interval
+        long timeInMilis = currentDateTime.getTimeInMillis();
+        timeInMilis += TIME_INTERVAL;
+        generatedTOTP = TimeBasedOTP.generateTOTP( new String( secret ) , "" + timeInMilis, numDigits );
+        result =  generatedTOTP.equals( submittedOTP );
+     }
+     
+     return result;
+  }
+  
+  /**
+   * Validate a submitted OTP string using HMAC_256
+   * @param submittedOTP OTP string to validate
+   * @param secret Shared secret 
+   * @return 
+   * @throws GeneralSecurityException
+   */
+  public static boolean validate256( String submittedOTP, byte[] secret, int numDigits ) throws GeneralSecurityException
+  {
+     TimeZone utc = TimeZone.getTimeZone( "UTC" );
+     Calendar currentDateTime = Calendar.getInstance( utc );
+     
+     String generatedTOTP = TimeBasedOTP.generateTOTP256( new String( secret ) , numDigits );
+     boolean result =  generatedTOTP.equals( submittedOTP );
+     
+     if( !result )
+     {
+        //Step back time interval
+        long timeInMilis = currentDateTime.getTimeInMillis();
+        timeInMilis -= TIME_INTERVAL;
+        
+        generatedTOTP = TimeBasedOTP.generateTOTP256( new String( secret ) , "" + timeInMilis, numDigits );
+        result =  generatedTOTP.equals( submittedOTP );
+     }
+     
+     if( !result )
+     {
+        //Step ahead time interval
+        long timeInMilis = currentDateTime.getTimeInMillis();
+        timeInMilis += TIME_INTERVAL;
+        
+        generatedTOTP = TimeBasedOTP.generateTOTP256( new String( secret ) , "" + timeInMilis, numDigits );
+        result =  generatedTOTP.equals( submittedOTP );
+     }
+     
+     return result;
+  }
+  
+  /**
+   * Validate a submitted OTP string using HMAC_512
+   * @param submittedOTP OTP string to validate
+   * @param secret Shared secret 
+   * @return 
+   * @throws GeneralSecurityException
+   */
+  public static boolean validate512( String submittedOTP, byte[] secret, int numDigits ) throws GeneralSecurityException
+  {
+     TimeZone utc = TimeZone.getTimeZone( "UTC" );
+     Calendar currentDateTime = Calendar.getInstance( utc );
+     
+     String generatedTOTP = TimeBasedOTP.generateTOTP512( new String( secret ) , numDigits );
+     boolean result =  generatedTOTP.equals( submittedOTP );
+     
+     if( !result )
+     {
+        //Step back time interval
+        long timeInMilis = currentDateTime.getTimeInMillis();
+        timeInMilis -= TIME_INTERVAL;
+        
+        generatedTOTP = TimeBasedOTP.generateTOTP512( new String( secret ) , "" + timeInMilis, numDigits );
+        result =  generatedTOTP.equals( submittedOTP );
+     }
+     
+     if( !result )
+     {
+        //Step ahead time interval
+        long timeInMilis = currentDateTime.getTimeInMillis();
+        timeInMilis += TIME_INTERVAL;
+        
+        generatedTOTP = TimeBasedOTP.generateTOTP512( new String( secret ) , "" + timeInMilis, numDigits );
+        result =  generatedTOTP.equals( submittedOTP );
+     }
+     
+     return result;
+  }
 }
