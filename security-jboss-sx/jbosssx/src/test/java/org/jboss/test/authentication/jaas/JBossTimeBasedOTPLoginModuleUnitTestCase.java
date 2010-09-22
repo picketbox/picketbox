@@ -21,12 +21,15 @@
  */
 package org.jboss.test.authentication.jaas;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.security.GeneralSecurityException;
 import java.security.Principal;
+import java.security.acl.Group;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -35,12 +38,12 @@ import javax.security.jacc.PolicyContext;
 import javax.security.jacc.PolicyContextException;
 import javax.security.jacc.PolicyContextHandler;
 
+import org.jboss.security.SimpleGroup;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.auth.callback.JBossCallbackHandler;
 import org.jboss.security.auth.spi.otp.JBossTimeBasedOTPLoginModule;
 import org.jboss.security.otp.TimeBasedOTP;
 import org.jboss.test.util.TestHttpServletRequest;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -54,8 +57,8 @@ public class JBossTimeBasedOTPLoginModuleUnitTestCase
 
    static final String WEB_REQUEST_KEY = "javax.servlet.http.HttpServletRequest";
    
-   @BeforeClass
-   public static void setUp() throws Exception
+   @Test
+   public void testTOTP() throws Exception
    {
       try
       {
@@ -66,11 +69,7 @@ public class JBossTimeBasedOTPLoginModuleUnitTestCase
       {
          throw new RuntimeException( e );
       } 
-   }
-   
-   @Test
-   public void testTOTP() throws Exception
-   {
+      
       Principal principal = new SimplePrincipal( "anil" );
       
       Subject subject = new Subject();
@@ -107,6 +106,42 @@ public class JBossTimeBasedOTPLoginModuleUnitTestCase
          //pass
       }
    }
+   
+   @Test
+   public void testTOTPWithAdditionalRoles() throws Exception
+   {
+      try
+      {
+         String totp =  TimeBasedOTP.generateTOTP( seed, 6 ) ; 
+         PolicyContext.registerHandler( WEB_REQUEST_KEY, getHandler(totp), true );
+      }
+      catch (GeneralSecurityException e)
+      {
+         throw new RuntimeException( e );
+      } 
+      
+      Principal principal = new SimplePrincipal( "anil" );
+      
+      Subject subject = new Subject();
+      CallbackHandler callbackHandler = new JBossCallbackHandler(principal, seed );
+      Map<String,Object> sharedState = new HashMap<String,Object>();
+      Map<String, Object> options = new HashMap<String,Object>();
+      options.put( "additionalRoles", "RoleA,RoleB" );
+      
+      //Add in a subject group principal
+      Group group = new SimpleGroup( "Roles" );
+      subject.getPrincipals().add( group );
+      
+      JBossTimeBasedOTPLoginModule jtp = new JBossTimeBasedOTPLoginModule();
+      jtp.initialize(subject, callbackHandler, sharedState, options); 
+      jtp.login();
+      
+      Set<Group> groups = subject.getPrincipals( Group.class );
+      assertTrue( "set has 1 group", groups.size() == 1 );
+      Group retrievedGroup = groups.iterator().next();
+      assertTrue( retrievedGroup.isMember( new SimplePrincipal( "RoleA" )));
+      assertTrue( retrievedGroup.isMember( new SimplePrincipal( "RoleB" )));
+   }  
    
    /**
     * Create a JACC Policy Context Handler that takes in a totp string

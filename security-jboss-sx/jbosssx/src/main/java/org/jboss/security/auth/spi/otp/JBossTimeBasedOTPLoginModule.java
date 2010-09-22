@@ -24,9 +24,12 @@ package org.jboss.security.auth.spi.otp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.security.acl.Group;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -39,6 +42,8 @@ import javax.security.jacc.PolicyContextException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.SecurityConstants;
+import org.jboss.security.SimplePrincipal;
 import org.jboss.security.otp.TimeBasedOTP;
 import org.jboss.security.otp.TimeBasedOTPUtil;
 
@@ -114,14 +119,18 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
    //This is the number of digits in the totp
    private int NUMBER_OF_DIGITS = 6;
    
+   private String additionalRoles = null;
+   
    /**
     * Default algorithm is HMAC_SHA1
     */
    private String algorithm = TimeBasedOTP.HMAC_SHA1; //Default
+   private Subject subject;
 
    public void initialize( Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
          Map<String, ?> options )
    { 
+      this.subject = subject;
       this.callbackHandler = callbackHandler;
       this.lmSharedState.putAll( sharedState );
       this.lmOptions.putAll( options );
@@ -148,6 +157,8 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
          if( algorithmStr.equalsIgnoreCase( TimeBasedOTP.HMAC_SHA512 ))
             algorithm = TimeBasedOTP.HMAC_SHA512;
       }
+      
+      additionalRoles = (String) options.get( "additionalRoles" ); 
    }
 
    /**
@@ -228,6 +239,13 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
          if( result == false )
             throw new LoginException();
          
+         //add in roles if needed
+         Set<Group> groupPrincipals  = subject.getPrincipals( Group.class );
+         if( groupPrincipals != null && groupPrincipals.size() > 0 )
+         {
+            appendRoles( groupPrincipals.iterator().next() );
+         }
+         
          return result; 
       }
       catch (GeneralSecurityException e)
@@ -282,5 +300,20 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
          } 
       }
       return totp; 
+   }
+   
+   private void appendRoles( Group group )
+   {
+      if( ! group.getName().equals( SecurityConstants.ROLES_IDENTIFIER ) )
+        return;
+        
+      if( additionalRoles != null && additionalRoles != "" )
+      {   
+         StringTokenizer st = new StringTokenizer( additionalRoles , "," );
+         while( st != null && st.hasMoreTokens() )
+         {
+            group.addMember( new SimplePrincipal( st.nextToken().trim() ) ); 
+         }
+      }
    }
 }
