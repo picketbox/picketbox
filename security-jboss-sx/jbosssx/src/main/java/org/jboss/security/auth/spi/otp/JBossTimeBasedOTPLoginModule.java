@@ -83,6 +83,8 @@ import org.jboss.security.otp.TimeBasedOTPUtil;
  * <ul>
  * <li>algorithm:  either "HmacSHA1", "HmacSHA256" or "HmacSHA512"   [Default: "HmacSHA1"]</li>
  * <li>numOfDigits:  Number of digits in the TOTP.  Default is 6.</li>
+ * <li>additionalRoles: any additional roles that you want to add into the authenticated subject (on success). For multiple roles,
+ * separate with a comma</li>
  * </ul>
  * </p>
  * 
