@@ -46,11 +46,6 @@ public interface PolicyRegistration
    String JACC = "JACC";
    
    /**
-    * Represents a ACL policy
-    */
-   String ACL = "ACL";
-
-   /**
     * Represents a Custom policy
     */
    String CUSTOM = "CUSTOM";

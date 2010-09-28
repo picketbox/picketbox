@@ -63,5 +63,5 @@ public class POJOResource implements Resource
    public void add(String key, Object value)
    {
       map.put(key, value);
-   } 
+   }
 }

@@ -30,10 +30,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
 import org.jboss.security.authorization.AuthorizationException;
-import org.jboss.security.authorization.EntitlementHolder;
-import org.jboss.security.authorization.Permission;
 import org.jboss.security.authorization.Resource;
-import org.jboss.security.identity.Identity;
 import org.jboss.security.identity.RoleGroup;
 
 // $Id$
@@ -88,33 +85,6 @@ public interface AuthorizationManager extends BaseSecurityManager
     * @throws AuthorizationException
     */
    public int authorize(final Resource resource, Subject subject, Group roleGroup) throws AuthorizationException;
-
-   /**
-    * <p>
-    * Authorize access to the resource if the specified identity has the proper permissions.
-    * </p>
-    * 
-    * @param resource the {@code Resource} being accessed.
-    * @param identity the {@code Identity} trying to access the resource.
-    * @param permission the permissions required for access to be granted.
-    * @return {@code AuthorizationContext#PERMIT} if access has been granted; {@code AuthorizationContext#DENY}
-    *         otherwise.
-    * @throws AuthorizationException if an error occurs while authorizing access to the resource.
-    */
-   public int authorize(final Resource resource, Identity identity, Permission permission)
-         throws AuthorizationException;
-
-   /**
-    * Instance Based Security Get all the entitlements assigned to the components of a Resource
-    * 
-    * @param clazz Defines the class type of the entitlements
-    * @param resource A Resource (Can be a Portal Resource, a Rules Resource)
-    * @param identity The Identity against whom the entitlements need to be generated
-    * @return a Entitlements Wrapper
-    * @throws AuthorizationException
-    */
-   public <T> EntitlementHolder<T> getEntitlements(final Class<T> clazz, final Resource resource,
-         final Identity identity) throws AuthorizationException;
 
    /**
     * Validates the application domain roles to which the operational environment Principal belongs.

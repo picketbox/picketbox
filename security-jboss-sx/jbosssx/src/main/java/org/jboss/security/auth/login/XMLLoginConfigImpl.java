@@ -41,6 +41,7 @@ import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.ApplicationPolicyRegistration;
 import org.jboss.security.config.PolicyConfig;
 import org.jboss.security.config.SecurityConfiguration;
+import org.jboss.security.config.parser.StaxBasedConfigParser;
 
 /**
  * An concrete implementation of the javax.security.auth.login.Configuration class that parses an xml configuration of
@@ -444,7 +445,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
    @SuppressWarnings("unchecked")
    private void loadXMLConfig(URL loginConfigURL, ArrayList configNames) throws Exception
    {
-      JBossXBParsingUtil xbUtil = new JBossXBParsingUtil();
-      xbUtil.parse(loginConfigURL, configNames); 
+      StaxBasedConfigParser parser = new StaxBasedConfigParser();
+      parser.parse(loginConfigURL.openStream()); 
    }  
 }

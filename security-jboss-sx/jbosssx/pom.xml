@@ -2,7 +2,7 @@
    <parent>
       <groupId>org.picketbox</groupId>
       <artifactId>jbosssx-parent</artifactId>
-      <version>3.0.0.CR2-SNAPSHOT</version>
+      <version>4.0.0-SNAPSHOT</version>
       <relativePath>../parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
@@ -111,13 +111,13 @@
    </build>
    <dependencies> 
       <dependency>
-         <groupId>org.jboss.javaee</groupId>
-         <artifactId>jboss-jaspi-api</artifactId>
+         <groupId>oswego-concurrent</groupId>
+         <artifactId>concurrent</artifactId>
          <scope>compile</scope>
       </dependency>
       <dependency>
-         <groupId>org.jboss</groupId>
-         <artifactId>jbossxb</artifactId>
+         <groupId>org.jboss.javaee</groupId>
+         <artifactId>jboss-jaspi-api</artifactId>
          <scope>compile</scope>
       </dependency>
       <dependency>

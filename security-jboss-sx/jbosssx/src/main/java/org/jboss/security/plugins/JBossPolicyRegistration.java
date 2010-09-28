@@ -32,10 +32,6 @@ import java.util.Set;
 import javax.xml.bind.JAXBElement;
 
 import org.jboss.logging.Logger;
-import org.jboss.security.acl.ACL;
-import org.jboss.security.acl.ACLImpl;
-import org.jboss.security.acl.config.ACLConfiguration;
-import org.jboss.security.acl.config.ACLConfigurationFactory;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.xacml.core.JBossPDP;
 import org.jboss.security.xacml.factories.PolicyFactory;
@@ -64,12 +60,6 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
     */
    private final Map<String, JBossPDP> contextIDToJBossPDP = new HashMap<String, JBossPDP>();
 
-   /** Map to keep track of the ACLs that have been configured in each context. */
-   private final Map<String, Set<ACL>> contextIDToACLs = new HashMap<String, Set<ACL>>();
-
-   /** Global map that keeps all the configured ACLs keyed by their resource */
-   private final Map<String, ACL> configuredACLs = new HashMap<String, ACL>();
-
    public void deRegisterPolicy(String contextID, String type)
    {
       if (PolicyRegistration.XACML.equalsIgnoreCase(type))
@@ -77,20 +67,6 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
          this.contextIdToXACMLPolicy.remove(contextID);
          if (trace)
             log.trace("DeRegistered policy for contextId:" + contextID + ":type=" + type);
-      }
-      else if (PolicyRegistration.ACL.equalsIgnoreCase(type))
-      {
-         Set<ACL> acls = this.contextIDToACLs.remove(contextID);
-         if (acls != null)
-         {
-            for (ACL acl : acls)
-            {
-               ACLImpl impl = (ACLImpl) acl;
-               this.configuredACLs.remove(impl.getResourceAsString());
-            }
-         }
-         if (trace)
-            log.trace("Deregistered ACLs for contextId:" + contextID);
       }
    }
 
@@ -106,24 +82,6 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
                return (T) this.contextIDToJBossPDP.get(contextID);
          }
          return (T) this.contextIdToXACMLPolicy.get(contextID);
-      }
-      else if (PolicyRegistration.ACL.equalsIgnoreCase(type))
-      {
-         if (contextMap != null)
-         {
-            String query = (String) contextMap.get("resource");
-            if ("ALL".equalsIgnoreCase(query))
-            {
-               // return all the ACLs that have been registered.
-               return (T) this.configuredACLs.values();
-            }
-            else if (query != null)
-            {
-               // we are looking for an ACL for an specific resource.
-               return (T) this.configuredACLs.get(query);
-            }
-         }
-         return (T) this.contextIDToACLs.get(contextID);
       }
       throw new RuntimeException("Unsupported type:" + type);
    }
@@ -171,22 +129,6 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
                log.debug("Error in registering xacml policy:", e);
          }
       }
-      else if (PolicyRegistration.ACL.equalsIgnoreCase(type))
-      {
-         ACLConfiguration configuration = ACLConfigurationFactory.getConfiguration(stream);
-         if(configuration == null)
-            throw new IllegalStateException("ACL Configuration is null");
-         Set<ACL> configuredACLs = configuration.getConfiguredACLs();
-         // register the configured ACLs
-         this.contextIDToACLs.put(contextID, configuredACLs);
-         for (ACL acl : configuredACLs)
-         {
-            ACLImpl impl = (ACLImpl) acl;
-            if (trace)
-               log.trace("Registering ACL for resource " + impl.getResourceAsString());
-            this.configuredACLs.put(impl.getResourceAsString(), acl);
-         }
-      }
    }
 
    /**
@@ -209,23 +151,6 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
          catch (Exception e)
          {
             throw new RuntimeException(e);
-         }
-      }
-      else if (PolicyRegistration.ACL.equalsIgnoreCase(type))
-      {
-         if(objectModel instanceof ACLConfiguration == false)
-            throw new IllegalArgumentException("Unsupported model:" + objectModel);
-         
-         ACLConfiguration configuration = (ACLConfiguration) objectModel;
-         Set<ACL> configuredACLs = configuration.getConfiguredACLs();
-         // register the configured ACLs
-         this.contextIDToACLs.put(contextId, configuredACLs);
-         for (ACL acl : configuredACLs)
-         {
-            ACLImpl impl = (ACLImpl) acl;
-            if (trace)
-               log.trace("Registering ACL for resource " + impl.getResourceAsString());
-            this.configuredACLs.put(impl.getResourceAsString(), acl);
          }
       }
    }

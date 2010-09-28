@@ -34,6 +34,7 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.jboss.security.config.ControlFlag;
 import org.jboss.security.identitytrust.config.IdentityTrustModuleEntry;
 
 /**
@@ -76,6 +77,7 @@ public class IdentityTrustConfigParser
       Map<String, Object> options = new HashMap<String,Object>(); 
       
       String codeName = null; 
+      ControlFlag flag = null;
       
       //We got the login-module element
       StartElement policyModuleElement = (StartElement) xmlEvent;
@@ -91,13 +93,18 @@ public class IdentityTrustConfigParser
          if("code".equals(attQName.getLocalPart()))
          {
             codeName = attributeValue; 
-         } 
+         }
+         if ("flag".equals(attQName.getLocalPart()))
+         {
+            flag = ControlFlag.valueOf(attributeValue);
+         }
       } 
       //See if there are options
       ModuleOptionParser moParser = new ModuleOptionParser();
       options.putAll(moParser.parse(xmlEventReader));
       
       IdentityTrustModuleEntry entry =  new IdentityTrustModuleEntry(codeName, options);  
+      entry.setControlFlag(flag);
       return entry;
    } 
 }

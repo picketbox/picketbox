@@ -23,7 +23,6 @@ package org.jboss.test.authorization;
 
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,29 +31,26 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.Configuration;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.jboss.security.auth.spi.UsersObjectModelFactory;
+import org.jboss.security.auth.login.XMLLoginConfigImpl;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.AuthorizationException;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.authorization.ResourceType;
-import org.jboss.security.authorization.config.SecurityConfigObjectModelFactory;
-import org.jboss.security.config.PolicyConfig;
+import org.jboss.security.config.ApplicationPolicyRegistration;
+import org.jboss.security.config.parser.StaxBasedConfigParser;
 import org.jboss.security.plugins.authorization.JBossAuthorizationContext;
 import org.jboss.test.JBossTestCase;
 import org.jboss.test.JBossTestSetup;
-import org.jboss.xb.binding.Unmarshaller;
-import org.jboss.xb.binding.UnmarshallerFactory;
 
 
 public class AuthorizationContextUnitTestCase extends JBossTestCase
 { 
-   private static PolicyConfig policyConfig = null;
-
    public AuthorizationContextUnitTestCase(String name)
    {
       super(name); 
@@ -75,6 +71,7 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
             URL url = tcl.getResource("authorization/config/authorization-policy.xml");
             if(url == null)
                throw new IllegalStateException("config url is null");
+            Configuration.setConfiguration(XMLLoginConfigImpl.getInstance());
             loadXMLConfig(url);
          }
          protected void tearDown() throws Exception
@@ -91,7 +88,6 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
     */
    public void testRequiredOptionBehavior() throws Exception
    {   
-      assertNotNull("PolicyConfig != null", policyConfig);
       int result = getResult("required-permit-policy");
       assertTrue("PERMIT?", AuthorizationContext.PERMIT == result);
       result = getResult("required-deny-policy");
@@ -103,7 +99,6 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
     */
    public void testRequisiteOptionBehavior() throws Exception
    {   
-      assertNotNull("PolicyConfig != null", policyConfig);
       int result = getResult("requisite-permit-policy");
       assertTrue("PERMIT?", AuthorizationContext.PERMIT == result);
       result = getResult("requisite-deny-policy");
@@ -116,7 +111,6 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
     */
    public void testSufficientOptionBehavior() throws Exception
    {   
-      assertNotNull("PolicyConfig != null", policyConfig);
       int result = getResult("sufficient-permit-policy");
       assertTrue("PERMIT?", AuthorizationContext.PERMIT == result);
       result = getResult("sufficient-deny-policy");
@@ -129,7 +123,6 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
     */
    public void testOptionalOptionBehavior() throws Exception
    {   
-      assertNotNull("PolicyConfig != null", policyConfig);
       int result = getResult("optional-permit-policy");
       assertTrue("PERMIT?", AuthorizationContext.PERMIT == result);
       result = getResult("optional-deny-policy");
@@ -141,7 +134,6 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
     */
    public void testCombinationBehavior() throws Exception
    {   
-      assertNotNull("PolicyConfig != null", policyConfig);
       int result = getResult("required-deny-sufficient-permit-policy");
       assertTrue("DENY?", AuthorizationContext.DENY == result); 
       result = getResult("required-permit-sufficient-deny-policy");
@@ -176,10 +168,15 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
    {
       int result = AuthorizationContext.DENY;
 
+      Configuration config = Configuration.getConfiguration();
+      if(config instanceof ApplicationPolicyRegistration == false)
+         throw new IllegalStateException("JAAS Configuration does not support application policy registration");
+      ApplicationPolicyRegistration appPolicyRegistration = (ApplicationPolicyRegistration) config;
+
       JBossAuthorizationContext aContext = new JBossAuthorizationContext(policyName, 
             new Subject(), 
             new TestCallbackHandler()); 
-      aContext.setApplicationPolicy(policyConfig.get(policyName)); 
+      aContext.setApplicationPolicy(appPolicyRegistration.getApplicationPolicy(policyName)); 
       try
       {
          result =  aContext.authorize(new Resource()
@@ -220,13 +217,7 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
    {
       if(loginConfigURL == null)
          throw new IllegalArgumentException("loginConfigURL is null");
-      SecurityConfigObjectModelFactory lcomf = new SecurityConfigObjectModelFactory();
-      UsersObjectModelFactory uomf = new UsersObjectModelFactory();
-
-      InputStreamReader xmlReader = new InputStreamReader(loginConfigURL.openStream());
-      Unmarshaller unmarshaller = UnmarshallerFactory.newInstance().newUnmarshaller();
-      unmarshaller.mapFactoryToNamespace(uomf, "http://www.jboss.org/j2ee/schemas/XMLLoginModule");
-      policyConfig = (PolicyConfig) unmarshaller.unmarshal(xmlReader, lcomf, (Object)null); 
+      new StaxBasedConfigParser().parse(loginConfigURL.openStream());
    } 
 
    /**

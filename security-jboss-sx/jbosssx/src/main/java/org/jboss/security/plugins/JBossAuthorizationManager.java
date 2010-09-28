@@ -49,14 +49,10 @@ import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityRolesAssociation;
 import org.jboss.security.SecurityUtil;
 import org.jboss.security.SimplePrincipal;
-import org.jboss.security.acl.ACLContext;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.AuthorizationException;
-import org.jboss.security.authorization.EntitlementHolder;
-import org.jboss.security.authorization.Permission;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.callbacks.SecurityContextCallback;
-import org.jboss.security.identity.Identity;
 import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
@@ -64,7 +60,6 @@ import org.jboss.security.identity.plugins.SimpleRoleGroup;
 import org.jboss.security.mapping.MappingContext;
 import org.jboss.security.mapping.MappingManager;
 import org.jboss.security.mapping.MappingType;
-import org.jboss.security.plugins.acl.JBossACLContext;
 import org.jboss.security.plugins.authorization.JBossAuthorizationContext;
 
 //$Id$
@@ -85,8 +80,6 @@ implements AuthorizationManager
    protected boolean trace = log.isTraceEnabled(); 
    
    private AuthorizationContext authorizationContext = null;
-   
-   private ACLContext aclContext = null;
    
    //Lock deals with synchronization of authorizationContext usage
    private final Lock lock = new ReentrantLock();
@@ -135,33 +128,6 @@ implements AuthorizationManager
       return internalAuthorization(resource, subject, getRoleGroup(roleGroup));
    }
 
-   /*
-    * (non-Javadoc)
-    * 
-    * @see org.jboss.security.AuthorizationManager#authorize(org.jboss.security.authorization.Resource, 
-    *               org.jboss.security.identity.Identity, org.jboss.security.authorization.Permission)
-    */
-   public int authorize(Resource resource, Identity identity, Permission permission) 
-      throws AuthorizationException
-   {
-      if(this.aclContext == null)
-         this.aclContext = new JBossACLContext(this.securityDomain);
-      return aclContext.authorize(resource, identity, permission);
-   }
-
-   /**
-    * @see AuthorizationManager#entitlements(Class, Resource, Identity)
-    */
-   public <T> EntitlementHolder<T> getEntitlements(Class<T> clazz,
-         Resource resource, Identity identity)
-   throws AuthorizationException
-   {
-      if(this.aclContext == null)
-         this.aclContext = new JBossACLContext(this.securityDomain);
-      return aclContext.getEntitlements(clazz, resource, identity);
-   }
-
-   
    /** Does the current Subject have a role(a Principal) that equates to one
     of the role names. This method obtains the Group named 'Roles' from
     the principal set of the currently authenticated Subject as determined
