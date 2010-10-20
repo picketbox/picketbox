@@ -264,8 +264,8 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
       }
 
       if( getUseFirstPass() == true )
-      {    // Add the username and password to the shared state map
-         sharedState.put("javax.security.auth.login.name", username);
+      {    // Add the principal and password to the shared state map
+         sharedState.put("javax.security.auth.login.name", identity);
          sharedState.put("javax.security.auth.login.password", credential);
       }
       super.loginOk = true;
