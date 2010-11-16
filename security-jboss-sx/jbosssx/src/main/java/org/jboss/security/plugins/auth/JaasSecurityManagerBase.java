@@ -222,7 +222,7 @@ public class JaasSecurityManagerBase
     */
    public JaasSecurityManagerBase()
    {
-      this("other", new JBossCallbackHandler());
+      this(SecurityConstants.DEFAULT_APPLICATION_POLICY, new JBossCallbackHandler());
    }
    /** Creates a JaasSecurityManager for with a securityDomain
     name of that given by the 'securityDomain' argument.

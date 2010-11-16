@@ -446,4 +446,38 @@ class SubjectActions
          }}
       );
    } 
+   
+   static Principal getPrincipal()
+   {
+      return AccessController.doPrivileged(new PrivilegedAction<Principal>()
+      {
+         public Principal run()
+         {
+            Principal principal = null;
+            SecurityContext sc = getSecurityContext();
+            if(sc != null)
+            {
+               principal = sc.getUtil().getUserPrincipal();
+            }
+            return principal;
+         }
+      });
+   }
+
+   static Object getCredential()
+   {
+      return AccessController.doPrivileged(new PrivilegedAction<Object>()
+      {
+         public Object run()
+         {
+            Object credential = null;
+            SecurityContext sc = getSecurityContext();
+            if(sc != null)
+            {
+               credential = sc.getUtil().getCredential();
+            }
+            return credential;
+         }
+      });
+   }
 }
