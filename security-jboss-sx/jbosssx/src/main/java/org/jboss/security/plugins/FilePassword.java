@@ -107,7 +107,7 @@ public class FilePassword
    public char[] toCharArray()
       throws IOException
    {
-      RandomAccessFile raf = new RandomAccessFile(passwordFile, "rws");
+      RandomAccessFile raf = new RandomAccessFile(passwordFile, "r");
       try
       {
          char[] password = decode(raf);
