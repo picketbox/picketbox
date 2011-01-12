@@ -59,7 +59,12 @@ public class SecurityFactory
          URL configLocation = tcl.getResource("auth.conf");
          String prop = "java.security.auth.login.config";
          if(SecurityActions.getSystemProperty(prop, null) == null)
-            SecurityActions.setSystemProperty(prop, configLocation.toExternalForm());
+         {
+            if( configLocation == null )
+               throw new RuntimeException( "Neither system property *java.security.auth.login.config* available or auth.conf present" );
+
+            SecurityActions.setSystemProperty(prop, configLocation.toExternalForm());  
+         }
          
          parentConfiguration = Configuration.getConfiguration();
       }
