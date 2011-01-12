@@ -22,6 +22,7 @@
 package org.picketbox.config;
 
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
@@ -54,6 +55,17 @@ class SecurityActions
         {
            ClassLoader tcl = Thread.currentThread().getContextClassLoader();
            return tcl.loadClass(fqn);
+        }
+     });
+  }
+  
+  static ClassLoader getClassLoader( final Class<?> clazz )
+  {
+     return AccessController.doPrivileged( new PrivilegedAction<ClassLoader>()
+     {
+        public ClassLoader run()
+        { 
+           return clazz.getClassLoader();
         }
      });
   }

@@ -108,7 +108,7 @@ public class PicketBoxConfiguration
       try
       {
          if(configStream == null)
-            configStream = getClass().getClassLoader().getResourceAsStream(configFileName);
+            configStream = SecurityActions.getClassLoader( getClass() ).getResourceAsStream(configFileName);
       }
       catch(Exception e)
       { 
