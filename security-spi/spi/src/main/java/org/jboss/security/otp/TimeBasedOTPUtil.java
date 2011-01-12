@@ -48,12 +48,11 @@ public class TimeBasedOTPUtil
      
      String generatedTOTP = TimeBasedOTP.generateTOTP( new String( secret ) , numDigits );
      boolean result =  generatedTOTP.equals( submittedOTP );
+
+     long timeInMilis = currentDateTime.getTimeInMillis();
      
      if( !result )
-     {
-        //Step back time interval
-        long timeInMilis = currentDateTime.getTimeInMillis();
-        
+     {   
         timeInMilis -= TIME_INTERVAL;
         
         generatedTOTP = TimeBasedOTP.generateTOTP( new String( secret ) , "" + timeInMilis, numDigits );
@@ -62,8 +61,6 @@ public class TimeBasedOTPUtil
      
      if( !result )
      {
-        //Step ahead time interval
-        long timeInMilis = currentDateTime.getTimeInMillis();
         timeInMilis += TIME_INTERVAL;
         generatedTOTP = TimeBasedOTP.generateTOTP( new String( secret ) , "" + timeInMilis, numDigits );
         result =  generatedTOTP.equals( submittedOTP );

@@ -87,7 +87,7 @@ public class TimeBasedOTPUnitTestCase
    
    int NUMBER_OF_DIGITS = 8;
    
-   int SLEEP_TIME = 10;
+   int SLEEP_TIME = 2;
    
    
    @Test
