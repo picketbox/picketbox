@@ -54,6 +54,8 @@ public class SecurityFactory
       try
       {
          ClassLoader tcl = SecurityActions.getContextClassLoader();
+         if( tcl == null )
+            throw new IllegalStateException( "TCCL has not been set" );
          URL configLocation = tcl.getResource("auth.conf");
          String prop = "java.security.auth.login.config";
          if(SecurityActions.getSystemProperty(prop, null) == null)
