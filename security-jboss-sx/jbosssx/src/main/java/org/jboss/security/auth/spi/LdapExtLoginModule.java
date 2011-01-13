@@ -135,19 +135,6 @@ import org.jboss.security.Util;
  anonymous login by some ldap servers and this may not be a desirable feature.
  Set this to false to reject empty passwords, true to have the ldap server
  validate the empty password. The default is true.
- * __authorizeOnly__ : Bind only as a well known user and don't check the 
- username and password (just authorize not authenticate) for use with stacking
- * __principalIsDN__ : The (usually from a stack) principal is actually an
- LDAP DN rather than straight "username" like "jsmith"
- * __principalIsDN__ : The (usually from a stack) principal is actually an
- LDAP DN rather than straight "username" like "jsmith"
- * __authorizeOnly__ : Used with stacking, DONT validate credentials and use
- a common or anonymous connection to find the ROLES, requires principalIsDN
- * __removePrincipalElements__ : if the principal is a DN (above) but you have
- superfluous elements not in LDAP (such as Microsoft Certificate Server  
- includes EMAILADDRESS) that you want to remove (to authenticate against say
- Active Directory) then list them here as a comma delemeted list i.e
- "phone,EMAILADDRESS,zip" 
  
  @author Andy Oliver
  @author Scott.Stark@jboss.org
@@ -185,9 +172,11 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
 
    private static final String DISTINGUISHED_NAME_ATTRIBUTE_OPT = "distinguishedNameAttribute";
 
-   private static final String ROLES_ONLY = "authorizeOnly";
-   private static final String PRINCIPAL_IS_DN = "principalIsDN";
-   private static final String REMOVE_PRINCIPAL_ELEMENTS = "removePrincipalElements";
+   private static final String PARSE_USERNAME = "parseUsername";
+   
+   private static final String USERNAME_BEGIN_STRING = "usernameBeginString";
+   
+   private static final String USERNAME_END_STRING = "usernameEndString";
 
    protected String bindDN;
 
@@ -207,10 +196,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
 
    protected boolean roleAttributeIsDN;
 
-    protected String removeElements;
-    protected boolean rolesOnly;
-    protected boolean principalIsDN;
-
    protected int recursion = 0;
 
    protected int searchTimeLimit = 10000;
@@ -218,6 +203,12 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    protected int searchScope = SearchControls.SUBTREE_SCOPE; 
    
    protected String distinguishedNameAttribute;
+   
+   protected boolean parseUsername;
+   
+   protected String usernameBeginString;
+   
+   protected String usernameEndString;
 
    // simple flag to indicate is the validatePassword method was called
    protected boolean isPasswordValidated = false;
@@ -232,7 +223,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler, Map sharedState, Map options)
    {
       super.initialize(subject, callbackHandler, sharedState, options);
-      removeElements = (String)options.get(REMOVE_PRINCIPAL_ELEMENTS);
       trace = log.isTraceEnabled();
    }
 
@@ -286,8 +276,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     */
    protected boolean validatePassword(String inputPassword, String expectedPassword)
    {
-      boolean doRemoveElements = removeElements != null 
-                                 && !removeElements.equals("");
       isPasswordValidated = true;
       boolean isValid = false;
       if (inputPassword != null)
@@ -312,9 +300,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          {
             // Validate the password by trying to create an initial context
             String username = getUsername();
-            username = doRemoveElements ? removeElements(removeElements,
-                                          username) : 
-                                          username; 
             isValid = createLdapInitContext(username, inputPassword);
             defaultRole();
             isValid = true;
@@ -360,13 +345,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     */
    private boolean createLdapInitContext(String username, Object credential) throws Exception
    {
-      rolesOnly = options.get(ROLES_ONLY) != null && 
-                  options.get(ROLES_ONLY).toString().trim().equals("true");
-      principalIsDN = options.get(PRINCIPAL_IS_DN) != null && 
-                  options.get(PRINCIPAL_IS_DN).toString().trim().equals("true");
-      removeElements = (String)options.get(REMOVE_PRINCIPAL_ELEMENTS);
-      boolean doRemoveElements = removeElements != null 
-                                && !removeElements.equals("");
       bindDN = (String) options.get(BIND_DN);
       bindCredential = (String) options.get(BIND_CREDENTIAL);
       if ((bindCredential != null) && bindCredential.startsWith("{EXT}"))
@@ -434,16 +412,15 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       try
       {
          ctx = constructInitialLdapContext(bindDN, bindCredential);
-         String parsedUser = doRemoveElements ? removeElements(removeElements,username) : username;
          // Validate the user by binding against the userDN
-         String userDN = rolesOnly && principalIsDN ? parsedUser : bindDNAuthentication(ctx, parsedUser, credential, baseDN, baseFilter);
+         String userDN = bindDNAuthentication(ctx, username, credential, baseDN, baseFilter);
 
          // Query for roles matching the role filter
          SearchControls constraints = new SearchControls();
          constraints.setSearchScope(searchScope);
          constraints.setReturningAttributes(new String[0]);
          constraints.setTimeLimit(searchTimeLimit);
-         rolesSearch(ctx, constraints, parsedUser, userDN, recursion, 0);
+         rolesSearch(ctx, constraints, username, userDN, recursion, 0);
       }
       finally
       {
@@ -692,42 +669,23 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       }
    }
 
-
- 
-    /** assuming the principal is a DN then parse off the ignorable parts
-     * like EMAILADDRESS so we have pure LDAP DN 
-     */
-    private String removeElements(String elementList, String user) 
-    {
-      String newUser = "";
-      String[] userParts = user.split("\\,");
-      String[] ignored    = elementList.split("\\,");
-      for(int i = 0; i < userParts.length; i++)
+   protected String getUsername()
+   {
+      String username = super.getUsername();
+      parseUsername = Boolean.valueOf((String) options.get(PARSE_USERNAME));
+      if (parseUsername)
       {
-         String part = userParts[i];
-         if(!checkIgnoreMatches(part,ignored)) 
-         {
-                  newUser += part;
-                  newUser = i == userParts.length-1 ? newUser : newUser +",";
-         }
+         usernameBeginString = (String) options.get(USERNAME_BEGIN_STRING);
+         usernameEndString = (String) options.get(USERNAME_END_STRING);
+         int beginIndex = 0;
+         if (usernameBeginString != null && !usernameBeginString.equals(""))
+            beginIndex = username.indexOf(usernameBeginString) + usernameBeginString.length();
+         int endIndex = username.length();
+         if (usernameEndString != null && !usernameEndString.equals(""))
+            endIndex = username.indexOf(usernameEndString);
+         username = username.substring(beginIndex, endIndex);
       }
-      return newUser.endsWith(",") ? newUser.substring(0,newUser.length()-1) : 
-             newUser ; //if a final element was ignored we have to parse off an extra comma
-    }
- 
-    /** return if the string begins with any of the elements in the array 
-     *  @return boolean
-     */
-     public boolean checkIgnoreMatches( String part, String[] ignored ) 
-     {
-        for( String ignore : ignored) 
-        {
-           if(part.startsWith(ignore)) 
-           {
-              return true;
-           }
-        }
-        return false;
-     }
+      return username;
+   }
  
 }
