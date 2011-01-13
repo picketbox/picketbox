@@ -253,6 +253,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          try
          {
             String username = getUsername();
+            if (trace)
+               log.trace("Binding username: " + username);
             createLdapInitContext(username, null);
             defaultRole();
          }
@@ -680,9 +682,13 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          int beginIndex = 0;
          if (usernameBeginString != null && !usernameBeginString.equals(""))
             beginIndex = username.indexOf(usernameBeginString) + usernameBeginString.length();
+         if (beginIndex == -1) // not allowed. reset
+            beginIndex = 0;
          int endIndex = username.length();
          if (usernameEndString != null && !usernameEndString.equals(""))
-            endIndex = username.indexOf(usernameEndString);
+            endIndex = username.substring(beginIndex).indexOf(usernameEndString);
+         if (endIndex == -1) // not allowed. reset
+            endIndex = username.length();
          username = username.substring(beginIndex, endIndex);
       }
       return username;
