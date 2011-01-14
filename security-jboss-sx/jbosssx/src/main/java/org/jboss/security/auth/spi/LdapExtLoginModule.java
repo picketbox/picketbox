@@ -248,7 +248,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    {
       // SECURITY-225: check if authentication was already done in a previous login module
       // and perform role mapping
-      if (!isPasswordValidated)
+      if (!isPasswordValidated && getIdentity() != unauthenticatedIdentity)
       {
          try
          {
