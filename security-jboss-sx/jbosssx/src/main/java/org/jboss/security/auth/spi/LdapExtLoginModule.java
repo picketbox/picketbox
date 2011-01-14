@@ -689,6 +689,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
             endIndex = username.substring(beginIndex).indexOf(usernameEndString);
          if (endIndex == -1) // not allowed. reset
             endIndex = username.length();
+         else
+            endIndex += beginIndex;
          username = username.substring(beginIndex, endIndex);
       }
       return username;
