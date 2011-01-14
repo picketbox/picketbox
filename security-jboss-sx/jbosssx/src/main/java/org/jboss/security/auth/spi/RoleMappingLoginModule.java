@@ -165,10 +165,13 @@ public class RoleMappingLoginModule extends AbstractServerLoginModule
          String roleKey = (String)enumer.nextElement();
          String comma_separated_roles = props.getProperty(roleKey);
          Principal pIdentity = createIdentity(roleKey);
-         if(group.isMember(pIdentity))
-            Util.parseGroupMembers(group,comma_separated_roles,this);
-         if(REPLACE_ROLE)
-            group.removeMember(pIdentity); 
+         if (group != null)
+         {
+            if(group.isMember(pIdentity))
+               Util.parseGroupMembers(group,comma_separated_roles,this);
+            if(REPLACE_ROLE)
+               group.removeMember(pIdentity);
+         }
       } 
    }
 }
