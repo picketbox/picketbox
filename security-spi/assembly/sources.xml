@@ -6,19 +6,19 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
-      <directory>${basedir}/../acl/src/main</directory>
+      <directory>${basedir}/../acl/src/main/java</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${basedir}/../identity/src/main</directory>
+      <directory>${basedir}/../identity/src/main/java</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${basedir}/../authorization/src/main</directory>
+      <directory>${basedir}/../authorization/src/main/java</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${basedir}/../spi/src/main</directory>
+      <directory>${basedir}/../spi/src/main/java</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
   </fileSets>

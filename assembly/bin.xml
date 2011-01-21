@@ -1,29 +1,40 @@
 <assembly>
   <formats>
-    <format>zip</format>
+    <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
-    <fileSet>
-      <directory>../security-spi/assembly/target/</directory>
+  	<fileSet>
+  	  <directory>../picketbox/target/classes</directory>
+  	  <outputDirectory>/</outputDirectory>
+  	</fileSet>
+  	<fileSet>
+      <directory>../security-spi/acl/target/classes</directory>
       <outputDirectory>/</outputDirectory>
-      <includes>
-        <include>jboss-security-spi-${project.version}.jar</include>
-      </includes>
     </fileSet>
     <fileSet>
-      <directory>../security-jboss-sx/assembly/target/</directory>
+      <directory>../security-spi/identity/target/classes</directory>
       <outputDirectory>/</outputDirectory>
-      <includes>
-        <include>jbosssx-${project.version}.jar</include>
-      </includes>
     </fileSet>
     <fileSet>
-      <directory>../picketbox/target/</directory>
+      <directory>../security-spi/authorization/target/classes</directory>
       <outputDirectory>/</outputDirectory>
-      <includes>
-        <include>picketbox-bare-${project.version}.jar</include>
-      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>../security-spi/spi/target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>../security-jboss-sx/identity/target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>../security-jboss-sx/jbosssx/target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>../security-jboss-sx/acl/target/classes</directory>
+      <outputDirectory>/</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>

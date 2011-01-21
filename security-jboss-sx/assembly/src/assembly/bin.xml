@@ -13,10 +13,6 @@
       <outputDirectory>/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../jbosssx-mc-int/target/classes</directory>
-      <outputDirectory>/</outputDirectory>
-    </fileSet>
-    <fileSet>
       <directory>../acl/target/classes</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
