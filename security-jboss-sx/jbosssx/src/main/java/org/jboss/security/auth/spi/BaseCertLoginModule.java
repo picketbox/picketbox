@@ -366,13 +366,13 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
             log.trace("Validating cert using: "+verifier);
          isValid = verifier.verify(cert, alias, keyStore, trustStore);
       }
-      else if (keyStore != null && cert != null)
+      else if (trustStore != null && cert != null)
       {
-         // Look for the cert in the keystore using the alias
+         // Look for the cert in the truststore using the alias
          X509Certificate storeCert = null;
          try
          {
-            storeCert = (X509Certificate) keyStore.getCertificate(alias);
+            storeCert = (X509Certificate) trustStore.getCertificate(alias);
             if( trace )
             {
                StringBuffer buf = new StringBuffer("\n\tSupplied Credential: ");
@@ -390,7 +390,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
                else
                {
                   ArrayList<String> aliases = new ArrayList<String>();
-                  Enumeration<String> en = keyStore.aliases();
+                  Enumeration<String> en = trustStore.aliases();
                   while (en.hasMoreElements())
                   {
                      aliases.add(en.nextElement());
