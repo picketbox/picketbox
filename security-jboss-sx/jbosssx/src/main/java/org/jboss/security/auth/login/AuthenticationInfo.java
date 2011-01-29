@@ -25,19 +25,27 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.naming.Context;
 import javax.security.auth.AuthPermission;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
+import org.jboss.security.config.Attribute;
 import org.jboss.security.config.BaseSecurityInfo;
+import org.jboss.security.config.Element;
+import org.jboss.security.config.parser.AuthenticationConfigParser;
 
 /**
  * The login module configuration information.
  * 
  * @author Scott.Stark@jboss.org
+ * @author <a href="mailto:mmoyses@redhat.com">Marcus Moyses</a>
  * @version $Revision$
  */
 public class AuthenticationInfo extends BaseAuthenticationInfo
@@ -130,5 +138,59 @@ public class AuthenticationInfo extends BaseAuthenticationInfo
    protected BaseSecurityInfo<Object> create(String name)
    {
       return new AuthenticationInfo(name);
+   }
+   
+   /**
+    * Write element content. The start element is already written.
+    * 
+    * @param writer
+    * @throws XMLStreamException
+    */
+   public void writeContent(XMLStreamWriter writer) throws XMLStreamException
+   {
+      for (int i = 0; i < moduleEntries.size(); i++)
+      {
+         AppConfigurationEntry entry = (AppConfigurationEntry) moduleEntries.get(i);
+         writer.writeStartElement(Element.LOGIN_MODULE.getLocalName());
+         String code = entry.getLoginModuleName();
+         if (AuthenticationConfigParser.loginModulesMap.containsValue(code)) {
+            String value = null;
+            Set<Entry<String, String>> entries = AuthenticationConfigParser.loginModulesMap.entrySet();
+            for (Entry<String, String> mapEntry : entries) {
+                if (mapEntry.getValue().equals(code)) {
+                    value = mapEntry.getKey();
+                    break;
+                }
+            }
+            writer.writeAttribute(Attribute.CODE.getLocalName(), value);
+        }
+        else
+            writer.writeAttribute(Attribute.CODE.getLocalName(), code);
+         writer.writeAttribute(Attribute.FLAG.getLocalName(), valueOf(entry.getControlFlag()));
+         Map<String, ?> options = entry.getOptions();
+         if (options != null && options.size() > 0)
+         {
+            for (Entry<String, ?> option : options.entrySet())
+            {
+               writer.writeStartElement(Element.MODULE_OPTION.getLocalName());
+               writer.writeAttribute(Attribute.NAME.getLocalName(), option.getKey());
+               writer.writeAttribute(Attribute.VALUE.getLocalName(), option.getValue().toString());
+               writer.writeEndElement();
+            }
+         }
+         writer.writeEndElement();
+      }
+      writer.writeEndElement();
+   }
+   
+   private String valueOf(LoginModuleControlFlag controlFlag)
+   {
+      if (controlFlag.equals(LoginModuleControlFlag.OPTIONAL))
+         return "optional";
+      if (controlFlag.equals(LoginModuleControlFlag.REQUIRED))
+         return "required";
+      if (controlFlag.equals(LoginModuleControlFlag.REQUISITE))
+         return "requisite";
+      return "sufficient";
    }
 }

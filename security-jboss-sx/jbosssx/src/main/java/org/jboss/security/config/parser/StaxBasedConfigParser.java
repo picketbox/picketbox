@@ -32,6 +32,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.transform.Source;
@@ -43,16 +44,19 @@ import javax.xml.validation.Validator;
 import org.jboss.logging.Logger;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.ApplicationPolicyRegistration;
+import org.jboss.security.config.Element;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
  * Configuration Parser based on Stax
+ * 
  * @author Anil.Saldhana@redhat.com
+ * @author <a href="mailto:mmoyses@redhat.com">Marcus Moyses</a>
  * @since Jan 22, 2010
  */
-public class StaxBasedConfigParser
+public class StaxBasedConfigParser implements XMLStreamConstants
 {
    private static Logger log = Logger.getLogger(StaxBasedConfigParser.class);
    private boolean trace = log.isTraceEnabled();
@@ -120,6 +124,35 @@ public class StaxBasedConfigParser
                   appPolicyRegistration.addApplicationPolicy(appPolicy.getName(), appPolicy); 
                }
          }
+      }
+   }
+   
+   public void parse2(InputStream configStream) throws XMLStreamException
+   {
+      Configuration config = Configuration.getConfiguration();
+      if (!(config instanceof ApplicationPolicyRegistration))
+      {
+         throw new IllegalStateException("JAAS Configuration does not support application policy registration");
+      }
+      
+      ApplicationPolicyRegistration appPolicyRegistration = (ApplicationPolicyRegistration) config;
+      XMLStreamReader reader = getXMLStreamReader(configStream);
+      while (reader.hasNext() && reader.nextTag() != END_ELEMENT)
+      {
+         final Element element = Element.forName(reader.getLocalName());
+         if (element.equals(Element.POLICY))
+         {
+            ApplicationPolicyParser appPolicyParser = new ApplicationPolicyParser();
+            List<ApplicationPolicy> appPolicies = appPolicyParser.parse(reader);
+            for(ApplicationPolicy appPolicy: appPolicies)
+            {
+               appPolicyRegistration.addApplicationPolicy(appPolicy.getName(), appPolicy); 
+            }
+         }
+         else
+            throw StaxParserUtil.unexpectedElement(reader);
+         if (reader.isEndElement())
+            break;
       }
    }
    
@@ -192,5 +225,26 @@ public class StaxBasedConfigParser
         throw new RuntimeException(ex);
       }
       return xmlEventReader;
-    }  
+    }
+   
+   private XMLStreamReader getXMLStreamReader(InputStream is) 
+   {
+      XMLInputFactory xmlInputFactory = null;
+      XMLStreamReader xmlStreamReader = null;
+      try 
+      {
+        xmlInputFactory = XMLInputFactory.newInstance();
+        xmlInputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.TRUE);
+        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+        xmlInputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.TRUE);
+        xmlInputFactory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.TRUE);
+ 
+        xmlStreamReader = xmlInputFactory.createXMLStreamReader(is);
+      } 
+      catch (Exception ex) 
+      {
+        throw new RuntimeException(ex);
+      }
+      return xmlStreamReader;
+    }
 }

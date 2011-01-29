@@ -21,13 +21,21 @@
   */
 package org.jboss.security.config;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 import org.jboss.security.audit.config.AuditProviderEntry;
 
 //$Id$
 
 /**
  *  Information on Audit Configuration in the ApplicationPolicy
+ *  
  *  @author Anil.Saldhana@redhat.com
+ *  @author <a href="mailto:mmoyses@redhat.com">Marcus Moyses</a>
  *  @since  May 10, 2007 
  *  @version $Revision$
  */
@@ -52,5 +60,34 @@ public class AuditInfo extends BaseSecurityInfo<AuditProviderEntry>
    protected BaseSecurityInfo<AuditProviderEntry> create(String name)
    { 
       return new AuditInfo(name);
+   }
+   
+   /**
+    * Write element content. The start element is already written.
+    * 
+    * @param writer
+    * @throws XMLStreamException
+    */
+   public void writeContent(XMLStreamWriter writer) throws XMLStreamException
+   {
+      for (int i = 0; i < moduleEntries.size(); i++)
+      {
+         AuditProviderEntry entry = moduleEntries.get(i);
+         writer.writeStartElement(Element.PROVIDER_MODULE.getLocalName());
+         writer.writeAttribute(Attribute.CODE.getLocalName(), entry.getName());
+         Map<String, ?> options = entry.getOptions();
+         if (options != null && options.size() > 0)
+         {
+            for (Entry<String, ?> option : options.entrySet())
+            {
+               writer.writeStartElement(Element.MODULE_OPTION.getLocalName());
+               writer.writeAttribute(Attribute.NAME.getLocalName(), option.getKey());
+               writer.writeAttribute(Attribute.VALUE.getLocalName(), option.getValue().toString());
+               writer.writeEndElement();
+            }
+         }
+         writer.writeEndElement();
+      }
+      writer.writeEndElement();
    }
 }

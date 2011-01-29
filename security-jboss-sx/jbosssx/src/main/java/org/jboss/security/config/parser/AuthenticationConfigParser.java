@@ -22,6 +22,7 @@
 package org.jboss.security.config.parser;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -31,18 +32,65 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.jboss.resource.security.CallerIdentityLoginModule;
+import org.jboss.resource.security.ConfiguredIdentityLoginModule;
+import org.jboss.resource.security.JaasSecurityDomainIdentityLoginModule;
+import org.jboss.resource.security.PBEIdentityLoginModule;
+import org.jboss.resource.security.SecureIdentityLoginModule;
+import org.jboss.security.ClientLoginModule;
+import org.jboss.security.auth.spi.BaseCertLoginModule;
+import org.jboss.security.auth.spi.CertRolesLoginModule;
+import org.jboss.security.auth.spi.DatabaseCertLoginModule;
+import org.jboss.security.auth.spi.DatabaseServerLoginModule;
+import org.jboss.security.auth.spi.IdentityLoginModule;
+import org.jboss.security.auth.spi.LdapExtLoginModule;
+import org.jboss.security.auth.spi.LdapLoginModule;
+import org.jboss.security.auth.spi.RoleMappingLoginModule;
+import org.jboss.security.auth.spi.RunAsLoginModule;
+import org.jboss.security.auth.spi.SimpleServerLoginModule;
+import org.jboss.security.auth.spi.UsersRolesLoginModule;
+import org.jboss.security.config.Element;
+
 /**
  * Stax based JAAS authentication configuration Parser
+ * 
  * @author Anil.Saldhana@redhat.com
+ * @author <a href="mailto:mmoyses@redhat.com">Marcus Moyses</a>
  * @since Jan 22, 2010
  */
-public class AuthenticationConfigParser
+public class AuthenticationConfigParser implements XMLStreamConstants
 {
+
+   public static Map<String, String> loginModulesMap = new HashMap<String, String>();
+
+   static
+   {
+      loginModulesMap.put("Client", ClientLoginModule.class.getName());
+      loginModulesMap.put("Certificate", BaseCertLoginModule.class.getName());
+      loginModulesMap.put("CertificateRoles", CertRolesLoginModule.class.getName());
+      loginModulesMap.put("DatabaseCertificate", DatabaseCertLoginModule.class.getName());
+      loginModulesMap.put("Database", DatabaseServerLoginModule.class.getName());
+      loginModulesMap.put("Identity", IdentityLoginModule.class.getName());
+      loginModulesMap.put("Ldap", LdapLoginModule.class.getName());
+      loginModulesMap.put("LdapExtended", LdapExtLoginModule.class.getName());
+      loginModulesMap.put("RoleMapping", RoleMappingLoginModule.class.getName());
+      loginModulesMap.put("RunAs", RunAsLoginModule.class.getName());
+      loginModulesMap.put("Simple", SimpleServerLoginModule.class.getName());
+      loginModulesMap.put("UsersRoles", UsersRolesLoginModule.class.getName());
+      loginModulesMap.put("CallerIdentity", CallerIdentityLoginModule.class.getName());
+      loginModulesMap.put("ConfiguredIdentity", ConfiguredIdentityLoginModule.class.getName());
+      loginModulesMap.put("JaasSecurityDomainIdentity", JaasSecurityDomainIdentityLoginModule.class.getName());
+      loginModulesMap.put("PBEIdentity", PBEIdentityLoginModule.class.getName());
+      loginModulesMap.put("SecureIdentity", SecureIdentityLoginModule.class.getName());
+   }
+
    /**
     * Parse the <authentication> element
     * @param xmlEventReader
@@ -116,5 +164,73 @@ public class AuthenticationConfigParser
       if("requisite".equalsIgnoreCase(flag))
          return LoginModuleControlFlag.REQUISITE;
       throw new RuntimeException(flag + " is not recognized");
+   }
+   
+   /**
+    * Parse the <authentication> element
+    * @param reader
+    * @return
+    * @throws XMLStreamException
+    */
+   public Set<AppConfigurationEntry> parse(XMLStreamReader reader) throws XMLStreamException
+   {
+      Set<AppConfigurationEntry> entries = new LinkedHashSet<AppConfigurationEntry>();
+      while (reader.hasNext() && reader.nextTag() != END_ELEMENT)
+      {
+         final Element element = Element.forName(reader.getLocalName());
+         AppConfigurationEntry entry = null;
+         if (element.equals(Element.LOGIN_MODULE))
+         {
+            entry = getEntry(reader);
+         }
+         else
+            throw StaxParserUtil.unexpectedElement(reader);
+         entries.add(entry);
+      }
+      return entries;
+   }
+
+   private AppConfigurationEntry getEntry(XMLStreamReader reader) throws XMLStreamException
+   {
+      Map<String, Object> options = new HashMap<String, Object>();
+      String codeName = null;
+      LoginModuleControlFlag controlFlag = LoginModuleControlFlag.REQUIRED;
+
+      final int count = reader.getAttributeCount();
+      if (count < 2)
+      {
+         Set<org.jboss.security.config.Attribute> set = new HashSet<org.jboss.security.config.Attribute>();
+         set.add(org.jboss.security.config.Attribute.CODE);
+         set.add(org.jboss.security.config.Attribute.FLAG);
+         throw StaxParserUtil.missingRequired(reader, set);
+      }
+      for (int i = 0; i < count; i++)
+      {
+         final String value = reader.getAttributeValue(i);
+         final org.jboss.security.config.Attribute attribute = org.jboss.security.config.Attribute.forName(reader
+               .getAttributeLocalName(i));
+         switch (attribute)
+         {
+            case CODE : {
+               // check if it's a known login module
+               if (loginModulesMap.containsKey(value))
+                   codeName = loginModulesMap.get(value);
+               else
+                   codeName = value;
+               break;
+            }
+            case FLAG : {
+               controlFlag = getControlFlag(value);
+               break;
+            }
+            default :
+               throw StaxParserUtil.unexpectedAttribute(reader, i);
+         }
+      }
+      //See if there are options
+      ModuleOptionParser moParser = new ModuleOptionParser();
+      options.putAll(moParser.parse(reader));
+
+      return new AppConfigurationEntry(codeName, controlFlag, options);
    }
 }

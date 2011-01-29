@@ -21,15 +21,20 @@
  */
 package org.jboss.security.config.parser;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
@@ -38,13 +43,16 @@ import org.jboss.security.auth.container.config.AuthModuleEntry;
 import org.jboss.security.auth.login.JASPIAuthenticationInfo;
 import org.jboss.security.auth.login.LoginModuleStackHolder;
 import org.jboss.security.config.ControlFlag;
+import org.jboss.security.config.Element;
 
 /**
  * Stax based JASPI configuration Parser
+ * 
  * @author Anil.Saldhana@redhat.com
+ * @author <a href="mailto:mmoyses@redhat.com">Marcus Moyses</a>
  * @since Jan 22, 2010
  */
-public class AuthenticationJASPIConfigParser
+public class AuthenticationJASPIConfigParser implements XMLStreamConstants
 {
    /**
     * Parse the <authentication-jaspi> element
@@ -195,5 +203,164 @@ public class AuthenticationJASPIConfigParser
       if ("requisite".equalsIgnoreCase(flag))
          return LoginModuleControlFlag.REQUISITE;
       throw new RuntimeException(flag + " is not recognized");
+   }
+   
+   /**
+    * Parse the <authentication-jaspi> element
+    * @param reader
+    * @return
+    * @throws XMLStreamException
+    */
+   public JASPIAuthenticationInfo parse(XMLStreamReader reader) throws XMLStreamException
+   {
+      JASPIAuthenticationInfo authInfo = new JASPIAuthenticationInfo();
+      Map<String, LoginModuleStackHolder> holders = new HashMap<String, LoginModuleStackHolder>();
+      while (reader.hasNext() && reader.nextTag() != END_ELEMENT)
+      {
+         final Element element = Element.forName(reader.getLocalName());
+         switch (element)
+         {
+            case LOGIN_MODULE_STACK : {
+               final int count = reader.getAttributeCount();
+               if (count < 1)
+               {
+                  throw StaxParserUtil.missingRequired(reader, Collections
+                        .singleton(org.jboss.security.config.Attribute.NAME));
+               }
+               LoginModuleStackHolder holder = null;
+               for (int i = 0; i < count; i++)
+               {
+                  final String value = reader.getAttributeValue(i);
+                  final org.jboss.security.config.Attribute attribute = org.jboss.security.config.Attribute
+                        .forName(reader.getAttributeLocalName(i));
+                  switch (attribute)
+                  {
+                     case NAME : {
+                        String name = value;
+                        holder = new LoginModuleStackHolder(name, null);
+                        holders.put(name, holder);
+                        authInfo.add(holder);
+                        break;
+                     }
+                     default :
+                        throw StaxParserUtil.unexpectedAttribute(reader, i);
+                  }
+               }
+               while (reader.hasNext() && reader.nextTag() != END_ELEMENT)
+               {
+                  final Element element2 = Element.forName(reader.getLocalName());
+                  if (element2.equals(Element.LOGIN_MODULE))
+                  {
+                     holder.addAppConfigurationEntry(getJAASEntry(reader));
+                  }
+               }
+               break;
+            }
+            case AUTH_MODULE : {
+               AuthModuleEntry entry = getJaspiEntry(reader);
+               String stackHolderRefName = entry.getLoginModuleStackHolderName();
+               if (stackHolderRefName != null)
+               {
+                  if (!holders.containsKey(stackHolderRefName))
+                     throw new RuntimeException("auth-module references a login module stack that doesn't exist: "
+                           + stackHolderRefName);
+                  entry.setLoginModuleStackHolder(holders.get(stackHolderRefName));
+               }
+               authInfo.add(entry);
+               break;
+            }
+            default :
+               throw StaxParserUtil.unexpectedElement(reader);
+         }
+      }
+      return authInfo;
+   }
+
+   private AppConfigurationEntry getJAASEntry(XMLStreamReader reader) throws XMLStreamException
+   {
+      Map<String, Object> options = new HashMap<String, Object>();
+      String codeName = null;
+      LoginModuleControlFlag controlFlag = LoginModuleControlFlag.REQUIRED;
+
+      final int count = reader.getAttributeCount();
+      if (count < 2)
+      {
+         Set<org.jboss.security.config.Attribute> set = new HashSet<org.jboss.security.config.Attribute>();
+         set.add(org.jboss.security.config.Attribute.CODE);
+         set.add(org.jboss.security.config.Attribute.FLAG);
+         throw StaxParserUtil.missingRequired(reader, set);
+      }
+      for (int i = 0; i < count; i++)
+      {
+         final String value = reader.getAttributeValue(i);
+         final org.jboss.security.config.Attribute attribute = org.jboss.security.config.Attribute.forName(reader
+               .getAttributeLocalName(i));
+         switch (attribute)
+         {
+            case CODE : {
+               codeName = value;
+               break;
+            }
+            case FLAG : {
+               controlFlag = getControlFlag(value);
+               break;
+            }
+            default :
+               throw StaxParserUtil.unexpectedAttribute(reader, i);
+         }
+      }
+      //See if there are options
+      ModuleOptionParser moParser = new ModuleOptionParser();
+      options.putAll(moParser.parse(reader));
+
+      return new AppConfigurationEntry(codeName, controlFlag, options);
+   }
+
+   private AuthModuleEntry getJaspiEntry(XMLStreamReader reader) throws XMLStreamException
+   {
+      Map<String, Object> options = new HashMap<String, Object>();
+      String codeName = null;
+      String loginModuleStackRef = null;
+      ControlFlag flag = ControlFlag.REQUIRED;
+
+      final int count = reader.getAttributeCount();
+      if (count == 0)
+      {
+         throw StaxParserUtil.missingRequired(reader, Collections.singleton(org.jboss.security.config.Attribute.CODE));
+      }
+      for (int i = 0; i < count; i++)
+      {
+         final String value = reader.getAttributeValue(i);
+         final org.jboss.security.config.Attribute attribute = org.jboss.security.config.Attribute.forName(reader
+               .getAttributeLocalName(i));
+         switch (attribute)
+         {
+            case CODE : {
+               codeName = value;
+               break;
+            }
+            case FLAG : {
+               flag = ControlFlag.valueOf(value);
+               break;
+            }
+            case LOGIN_MODULE_STACK_REF : {
+               loginModuleStackRef = value;
+               break;
+            }
+            default :
+               throw StaxParserUtil.unexpectedAttribute(reader, i);
+         }
+      }
+      if (codeName == null)
+      {
+         throw StaxParserUtil.missingRequired(reader, Collections.singleton(org.jboss.security.config.Attribute.CODE));
+      }
+      //See if there are options
+      ModuleOptionParser moParser = new ModuleOptionParser();
+      options.putAll(moParser.parse(reader));
+
+      AuthModuleEntry entry = new AuthModuleEntry(codeName, options, loginModuleStackRef);
+      entry.setControlFlag(flag);
+      return entry;
    }
 }

@@ -26,12 +26,19 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.jboss.security.auth.container.config.AuthModuleEntry;
+import org.jboss.security.config.Attribute;
 import org.jboss.security.config.BaseSecurityInfo;
+import org.jboss.security.config.Element;
+import org.jboss.security.config.parser.AuthenticationConfigParser;
 
 // $Id$
 
@@ -39,6 +46,7 @@ import org.jboss.security.config.BaseSecurityInfo;
  * AuthenticationInfo based on JSR-196
  * 
  * @author <a href="mailto:Anil.Saldhana@jboss.org">Anil Saldhana</a>
+ * @author <a href="mailto:mmoyses@redhat.com">Marcus Moyses</a>
  * @since Dec 21, 2005
  */
 public class JASPIAuthenticationInfo extends BaseAuthenticationInfo
@@ -209,5 +217,86 @@ public class JASPIAuthenticationInfo extends BaseAuthenticationInfo
          }
       }
       return buffer.toString();
+   }
+   
+   /**
+    * Write element content. The start element is already written.
+    * 
+    * @param writer
+    * @throws XMLStreamException
+    */
+   public void writeContent(XMLStreamWriter writer) throws XMLStreamException
+   {
+      for (int i = 0; i < moduleEntries.size(); i++)
+      {
+         AuthModuleEntry entry = (AuthModuleEntry) moduleEntries.get(i);
+         writer.writeStartElement(Element.AUTH_MODULE.getLocalName());
+         writer.writeAttribute(Attribute.CODE.getLocalName(), entry.getAuthModuleName());
+         writer.writeAttribute(Attribute.FLAG.getLocalName(), entry.getControlFlag().toString().toLowerCase());
+         writer.writeAttribute(Attribute.LOGIN_MODULE_STACK_REF.getLocalName(), entry.getLoginModuleStackHolderName());
+         Map<String, ?> options = entry.getOptions();
+         if (options != null && options.size() > 0)
+         {
+            for (Entry<String, ?> option : options.entrySet())
+            {
+               writer.writeStartElement(Element.MODULE_OPTION.getLocalName());
+               writer.writeAttribute(Attribute.NAME.getLocalName(), option.getKey());
+               writer.writeAttribute(Attribute.VALUE.getLocalName(), option.getValue().toString());
+               writer.writeEndElement();
+            }
+         }
+         writer.writeEndElement();
+      }
+      for (int i = 0; i < loginModuleStack.size(); i++)
+      {
+         LoginModuleStackHolder entry = loginModuleStack.get(i);
+         writer.writeStartElement(Element.LOGIN_MODULE_STACK.getLocalName());
+         writer.writeAttribute(Attribute.NAME.getLocalName(), entry.getName());
+         for (int j = 0; j < entry.getAppConfigurationEntry().length; j++)
+         {
+            writer.writeStartElement(Element.LOGIN_MODULE.getLocalName());
+            AppConfigurationEntry ace = entry.getAppConfigurationEntry()[j];
+            String code = ace.getLoginModuleName();
+            if (AuthenticationConfigParser.loginModulesMap.containsValue(code)) {
+               String value = null;
+               Set<Entry<String, String>> entries = AuthenticationConfigParser.loginModulesMap.entrySet();
+               for (Entry<String, String> mapEntry : entries) {
+                   if (mapEntry.getValue().equals(code)) {
+                       value = mapEntry.getKey();
+                       break;
+                   }
+               }
+               writer.writeAttribute(Attribute.CODE.getLocalName(), value);
+           }
+           else
+               writer.writeAttribute(Attribute.CODE.getLocalName(), code);
+            writer.writeAttribute(Attribute.FLAG.getLocalName(), valueOf(ace.getControlFlag()));
+            Map<String, ?> options = ace.getOptions();
+            if (options != null && options.size() > 0)
+            {
+               for (Entry<String, ?> option : options.entrySet())
+               {
+                  writer.writeStartElement(Element.MODULE_OPTION.getLocalName());
+                  writer.writeAttribute(Attribute.NAME.getLocalName(), option.getKey());
+                  writer.writeAttribute(Attribute.VALUE.getLocalName(), option.getValue().toString());
+                  writer.writeEndElement();
+               }
+            }
+            writer.writeEndElement();
+         }
+         writer.writeEndElement();
+      }
+      writer.writeEndElement();
+   }
+   
+   private String valueOf(LoginModuleControlFlag controlFlag)
+   {
+      if (controlFlag.equals(LoginModuleControlFlag.OPTIONAL))
+         return "optional";
+      if (controlFlag.equals(LoginModuleControlFlag.REQUIRED))
+         return "required";
+      if (controlFlag.equals(LoginModuleControlFlag.REQUISITE))
+         return "requisite";
+      return "sufficient";
    }
 }

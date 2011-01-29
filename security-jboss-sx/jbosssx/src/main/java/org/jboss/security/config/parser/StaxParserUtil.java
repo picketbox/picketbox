@@ -21,17 +21,25 @@
  */
 package org.jboss.security.config.parser;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
  
 
 /**
  * Utility for the stax based parser
+ * 
  * @author Anil.Saldhana@redhat.com
+ * @author <a href="mailto:mmoyses@redhat.com">Marcus Moyses</a>
  * @since Feb 8, 2010
  */
-public class StaxParserUtil
+public class StaxParserUtil implements XMLStreamConstants
 {  
    /**
     * Given an {@code Attribute}, get its trimmed value
@@ -78,4 +86,67 @@ public class StaxParserUtil
          throw new IllegalArgumentException("Input str is null");
       return str.trim();
    }
+   
+   /**
+    * Get an exception reporting a missing, required XML attribute.
+    *
+    * @param reader the stream reader
+    * @param required a set of enums whose toString method returns the attribute name
+    * @return the exception
+    */
+   public static XMLStreamException missingRequired(final XMLStreamReader reader, final Set<?> required)
+   {
+      final StringBuilder b = new StringBuilder();
+      Iterator<?> iterator = required.iterator();
+      while (iterator.hasNext())
+      {
+         final Object o = iterator.next();
+         b.append(o.toString());
+         if (iterator.hasNext())
+         {
+            b.append(", ");
+         }
+      }
+      return new XMLStreamException("Missing required attribute(s): " + b, reader.getLocation());
+   }
+
+   /**
+    * Get an exception reporting an unexpected XML element.
+    *
+    * @param reader the stream reader
+    * @return the exception
+    */
+   public static XMLStreamException unexpectedElement(final XMLStreamReader reader)
+   {
+      return new XMLStreamException("Unexpected element '" + reader.getName() + "' encountered", reader.getLocation());
+   }
+
+   /**
+    * Get an exception reporting an unexpected XML attribute.
+    *
+    * @param reader the stream reader
+    * @param index the attribute index
+    * @return the exception
+    */
+   public static XMLStreamException unexpectedAttribute(final XMLStreamReader reader, final int index)
+   {
+      return new XMLStreamException("Unexpected attribute '" + reader.getAttributeName(index) + "' encountered", reader
+            .getLocation());
+   }
+
+   /**
+    * Consumes the remainder of the current element, throwing an {@link XMLStreamException}
+    * if it contains any child elements.
+    *
+    * @param reader the reader
+    * @throws XMLStreamException if an error occurs
+    */
+   public static void requireNoContent(final XMLStreamReader reader) throws XMLStreamException
+   {
+      if (reader.hasNext() && reader.nextTag() != END_ELEMENT)
+      {
+         throw unexpectedElement(reader);
+      }
+   }
+
 }

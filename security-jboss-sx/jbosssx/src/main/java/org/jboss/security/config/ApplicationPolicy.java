@@ -24,8 +24,14 @@ package org.jboss.security.config;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
+import org.jboss.security.auth.login.AuthenticationInfo;
 import org.jboss.security.auth.login.BaseAuthenticationInfo;
+import org.jboss.security.auth.login.JASPIAuthenticationInfo;
 import org.jboss.security.identity.RoleGroup;
 
 // $Id$
@@ -34,6 +40,7 @@ import org.jboss.security.identity.RoleGroup;
  * Application Policy Information Holder - Authentication - Authorization - Audit - Mapping
  * 
  * @author <a href="mailto:Anil.Saldhana@jboss.org">Anil Saldhana</a>
+ * @author <a href="mailto:mmoyses@redhat.com">Marcus Moyses</a>
  * @since Jun 9, 2006
  * @version $Revision$
  */
@@ -359,5 +366,63 @@ public class ApplicationPolicy
             ap = SecurityConfiguration.getApplicationPolicy(this.baseApplicationPolicyName);
       }
       return ap;
+   }
+   
+   /**
+    * Write element content.
+    * 
+    * @param writer
+    * @throws XMLStreamException
+    */
+   public void writeContent(XMLStreamWriter writer) throws XMLStreamException
+   {
+      writer.writeStartElement(Element.APPLICATION_POLICY.getLocalName());
+      writer.writeAttribute(Attribute.NAME.getLocalName(), name);
+      if (baseApplicationPolicyName != null)
+      {
+         writer.writeAttribute(Attribute.EXTENDS.getLocalName(), baseApplicationPolicyName);
+      }
+      if (authenticationInfo != null)
+      {
+         if (authenticationInfo instanceof AuthenticationInfo)
+         {
+            writer.writeStartElement(Element.AUTHENTICATION.getLocalName());
+            ((AuthenticationInfo) authenticationInfo).writeContent(writer);
+         }
+         else
+         {
+            writer.writeStartElement(Element.AUTHENTICATION_JASPI.getLocalName());
+            ((JASPIAuthenticationInfo) authenticationInfo).writeContent(writer);
+         }
+      }
+      if (aclInfo != null)
+      {
+         writer.writeStartElement(Element.ACL.getLocalName());
+         aclInfo.writeContent(writer);
+      }
+      if (authorizationInfo != null)
+      {
+         writer.writeStartElement(Element.AUTHORIZATION.getLocalName());
+         authorizationInfo.writeContent(writer);
+      }
+      if (auditInfo != null)
+      {
+         writer.writeStartElement(Element.AUDIT.getLocalName());
+         auditInfo.writeContent(writer);
+      }
+      if (identityTrustInfo != null)
+      {
+         writer.writeStartElement(Element.IDENTITY_TRUST.getLocalName());
+         identityTrustInfo.writeContent(writer);
+      }
+      if (mappingInfos != null && mappingInfos.size() > 0)
+      {
+         writer.writeStartElement(Element.MAPPING.getLocalName());
+         for (Entry<String, MappingInfo> entry : mappingInfos.entrySet())
+         {
+            entry.getValue().writeContent(writer);
+         }
+      }
+      writer.writeEndElement();
    }
 }
