@@ -298,7 +298,11 @@ public class AuthenticationJASPIConfigParser implements XMLStreamConstants
          switch (attribute)
          {
             case CODE : {
-               codeName = value;
+               // check if it's a known login module
+               if (AuthenticationConfigParser.loginModulesMap.containsKey(value))
+                   codeName = AuthenticationConfigParser.loginModulesMap.get(value);
+               else
+                   codeName = value;
                break;
             }
             case FLAG : {
