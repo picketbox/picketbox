@@ -227,26 +227,6 @@ public class JASPIAuthenticationInfo extends BaseAuthenticationInfo
     */
    public void writeContent(XMLStreamWriter writer) throws XMLStreamException
    {
-      for (int i = 0; i < moduleEntries.size(); i++)
-      {
-         AuthModuleEntry entry = (AuthModuleEntry) moduleEntries.get(i);
-         writer.writeStartElement(Element.AUTH_MODULE.getLocalName());
-         writer.writeAttribute(Attribute.CODE.getLocalName(), entry.getAuthModuleName());
-         writer.writeAttribute(Attribute.FLAG.getLocalName(), entry.getControlFlag().toString().toLowerCase());
-         writer.writeAttribute(Attribute.LOGIN_MODULE_STACK_REF.getLocalName(), entry.getLoginModuleStackHolderName());
-         Map<String, ?> options = entry.getOptions();
-         if (options != null && options.size() > 0)
-         {
-            for (Entry<String, ?> option : options.entrySet())
-            {
-               writer.writeStartElement(Element.MODULE_OPTION.getLocalName());
-               writer.writeAttribute(Attribute.NAME.getLocalName(), option.getKey());
-               writer.writeAttribute(Attribute.VALUE.getLocalName(), option.getValue().toString());
-               writer.writeEndElement();
-            }
-         }
-         writer.writeEndElement();
-      }
       for (int i = 0; i < loginModuleStack.size(); i++)
       {
          LoginModuleStackHolder entry = loginModuleStack.get(i);
@@ -283,6 +263,26 @@ public class JASPIAuthenticationInfo extends BaseAuthenticationInfo
                }
             }
             writer.writeEndElement();
+         }
+         writer.writeEndElement();
+      }
+      for (int i = 0; i < moduleEntries.size(); i++)
+      {
+         AuthModuleEntry entry = (AuthModuleEntry) moduleEntries.get(i);
+         writer.writeStartElement(Element.AUTH_MODULE.getLocalName());
+         writer.writeAttribute(Attribute.CODE.getLocalName(), entry.getAuthModuleName());
+         writer.writeAttribute(Attribute.FLAG.getLocalName(), entry.getControlFlag().toString().toLowerCase());
+         writer.writeAttribute(Attribute.LOGIN_MODULE_STACK_REF.getLocalName(), entry.getLoginModuleStackHolderName());
+         Map<String, ?> options = entry.getOptions();
+         if (options != null && options.size() > 0)
+         {
+            for (Entry<String, ?> option : options.entrySet())
+            {
+               writer.writeStartElement(Element.MODULE_OPTION.getLocalName());
+               writer.writeAttribute(Attribute.NAME.getLocalName(), option.getKey());
+               writer.writeAttribute(Attribute.VALUE.getLocalName(), option.getValue().toString());
+               writer.writeEndElement();
+            }
          }
          writer.writeEndElement();
       }
