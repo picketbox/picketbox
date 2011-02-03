@@ -204,7 +204,7 @@ public class ApplicationPolicyParser implements XMLStreamConstants
       while (reader.hasNext() && reader.nextTag() != END_ELEMENT)
       {
          final Element element = Element.forName(reader.getLocalName());
-         if (element.equals(Element.APPLICATION_POLICY))
+         if (element.equals(Element.APPLICATION_POLICY) || element.equals(Element.SECURITY_DOMAIN))
          {
             final int count = reader.getAttributeCount();
             if (count == 0)

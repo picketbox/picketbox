@@ -376,7 +376,7 @@ public class ApplicationPolicy
     */
    public void writeContent(XMLStreamWriter writer) throws XMLStreamException
    {
-      writer.writeStartElement(Element.APPLICATION_POLICY.getLocalName());
+      writer.writeStartElement(Element.SECURITY_DOMAIN.getLocalName());
       writer.writeAttribute(Attribute.NAME.getLocalName(), name);
       if (baseApplicationPolicyName != null)
       {

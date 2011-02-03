@@ -37,6 +37,8 @@ public enum Element {
     POLICY("policy"),
 
     APPLICATION_POLICY("application-policy"),
+    
+    SECURITY_DOMAIN("security-domain"),
 
     AUTHENTICATION("authentication"),
     
