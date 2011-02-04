@@ -187,6 +187,14 @@ public class SecureIdentityLoginModule
          {
             encoding[i + pad] = old[i];
          }
+         //SECURITY-563: handle negative numbers
+         if (n.signum() == -1)
+         {
+            for (int i = 0; i < newLength - length; i++)
+            {
+               encoding[i] = (byte) -1;
+            }
+         }
       }
       
       Cipher cipher = Cipher.getInstance("Blowfish");
