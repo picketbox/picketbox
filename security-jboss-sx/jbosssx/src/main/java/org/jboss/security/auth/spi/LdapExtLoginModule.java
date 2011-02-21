@@ -26,6 +26,7 @@ import java.security.acl.Group;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
 import javax.management.ObjectName;
@@ -149,6 +150,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    private static final String ROLE_ATTRIBUTE_IS_DN_OPT = "roleAttributeIsDN";
 
    private static final String ROLE_NAME_ATTRIBUTE_ID_OPT = "roleNameAttributeID";
+   
+   private static final String PARSE_ROLE_NAME_FROM_DN_OPT = "parseRoleNameFromDN";
 
    private static final String BIND_DN = "bindDN";
 
@@ -195,6 +198,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    protected String roleNameAttributeID;
 
    protected boolean roleAttributeIsDN;
+   
+   protected boolean parseRoleNameFromDN;
 
    protected int recursion = 0;
 
@@ -371,6 +376,11 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       roleNameAttributeID = (String) options.get(ROLE_NAME_ATTRIBUTE_ID_OPT);
       if (roleNameAttributeID == null)
          roleNameAttributeID = "name";
+      
+      //JBAS-4619:Parse Role Name from DN
+      String parseRoleNameFromDNOption = (String) options.get(PARSE_ROLE_NAME_FROM_DN_OPT);
+      parseRoleNameFromDN = Boolean.valueOf(parseRoleNameFromDNOption).booleanValue();
+      
       rolesCtxDN = (String) options.get(ROLES_CTX_DN_OPT);
       String strRecursion = (String) options.get(ROLE_RECURSION);
       try
@@ -517,16 +527,23 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
             String dn = canonicalize(sr.getName());
             if (nesting == 0 && roleAttributeIsDN && roleNameAttributeID != null)
             {
-               // Check the top context for role names
-               String[] attrNames = {roleNameAttributeID};
-               Attributes result2 = ctx.getAttributes(dn, attrNames);
-               Attribute roles2 = result2.get(roleNameAttributeID);
-               if (roles2 != null)
+               if(parseRoleNameFromDN)
                {
-                  for (int m = 0; m < roles2.size(); m++)
+                  parseRole(dn);
+               }
+               else
+               {
+                  // Check the top context for role names
+                  String[] attrNames = {roleNameAttributeID};
+                  Attributes result2 = ctx.getAttributes(dn, attrNames);
+                  Attribute roles2 = result2.get(roleNameAttributeID);
+                  if( roles2 != null )
                   {
-                     String roleName = (String) roles2.get(m);
-                     addRole(roleName);
+                     for(int m = 0; m < roles2.size(); m ++)
+                     {
+                        String roleName = (String) roles2.get(m);
+                        addRole(roleName);
+                     }
                   }
                }
             }
@@ -540,6 +557,11 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                for (int n = 0; n < roles.size(); n++)
                {
                   String roleName = (String) roles.get(n);
+                  if(roleAttributeIsDN && parseRoleNameFromDN)
+                  {
+                      parseRole(roleName);
+                  }
+                  else
                   if (roleAttributeIsDN)
                   {
                      // Query the roleDN location for the value of roleNameAttributeID
@@ -667,6 +689,21 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          {
             if(trace)
                log.debug("Failed to create principal: " + roleName, e);
+         }
+      }
+   }
+   
+   private void parseRole(String dn)
+   {
+      StringTokenizer st = new StringTokenizer(dn, ",");
+      while(st != null && st.hasMoreTokens())
+      {
+         String keyVal = st.nextToken();
+         if(keyVal.indexOf(roleNameAttributeID) > -1)
+         {
+            StringTokenizer kst = new StringTokenizer(keyVal,"=");
+            kst.nextToken();
+            addRole(kst.nextToken());
          }
       }
    }
