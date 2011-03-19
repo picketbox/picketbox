@@ -76,8 +76,8 @@ public class UtilTestCase extends TestCase
    public void testUnPrefixSecurityDomain() throws Exception
    {
       assertEquals("sd==sd", "sd", SecurityUtil.unprefixSecurityDomain("sd"));
-      assertEquals("java:/jaas/sd==sd","sd",  SecurityUtil.unprefixSecurityDomain("java:/jaas/sd"));
-      assertEquals("java:/jbsx/sd==sd","sd",  SecurityUtil.unprefixSecurityDomain("java:/jbsx/sd"));
+      assertEquals("java:jboss/jaas/sd==sd","sd",  SecurityUtil.unprefixSecurityDomain("java:jboss/jaas/sd"));
+      assertEquals("java:jboss/jbsx/sd==sd","sd",  SecurityUtil.unprefixSecurityDomain("java:jboss/jbsx/sd"));
    }
 
    public static void main(java.lang.String[] args)

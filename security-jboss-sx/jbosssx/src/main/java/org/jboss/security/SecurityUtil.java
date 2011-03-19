@@ -59,9 +59,9 @@ public class SecurityUtil
       if (securityDomain != null)
       {
          if (securityDomain.startsWith(SecurityConstants.JAAS_CONTEXT_ROOT))
-            result = securityDomain.substring(SecurityConstants.JAAS_CONTEXT_ROOT.length() + 1);
+            result = securityDomain.substring(SecurityConstants.JAAS_CONTEXT_ROOT.length());
          else if (securityDomain.startsWith(SecurityConstants.JASPI_CONTEXT_ROOT))
-            result = securityDomain.substring(SecurityConstants.JASPI_CONTEXT_ROOT.length() + 1);
+            result = securityDomain.substring(SecurityConstants.JASPI_CONTEXT_ROOT.length());
          else
             result = securityDomain;
       }

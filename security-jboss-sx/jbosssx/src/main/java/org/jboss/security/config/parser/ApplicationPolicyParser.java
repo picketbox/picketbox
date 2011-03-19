@@ -273,7 +273,7 @@ public class ApplicationPolicyParser implements XMLStreamConstants
             case AUTHENTICATION : {
                AuthenticationConfigParser parser = new AuthenticationConfigParser();
                Set<AppConfigurationEntry> entries = parser.parse(reader);
-               AuthenticationInfo authInfo = new AuthenticationInfo();
+               AuthenticationInfo authInfo = new AuthenticationInfo(appPolicy.getName());
                authInfo.setAppConfigurationEntry(new ArrayList(entries));
                appPolicy.setAuthenticationInfo(authInfo);
                break;
