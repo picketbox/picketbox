@@ -40,12 +40,12 @@ public interface SecurityConstants
    /**
     * Default JAAS based Security Domain Context
     */
-   String JAAS_CONTEXT_ROOT = "java:/jaas";
+   String JAAS_CONTEXT_ROOT = "java:jboss/jaas/";
    
    /**
     * Default JASPI based Security Domain Context
     */
-   String JASPI_CONTEXT_ROOT = "java:/jbsx";
+   String JASPI_CONTEXT_ROOT = "java:jboss/jbsx/";
    
    /**
     * The String option name used to pass in the security-domain 
@@ -128,4 +128,6 @@ public interface SecurityConstants
     * Identity Trust Constants
     */
    String JAVAEE = "JavaEE";
+
+   String CALLER_PRINCIPAL_GROUP = "CallerPrincipal";
 }
