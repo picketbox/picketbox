@@ -18,6 +18,7 @@
      <module>security-spi</module>
      <module>security-jboss-sx</module>
      <module>picketbox</module>
+     <module>picketbox-infinispan</module>
      <module>assembly</module>
    </modules>
 </project>
