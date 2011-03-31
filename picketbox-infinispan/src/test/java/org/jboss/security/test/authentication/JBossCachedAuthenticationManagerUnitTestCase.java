@@ -154,7 +154,7 @@ public class JBossCachedAuthenticationManagerUnitTestCase extends TestCase
       EmbeddedCacheManager cacheManager = new DefaultCacheManager();
       org.infinispan.config.Configuration configuration = cacheManager.getDefaultConfiguration();
       configuration.setExpirationMaxIdle(2000);
-      configuration.setExpirationLifespan(3000);
+      configuration.setExpirationLifespan(4000);
       Cache<Principal, DomainInfo> cache = cacheManager.getCache("test");
       @SuppressWarnings("unchecked")
       CacheableManager<Cache<Principal, DomainInfo>, Principal> cm = (CacheableManager<Cache<Principal, DomainInfo>, Principal>) am;
@@ -162,11 +162,11 @@ public class JBossCachedAuthenticationManagerUnitTestCase extends TestCase
       
       assertTrue(am.isValid(p, "theduke"));
       assertTrue(cm.containsKey(p));
-      Thread.sleep(1000);
+      Thread.sleep(1500);
       assertTrue(cm.containsKey(p));
-      Thread.sleep(1000);
+      Thread.sleep(1500);
       assertTrue(cm.containsKey(p));
-      Thread.sleep(1000);
+      Thread.sleep(1500);
       assertFalse(cm.containsKey(p));
    }
    
