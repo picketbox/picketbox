@@ -31,6 +31,7 @@ import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import junit.framework.TestCase;
 
 import org.infinispan.Cache;
+import org.infinispan.eviction.EvictionStrategy;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.jboss.security.AuthenticationManager;
@@ -85,9 +86,8 @@ public class JBossCachedAuthenticationManagerUnitTestCase extends TestCase
       AuthenticationManager am = new JBossCachedAuthenticationManager("test", acbh);
       
       EmbeddedCacheManager cacheManager = new DefaultCacheManager();
-      org.infinispan.config.Configuration configuration = new org.infinispan.config.Configuration();
+      org.infinispan.config.Configuration configuration = cacheManager.getDefaultConfiguration();
       configuration.setExpirationMaxIdle(2000);
-      cacheManager.defineConfiguration("test", configuration);
       Cache<Principal, DomainInfo> cache = cacheManager.getCache("test");
       @SuppressWarnings("unchecked")
       CacheableManager<Cache<Principal, DomainInfo>, Principal> cm = (CacheableManager<Cache<Principal, DomainInfo>, Principal>) am;
@@ -106,9 +106,8 @@ public class JBossCachedAuthenticationManagerUnitTestCase extends TestCase
       AuthenticationManager am = new JBossCachedAuthenticationManager("test", acbh);
       
       EmbeddedCacheManager cacheManager = new DefaultCacheManager();
-      org.infinispan.config.Configuration configuration = new org.infinispan.config.Configuration();
+      org.infinispan.config.Configuration configuration = cacheManager.getDefaultConfiguration();
       configuration.setExpirationMaxIdle(1000);
-      cacheManager.defineConfiguration("test", configuration);
       Cache<Principal, DomainInfo> cache = cacheManager.getCache("test");
       @SuppressWarnings("unchecked")
       CacheableManager<Cache<Principal, DomainInfo>, Principal> cm = (CacheableManager<Cache<Principal, DomainInfo>, Principal>) am;
@@ -127,9 +126,8 @@ public class JBossCachedAuthenticationManagerUnitTestCase extends TestCase
       AuthenticationManager am = new JBossCachedAuthenticationManager("test", acbh);
       
       EmbeddedCacheManager cacheManager = new DefaultCacheManager();
-      org.infinispan.config.Configuration configuration = new org.infinispan.config.Configuration();
+      org.infinispan.config.Configuration configuration = cacheManager.getDefaultConfiguration();
       configuration.setExpirationMaxIdle(2000);
-      cacheManager.defineConfiguration("test", configuration);
       Cache<Principal, DomainInfo> cache = cacheManager.getCache("test");
       @SuppressWarnings("unchecked")
       CacheableManager<Cache<Principal, DomainInfo>, Principal> cm = (CacheableManager<Cache<Principal, DomainInfo>, Principal>) am;
@@ -154,10 +152,9 @@ public class JBossCachedAuthenticationManagerUnitTestCase extends TestCase
       AuthenticationManager am = new JBossCachedAuthenticationManager("test", acbh);
       
       EmbeddedCacheManager cacheManager = new DefaultCacheManager();
-      org.infinispan.config.Configuration configuration = new org.infinispan.config.Configuration();
+      org.infinispan.config.Configuration configuration = cacheManager.getDefaultConfiguration();
       configuration.setExpirationMaxIdle(2000);
       configuration.setExpirationLifespan(3000);
-      cacheManager.defineConfiguration("test", configuration);
       Cache<Principal, DomainInfo> cache = cacheManager.getCache("test");
       @SuppressWarnings("unchecked")
       CacheableManager<Cache<Principal, DomainInfo>, Principal> cm = (CacheableManager<Cache<Principal, DomainInfo>, Principal>) am;
@@ -171,6 +168,39 @@ public class JBossCachedAuthenticationManagerUnitTestCase extends TestCase
       assertTrue(cm.containsKey(p));
       Thread.sleep(1000);
       assertFalse(cm.containsKey(p));
+   }
+   
+   public void testCacheMaxEntriesEviction() throws Exception
+   {
+      Principal p = new SimplePrincipal("jduke");
+      AppCallbackHandler acbh = new AppCallbackHandler("jduke", "theduke".toCharArray());
+      AuthenticationManager am = new JBossCachedAuthenticationManager("test", acbh);
+      
+      EmbeddedCacheManager cacheManager = new DefaultCacheManager();
+      org.infinispan.config.Configuration configuration = cacheManager.getDefaultConfiguration();
+      configuration.setExpirationMaxIdle(3000);
+      configuration.setEvictionMaxEntries(2);
+      configuration.setEvictionStrategy(EvictionStrategy.FIFO);
+      configuration.setEvictionWakeUpInterval(2000);
+      Cache<Principal, DomainInfo> cache = cacheManager.getCache("test");
+      @SuppressWarnings("unchecked")
+      CacheableManager<Cache<Principal, DomainInfo>, Principal> cm = (CacheableManager<Cache<Principal, DomainInfo>, Principal>) am;
+      cm.setCache(cache);
+      
+      assertTrue(am.isValid(p, "theduke"));
+      assertTrue(cm.containsKey(p));
+      Principal p2 = new SimplePrincipal("scott");
+      assertTrue(am.isValid(p2, "echoman"));
+      assertTrue(cm.containsKey(p));
+      // we store the caller principal in the cache
+      Principal p2_ = new SimplePrincipal("callerScott");
+      assertTrue(cm.containsKey(p2_));
+      Principal p3 = new SimplePrincipal("stark");
+      assertTrue(am.isValid(p3, "javaman"));
+      assertFalse(cm.containsKey(p));
+      Principal p3_ = new SimplePrincipal("callerStark");
+      assertTrue(cm.containsKey(p2_));
+      assertTrue(cm.containsKey(p3_));
    }
    
    private void establishSecurityConfiguration()
