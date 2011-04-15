@@ -24,6 +24,8 @@ package org.picketbox.plugins;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
 import org.jboss.security.ISecurityManagement;
+import org.jboss.security.JBossJSSESecurityDomain;
+import org.jboss.security.JSSESecurityDomain;
 import org.jboss.security.audit.AuditManager;
 import org.jboss.security.identitytrust.IdentityTrustManager;
 import org.jboss.security.mapping.MappingManager;
@@ -82,5 +84,13 @@ public class PicketBoxSecurityManagement implements ISecurityManagement
    public MappingManager getMappingManager(String securityDomain)
    {
       return new JBossMappingManager(securityDomain);
+   }
+   
+   /**
+    * @see ISecurityManagement#getJSSE(String)
+    */
+   public JSSESecurityDomain getJSSE(String securityDomain)
+   {
+      return new JBossJSSESecurityDomain(securityDomain);
    }
 }

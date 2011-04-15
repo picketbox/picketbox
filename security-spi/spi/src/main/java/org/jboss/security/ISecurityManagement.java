@@ -68,4 +68,12 @@ public interface ISecurityManagement extends Serializable
     * @return 
     */
    public IdentityTrustManager getIdentityTrustManager(String securityDomain);
+   
+   /**
+    * JSSE configuration for the security domain
+    * 
+    * @param securityDomain the SecurityDomain
+    * @return
+    */
+   public JSSESecurityDomain getJSSE(String securityDomain);
 }

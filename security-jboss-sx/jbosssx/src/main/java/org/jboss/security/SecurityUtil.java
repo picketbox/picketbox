@@ -46,6 +46,8 @@ import org.jboss.security.mapping.MappingManager;
 public class SecurityUtil
 {
    private static Logger log = Logger.getLogger(SecurityUtil.class);
+   
+   private static String LEGACY_JAAS_CONTEXT_ROOT = "java:/jaas/";
 
    /**
     * Strip the security domain of prefix (java:jaas or java:jbsx)
@@ -62,6 +64,8 @@ public class SecurityUtil
             result = securityDomain.substring(SecurityConstants.JAAS_CONTEXT_ROOT.length());
          else if (securityDomain.startsWith(SecurityConstants.JASPI_CONTEXT_ROOT))
             result = securityDomain.substring(SecurityConstants.JASPI_CONTEXT_ROOT.length());
+         else if (securityDomain.startsWith(LEGACY_JAAS_CONTEXT_ROOT))
+            result = securityDomain.substring(LEGACY_JAAS_CONTEXT_ROOT.length());
          else
             result = securityDomain;
       }

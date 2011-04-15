@@ -78,4 +78,20 @@ class SecurityActions
       }
       return prop;
    }
+   
+   private static class GetTCLAction implements PrivilegedAction<ClassLoader>
+   {
+      static PrivilegedAction<ClassLoader> ACTION = new GetTCLAction();
+      public ClassLoader run()
+      {
+         ClassLoader loader = Thread.currentThread().getContextClassLoader();
+         return loader;
+      }
+   }
+   
+   static ClassLoader getContextClassLoader()
+   {
+      ClassLoader loader = (ClassLoader) AccessController.doPrivileged(GetTCLAction.ACTION);
+      return loader;
+   }
 }
