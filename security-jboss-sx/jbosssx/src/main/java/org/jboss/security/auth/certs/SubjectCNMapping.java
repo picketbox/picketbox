@@ -42,7 +42,7 @@ public class SubjectCNMapping
     * @param certs Array of client certificates, with the first one in
     * the array being the certificate of the client itself.
     */
-   public Principal toPrinicipal(X509Certificate[] certs)
+   public Principal toPrincipal(X509Certificate[] certs)
    {
       Principal cn = null;
       Principal subject = certs[0].getSubjectDN();
@@ -63,5 +63,10 @@ public class SubjectCNMapping
          cn = subject;
       }
       return cn;
+   }
+   
+   public Principal toPrinicipal(X509Certificate[] certs)
+   {
+      return toPrincipal(certs);
    }
 }
