@@ -42,7 +42,7 @@ public class SubjectDNMapping
     * @param certs Array of client certificates, with the first one in
     * the array being the certificate of the client itself.
     */
-   public Principal toPrinicipal(X509Certificate[] certs)
+   public Principal toPrincipal(X509Certificate[] certs)
    {
       Principal subject = certs[0].getSubjectDN();
       // Convert to a serializable principal
@@ -53,5 +53,10 @@ public class SubjectDNMapping
       }
 
       return subject;
+   }
+   
+   public Principal toPrinicipal(X509Certificate[] certs)
+   {
+      return toPrincipal(certs);
    }
 }

@@ -43,11 +43,16 @@ public class SerialNumberIssuerDNMapping
     * @param certs Array of client certificates, with the first one in
     * the array being the certificate of the client itself.
     */
-   public Principal toPrinicipal(X509Certificate[] certs)
+   public Principal toPrincipal(X509Certificate[] certs)
    {
       BigInteger serialNumber = certs[0].getSerialNumber();
       Principal issuer = certs[0].getIssuerDN();
       SimplePrincipal principal = new SimplePrincipal(serialNumber+" "+issuer);
       return principal;
+   }
+   
+   public Principal toPrinicipal(X509Certificate[] certs)
+   {
+      return toPrincipal(certs);
    }
 }

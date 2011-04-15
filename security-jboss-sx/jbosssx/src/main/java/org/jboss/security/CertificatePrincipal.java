@@ -37,6 +37,16 @@ public interface CertificatePrincipal
     *
     * @param certs Array of client certificates, with the first one in
     * the array being the certificate of the client itself.
+    * @deprecated method kept for backward compatibility. Use toPrincipal(X509Certificate[]) instead.
     */
    public Principal toPrinicipal(X509Certificate[] certs);
+   
+   /**
+    * Return the Principal associated with the specified chain of X509
+    * client certificates.  If there is none, return <code>null</code>.
+    *
+    * @param certs Array of client certificates, with the first one in
+    * the array being the certificate of the client itself.
+    */
+   public Principal toPrincipal(X509Certificate[] certs);
 }
