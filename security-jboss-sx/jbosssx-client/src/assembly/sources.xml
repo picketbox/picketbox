@@ -1,0 +1,30 @@
+<assembly>
+  <id>sources</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>../jbosssx/src/main/java</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>org/jboss/crypto/JBossSXProvider.java</include>
+        <include>org/jboss/crypto/CryptoUtil.java</include>
+        <include>org/jboss/crypto/digest/*</include>
+        <include>org/jboss/security/*</include>
+        <include>org/jboss/security/auth/callback/*</include>
+        <include>org/jboss/security/auth/login/*</include>
+        <include>org/jboss/security/client/*</include>
+        <include>org/jboss/security/auth/login/XMLLoginConfig.java</include>
+        <include>org/jboss/security/auth/login/XMLLoginConfigMBean.java</include>
+        <include>org/jboss/security/plugins/PBEUtils.java</include>
+        <include>org/jboss/security/ssl/ClientSocketFactory.java</include>
+        <include>org/jboss/security/ssl/RMISSLClientSocketFactory.java</include>
+        <include>org/jboss/security/plugins/*SecurityContext*.java</include>
+        <include>org/jboss/security/plugins/DefaultSecurityManagement.java</include>
+        <include>org/jboss/resource/security/*.java</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>
