@@ -36,6 +36,7 @@ import java.security.cert.Certificate;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 
@@ -54,15 +55,15 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
 
    private KeyStore keyStore;
 
-   private KeyManagerFactory keyManager;
+   private KeyManagerFactory keyManagerFactory;
+   
+   private KeyManager[] keyManagers;
 
    private String keyStoreType = "JKS";
 
    private URL keyStoreURL;
 
    private char[] keyStorePassword;
-
-   private String keyStoreAlias;
 
    private String keyStoreProvider;
    
@@ -74,7 +75,9 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
 
    private KeyStore trustStore;
 
-   private TrustManagerFactory trustManager;
+   private TrustManagerFactory trustManagerFactory;
+   
+   private TrustManager[] trustManagers;
 
    private String trustStoreType = "JKS";
 
@@ -91,6 +94,8 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    private String trustManagerFactoryAlgorithm;
 
    private String clientAlias;
+   
+   private String serverAlias;
 
    private boolean clientAuth;
 
@@ -124,16 +129,6 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    public void setKeyStoreURL(String keyStoreURL) throws IOException
    {
       this.keyStoreURL = validateStoreURL(keyStoreURL);
-   }
-
-   public String getKeyStoreAlias()
-   {
-      return keyStoreAlias;
-   }
-
-   public void setKeyStoreAlias(String keyStoreAlias)
-   {
-      this.keyStoreAlias = keyStoreAlias;
    }
 
    public String getKeyStoreProvider()
@@ -253,12 +248,12 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    @Override
    public String getServerAlias()
    {
-      return keyStoreAlias;
+      return serverAlias;
    }
 
    public void setServerAlias(String serverAlias)
    {
-      this.keyStoreAlias = serverAlias;
+      this.serverAlias = serverAlias;
    }
 
    @Override
@@ -300,15 +295,15 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    }
 
    @Override
-   public KeyManagerFactory getKeyManagerFactory() throws SecurityException
+   public KeyManager[] getKeyManagers() throws SecurityException
    {
-      return keyManager;
+      return keyManagers;
    }
 
    @Override
-   public TrustManagerFactory getTrustManagerFactory() throws SecurityException
+   public TrustManager[] getTrustManagers() throws SecurityException
    {
-      return trustManager;
+      return trustManagers;
    }
 
    @Override
@@ -446,27 +441,20 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
             is = keyStoreURL.openStream();
          }
          keyStore.load(is, keyStorePassword);
-         if (keyStoreAlias != null && !keyStore.isKeyEntry(keyStoreAlias))
-         {
-            throw new IOException("Cannot find key entry with alias " + keyStoreAlias + " in the keyStore");
-         }
          String algorithm = null;
          if (keyManagerFactoryAlgorithm != null)
             algorithm = keyManagerFactoryAlgorithm;
          else
             algorithm = KeyManagerFactory.getDefaultAlgorithm();
          if (keyManagerFactoryProvider != null)
-            keyManager = KeyManagerFactory.getInstance(algorithm, keyManagerFactoryProvider);
+            keyManagerFactory = KeyManagerFactory.getInstance(algorithm, keyManagerFactoryProvider);
          else
-            keyManager = KeyManagerFactory.getInstance(algorithm);
-         keyManager.init(keyStore, keyStorePassword);
-         if (keyStoreAlias != null)
+            keyManagerFactory = KeyManagerFactory.getInstance(algorithm);
+         keyManagerFactory.init(keyStore, keyStorePassword);
+         keyManagers = keyManagerFactory.getKeyManagers();
+         for (int i = 0; i < keyManagers.length; i++)
          {
-            KeyManager[] keyManagers = keyManager.getKeyManagers();
-            for (int i = 0; i < keyManagers.length; i++)
-            {
-               keyManagers[i] = new SecurityKeyManager((X509KeyManager) keyManagers[i], keyStoreAlias, clientAlias);
-            }
+            keyManagers[i] = new SecurityKeyManager((X509KeyManager) keyManagers[i], serverAlias, clientAlias);
          }
       }
       if (trustStorePassword != null)
@@ -501,10 +489,11 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
          else
             algorithm = TrustManagerFactory.getDefaultAlgorithm();
          if (trustManagerFactoryProvider != null)
-            trustManager = TrustManagerFactory.getInstance(algorithm, trustStoreProvider);
+            trustManagerFactory = TrustManagerFactory.getInstance(algorithm, trustStoreProvider);
          else
-            trustManager = TrustManagerFactory.getInstance(algorithm);
-         trustManager.init(trustStore);
+            trustManagerFactory = TrustManagerFactory.getInstance(algorithm);
+         trustManagerFactory.init(trustStore);
+         trustManagers = trustManagerFactory.getTrustManagers();
       }
       else if (keyStore != null)
       {
@@ -514,8 +503,9 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
             algorithm = trustManagerFactoryAlgorithm;
          else
             algorithm = TrustManagerFactory.getDefaultAlgorithm();
-         trustManager = TrustManagerFactory.getInstance(algorithm);
-         trustManager.init(trustStore);
+         trustManagerFactory = TrustManagerFactory.getInstance(algorithm);
+         trustManagerFactory.init(trustStore);
+         trustManagers = trustManagerFactory.getTrustManagers();
       }
    }
 

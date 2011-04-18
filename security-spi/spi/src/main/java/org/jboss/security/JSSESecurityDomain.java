@@ -25,9 +25,9 @@ import java.lang.SecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
-// JSSE key and trust managers
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManagerFactory;
+
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.TrustManager;
 
 /**
  * Security domain used for configuring SSL.
@@ -44,11 +44,11 @@ public interface JSSESecurityDomain extends BaseSecurityManager
    public KeyStore getKeyStore() throws SecurityException;
 
    /**
-    * Get the KeyManagerFactory associated with the security domain
+    * Get the KeyManagers created by the configured KeyManagerFactory
     * 
-    * @return the keystore manager factory
+    * @return the initialized KeyManagers
     */
-   public KeyManagerFactory getKeyManagerFactory() throws SecurityException;
+   public KeyManager[] getKeyManagers() throws SecurityException;
 
    /**
     * Get the truststore associated with the security domain. This may be the same as the keystore
@@ -58,11 +58,11 @@ public interface JSSESecurityDomain extends BaseSecurityManager
    public KeyStore getTrustStore() throws SecurityException;
 
    /**
-    * Get the TrustManagerFactory associated with the security domain
+    * Get the TrustManagers created by the configured TrustManagerFactory
     * 
-    * @return the truststore manager factory
+    * @return the initialized TrustManagers
     */
-   public TrustManagerFactory getTrustManagerFactory() throws SecurityException;
+   public TrustManager[] getTrustManagers() throws SecurityException;
    
    /**
     * Reload/initialize keystore and truststore using the attributes set in the security domain
