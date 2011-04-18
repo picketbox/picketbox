@@ -8,7 +8,7 @@
    <groupId>org.picketbox</groupId>
    <artifactId>picketbox-parent</artifactId>
    <packaging>pom</packaging>
-   <version>4.0.0-SNAPSHOT</version>
+   <version>4.0.0.Alpha8</version>
    <name>PicketBox- Parent</name>
    <url>http://jboss.org/picketbox</url>
    <description>PicketBox is a security framework for authentication, authorization, audit and mapping</description>
@@ -23,8 +23,8 @@
       <url>http://www.jboss.org</url>
    </organization>
    <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/tags/4.0.0-SNAPSHOT</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/tags/4.0.0-SNAPSHOT</developerConnection>
+      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/tags/4.0.0.Alpha8</connection>
+      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/tags/4.0.0.Alpha8</developerConnection>
    </scm>
   
    <build>
