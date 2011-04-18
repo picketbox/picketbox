@@ -41,7 +41,10 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.security.JSSESecurityDomain;
+import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityDomain;
+import org.jboss.security.SecurityUtil;
 import org.jboss.security.auth.callback.ObjectCallback;
 import org.jboss.security.auth.certs.X509CertificateVerifier;
 
@@ -67,7 +70,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
    /** The client certificate */
    private X509Certificate credential;
    /** The SecurityDomain to obtain the KeyStore/TrustStore from */
-   private SecurityDomain domain = null;
+   private Object domain = null;
    /** An option certificate verifier */
    private X509CertificateVerifier verifier; 
 
@@ -96,29 +99,37 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
 
       // Get the security domain and default to "other"
       String sd = (String) options.get("securityDomain");
+      sd = SecurityUtil.unprefixSecurityDomain(sd);
       if (sd == null)
-         sd = "java:/jaas/other";
+         sd = "other";
 
       if( trace )
          log.trace("securityDomain=" + sd);
 
       try
       {
-         Object tempDomain = new InitialContext().lookup(sd);
+         Object tempDomain = new InitialContext().lookup(SecurityConstants.JAAS_CONTEXT_ROOT + sd);
          if (tempDomain instanceof SecurityDomain)
          {
-            domain = (SecurityDomain) tempDomain;
+            domain = tempDomain;
             if( trace )
             {
-               if (domain != null)
-                  log.trace("found domain: " + domain.getClass().getName());
-               else
-                  log.trace("the domain " + sd + " is null!");
+               log.trace("found domain: " + domain.getClass().getName());
             }
          }
-         else
-         {
-            log.error("The domain " + sd + " is not a SecurityDomain. All authentication using this module will fail!");
+         else {
+            tempDomain = new InitialContext().lookup(SecurityConstants.JAAS_CONTEXT_ROOT + sd + "/jsse");
+            if (tempDomain instanceof JSSESecurityDomain) {
+               domain = tempDomain;
+               if( trace )
+               {
+                  log.trace("found domain: " + domain.getClass().getName());
+               }
+            }
+            else
+            {
+               log.error("The JSSE security domain " + sd + " is not valid. All authentication using this login module will fail!");
+            }
          }
       }
       catch (NamingException e)
@@ -353,8 +364,17 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
       KeyStore trustStore = null;
       if( domain != null )
       {
-         keyStore = domain.getKeyStore();
-         trustStore = domain.getTrustStore();
+         if (domain instanceof SecurityDomain)
+         {
+            keyStore = ((SecurityDomain) domain).getKeyStore();
+            trustStore = ((SecurityDomain) domain).getTrustStore();
+         }
+         else
+            if (domain instanceof JSSESecurityDomain)
+            {
+               keyStore = ((JSSESecurityDomain) domain).getKeyStore();
+               trustStore = ((JSSESecurityDomain) domain).getTrustStore();
+            }
       }
       if( trustStore == null )
          trustStore = keyStore;
