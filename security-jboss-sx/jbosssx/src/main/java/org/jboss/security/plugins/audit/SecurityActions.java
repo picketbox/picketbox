@@ -52,12 +52,19 @@ class SecurityActions
          {
             try
             {
-               return getContextClassLoader().loadClass(name);
+               return getClass().getClassLoader().loadClass(name);
             }
-            catch ( Exception e)
+            catch (Exception ignore)
             {
-               throw new PrivilegedActionException(e);
-            } 
+               try
+               {
+                  return getContextClassLoader().loadClass(name);
+               }
+               catch (Exception e)
+               {
+                  throw new PrivilegedActionException(e);
+               }
+            }
          }
       });
    }

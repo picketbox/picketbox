@@ -43,12 +43,19 @@ public class SecurityActions
          {
             try
             {
-               ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-               return tcl.loadClass(FQN);
+               return getClass().getClassLoader().loadClass(FQN);
             }
-            catch (Exception e)
+            catch (Exception ignore)
             {
-               throw new RuntimeException(e);
+               try
+               {
+                  ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+                  return tcl.loadClass(FQN);
+               }
+               catch (Exception e)
+               {
+                  throw new RuntimeException(e);
+               }
             }
          }
       });

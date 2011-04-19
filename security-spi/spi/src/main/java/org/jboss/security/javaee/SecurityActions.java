@@ -40,8 +40,15 @@ class SecurityActions
       {
          public Class<?> run() throws Exception
          {
-            ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-            return tcl.loadClass(fqn);
+            try
+            {
+               return getClass().getClassLoader().loadClass(fqn);
+            }
+            catch (Exception e)
+            {
+               ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+               return tcl.loadClass(fqn);
+            }
          }
       });
    }
