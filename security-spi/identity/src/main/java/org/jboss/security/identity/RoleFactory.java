@@ -50,8 +50,15 @@ public class RoleFactory
          Class<?> clazz = clazzMap.get(SIMPLE_ROLE_CLASS);
          if( clazz == null )
          {
-            ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-            clazz = tcl.loadClass(SIMPLE_ROLE_CLASS); 
+            try
+            {
+               clazz = getClass().getClassLoader().loadClass(name);
+            }
+            catch (Exception e)
+            {
+               ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+               clazz = tcl.loadClass(SIMPLE_ROLE_CLASS);
+            }
          }
          
          Constructor<?> ctr = clazz.getConstructor(new Class[] {String.class});
@@ -69,8 +76,15 @@ public class RoleFactory
          Class<?> clazz = clazzMap.get(SIMPLE_ROLEGROUP_CLASS);
          if( clazz == null )
          {
-            ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-            clazz = tcl.loadClass(SIMPLE_ROLEGROUP_CLASS); 
+            try
+            {
+               clazz = getClass().getClassLoader().loadClass(name);
+            }
+            catch (Exception e)
+            {
+               ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+               clazz = tcl.loadClass(SIMPLE_ROLEGROUP_CLASS);
+            }
          }
           
          Constructor<?> ctr = clazz.getConstructor(new Class[] {String.class});

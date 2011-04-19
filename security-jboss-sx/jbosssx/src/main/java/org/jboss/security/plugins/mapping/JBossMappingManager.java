@@ -138,7 +138,6 @@ public class JBossMappingManager implements MappingManager
    @SuppressWarnings("unchecked")
    private <T> MappingProvider<T> getMappingProvider(MappingModuleEntry mme)
    {
-      ClassLoader tcl = SecurityActions.getContextClassLoader();
       MappingProvider<T> mp = null;
       try
       {
@@ -146,7 +145,15 @@ public class JBossMappingManager implements MappingManager
          Class<?> clazz = clazzMap.get(fqn);
          if( clazz == null )
          {
-            clazz = tcl.loadClass(fqn);
+            try
+            {
+               clazz = getClass().getClassLoader().loadClass(fqn);
+            }
+            catch (Exception e)
+            {
+               ClassLoader tcl = SecurityActions.getContextClassLoader();
+               clazz = tcl.loadClass(fqn);
+            }
             clazzMap.put(fqn, clazz); 
          } 
          mp = (MappingProvider<T>) clazz.newInstance();

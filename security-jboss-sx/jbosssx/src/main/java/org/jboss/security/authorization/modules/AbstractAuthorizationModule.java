@@ -164,11 +164,18 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
    protected AuthorizationModuleDelegate getDelegate(String delegateStr) 
    throws Exception
    {
-      ClassLoader tcl = SecurityActions.getContextClassLoader();
       Class<?> clazz = clazzMap.get(delegateStr);
       if(clazz == null)
       {
-         clazz = tcl.loadClass(delegateStr);
+         try
+         {
+            clazz = getClass().getClassLoader().loadClass(delegateStr);
+         }
+         catch (Exception e)
+         {
+            ClassLoader tcl = SecurityActions.getContextClassLoader();
+            clazz = tcl.loadClass(delegateStr);
+         }
          clazzMap.put(delegateStr, clazz); 
       } 
       

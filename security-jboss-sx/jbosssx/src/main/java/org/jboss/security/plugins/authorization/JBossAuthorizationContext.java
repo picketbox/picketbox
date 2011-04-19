@@ -306,13 +306,20 @@ public class JBossAuthorizationContext extends AuthorizationContext
          throws PrivilegedActionException
    {
       AuthorizationModule am = null;
-      ClassLoader tcl = SecurityActions.getContextClassLoader();
       try
       {
          Class<?> clazz = clazzMap.get(name);
          if(clazz == null)
          {
-            clazz = tcl.loadClass(name);
+            try
+            {
+               clazz = getClass().getClassLoader().loadClass(name);
+            }
+            catch (Exception ignore)
+            {
+               ClassLoader tcl = SecurityActions.getContextClassLoader();
+               clazz = tcl.loadClass(name);
+            }
             clazzMap.put(name, clazz);
          }   
             
