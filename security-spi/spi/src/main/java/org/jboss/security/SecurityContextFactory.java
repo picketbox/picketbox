@@ -51,16 +51,31 @@ public class SecurityContextFactory
    {
       try
       {
-         defaultSecurityContextClass = (Class<? extends SecurityContext>) SecuritySPIActions.getContextClassLoader().loadClass(defaultFQN);
+         defaultSecurityContextClass = (Class<? extends SecurityContext>) SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class).loadClass(defaultFQN);
       }
       catch(Exception ignore)
-      {}
+      {
+         try
+         {
+            defaultSecurityContextClass = (Class<? extends SecurityContext>) SecuritySPIActions.getContextClassLoader().loadClass(defaultFQN);
+         }
+         catch (Exception e)
+         {
+         }
+      }
       try
       {
-         defaultUtilClass = (Class<? extends SecurityContextUtil>) SecuritySPIActions.getContextClassLoader().loadClass(defaultUtilClassFQN); 
+         defaultUtilClass = (Class<? extends SecurityContextUtil>) SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class).loadClass(defaultUtilClassFQN);
       }
       catch(Exception ignore)
-      {   
+      {
+         try
+         {
+            defaultUtilClass = (Class<? extends SecurityContextUtil>) SecuritySPIActions.getContextClassLoader().loadClass(defaultUtilClassFQN);
+         }
+         catch(Exception e)
+         {
+         }
       }
    }
 
@@ -74,7 +89,21 @@ public class SecurityContextFactory
    {
       if(defaultSecurityContextClass != null)
          return createSecurityContext(securityDomain, defaultSecurityContextClass);
-      return createSecurityContext(securityDomain, defaultFQN);
+      return createSecurityContext(securityDomain, defaultFQN, SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class));
+   }
+   
+   /**
+    * Create a security context 
+    * @param securityDomain Security Domain driving the context
+    * @param classLoader ClassLoader to use
+    * @return
+    * @throws Exception 
+    */
+   public static SecurityContext createSecurityContext(String securityDomain, ClassLoader classLoader) throws Exception
+   {
+      if(defaultSecurityContextClass != null)
+         return createSecurityContext(securityDomain, defaultSecurityContextClass);
+      return createSecurityContext(securityDomain, defaultFQN, classLoader);
    }
    
    /**
@@ -87,12 +116,26 @@ public class SecurityContextFactory
    public static SecurityContext createSecurityContext(String securityDomain,
          String fqnClass) throws Exception
    {
+      return createSecurityContext(securityDomain, fqnClass, SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class));
+   }
+   
+   /**
+    * Construct a SecurityContext
+    * @param securityDomain  The Security Domain
+    * @param fqnClass  Fully Qualified Name of the SecurityContext Class
+    * @param classLoader ClassLoader to use
+    * @return an instance of SecurityContext
+    * @throws Exception
+    */
+   public static SecurityContext createSecurityContext(String securityDomain,
+         String fqnClass, ClassLoader classLoader) throws Exception
+   {
       if(securityDomain == null)
          throw new IllegalArgumentException("securityDomain is null");
       if(fqnClass == null)
          throw new IllegalArgumentException("fqnClass is null");
-      defaultSecurityContextClass = getContextClass(fqnClass);
-      return createSecurityContext(securityDomain, defaultSecurityContextClass); 
+      defaultSecurityContextClass = getContextClass(fqnClass, classLoader);
+      return createSecurityContext(securityDomain, defaultSecurityContextClass);
    }
    
    
@@ -128,9 +171,26 @@ public class SecurityContextFactory
     * @see #createSecurityContext(String)
     */
    public static SecurityContext createSecurityContext(Principal p, 
-         Object cred,Subject s, String securityDomain) throws Exception
+         Object cred, Subject s, String securityDomain) throws Exception
    {
-      SecurityContext jsc = createSecurityContext(securityDomain);
+      return createSecurityContext(p, cred, s, securityDomain, SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class));
+   }
+   
+   /**
+    * Create a security context
+    * @param p Principal
+    * @param cred Credential
+    * @param s Subject
+    * @param securityDomain SecurityDomain
+    * @param classLoader ClassLoader to use
+    * @return
+    * @throws Exception 
+    * @see #createSecurityContext(String)
+    */
+   public static SecurityContext createSecurityContext(Principal p, 
+         Object cred, Subject s, String securityDomain, ClassLoader classLoader) throws Exception
+   {
+      SecurityContext jsc = createSecurityContext(securityDomain, classLoader);
       jsc.getUtil().createSubjectInfo(p,cred,s);
       return jsc;
    }
@@ -142,30 +202,43 @@ public class SecurityContextFactory
     * @param s Subject
     * @param securityDomain SecurityDomain
     * @param fqnClass FQN of the SecurityContext class to be instantiated
+    * @param classLoader ClassLoader to use
     * @return
     * @see #createSecurityContext(String)
     * @throws Exception
     */
    public static SecurityContext createSecurityContext(Principal p, 
-         Object cred,Subject s, String securityDomain, String fqnClass) 
+         Object cred,Subject s, String securityDomain, String fqnClass, ClassLoader classLoader) 
    throws Exception
    {
-      SecurityContext sc = createSecurityContext(securityDomain, fqnClass);
+      SecurityContext sc = createSecurityContext(securityDomain, fqnClass, classLoader);
       sc.getUtil().createSubjectInfo(p,cred,s);
       return sc;
    }
    
    /**
     * Return an instance of the SecurityContextUtil
+    * @param sc SecurityContext
     * @return
     */
    public static SecurityContextUtil createUtil(SecurityContext sc) throws Exception
+   {
+      return createUtil(sc, SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class));
+   }
+   
+   /**
+    * Return an instance of the SecurityContextUtil
+    * @param sc SecurityContext
+    * @param classLoader ClassLoader to use
+    * @return
+    */
+   public static SecurityContextUtil createUtil(SecurityContext sc, ClassLoader classLoader) throws Exception
    {
       Class<? extends SecurityContextUtil> clazz = defaultUtilClass;
       
       if(clazz  == null)
       {
-         clazz = (Class<? extends SecurityContextUtil>) loadClass(defaultUtilClassFQN);
+         clazz = (Class<? extends SecurityContextUtil>) loadClass(defaultUtilClassFQN, classLoader);
          defaultUtilClass = clazz; 
       }
       
@@ -173,7 +246,7 @@ public class SecurityContextFactory
       Constructor<?> ctr = clazz.getConstructor(new Class[]{SecurityContext.class});
       Object obj = ctr.newInstance(new Object[]{sc});
       return SecurityContextUtil.class.cast(obj);
-   } 
+   }
    
    /**
     * Return an instance of the SecurityContextUtil given a FQN of the util class
@@ -183,12 +256,32 @@ public class SecurityContextFactory
     */ 
    public static SecurityContextUtil createUtil(SecurityContext sc, String utilFQN) throws Exception
    {
-      ClassLoader tcl = SecuritySPIActions.getContextClassLoader();
-      Class<?> clazz = tcl.loadClass(utilFQN);
+      return createUtil(sc, utilFQN, SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class));
+   }
+   
+   /**
+    * Return an instance of the SecurityContextUtil given a FQN of the util class
+    * @param sc SecurityContext
+    * @param utilFQN fqn of the util class
+    * @param classLoader ClassLoader to use
+    * @return
+    */ 
+   public static SecurityContextUtil createUtil(SecurityContext sc, String utilFQN, ClassLoader classLoader) throws Exception
+   {
+      Class<?> clazz = null;
+      try
+      {
+         clazz = classLoader.loadClass(utilFQN);
+      }
+      catch (Exception e)
+      {
+         ClassLoader tcl = SecuritySPIActions.getContextClassLoader();
+         clazz = tcl.loadClass(utilFQN);
+      }
       //Get the CTR
       Constructor<? extends SecurityContextUtil> ctr = 
          (Constructor<? extends SecurityContextUtil>) clazz.getConstructor(new Class[]{SecurityContext.class});
-      return ctr.newInstance(new Object[]{sc}); 
+      return ctr.newInstance(new Object[]{sc});
    }
    
    /**
@@ -229,18 +322,33 @@ public class SecurityContextFactory
    /**
     * Load a class
     * @param fqn
+    * @param classLoader
     * @return
     * @throws Exception
     */
-   private static Class<?> loadClass(String fqn) throws Exception
+   private static Class<?> loadClass(String fqn, ClassLoader classLoader) throws Exception
    {
-      ClassLoader tcl = SecuritySPIActions.getContextClassLoader();
-      return tcl.loadClass(fqn);
+      try
+      {
+         return classLoader.loadClass(fqn);
+      }
+      catch (Exception e)
+      {
+         ClassLoader tcl = SecuritySPIActions.getContextClassLoader();
+         return tcl.loadClass(fqn);
+      }
    }
     
-   private static Class<SecurityContext> getContextClass(String className) throws Exception
+   private static Class<SecurityContext> getContextClass(String className, ClassLoader classLoader) throws Exception
    {
-      ClassLoader tcl = SecuritySPIActions.getContextClassLoader();
-      return (Class<SecurityContext>) tcl.loadClass(className);
+      try
+      {
+         return (Class<SecurityContext>) classLoader.loadClass(className);
+      }
+      catch (Exception e)
+      {
+         ClassLoader tcl = SecuritySPIActions.getContextClassLoader();
+         return (Class<SecurityContext>) tcl.loadClass(className);
+      }
    }
 }
