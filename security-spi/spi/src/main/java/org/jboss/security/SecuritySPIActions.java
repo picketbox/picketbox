@@ -34,11 +34,22 @@ class SecuritySPIActions
 {  
    static ClassLoader getContextClassLoader()
    {
-      return AccessController.doPrivileged( new PrivilegedAction<ClassLoader>() 
+      return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() 
       {
          public ClassLoader run()
          {
            return Thread.currentThread().getContextClassLoader();
+         }
+      });
+   }
+   
+   static ClassLoader getCurrentClassLoader(final Class clazz)
+   {
+      return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>()
+      {
+         public ClassLoader run()
+         {
+            return clazz.getClassLoader();
          }
       });
    }
