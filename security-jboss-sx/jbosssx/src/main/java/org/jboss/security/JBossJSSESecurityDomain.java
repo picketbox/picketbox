@@ -33,6 +33,7 @@ import java.security.KeyStore;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.util.Properties;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -104,6 +105,8 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    private String[] cipherSuites;
    
    private String[] protocols;
+   
+   private Properties additionalProperties;
 
    private String name;
 
@@ -369,6 +372,17 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    {
       String[] p = protocols.split(",");
       this.protocols = p;
+   }
+
+   @Override
+   public Properties getAdditionalProperties()
+   {
+      return additionalProperties;
+   }
+   
+   public void setAdditionalProperties(Properties properties)
+   {
+      this.additionalProperties = properties;
    }
 
    private URL validateStoreURL(String storeURL) throws IOException
