@@ -25,6 +25,7 @@ import java.lang.SecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.util.Properties;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
@@ -146,5 +147,12 @@ public interface JSSESecurityDomain extends BaseSecurityManager
     * @return array of protocol names
     */
    public String[] getProtocols();
+   
+   /**
+    * Returns the additional properties map
+    * 
+    * @return map with additional properties
+    */
+   public Properties getAdditionalProperties();
    
 }
