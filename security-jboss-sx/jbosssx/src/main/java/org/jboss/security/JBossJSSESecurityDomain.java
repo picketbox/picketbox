@@ -100,6 +100,10 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    private boolean clientAuth;
 
    private char[] serviceAuthToken;
+   
+   private String[] cipherSuites;
+   
+   private String[] protocols;
 
    private String name;
 
@@ -341,6 +345,30 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    public void reloadKeyAndTrustStore() throws Exception
    {
       loadKeyAndTrustStore();
+   }
+   
+   @Override
+   public String[] getCipherSuites()
+   {
+      return cipherSuites;
+   }
+   
+   public void setCipherSuites(String cipherSuites)
+   {
+      String[] cs = cipherSuites.split(",");
+      this.cipherSuites = cs;
+   }
+
+   @Override
+   public String[] getProtocols()
+   {
+      return protocols;
+   }
+   
+   public void setProtocols(String protocols)
+   {
+      String[] p = protocols.split(",");
+      this.protocols = p;
    }
 
    private URL validateStoreURL(String storeURL) throws IOException
