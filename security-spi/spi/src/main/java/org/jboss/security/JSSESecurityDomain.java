@@ -133,4 +133,18 @@ public interface JSSESecurityDomain extends BaseSecurityManager
     */
    public Certificate getCertificate(String alias) throws Exception;
    
+   /**
+    * Returns the cipher suites that should be enabled on SSLSockets
+    * 
+    * @return array of cipher suite names
+    */
+   public String[] getCipherSuites();
+   
+   /**
+    * Returns the protocols that should be enabled on SSLSockets
+    * 
+    * @return array of protocol names
+    */
+   public String[] getProtocols();
+   
 }
