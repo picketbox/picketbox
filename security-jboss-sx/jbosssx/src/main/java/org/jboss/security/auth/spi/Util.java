@@ -24,6 +24,7 @@ package org.jboss.security.auth.spi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.MessageDigest;
@@ -186,14 +187,32 @@ public class Util
          URLClassLoader ucl = (URLClassLoader) loader;
          defaultUrl = SecurityActions.findResource(ucl,defaultsName);
          url = SecurityActions.findResource(ucl,propertiesName);
-         if(log.isTraceEnabled())
+         if (trace)
             log.trace("findResource: "+url);
       }
       // Do a general resource search
-      if( defaultUrl == null )
+      if( defaultUrl == null ) {
          defaultUrl = loader.getResource(defaultsName);
-      if( url == null )
+         if (defaultUrl == null) {
+            try {
+               defaultUrl = new URL(defaultsName);
+            } catch (MalformedURLException mue) {
+               if (trace)
+                  log.trace("Failed to open defaultUrl", mue);
+            }
+         }
+      }
+      if( url == null ) {
          url = loader.getResource(propertiesName);
+         if (url == null) {
+            try {
+               url = new URL(propertiesName);
+            } catch (MalformedURLException mue) {
+               if (trace)
+                  log.trace("Failed to open url", mue);
+            }
+         }
+      }
       if( url == null && defaultUrl == null )
       {
          String msg = "No properties file: " + propertiesName
@@ -201,7 +220,7 @@ public class Util
          throw new IOException(msg);
       }
 
-      if(log.isTraceEnabled())
+      if (trace)
          log.trace("Properties file=" + url+", defaults="+defaultUrl);
       Properties defaults = new Properties();
       if( defaultUrl != null )
@@ -211,13 +230,13 @@ public class Util
             InputStream is = defaultUrl.openStream();
             defaults.load(is);
             is.close();
-            if(trace)
-               log.debug("Loaded defaults, users="+defaults.keySet());
+            if (trace)
+               log.trace("Loaded defaults, users="+defaults.keySet());
          }
          catch(Throwable e)
          {
-            if(trace)
-               log.debug("Failed to load defaults", e);
+            if (trace)
+               log.trace("Failed to load defaults", e);
          }
       }
 
@@ -231,7 +250,7 @@ public class Util
          }
          catch (PrivilegedActionException e)
          {
-            if(trace)
+            if (trace)
                log.trace("Open stream error", e);
             throw new IOException(e.getLocalizedMessage());
          }
@@ -244,8 +263,8 @@ public class Util
          {
             throw new IOException("Properties file " + propertiesName + " not avilable");
          }
-         if(trace)
-            log.debug("Loaded properties, users="+bundle.keySet());
+         if (trace)
+            log.trace("Loaded properties, users="+bundle.keySet());
       }
 
       return bundle;
