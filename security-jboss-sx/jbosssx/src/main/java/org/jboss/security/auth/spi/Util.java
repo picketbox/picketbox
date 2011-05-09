@@ -21,6 +21,7 @@
 */
 package org.jboss.security.auth.spi;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -198,7 +199,10 @@ public class Util
                defaultUrl = new URL(defaultsName);
             } catch (MalformedURLException mue) {
                if (trace)
-                  log.trace("Failed to open defaultUrl", mue);
+                  log.trace("Failed to open default properties as URL", mue);
+               File tmp = new File(defaultsName);
+               if (tmp.exists())
+                  defaultUrl = tmp.toURI().toURL();
             }
          }
       }
@@ -209,7 +213,10 @@ public class Util
                url = new URL(propertiesName);
             } catch (MalformedURLException mue) {
                if (trace)
-                  log.trace("Failed to open url", mue);
+                  log.trace("Failed to open properties as URL", mue);
+               File tmp = new File(propertiesName);
+               if (tmp.exists())
+                  url = tmp.toURI().toURL();
             }
          }
       }
