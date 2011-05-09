@@ -402,7 +402,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       if (url == null)
       {
          File tst = new File(storeURL);
-         if (tst.exists() == true)
+         if (tst.exists())
             url = tst.toURI().toURL();
       }
 
