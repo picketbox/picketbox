@@ -31,13 +31,13 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.infinispan.Cache;
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.CacheableManager;
@@ -58,7 +58,7 @@ import org.jboss.security.authentication.JBossCachedAuthenticationManager.Domain
 public class JBossCachedAuthenticationManager
       implements
          AuthenticationManager,
-         CacheableManager<Cache<Principal, DomainInfo>, Principal>
+         CacheableManager<ConcurrentMap<Principal, DomainInfo>, Principal>
 {
 
    private String securityDomain;
@@ -71,7 +71,7 @@ public class JBossCachedAuthenticationManager
 
    private transient Method setSecurityInfo;
 
-   protected Cache<Principal, DomainInfo> domainCache;
+   protected ConcurrentMap<Principal, DomainInfo> domainCache;
 
    private boolean deepCopySubjectOption = false;
 
@@ -178,11 +178,11 @@ public class JBossCachedAuthenticationManager
    {
       if (trace)
          log.trace("Flushing " + key.getName() + " from cache");
-      domainCache.evict(key);
+      domainCache.remove(key);
    }
 
    @Override
-   public void setCache(Cache<Principal, DomainInfo> cache)
+   public void setCache(ConcurrentMap<Principal, DomainInfo> cache)
    {
       this.domainCache = cache;
    }
