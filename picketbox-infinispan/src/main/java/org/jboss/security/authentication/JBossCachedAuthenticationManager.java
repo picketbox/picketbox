@@ -186,7 +186,7 @@ public class JBossCachedAuthenticationManager
    {
       this.domainCache = cache;
    }
-   
+
    @Override
    public boolean containsKey(Principal key)
    {
@@ -311,7 +311,7 @@ public class JBossCachedAuthenticationManager
 
       return isValid;
    }
-   
+
    /** 
     * Currently this simply calls defaultLogin() to do a JAAS login using the
     * security domain name as the login module configuration name.
@@ -362,7 +362,7 @@ public class JBossCachedAuthenticationManager
 
       return authenticated;
    }
-   
+
    /** 
     * Pass the security info to the login modules configured for
     * this security domain using our SecurityAssociationHandler.
@@ -479,6 +479,8 @@ public class JBossCachedAuthenticationManager
    public static class DomainInfo implements Serializable
    {
 
+      private static Logger log = Logger.getLogger(DomainInfo.class);
+
       private static final long serialVersionUID = 7402775370244483773L;
 
       protected LoginContext loginContext;
@@ -488,6 +490,21 @@ public class JBossCachedAuthenticationManager
       protected Object credential;
 
       protected Principal callerPrincipal;
+
+      public void logout()
+      {
+         if (loginContext != null)
+         {
+            try
+            {
+               loginContext.logout();
+            }
+            catch (Exception e)
+            {
+               log.trace("Cache entry logout failed", e);
+            }
+         }
+      }
    }
 
 }
