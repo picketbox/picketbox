@@ -192,6 +192,14 @@ public class JBossCachedAuthenticationManager
    {
       return domainCache.containsKey(key);
    }
+   
+   @Override
+   public Set<Principal> getCachedKeys()
+   {
+      if (domainCache != null)
+         return domainCache.keySet();
+      return null;
+   }
 
    /**
     * Flag to specify if deep copy of subject sets needs to be 

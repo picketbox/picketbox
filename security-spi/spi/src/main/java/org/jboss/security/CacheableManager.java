@@ -21,6 +21,8 @@
  */
 package org.jboss.security;
 
+import java.util.Set;
+
 /**
  * An interface for managers that allow cached values.
  * 
@@ -56,5 +58,12 @@ public interface CacheableManager <T, K>
     * @return true if there is an entry, false otherwise.
     */
    public boolean containsKey(K key);
+   
+   /**
+    * Returns a set of keys stored in the cache.
+    * 
+    * @return keys stored in the cache.
+    */
+   public Set<K> getCachedKeys();
    
 }
