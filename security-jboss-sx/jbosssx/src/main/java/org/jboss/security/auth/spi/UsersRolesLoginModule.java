@@ -30,6 +30,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.util.StringPropertyReplacer;
+
 /** A simple Properties map based login module that consults two Java Properties
  formatted text files for username to password("users.properties") and
  username to roles("roles.properties") mapping. The names of the properties
@@ -110,16 +112,16 @@ public class UsersRolesLoginModule extends UsernamePasswordLoginModule
          // Check for usersProperties & rolesProperties
          String option = (String) options.get("usersProperties");
          if (option != null)
-            usersRsrcName = option;
+            usersRsrcName = StringPropertyReplacer.replaceProperties(option);
          option = (String) options.get("defaultUsersProperties");
          if (option != null)
-            defaultUsersRsrcName = option;
+            defaultUsersRsrcName = StringPropertyReplacer.replaceProperties(option);
          option = (String) options.get("rolesProperties");
          if (option != null)
-            rolesRsrcName = option;
+            rolesRsrcName = StringPropertyReplacer.replaceProperties(option);
          option = (String) options.get("defaultRolesProperties");
          if (option != null)
-            defaultRolesRsrcName = option;
+            defaultRolesRsrcName = StringPropertyReplacer.replaceProperties(option);
          option = (String) options.get("roleGroupSeperator");
          if( option != null )
             roleGroupSeperator = option.charAt(0);
