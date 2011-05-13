@@ -110,9 +110,7 @@ public interface AuthorizationManager extends BaseSecurityManager
     * Return the set of domain roles the principal has been assigned.
     * 
     * @return The Set<Principal> for the application domain roles that the principal has been assigned.
-    * @deprecated
     */
-   @Deprecated
    public Set<Principal> getUserRoles(Principal principal);
 
    /**
