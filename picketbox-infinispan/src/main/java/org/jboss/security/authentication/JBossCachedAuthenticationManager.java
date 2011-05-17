@@ -170,15 +170,18 @@ public class JBossCachedAuthenticationManager
    {
       if (trace)
          log.trace("Flushing all entried from the cache");
-      domainCache.clear();
+      if (domainCache != null)
+         domainCache.clear();
    }
 
    @Override
    public void flushCache(Principal key)
    {
-      if (trace)
-         log.trace("Flushing " + key.getName() + " from cache");
-      domainCache.remove(key);
+      if (domainCache != null && key != null) {
+         if (trace)
+            log.trace("Flushing " + key.getName() + " from cache");
+         domainCache.remove(key);
+      }
    }
 
    @Override
@@ -190,7 +193,9 @@ public class JBossCachedAuthenticationManager
    @Override
    public boolean containsKey(Principal key)
    {
-      return domainCache.containsKey(key);
+      if (domainCache != null && key != null)
+         return domainCache.containsKey(key);
+      return false;
    }
    
    @Override
@@ -222,9 +227,9 @@ public class JBossCachedAuthenticationManager
     */
    private DomainInfo getCacheInfo(Principal principal)
    {
-      if (domainCache == null)
-         return null;
-      return domainCache.get(principal);
+      if (domainCache != null && principal != null)
+         return domainCache.get(principal);
+      return null;
    }
 
    /**
@@ -422,7 +427,7 @@ public class JBossCachedAuthenticationManager
    private Subject updateCache(LoginContext loginContext, Subject subject, Principal principal, Object credential)
    {
       // If we don't have a cache there is nothing to update
-      if (domainCache == null)
+      if (domainCache == null || principal == null)
          return subject;
 
       DomainInfo info = new DomainInfo();
