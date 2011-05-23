@@ -49,15 +49,8 @@ class SecurityAssociationActions
          this.subject = subject;
       }
       
-      @SuppressWarnings("deprecation")
       public Object run()
       {
-         //Client Side usage
-         if(!getServer())
-         {
-            SecurityAssociation.pushSubjectContext(subject, principal, credential);
-         }
-         
          //Always create a new security context
          SecurityContext sc = null;
          try
@@ -79,20 +72,10 @@ class SecurityAssociationActions
    }
    private static class PopPrincipalInfoAction implements PrivilegedAction<Object>
    {
-      @SuppressWarnings("deprecation")
       public Object run()
       {
          if(!getServer())
-           SecurityAssociation.popSubjectContext(); 
-         return null;
-      }
-   }
-   private static class SetServerAction implements PrivilegedAction<Object>
-   {
-      static PrivilegedAction<Object> ACTION = new SetServerAction();
-      public Object run()
-      {
-         SecurityAssociation.setServer();
+           popSecurityContext();
          return null;
       }
    }
@@ -102,7 +85,7 @@ class SecurityAssociationActions
       public Object run()
       {
          if(!getServer())
-           SecurityAssociation.clear(); 
+           SecurityContextAssociation.clearSecurityContext(); 
          return null;
       }
    }
@@ -111,7 +94,7 @@ class SecurityAssociationActions
       static PrivilegedAction<Subject> ACTION = new GetSubjectAction();
       public Subject run()
       {
-         Subject subject = SecurityAssociation.getSubject();
+         Subject subject = SecurityContextAssociation.getSubject();
          return subject;
       }
    }
@@ -120,7 +103,7 @@ class SecurityAssociationActions
       static PrivilegedAction<Principal> ACTION = new GetPrincipalAction();
       public Principal run()
       {
-         Principal principal = SecurityAssociation.getPrincipal();
+         Principal principal = SecurityContextAssociation.getPrincipal();
          return principal;
       }
    }
@@ -129,7 +112,7 @@ class SecurityAssociationActions
       static PrivilegedAction<Object> ACTION = new GetCredentialAction();
       public Object run()
       {
-         Object credential = SecurityAssociation.getCredential();
+         Object credential = SecurityContextAssociation.getCredential();
          return credential;
       }
    }
@@ -140,11 +123,7 @@ class SecurityAssociationActions
       { 
          public Object run()
          {
-            SecurityContext sc = SecurityContextAssociation.getSecurityContext();
-            //The SecurityContext may have been cached somewhere
-            if(sc != null)
-               sc = null;
-            setSecurityContext(sc); 
+            SecurityContextAssociation.clearSecurityContext();
             return null;
          }
       });
@@ -178,7 +157,6 @@ class SecurityAssociationActions
    {
       AccessController.doPrivileged(new PrivilegedAction<Object>()
       { 
-         @SuppressWarnings("deprecation")
          public Object run()
          {
             SecurityContext sc;
@@ -192,10 +170,21 @@ class SecurityAssociationActions
                throw new RuntimeException(e);
             }
             setSecurityContext(sc);
-            //For Client Side legacy usage
-            if(getServer() == Boolean.FALSE)
+            return null;
+         }
+      });
+   }
+   
+   static void popSecurityContext()
+   {
+      AccessController.doPrivileged(new PrivilegedAction<Object>()
+      { 
+         public Object run()
+         {
+            SecurityContext sc = getSecurityContext();
+            if (sc != null)
             {
-               SecurityAssociation.pushSubjectContext(subject, p, cred);
+               sc.getUtil().createSubjectInfo(null, null, null);
             }
             return null;
          }
@@ -219,7 +208,7 @@ class SecurityAssociationActions
       {
          public Boolean run()
          {
-            return SecurityAssociation.isServer();
+            return !SecurityContextAssociation.isClient();
          }
       });
    }
@@ -236,10 +225,6 @@ class SecurityAssociationActions
       });
    }
    
-   static void setServer()
-   {
-      AccessController.doPrivileged(SetServerAction.ACTION);
-   }
    static void clear()
    {
       AccessController.doPrivileged(ClearAction.ACTION);

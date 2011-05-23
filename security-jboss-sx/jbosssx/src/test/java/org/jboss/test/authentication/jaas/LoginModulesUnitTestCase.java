@@ -38,7 +38,7 @@ import junit.framework.TestCase;
 
 import org.jboss.crypto.CryptoUtil;
 import org.jboss.logging.Logger;
-import org.jboss.security.SecurityAssociation;
+import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
@@ -338,17 +338,17 @@ protected void setUp() throws Exception
      Subject subject = lc.getSubject();
      Principal scott = new SimplePrincipal("scott");
      assertTrue("Principals contains scott", subject.getPrincipals().contains(scott));
-     Principal saPrincipal = SecurityAssociation.getPrincipal();
+     Principal saPrincipal = SecurityContextAssociation.getPrincipal();
      assertTrue("SecurityAssociation.getPrincipal == scott", saPrincipal.equals(scott));
 
      UsernamePasswordHandler handler2 = new UsernamePasswordHandler("scott2", "secret2".toCharArray());
      LoginContext lc2 = new LoginContext("testClientLogin", handler2);
      lc2.login();
      Principal scott2 = new SimplePrincipal("scott2");
-     saPrincipal = SecurityAssociation.getPrincipal();
+     saPrincipal = SecurityContextAssociation.getPrincipal();
      assertTrue("SecurityAssociation.getPrincipal == scott2", saPrincipal.equals(scott2));
      lc2.logout();
-     saPrincipal = SecurityAssociation.getPrincipal();
+     saPrincipal = SecurityContextAssociation.getPrincipal();
      assertTrue("SecurityAssociation.getPrincipal == scott", saPrincipal.equals(scott));
      
      lc.logout();      

@@ -28,7 +28,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.spi.LoginModule;
 
 import org.jboss.security.RunAsIdentity;
-import org.jboss.security.SecurityAssociation;
+import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityContextAssociation;
 
 /** A login module that establishes a run-as role for the duration of the login
  * phase of authentication. It can be used to allow another login module
@@ -64,7 +65,7 @@ public class RunAsLoginModule implements LoginModule
    public boolean login()
    {
       RunAsIdentity runAsRole = new RunAsIdentity(roleName, principalName);
-      SecurityAssociation.pushRunAsIdentity(runAsRole);
+      SecurityContextAssociation.pushRunAsIdentity(runAsRole);
       pushedRole = true;
       return true;
    }
@@ -84,7 +85,7 @@ public class RunAsLoginModule implements LoginModule
       if( pushedRole == false )
          return false;
 
-      SecurityAssociation.popRunAsIdentity();
+      SecurityContextAssociation.popRunAsIdentity();
       return true;
    }
 

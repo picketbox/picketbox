@@ -100,7 +100,6 @@ public class AltClientLoginModule implements LoginModule
          */
          if(trace)
             log.trace("Enabling multi-threaded mode");
-         SecurityAssociationActions.setServer();
       }
       
         /* Check for password sharing options. Any non-null value for

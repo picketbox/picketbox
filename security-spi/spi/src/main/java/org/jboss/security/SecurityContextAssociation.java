@@ -22,9 +22,13 @@
 package org.jboss.security;
  
 import java.security.AccessController;
+import java.security.Principal;
 import java.security.PrivilegedAction;
 
+import javax.security.auth.Subject;
+
 import org.jboss.security.SecurityContext;
+import org.jboss.security.RunAs;
 
 
 /**
@@ -50,6 +54,15 @@ public class SecurityContextAssociation
    
    private static RuntimePermission ClearSecurityContextPermission = 
       new RuntimePermission("org.jboss.security.clearSecurityContext");
+   
+   private static final RuntimePermission SetRunAsIdentity =
+      new RuntimePermission("org.jboss.security.setRunAsRole");
+   
+   private static final RuntimePermission GetContextInfo =
+      new RuntimePermission("org.jboss.security.accessContextInfo", "get");
+
+   private static final RuntimePermission SetContextInfo =
+      new RuntimePermission("org.jboss.security.accessContextInfo", "set");
    
    /**
     * Flag to indicate whether threads that are spawned inherit the security context from parent
@@ -150,7 +163,105 @@ public class SecurityContextAssociation
       else
          securityContextLocal.remove();
    }
-    
+   
+   /**
+    * Pushes a RunAs identity
+    * 
+    * @param runAs
+    */
+   public static void pushRunAsIdentity(RunAs runAs)
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(SetRunAsIdentity);
+      
+      SecurityContext sc = getSecurityContext();
+      if (sc != null)
+      {
+         sc.setOutgoingRunAs(runAs);
+      }
+   }
+   
+   /**
+    * Pops a RunAs identity
+    * 
+    * @return
+    */
+   public static RunAs popRunAsIdentity()
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(SetRunAsIdentity);
+      
+      SecurityContext sc = SecurityContextAssociation.getSecurityContext();
+      RunAs ra = null;
+      if (sc != null)
+      {
+         ra = (RunAs) sc.getOutgoingRunAs();
+         sc.setOutgoingRunAs(null);
+      }
+      return ra;
+   }
+   
+   /**
+    * Look at the current thread of control's run-as identity
+    */
+   public static RunAs peekRunAsIdentity()
+   {
+      RunAs ra = null;
+      SecurityContext sc = SecurityContextAssociation.getSecurityContext();
+      if (sc != null)
+      {
+         ra = (RunAs) sc.getOutgoingRunAs();
+      }
+      return ra;
+   }
+   
+   /**
+    * Get the current thread context info. If a security manager is present,
+    * then this method calls the security manager's <code>checkPermission</code>
+    * method with a <code> RuntimePermission("org.jboss.security.accessContextInfo",
+    * "get") </code> permission to ensure it's ok to access context information.
+    * If not, a <code>SecurityException</code> will be thrown.
+    * @param key - the context key
+    * @return the mapping for the key in the current thread context
+    */
+   public static Object getContextInfo(String key)
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(GetContextInfo);
+
+      if (key == null)
+         throw new IllegalArgumentException("key is null");
+      //SECURITY-459 get it from the current security context
+      SecurityContext sc = getSecurityContext();
+      if (sc != null)
+         return sc.getData().get(key);
+      return null;
+   }
+   
+   /**
+    * Set the current thread context info. If a security manager is present,
+    * then this method calls the security manager's <code>checkPermission</code>
+    * method with a <code> RuntimePermission("org.jboss.security.accessContextInfo",
+    * "set") </code> permission to ensure it's ok to access context information.
+    * If not, a <code>SecurityException</code> will be thrown.
+    * @param key - the context key
+    * @param value - the context value to associate under key
+    * @return the previous mapping for the key if one exists
+    */
+   public static Object setContextInfo(String key, Object value)
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(SetContextInfo);
+
+      SecurityContext sc = getSecurityContext();
+      if (sc != null)
+         return sc.getData().put(key, value);
+      return null;
+   }
    
    private static String getSystemProperty(final String propertyName, final String defaultString)
    {
@@ -161,5 +272,89 @@ public class SecurityContextAssociation
             return System.getProperty(propertyName, defaultString);
          }
       });
+   }
+   
+   public static Subject getSubject()
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(GetSecurityContextPermission);
+      
+      SecurityContext sc = getSecurityContext();
+      if (sc != null)
+         return sc.getUtil().getSubject();
+      return null;
+   }
+   
+   public static Principal getPrincipal()
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(GetSecurityContextPermission);
+      
+      SecurityContext sc = getSecurityContext();
+      if (sc != null)
+         return sc.getUtil().getUserPrincipal();
+      return null;
+   }
+   
+   public static void setPrincipal(Principal principal)
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(SetSecurityContextPermission);
+
+      SecurityContext securityContext = SecurityContextAssociation.getSecurityContext();
+      if (securityContext == null)
+      {
+         try
+         {
+            securityContext = SecurityContextFactory.createSecurityContext("CLIENT_SIDE");
+         }
+         catch (Exception e)
+         {
+            throw new RuntimeException(e);
+         }
+         SecurityContextAssociation.setSecurityContext(securityContext);
+      }
+      Object credential = securityContext.getUtil().getCredential();
+      Subject subj = securityContext.getUtil().getSubject();
+      securityContext.getUtil().createSubjectInfo(principal, credential, subj);
+   }
+   
+   public static Object getCredential()
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(GetSecurityContextPermission);
+      
+      SecurityContext sc = getSecurityContext();
+      if (sc != null)
+         return sc.getUtil().getCredential();
+      return null;
+   }
+   
+   public static void setCredential(Object credential)
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(SetSecurityContextPermission);
+      
+      SecurityContext securityContext = SecurityContextAssociation.getSecurityContext();
+      if (securityContext == null)
+      {
+         try
+         {
+            securityContext = SecurityContextFactory.createSecurityContext("CLIENT_SIDE");
+         }
+         catch (Exception e)
+         {
+            throw new RuntimeException(e);
+         }
+         SecurityContextAssociation.setSecurityContext(securityContext);
+      }
+      Principal principal = securityContext.getUtil().getUserPrincipal();
+      Subject subj = securityContext.getUtil().getSubject();
+      securityContext.getUtil().createSubjectInfo(principal, credential, subj);
    }
 }

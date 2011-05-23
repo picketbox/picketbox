@@ -26,8 +26,9 @@ import java.security.AccessController;
 import java.security.Principal;
 import java.security.PrivilegedAction;
 
+import org.jboss.security.RunAs;
 import org.jboss.security.RunAsIdentity;
-import org.jboss.security.SecurityAssociation;
+import org.jboss.security.SecurityContextAssociation;
 
 /** PrivilegedActions used by this package
  * 
@@ -41,7 +42,7 @@ class GetPrincipalInfoAction
     */
    private static char[] getPassword()
    {
-      Object credential = SecurityAssociation.getCredential();
+      Object credential = SecurityContextAssociation.getCredential();
       char[] password = null;
        if( credential instanceof char[] )
        {
@@ -77,7 +78,7 @@ class GetPrincipalInfoAction
          {
             public Object run()
             {
-               return SecurityAssociation.peekRunAsIdentity();
+               return SecurityContextAssociation.peekRunAsIdentity();
             }
          };
 
@@ -85,7 +86,7 @@ class GetPrincipalInfoAction
          {
             public Object run()
             {
-               return SecurityAssociation.getPrincipal();
+               return SecurityContextAssociation.getPrincipal();
             }
          };
 
@@ -115,14 +116,14 @@ class GetPrincipalInfoAction
 
       PrincipalActions NON_PRIVILEGED = new PrincipalActions()
       {
-         public RunAsIdentity peek()
+         public RunAs peek()
          {
-            return SecurityAssociation.peekRunAsIdentity();
+            return SecurityContextAssociation.peekRunAsIdentity();
          }
 
          public Principal getPrincipal()
          {
-            return SecurityAssociation.getPrincipal();
+            return SecurityContextAssociation.getPrincipal();
          }
 
          public char[] getCredential()
@@ -133,7 +134,7 @@ class GetPrincipalInfoAction
 
       Principal getPrincipal();
       char[] getCredential();
-      RunAsIdentity peek();
+      RunAs peek();
    }
 
    static Principal getPrincipal()
@@ -166,11 +167,11 @@ class GetPrincipalInfoAction
    {
       if(System.getSecurityManager() == null)
       {
-         return PrincipalActions.NON_PRIVILEGED.peek();
+         return (RunAsIdentity) PrincipalActions.NON_PRIVILEGED.peek();
       }
       else
       {
-         return PrincipalActions.PRIVILEGED.peek();
+         return (RunAsIdentity) PrincipalActions.PRIVILEGED.peek();
       }
    }
 

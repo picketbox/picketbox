@@ -38,7 +38,6 @@ import javax.security.jacc.PolicyContext;
 import javax.security.jacc.PolicyContextException;
 
 import org.jboss.logging.Logger;
-import org.jboss.security.SecurityAssociation;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
@@ -213,7 +212,7 @@ class SubjectActions
          {
             sc.getData().put(key, value);
          }
-         return SecurityAssociation.setContextInfo(key, value);
+         return SecurityContextAssociation.setContextInfo(key, value);
       }
    }
 

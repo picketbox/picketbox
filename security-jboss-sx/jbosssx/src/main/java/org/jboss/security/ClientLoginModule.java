@@ -39,20 +39,19 @@ import org.jboss.logging.Logger;
 
 /** A simple implementation of LoginModule for use by JBoss clients for
  the establishment of the caller identity and credentials. This simply sets
- the SecurityAssociation principal to the value of the NameCallback
- filled in by the CallbackHandler, and the SecurityAssociation credential
+ the SecurityContext principal to the value of the NameCallback
+ filled in by the CallbackHandler, and the SecurityContext credential
  to the value of the PasswordCallback filled in by the CallbackHandler.
  
  It has the following options:
  <ul>
  <li>multi-threaded=[true|false]
- When the multi-threaded option is set to true, the SecurityAssociation.setServer()
- so that each login thread has its own principal and credential storage.
+ When the multi-threaded option is set to true each login thread has its own principal and credential storage.
  <li>restore-login-identity=[true|false]
- When restore-login-identity is true, the SecurityAssociation principal
+ When restore-login-identity is true, the SecurityContext principal
  and credential seen on entry to the login() method are saved and restored
  on either abort or logout. When false (the default), the abort and logout
- simply clears the SecurityAssociation. A restore-login-identity of true is
+ simply clears the SecurityContext. A restore-login-identity of true is
  needed if one need to change identities and then restore the original
  caller identity.
  <li>password-stacking=tryFirstPass|useFirstPass
@@ -116,7 +115,6 @@ public class ClientLoginModule implements LoginModule
          */
          if(trace)
             log.trace("Enabling multi-threaded mode");
-         SecurityAssociationActions.setServer(); 
       }
       
       /**
@@ -256,14 +254,12 @@ public class ClientLoginModule implements LoginModule
          log.trace("abort");
       if( restoreLoginIdentity == true )
       {
-         SecurityAssociationActions.popPrincipalInfo();
          SecurityAssociationActions.setSecurityContext(this.cachedSecurityContext);
       }
       else
       {
          // Clear the entire security association stack
          SecurityAssociationActions.clear();
-         SecurityAssociationActions.popPrincipalInfo(); //SECURITY-339
       }
 
       return true;
@@ -275,14 +271,12 @@ public class ClientLoginModule implements LoginModule
          log.trace("logout");
       if( restoreLoginIdentity == true )
       {
-         SecurityAssociationActions.popPrincipalInfo();
          SecurityAssociationActions.setSecurityContext(this.cachedSecurityContext);
       }
       else
       {
          // Clear the entire security association stack
          SecurityAssociationActions.clear();  
-         SecurityAssociationActions.clearSecurityContext(null);         
       }
       Set<Principal> principals = subject.getPrincipals();
       principals.remove(loginPrincipal);

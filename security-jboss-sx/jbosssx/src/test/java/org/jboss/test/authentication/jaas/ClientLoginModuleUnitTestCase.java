@@ -36,7 +36,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.jboss.security.SecurityAssociation;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.SecurityContextFactory;
@@ -45,7 +44,7 @@ import org.jboss.security.SubjectInfo;
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
 
 /**
- ClientLoginModuleUnitTestCase/SecurityAssociation interaction tests
+ ClientLoginModuleUnitTestCase/SecurityContextAssociation interaction tests
  
  @author Scott.Stark@jboss.org
  @version $Revision: 68075 $
@@ -186,10 +185,8 @@ public class ClientLoginModuleUnitTestCase
       TestSuite suite = new TestSuite();
       suite.addTest(new ClientLoginModuleUnitTestCase("testSingleThreaded"));
       suite.addTest(new ClientLoginModuleUnitTestCase("testSingleThreadedRestoreIdentity"));
-      suite.addTest(new ClientLoginModuleUnitTestCase("testSingleThreadedRestoreStack"));
       suite.addTest(new ClientLoginModuleUnitTestCase("testMultiThreaded"));
       suite.addTest(new ClientLoginModuleUnitTestCase("testMultiThreadedRestoreIdentity"));
-      suite.addTest(new ClientLoginModuleUnitTestCase("testMultiThreadedRestoreStack"));
       suite.addTest(new ClientLoginModuleUnitTestCase("testAbortWithRestore"));
       suite.addTest(new ClientLoginModuleUnitTestCase("testAbortWithNoRestore"));
       return suite;
@@ -203,8 +200,8 @@ public class ClientLoginModuleUnitTestCase
    protected void setUp() throws Exception
    {
       Configuration.setConfiguration(jaasConfig);
-      //Clear SecurityAssociation
-      SecurityAssociation.clear();
+      //Clear SecurityContextAssociation
+      SecurityContextAssociation.clearSecurityContext();
    }
    protected void tearDown()
    {
@@ -221,9 +218,9 @@ public class ClientLoginModuleUnitTestCase
       System.out.println("LC.Subject: "+subject);
       Principal theduke = new SimplePrincipal("jduke");
       assertTrue("Principals contains theduke", subject.getPrincipals().contains(theduke));
-      Principal saPrincipal = SecurityAssociation.getPrincipal();
-      assertTrue("SecurityAssociation.getPrincipal == theduke", saPrincipal.equals(theduke));
-      char[] password = (char[]) SecurityAssociation.getCredential();
+      Principal saPrincipal = SecurityContextAssociation.getPrincipal();
+      assertTrue("SecurityContextAssociation.getPrincipal == theduke", saPrincipal.equals(theduke));
+      char[] password = (char[]) SecurityContextAssociation.getCredential();
       assertTrue("password == theduke",
          Arrays.equals(password, "theduke".toCharArray()));
       
@@ -239,8 +236,11 @@ public class ClientLoginModuleUnitTestCase
       System.out.println("+++ testSingleThreadedRestoreIdentity");
       
       Principal jduke1 = new SimplePrincipal("jduke1");
-      SecurityAssociation.setPrincipal(jduke1);
-      SecurityAssociation.setCredential("theduke1");
+      SecurityContext sc = SecurityContextAssociation.getSecurityContext();
+      if (sc == null)
+         sc = SecurityContextFactory.createSecurityContext("test");
+      sc.getUtil().createSubjectInfo(jduke1, "theduke1", new Subject());
+      SecurityContextAssociation.setSecurityContext(sc);
 
       UsernamePasswordHandler handler = new UsernamePasswordHandler("jduke2",
          "theduke2");
@@ -251,70 +251,19 @@ public class ClientLoginModuleUnitTestCase
       
       Principal jduke2 = new SimplePrincipal("jduke2");
       assertTrue("Principals contains jduke2", subject.getPrincipals().contains(jduke2));
-      Principal saPrincipal = SecurityAssociation.getPrincipal();
-      assertTrue("SecurityAssociation.getPrincipal == jduke2", saPrincipal.equals(jduke2));
-      char[] password = (char[]) SecurityAssociation.getCredential();
+      Principal saPrincipal = SecurityContextAssociation.getPrincipal();
+      assertTrue("SecurityContextAssociation.getPrincipal == jduke2", saPrincipal.equals(jduke2));
+      char[] password = (char[]) SecurityContextAssociation.getCredential();
       assertTrue("password == theduke2",
          Arrays.equals(password, "theduke2".toCharArray()));
 
       lc.logout();
       // Validate restored state
-      saPrincipal = SecurityAssociation.getPrincipal();
-      assertTrue("SecurityAssociation.getPrincipal == jduke1", saPrincipal.equals(jduke1));
-      String theduke1 = (String) SecurityAssociation.getCredential();
+      saPrincipal = SecurityContextAssociation.getPrincipal();
+      assertTrue("SecurityContextAssociation.getPrincipal == jduke1", saPrincipal.equals(jduke1));
+      String theduke1 = (String) SecurityContextAssociation.getCredential();
       assertTrue("password == theduke1", theduke1.equals("theduke1"));
       
-   }
-
-   @SuppressWarnings("deprecation")
-   public void testSingleThreadedRestoreStack() throws Exception
-   {
-      System.out.println("+++ testSingleThreadedRestoreStack");
- 
-      Principal jduke1 = new SimplePrincipal("jduke1");
-      Subject subject1 = new Subject();
-      SecurityAssociation.pushSubjectContext(subject1, jduke1, "theduke1");
-
-      Principal jduke2 = new SimplePrincipal("jduke2");
-      Subject subject2 = new Subject();
-      SecurityAssociation.pushSubjectContext(subject2, jduke2, "theduke2");
-
-      UsernamePasswordHandler handler = new UsernamePasswordHandler("jduke3",
-         "theduke3");
-      LoginContext lc = new LoginContext("testSingleThreadedRestoreIdentity", handler);
-      lc.login();
-      Subject subject = lc.getSubject();
-      System.out.println("LC.Subject: "+subject);
-      
-      Principal jduke3 = new SimplePrincipal("jduke3");
-      assertTrue("Principals contains jduke3", subject.getPrincipals().contains(jduke3));
-      Principal saPrincipal = SecurityAssociation.getPrincipal();
-      assertTrue("SecurityAssociation.getPrincipal == jduke3", saPrincipal.equals(jduke3));
-      char[] password = (char[]) SecurityAssociation.getCredential();
-      assertTrue("password == theduke3",
-         Arrays.equals(password, "theduke3".toCharArray()));
-      SecurityAssociation.SubjectContext sc3 = SecurityAssociation.peekSubjectContext();
-      System.out.println(sc3);
-      assertTrue("SecurityAssociation.peekSubjectContext == jduke3", sc3.getPrincipal().equals(jduke3));
-      char[] theduke3 = (char[]) sc3.getCredential();
-      assertTrue("password == theduke3",
-         Arrays.equals(theduke3, "theduke3".toCharArray()));
-
-      lc.logout();
-
-      // Validate restored state
-      SecurityAssociation.SubjectContext sc2 = SecurityAssociation.peekSubjectContext();
-      System.out.println(sc2);
-      assertTrue("SecurityAssociation.peekSubjectContext == jduke2", sc2.getPrincipal().equals(jduke2));
-      String theduke2 = (String) sc2.getCredential();
-      assertTrue("password == theduke2", theduke2.equals("theduke2"));
-
-      SecurityAssociation.popSubjectContext();
-      SecurityAssociation.SubjectContext sc1 = SecurityAssociation.peekSubjectContext();
-      System.out.println(sc1);
-      assertTrue("SecurityAssociation.peekSubjectContext == jduke1", sc1.getPrincipal().equals(jduke1));
-      String theduke1 = (String) sc1.getCredential();
-      assertTrue("password == theduke1", theduke1.equals("theduke1"));
    }
 
    public void testMultiThreaded() throws Exception
@@ -341,15 +290,15 @@ public class ClientLoginModuleUnitTestCase
             System.out.println("+++ testMultiThreadedRunnable");
             UsernamePasswordHandler handler = new UsernamePasswordHandler("jduke",
                "theduke");
-            LoginContext lc = new LoginContext("testSingleThreaded", handler);
+            LoginContext lc = new LoginContext("testMultiThreaded", handler);
             lc.login();
             Subject subject = lc.getSubject();
             System.out.println("LC.Subject: "+subject);
             Principal theduke = new SimplePrincipal("jduke");
             assertTrue("Principals contains theduke", subject.getPrincipals().contains(theduke));
-            Principal saPrincipal = SecurityAssociation.getPrincipal();
-            assertTrue("SecurityAssociation.getPrincipal == theduke", saPrincipal.equals(theduke));
-            char[] password = (char[]) SecurityAssociation.getCredential();
+            Principal saPrincipal = SecurityContextAssociation.getPrincipal();
+            assertTrue("SecurityContextAssociation.getPrincipal == theduke", saPrincipal.equals(theduke));
+            char[] password = (char[]) SecurityContextAssociation.getCredential();
             assertTrue("password == theduke",
                Arrays.equals(password, "theduke".toCharArray()));
          }
@@ -384,107 +333,34 @@ public class ClientLoginModuleUnitTestCase
             System.out.println("+++ testMultiThreadedRestoreIdentity");
       
             Principal jduke1 = new SimplePrincipal("jduke1");
-            SecurityAssociation.setPrincipal(jduke1);
-            SecurityAssociation.setCredential("theduke1");
+            SecurityContext sc = SecurityContextAssociation.getSecurityContext();
+            if (sc == null)
+               sc = SecurityContextFactory.createSecurityContext("test");
+            sc.getUtil().createSubjectInfo(jduke1, "theduke1", new Subject());
+            SecurityContextAssociation.setSecurityContext(sc);
       
             UsernamePasswordHandler handler = new UsernamePasswordHandler("jduke2",
                "theduke2");
-            LoginContext lc = new LoginContext("testSingleThreadedRestoreIdentity", handler);
+            LoginContext lc = new LoginContext("testMultiThreadedRestoreIdentity", handler);
             lc.login();
             Subject subject = lc.getSubject();
             System.out.println("LC.Subject: "+subject);
             
             Principal jduke2 = new SimplePrincipal("jduke2");
             assertTrue("Principals contains jduke2", subject.getPrincipals().contains(jduke2));
-            Principal saPrincipal = SecurityAssociation.getPrincipal();
-            assertTrue("SecurityAssociation.getPrincipal == jduke2", saPrincipal.equals(jduke2));
-            char[] password = (char[]) SecurityAssociation.getCredential();
+            Principal saPrincipal = SecurityContextAssociation.getPrincipal();
+            assertTrue("SecurityContextAssociation.getPrincipal == jduke2", saPrincipal.equals(jduke2));
+            char[] password = (char[]) SecurityContextAssociation.getCredential();
             assertTrue("password == theduke2",
                Arrays.equals(password, "theduke2".toCharArray()));
       
             lc.logout();
             // Validate restored state
-            saPrincipal = SecurityAssociation.getPrincipal();
-            assertTrue("SecurityAssociation.getPrincipal == jduke1", saPrincipal.equals(jduke1));
-            String theduke1 = (String) SecurityAssociation.getCredential();
+            saPrincipal = SecurityContextAssociation.getPrincipal();
+            assertTrue("SecurityContextAssociation.getPrincipal == jduke1", saPrincipal.equals(jduke1));
+            String theduke1 = (String) SecurityContextAssociation.getCredential();
             assertTrue("password == theduke1", theduke1.equals("theduke1"));
       
-         }
-         catch(Exception e)
-         {
-            failure = e;
-         }
-      }
-   }
-
-   public void testMultiThreadedRestoreStack() throws Exception
-   {
-      TestMultiThreadedRestoreStack r0 = new TestMultiThreadedRestoreStack();
-      Thread t0 = new Thread(r0, "testMultiThreadedRestoreIdentity#0");
-      t0.start();
-      TestMultiThreadedRestoreStack r1 = new TestMultiThreadedRestoreStack();
-      Thread t1 = new Thread(r1, "testMultiThreadedRestoreIdentity#1");
-      t1.start();
-
-      t0.join();
-      assertTrue(r0.failure == null);
-      t1.join();
-      assertTrue(r1.failure == null);
-   }
-   static class TestMultiThreadedRestoreStack implements Runnable
-   {
-      Exception failure;
-      @SuppressWarnings("deprecation")
-      public void run()
-      {
-         try
-         {
-            System.out.println("+++ testMultThreadedRestoreStack");
-
-            Principal jduke1 = new SimplePrincipal("jduke1");
-            Subject subject1 = new Subject();
-            SecurityAssociation.pushSubjectContext(subject1, jduke1, "theduke1");
-
-            Principal jduke2 = new SimplePrincipal("jduke2");
-            Subject subject2 = new Subject();
-            SecurityAssociation.pushSubjectContext(subject2, jduke2, "theduke2");
-
-            UsernamePasswordHandler handler = new UsernamePasswordHandler("jduke3",
-               "theduke3");
-            LoginContext lc = new LoginContext("testSingleThreadedRestoreIdentity", handler);
-            lc.login();
-            Subject subject = lc.getSubject();
-            System.out.println("LC.Subject: "+subject);
-      
-            Principal jduke3 = new SimplePrincipal("jduke3");
-            assertTrue("Principals contains jduke3", subject.getPrincipals().contains(jduke3));
-            Principal saPrincipal = SecurityAssociation.getPrincipal();
-            assertTrue("SecurityAssociation.getPrincipal == jduke3", saPrincipal.equals(jduke3));
-            char[] password = (char[]) SecurityAssociation.getCredential();
-            assertTrue("password == theduke3",
-               Arrays.equals(password, "theduke3".toCharArray()));
-            SecurityAssociation.SubjectContext sc3 = SecurityAssociation.peekSubjectContext();
-            System.out.println(sc3);
-            assertTrue("SecurityAssociation.peekSubjectContext == jduke3", sc3.getPrincipal().equals(jduke3));
-            char[] theduke3 = (char[]) sc3.getCredential();
-            assertTrue("password == theduke3",
-               Arrays.equals(theduke3, "theduke3".toCharArray()));
-
-            lc.logout(); 
-            
-            // Validate restored state
-            SecurityAssociation.SubjectContext sc2 = SecurityAssociation.peekSubjectContext();
-            System.out.println(sc2);
-            assertTrue("SecurityAssociation.peekSubjectContext == jduke2", sc2.getPrincipal().equals(jduke2));
-            String theduke2 = (String) sc2.getCredential();
-            assertTrue("password == theduke2", theduke2.equals("theduke2"));
-
-            SecurityAssociation.popSubjectContext();
-            SecurityAssociation.SubjectContext sc1 = SecurityAssociation.peekSubjectContext();
-            System.out.println(sc1);
-            assertTrue("SecurityAssociation.peekSubjectContext == jduke1", sc1.getPrincipal().equals(jduke1));
-            String theduke1 = (String) sc1.getCredential();
-            assertTrue("password == theduke1", theduke1.equals("theduke1"));
          }
          catch(Exception e)
          {
@@ -600,10 +476,9 @@ public class ClientLoginModuleUnitTestCase
       subject = lc.getSubject();
       assertNull("Subject is null", subject);
       
-      //We have to ensure that the first successful authentication has not been removed from the stack
+      //We have to ensure that the security context was cleared after abort
       currentSC = SecurityContextAssociation.getSecurityContext();
-      assertNotNull("Current Security Context is not null", currentSC);
-      this.verifySubjectInfo(currentSC);
+      assertNull("Current Security Context is not null", currentSC);
             
       //Let us go through some logout cycles
       handler = new UsernamePasswordHandler("jduke", "jduke");
@@ -641,15 +516,9 @@ public class ClientLoginModuleUnitTestCase
       subject = lc.getSubject();
       assertNull("Subject is null", subject);
       
-      //We have to ensure that the first successful authentication has not been removed from the stack
+      //We have to ensure that the security context was cleared after abort
       currentSC = SecurityContextAssociation.getSecurityContext();
-      assertNotNull("Current Security Context is not null", currentSC);
-      SubjectInfo subjectInfo = currentSC.getSubjectInfo();
-      assertNotNull("SubjectInfo", subjectInfo);
-      subject = subjectInfo.getAuthenticatedSubject();
-      assertNull("Subject is null", subject); 
-      assertNull("Principal on security context is null", currentSC.getUtil().getUserPrincipal());
-      assertNull("Principal on legacy security association is null", SecurityAssociation.getPrincipal());
+      assertNull("Current Security Context is not null", currentSC);
    }
    
    private void verifySubjectInfo(SecurityContext currentSC)
@@ -661,6 +530,6 @@ public class ClientLoginModuleUnitTestCase
       Principal jduke = new SimplePrincipal("jduke");
       assertTrue("jduke exists in the subject",subject.getPrincipals().contains(jduke));
       assertEquals("jduke exists", jduke, currentSC.getUtil().getUserPrincipal());
-      assertEquals("jduke exists", jduke, SecurityAssociation.getPrincipal());
+      assertEquals("jduke exists", jduke, SecurityContextAssociation.getPrincipal());
    }
 }
