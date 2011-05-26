@@ -321,8 +321,11 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
       }
 
       InitialLdapContext ctx = null;
+      ClassLoader currentTCCL = SecurityActions.getContextClassLoader();
       try
       {
+         if (currentTCCL != null)
+            SecurityActions.setContextClassLoader(null);
          ctx = new InitialLdapContext(env, null);
          if (trace)
             log.trace("Logged into LDAP server, " + ctx);
@@ -502,6 +505,8 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
          // Close the context to release the connection
          if (ctx != null)
             ctx.close();
+         if (currentTCCL != null)
+            SecurityActions.setContextClassLoader(currentTCCL);
       }
    }
 

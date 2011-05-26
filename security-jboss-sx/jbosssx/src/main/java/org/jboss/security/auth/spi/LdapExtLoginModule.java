@@ -421,8 +421,11 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
 
       // Get the admin context for searching
       InitialLdapContext ctx = null;
+      ClassLoader currentTCCL = SecurityActions.getContextClassLoader();
       try
       {
+         if (currentTCCL != null)
+            SecurityActions.setContextClassLoader(null);
          ctx = constructInitialLdapContext(bindDN, bindCredential);
          // Validate the user by binding against the userDN
          String userDN = bindDNAuthentication(ctx, username, credential, baseDN, baseFilter);
@@ -438,6 +441,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       {
          if (ctx != null)
             ctx.close();
+         if (currentTCCL != null)
+            SecurityActions.setContextClassLoader(currentTCCL);
       }
       return true;
    }

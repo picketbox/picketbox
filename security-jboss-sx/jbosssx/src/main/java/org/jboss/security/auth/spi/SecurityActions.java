@@ -50,6 +50,18 @@ class SecurityActions
        });  
    }
    
+   static Void setContextClassLoader(final ClassLoader cl)
+   {
+      return AccessController.doPrivileged(new PrivilegedAction<Void>()
+      {
+         public Void run()
+         {
+            Thread.currentThread().setContextClassLoader(cl);
+            return null;
+         }
+      });
+   }
+   
    static URL findResource(final URLClassLoader cl, final String name)
    {
       return AccessController.doPrivileged(new PrivilegedAction<URL>()
