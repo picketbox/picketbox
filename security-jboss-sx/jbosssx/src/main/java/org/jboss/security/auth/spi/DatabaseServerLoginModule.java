@@ -75,7 +75,7 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
    /** The sql query to obtain the user password */
    protected String principalsQuery = "select Password from Principals where PrincipalID=?";
    /** The sql query to obtain the user roles */
-   protected String rolesQuery = "select Role, RoleGroup from Roles where PrincipalID=?";
+   protected String rolesQuery;
    /** Whether to suspend resume transactions during database operations */
    protected boolean suspendResume = true;
    
@@ -114,7 +114,8 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
       {
          log.trace("DatabaseServerLoginModule, dsJndiName="+dsJndiName);
          log.trace("principalsQuery="+principalsQuery);
-         log.trace("rolesQuery="+rolesQuery);
+         if (rolesQuery != null)
+            log.trace("rolesQuery="+rolesQuery);
          log.trace("suspendResume="+suspendResume);
       }
       //Get the Transaction Manager JNDI Name
@@ -255,12 +256,16 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
     */
    protected Group[] getRoleSets() throws LoginException
    {
-      String username = getUsername();
-      if (log.isTraceEnabled())
-         log.trace("getRoleSets using rolesQuery: "+rolesQuery+", username: "+username);
-      Group[] roleSets = Util.getRoleSets(username, dsJndiName, rolesQuery, this,
-         suspendResume);
-      return roleSets;
+      if (rolesQuery != null)
+      {
+         String username = getUsername();
+         if (log.isTraceEnabled())
+            log.trace("getRoleSets using rolesQuery: "+rolesQuery+", username: "+username);
+         Group[] roleSets = Util.getRoleSets(username, dsJndiName, rolesQuery, this,
+               suspendResume);
+         return roleSets;
+      }
+      return new Group[0];
    }
    
    /** A hook to allow subclasses to convert a password from the database

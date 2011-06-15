@@ -216,6 +216,15 @@ public abstract class AbstractServerLoginModule implements LoginModule
       Set<Principal> principals = subject.getPrincipals();
       Principal identity = getIdentity();
       principals.add(identity);
+      // add the CallerPrincipal group
+      Group callerGroup = getCallerPrincipalGroup(principals);
+      if (callerGroup == null)
+      {
+         callerGroup = new SimpleGroup(SecurityConstants.CALLER_PRINCIPAL_GROUP);
+         callerGroup.addMember(identity);
+         principals.add(callerGroup);
+      }
+      // add other role groups
       Group[] roleSets = getRoleSets();
       for(int g = 0; g < roleSets.length; g ++)
       {
@@ -263,6 +272,9 @@ public abstract class AbstractServerLoginModule implements LoginModule
       Principal identity = getIdentity();
       Set<Principal> principals = subject.getPrincipals();
       principals.remove(identity);
+      Group callerGroup = getCallerPrincipalGroup(principals);
+      if (callerGroup != null)
+         principals.remove(callerGroup);
       // Remove any added Groups...
       return true;
    }
@@ -349,5 +361,23 @@ public abstract class AbstractServerLoginModule implements LoginModule
             p = (Principal) ctor.newInstance(ctorArgs);
       }
       return p;
+   }
+   
+   protected Group getCallerPrincipalGroup(Set<Principal> principals)
+   {
+      Group callerGroup = null;
+      for (Principal principal : principals)
+      {
+         if (principal instanceof Group)
+         {
+            Group group = Group.class.cast(principal);
+            if (group.getName().equals(SecurityConstants.CALLER_PRINCIPAL_GROUP))
+            {
+               callerGroup = group;
+               break;
+            }
+         }
+      }
+      return callerGroup;
    }
 }

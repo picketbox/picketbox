@@ -268,7 +268,7 @@ public class Util
          }
          else
          {
-            throw new IOException("Properties file " + propertiesName + " not avilable");
+            throw new IOException("Properties file " + propertiesName + " not available");
          }
          if (trace)
             log.trace("Loaded properties, users="+bundle.keySet());
@@ -290,33 +290,52 @@ public class Util
     * @exception java.io.IOException thrown if the properties file cannot be found
     *    or loaded 
     */
-   static Properties loadProperties(String propertiesName, Logger log)
-      throws IOException
-   { 
+   static Properties loadProperties(String propertiesName, Logger log) throws IOException
+   {
       boolean trace = log.isTraceEnabled();
-      
-      ClassLoader loader = SecurityActions.getContextClassLoader(); 
+
+      Properties bundle = null;
+      ClassLoader loader = SecurityActions.getContextClassLoader();
       URL url = null;
       // First check for local visibility via a URLClassLoader.findResource
-      if( loader instanceof URLClassLoader )
+      if (loader instanceof URLClassLoader)
       {
-         URLClassLoader ucl = (URLClassLoader) loader; 
-         url = SecurityActions.findResource(ucl,propertiesName);
-         if(trace)
-            log.trace("findResource: "+url);
-      } 
-      if( url == null )
+         URLClassLoader ucl = (URLClassLoader) loader;
+         url = SecurityActions.findResource(ucl, propertiesName);
+         if (trace)
+            log.trace("findResource: " + url);
+      }
+      // Do a general resource search
+      if (url == null)
+      {
          url = loader.getResource(propertiesName);
-      if( url == null)
+         if (url == null)
+         {
+            try
+            {
+               url = new URL(propertiesName);
+            }
+            catch (MalformedURLException mue)
+            {
+               if (trace)
+                  log.trace("Failed to open properties as URL", mue);
+               File tmp = new File(propertiesName);
+               if (tmp.exists())
+                  url = tmp.toURI().toURL();
+            }
+         }
+      }
+      if (url == null)
       {
-         url = new URL(propertiesName); 
+         String msg = "No properties file: " + propertiesName + " found";
+         throw new IOException(msg);
       }
 
-      if(trace)
-         log.trace("Properties file=" + url ); 
-
-      Properties bundle = new Properties();
-      if( url != null )
+      if (trace)
+         log.trace("Properties file=" + url);
+      Properties defaults = new Properties();
+      bundle = new Properties(defaults);
+      if (url != null)
       {
          InputStream is = null;
          try
@@ -325,8 +344,8 @@ public class Util
          }
          catch (PrivilegedActionException e)
          {
-            if(trace)
-               log.trace("open stream error:", e);
+            if (trace)
+               log.trace("Open stream error", e);
             throw new IOException(e.getLocalizedMessage());
          }
          if (is != null)
@@ -338,7 +357,8 @@ public class Util
          {
             throw new IOException("Properties file " + propertiesName + " not available");
          }
-         log.debug("Loaded properties, users="+bundle.keySet());
+         if (trace)
+            log.trace("Loaded properties, users=" + bundle.keySet());
       }
 
       return bundle;

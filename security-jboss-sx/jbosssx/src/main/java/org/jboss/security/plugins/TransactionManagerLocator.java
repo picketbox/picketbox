@@ -40,6 +40,7 @@ public class TransactionManagerLocator
 {
    private static Logger log = Logger.getLogger(TransactionManagerLocator.class);
    private boolean trace = log.isTraceEnabled();
+   private static TransactionManager transactionManager;
    
    public TransactionManagerLocator()
    {   
@@ -72,6 +73,8 @@ public class TransactionManagerLocator
          { 
             if(trace)
                log.trace("Exception in getJBossTM:", ignore);
+            if (transactionManager != null)
+               tm = transactionManager;
          }
       } 
       return tm;
@@ -83,5 +86,10 @@ public class TransactionManagerLocator
       Class<?> clz = tcl.loadClass("org.jboss.tm.TransactionManagerLocator");
       Method m = clz.getMethod("locate", new Class[]{});
       return (TransactionManager) m.invoke(null, new Object[0]); 
+   }
+   
+   public static void setTransactionManager(TransactionManager transactionManager)
+   {
+      TransactionManagerLocator.transactionManager = transactionManager;
    }
 }

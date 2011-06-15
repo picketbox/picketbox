@@ -461,9 +461,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    {
       SearchControls constraints = new SearchControls();
       constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-      constraints.setReturningAttributes(new String[0]);
       constraints.setTimeLimit(searchTimeLimit);
-
       String attrList[] = {distinguishedNameAttribute};
       constraints.setReturningAttributes(attrList);
 
@@ -657,6 +655,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          Properties tmp = new Properties();
          tmp.putAll(env);
          tmp.setProperty(Context.SECURITY_CREDENTIALS, "***");
+         tmp.setProperty(BIND_CREDENTIAL, "***");
          log.trace("Logging into LDAP server, env=" + tmp.toString());
       }
    }

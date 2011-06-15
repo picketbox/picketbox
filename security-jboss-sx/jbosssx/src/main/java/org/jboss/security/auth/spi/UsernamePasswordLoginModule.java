@@ -412,8 +412,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
       {
          try
          {
-            ClassLoader loader = SecurityActions.getContextClassLoader();
-            Class<?> callbackClass = loader.loadClass(callbackClassName);
+            Class<?> callbackClass = SecurityActions.loadClass(callbackClassName);
             callback = (DigestCallback) callbackClass.newInstance();
             if( log.isTraceEnabled() )
                log.trace("Created DigestCallback: "+callback);

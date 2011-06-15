@@ -25,6 +25,8 @@ import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.security.Principal;
 import java.security.acl.Group;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -361,12 +363,31 @@ protected void setUp() throws Exception
      LoginContext lc = new LoginContext("testUsernamePassword", handler);
      lc.login();
      Subject subject = lc.getSubject();
-     Set groups = subject.getPrincipals(Group.class);
-     assertTrue("Principals contains scott", subject.getPrincipals().contains(new SimplePrincipal("scott")));
-     assertTrue("Principals contains Roles", groups.contains(new SimplePrincipal("Roles")));
-     Group roles = (Group) groups.iterator().next();
-     assertTrue("TestRole is a role", roles.isMember(new SimplePrincipal("TestRole")));
-     assertTrue("Role2 is a role", roles.isMember(new SimplePrincipal("Role2")));
+     Set<Group> groups = subject.getPrincipals(Group.class);
+     Principal scott = new SimplePrincipal("scott");
+     assertTrue("Principals contains scott", subject.getPrincipals().contains(scott));
+     assertTrue("Principals contains Roles", groups.contains(new SimpleGroup("Roles")));
+     assertTrue("Principals contains CallerPrincipal", groups.contains(new SimpleGroup("CallerPrincipal")));
+     for (Group group : groups)
+     {
+        if (group.getName().equals("Roles"))
+        {
+           Enumeration<? extends Principal> roles = group.members();
+           assertEquals("Roles group has 2 entries", 2, Collections.list(roles).size());
+           assertTrue("TestRole is a role", group.isMember(new SimplePrincipal("TestRole")));
+           assertTrue("Role2 is a role", group.isMember(new SimplePrincipal("Role2")));
+        }
+        else if (group.getName().equals("CallerPrincipal"))
+        {
+           Enumeration<? extends Principal> roles = group.members();
+           assertEquals("CallerPrincipal group has 1 entry", 1, Collections.list(roles).size());
+           assertTrue("scott is the caller principal", group.isMember(scott));
+        }
+        else
+        {
+           fail("Another group was set: " + group.getName());
+        }
+     }
 
      lc.logout();
   }
@@ -377,12 +398,31 @@ protected void setUp() throws Exception
      LoginContext lc = new LoginContext("testUsernamePasswordHash", handler);
      lc.login();
      Subject subject = lc.getSubject();
-     Set groups = subject.getPrincipals(Group.class);
-     assertTrue("Principals contains scott", subject.getPrincipals().contains(new SimplePrincipal("scott")));
-     assertTrue("Principals contains Roles", groups.contains(new SimplePrincipal("Roles")));
-     Group roles = (Group) groups.iterator().next();
-     assertTrue("TestRole is a role", roles.isMember(new SimplePrincipal("TestRole")));
-     assertTrue("Role2 is a role", roles.isMember(new SimplePrincipal("Role2")));
+     Set<Group> groups = subject.getPrincipals(Group.class);
+     Principal scott = new SimplePrincipal("scott");
+     assertTrue("Principals contains scott", subject.getPrincipals().contains(scott));
+     assertTrue("Principals contains Roles", groups.contains(new SimpleGroup("Roles")));
+     assertTrue("Principals contains CallerPrincipal", groups.contains(new SimpleGroup("CallerPrincipal")));
+     for (Group group : groups)
+     {
+        if (group.getName().equals("Roles"))
+        {
+           Enumeration<? extends Principal> roles = group.members();
+           assertEquals("Roles group has 2 entries", 2, Collections.list(roles).size());
+           assertTrue("TestRole is a role", group.isMember(new SimplePrincipal("TestRole")));
+           assertTrue("Role2 is a role", group.isMember(new SimplePrincipal("Role2")));
+        }
+        else if (group.getName().equals("CallerPrincipal"))
+        {
+           Enumeration<? extends Principal> roles = group.members();
+           assertEquals("CallerPrincipal group has 1 entry", 1, Collections.list(roles).size());
+           assertTrue("scott is the caller principal", group.isMember(scott));
+        }
+        else
+        {
+           fail("Another group was set: " + group.getName());
+        }
+     }
 
      lc.logout();
   }
@@ -394,11 +434,28 @@ protected void setUp() throws Exception
      LoginContext lc = new LoginContext("testAnon", handler);
      lc.login();
      Subject subject = lc.getSubject();
-     Set groups = subject.getPrincipals(Group.class);
-     assertTrue("Principals contains nobody", subject.getPrincipals().contains(new SimplePrincipal("nobody")));
-     assertTrue("Principals contains Roles", groups.contains(new SimplePrincipal("Roles")));
-     Group roles = (Group) groups.iterator().next();
-     assertTrue("Roles has no members", roles.members().hasMoreElements() == false);
+     Set<Group> groups = subject.getPrincipals(Group.class);
+     Principal nobody = new SimplePrincipal("nobody");
+     assertTrue("Principals contains nobody", subject.getPrincipals().contains(nobody));
+     assertTrue("Principals contains Roles", groups.contains(new SimpleGroup("Roles")));
+     assertTrue("Principals contains CallerPrincipal", groups.contains(new SimpleGroup("CallerPrincipal")));
+     for (Group group : groups)
+     {
+        if (group.getName().equals("Roles"))
+        {
+           assertTrue("Roles has no members", !group.members().hasMoreElements());
+        }
+        else if (group.getName().equals("CallerPrincipal"))
+        {
+           Enumeration<? extends Principal> roles = group.members();
+           assertEquals("CallerPrincipal group has 1 entry", 1, Collections.list(roles).size());
+           assertTrue("scott is the caller principal", group.isMember(nobody));
+        }
+        else
+        {
+           fail("Another group was set: " + group.getName());
+        }
+     }
 
      lc.logout();
   }
@@ -424,13 +481,32 @@ protected void setUp() throws Exception
      LoginContext lc = new LoginContext("testIdentity");
      lc.login();
      Subject subject = lc.getSubject();
-     Set groups = subject.getPrincipals(Group.class);
-     assertTrue("Principals contains stark", subject.getPrincipals().contains(new SimplePrincipal("stark")));
-     assertTrue("Principals contains Roles", groups.contains(new SimplePrincipal("Roles")));
-     Group roles = (Group) groups.iterator().next();
-     assertTrue("Role2 is not a role", roles.isMember(new SimplePrincipal("Role2")) == false);
-     assertTrue("Role3 is a role", roles.isMember(new SimplePrincipal("Role3")));
-     assertTrue("Role4 is a role", roles.isMember(new SimplePrincipal("Role4")));
+     Set<Group> groups = subject.getPrincipals(Group.class);
+     Principal stark = new SimplePrincipal("stark");
+     assertTrue("Principals contains stark", subject.getPrincipals().contains(stark));
+     assertTrue("Principals contains Roles", groups.contains(new SimpleGroup("Roles")));
+     assertTrue("Principals contains CallerPrincipal", groups.contains(new SimpleGroup("CallerPrincipal")));
+     for (Group group : groups)
+     {
+        if (group.getName().equals("Roles"))
+        {
+           Enumeration<? extends Principal> roles = group.members();
+           assertEquals("Roles group has 2 entries", 2, Collections.list(roles).size());
+           assertTrue("Role2 is not a role", !group.isMember(new SimplePrincipal("Role2")));
+           assertTrue("Role3 is a role", group.isMember(new SimplePrincipal("Role3")));
+           assertTrue("Role4 is a role", group.isMember(new SimplePrincipal("Role4")));
+        }
+        else if (group.getName().equals("CallerPrincipal"))
+        {
+           Enumeration<? extends Principal> roles = group.members();
+           assertEquals("CallerPrincipal group has 1 entry", 1, Collections.list(roles).size());
+           assertTrue("scott is the caller principal", group.isMember(stark));
+        }
+        else
+        {
+           fail("Another group was set: " + group.getName());
+        }
+     }
 
      lc.logout();
   } 
@@ -441,12 +517,31 @@ protected void setUp() throws Exception
      LoginContext lc = new LoginContext("testSimple", handler);
      lc.login();
      Subject subject = lc.getSubject();
-     Set groups = subject.getPrincipals(Group.class);
-     assertTrue("Principals contains jduke", subject.getPrincipals().contains(new SimplePrincipal("jduke")));
-     assertTrue("Principals contains Roles", groups.contains(new SimplePrincipal("Roles")));
-     Group roles = (Group) groups.iterator().next();
-     assertTrue("user is a role", roles.isMember(new SimplePrincipal("user")));
-     assertTrue("guest is a role", roles.isMember(new SimplePrincipal("guest")));
+     Set<Group> groups = subject.getPrincipals(Group.class);
+     Principal jduke = new SimplePrincipal("jduke");
+     assertTrue("Principals contains jduke", subject.getPrincipals().contains(jduke));
+     assertTrue("Principals contains Roles", groups.contains(new SimpleGroup("Roles")));
+     assertTrue("Principals contains CallerPrincipal", groups.contains(new SimpleGroup("CallerPrincipal")));
+     for (Group group : groups)
+     {
+        if (group.getName().equals("Roles"))
+        {
+           Enumeration<? extends Principal> roles = group.members();
+           assertEquals("Roles group has 2 entries", 2, Collections.list(roles).size());
+           assertTrue("user is a role", group.isMember(new SimplePrincipal("user")));
+           assertTrue("guest is a role", group.isMember(new SimplePrincipal("guest")));
+        }
+        else if (group.getName().equals("CallerPrincipal"))
+        {
+           Enumeration<? extends Principal> roles = group.members();
+           assertEquals("CallerPrincipal group has 1 entry", 1, Collections.list(roles).size());
+           assertTrue("scott is the caller principal", group.isMember(jduke));
+        }
+        else
+        {
+           fail("Another group was set: " + group.getName());
+        }
+     }
 
      lc.logout();
   }

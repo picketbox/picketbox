@@ -22,7 +22,10 @@
 package org.jboss.test.authentication;
 
 import java.lang.reflect.Method;
+import java.security.Principal;
 import java.security.acl.Group;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -162,11 +165,30 @@ public class JBossSecuritySubjectFactoryUnitTestCase extends TestCase
       JBossSecuritySubjectFactory subjectFactory = new JBossSecuritySubjectFactory();
       Subject subject = subjectFactory.createSubject();
       Set<Group> groups = subject.getPrincipals(Group.class);
-      assertTrue("Principals contains scott", subject.getPrincipals().contains(new SimplePrincipal("scott")));
-      assertTrue("Principals contains Roles", groups.contains(new SimplePrincipal("Roles")));
-      Group roles = groups.iterator().next();
-      assertTrue("TestRole is a role", roles.isMember(new SimplePrincipal("TestRole")));
-      assertTrue("Role2 is a role", roles.isMember(new SimplePrincipal("Role2")));
+      Principal scott = new SimplePrincipal("scott");
+      assertTrue("Principals contains scott", subject.getPrincipals().contains(scott));
+      assertTrue("Principals contains Roles", groups.contains(new SimpleGroup("Roles")));
+      assertTrue("Principals contains CallerPrincipal", groups.contains(new SimpleGroup("CallerPrincipal")));
+      for (Group group : groups)
+      {
+         if (group.getName().equals("Roles"))
+         {
+            Enumeration<? extends Principal> roles = group.members();
+            assertEquals("Roles group has 2 entries", 2, Collections.list(roles).size());
+            assertTrue("TestRole is a role", group.isMember(new SimplePrincipal("TestRole")));
+            assertTrue("Role2 is a role", group.isMember(new SimplePrincipal("Role2")));
+         }
+         else if (group.getName().equals("CallerPrincipal"))
+         {
+            Enumeration<? extends Principal> roles = group.members();
+            assertEquals("CallerPrincipal group has 1 entry", 1, Collections.list(roles).size());
+            assertTrue("scott is the caller principal", group.isMember(scott));
+         }
+         else
+         {
+            fail("Another group was set: " + group.getName());
+         }
+      }
    }
    
    public void testSubjectCreationWithDefaultSecurityManagementImplementation() throws Exception
@@ -180,10 +202,29 @@ public class JBossSecuritySubjectFactoryUnitTestCase extends TestCase
       JBossSecuritySubjectFactory subjectFactory = new JBossSecuritySubjectFactory();
       Subject subject = subjectFactory.createSubject("securityDomain");
       Set<Group> groups = subject.getPrincipals(Group.class);
-      assertTrue("Principals contains scott", subject.getPrincipals().contains(new SimplePrincipal("scott")));
-      assertTrue("Principals contains Roles", groups.contains(new SimplePrincipal("Roles")));
-      Group roles = groups.iterator().next();
-      assertTrue("Role1 is a role", roles.isMember(new SimplePrincipal("Role1")));
+      Principal scott = new SimplePrincipal("scott");
+      assertTrue("Principals contains scott", subject.getPrincipals().contains(scott));
+      assertTrue("Principals contains Roles", groups.contains(new SimpleGroup("Roles")));
+      assertTrue("Principals contains CallerPrincipal", groups.contains(new SimpleGroup("CallerPrincipal")));
+      for (Group group : groups)
+      {
+         if (group.getName().equals("Roles"))
+         {
+            Enumeration<? extends Principal> roles = group.members();
+            assertEquals("Roles group has 1 entry", 1, Collections.list(roles).size());
+            assertTrue("Role1 is a role", group.isMember(new SimplePrincipal("Role1")));
+         }
+         else if (group.getName().equals("CallerPrincipal"))
+         {
+            Enumeration<? extends Principal> roles = group.members();
+            assertEquals("CallerPrincipal group has 1 entry", 1, Collections.list(roles).size());
+            assertTrue("scott is the caller principal", group.isMember(scott));
+         }
+         else
+         {
+            fail("Another group was set: " + group.getName());
+         }
+      }
    }
 
 }
