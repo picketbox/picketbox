@@ -120,7 +120,6 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
       this.options = options;
    }
 
-   @SuppressWarnings("unchecked")
    public void performMapping(Map<String, Object> map, List<Attribute<String>> mappedObject)
    {
       List<Attribute<String>> attributeList = new ArrayList<Attribute<String>>();
@@ -165,8 +164,11 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
          }
          
          InitialLdapContext ctx;
+         ClassLoader currentTCCL = SecurityActions.getContextClassLoader();
          try
          {
+            if (currentTCCL != null)
+               SecurityActions.setContextClassLoader(null);
             ctx = this.constructInitialLdapContext(bindDN, bindCredential);
          }
          catch (NamingException e)
@@ -205,7 +207,7 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
          
          constraints.setReturningAttributes(neededAttributes);
 
-         NamingEnumeration results = null;
+         NamingEnumeration<SearchResult> results = null;
 
          Object[] filterArgs = {user};
          try
@@ -218,7 +220,7 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
                results.close();
                throw new NamingException("Search of baseDN(" + baseDN + ") found no matches");
             } 
-            SearchResult sr = (SearchResult) results.next();
+            SearchResult sr = results.next();
             String name = sr.getName();
             String userDN = null;
             if (sr.isRelative() == true)
@@ -256,6 +258,10 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
             {
                if (results != null)
                   results.close();
+               if (ctx != null)
+                  ctx.close();
+               if (currentTCCL != null)
+                  SecurityActions.setContextClassLoader(currentTCCL);
             }            
          }catch(NamingException ne)
          {
@@ -283,14 +289,13 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
    } 
    
    
-   @SuppressWarnings("unchecked")
    private InitialLdapContext constructInitialLdapContext(String dn, Object credential) throws NamingException
    {
       Properties env = new Properties();
-      Iterator iter = options.entrySet().iterator();
+      Iterator<Entry<String, Object>> iter = options.entrySet().iterator();
       while (iter.hasNext())
       {
-         Entry entry = (Entry) iter.next();
+         Entry<String, Object> entry = iter.next();
          env.put(entry.getKey(), entry.getValue());
       }
 
@@ -333,10 +338,13 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
    private String[] getNeededAttributes(String commaSeparatedList)
    {
       ArrayList<String> arrayList = new ArrayList<String>();
-      StringTokenizer st = new StringTokenizer(commaSeparatedList,",");
-      while(st.hasMoreTokens())
+      if (commaSeparatedList != null)
       {
-         arrayList.add(st.nextToken());
+         StringTokenizer st = new StringTokenizer(commaSeparatedList,",");
+         while(st.hasMoreTokens())
+         {
+            arrayList.add(st.nextToken());
+         }
       }
       String[] strArr = new String[arrayList.size()];
       return arrayList.toArray(strArr); 
