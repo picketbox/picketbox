@@ -367,7 +367,7 @@ public class JBossCachedAuthenticationManager
       {
          // Don't log anonymous user failures unless trace level logging is on
          if (principal != null && principal.getName() != null || trace)
-            log.trace("Login failure", e);
+            log.error("Login failure", e);
          authException = e;
       }
       // Set the security association thread context info exception
