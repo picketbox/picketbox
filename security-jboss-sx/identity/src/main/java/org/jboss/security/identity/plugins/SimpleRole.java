@@ -99,4 +99,24 @@ public class SimpleRole implements Role, Cloneable
    {
       return roleName;
    }
+
+   @Override
+   public int hashCode()
+   {
+	  int hashCode = roleName.hashCode();
+	  if (parent != null)
+		 hashCode += parent.hashCode();
+	  return hashCode;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+	  if (obj instanceof SimpleRole)
+	  {
+		 SimpleRole other = SimpleRole.class.cast(obj);
+		 return parent != null ? (roleName.equals(other.roleName) && parent.equals(other.parent)) : (roleName.equals(other.roleName) && other.parent == null);
+	  }
+	  return false;
+   }
 }

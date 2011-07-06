@@ -95,7 +95,8 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
     */
    public synchronized void addRole(Role role)
    {
-      this.roles.add(role);
+	  if (!this.roles.contains(role))
+		 this.roles.add(role);
    }
 
    /*
@@ -105,7 +106,15 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
    public synchronized void addAll(List<Role> roles)
    {
       if (roles != null)
-         this.roles.addAll(roles);
+      {
+         for (Role role : roles)
+         {
+			if (!this.roles.contains(role))
+			{
+			   this.roles.add(role);
+			}
+		 }
+      }
    }
 
    /*
