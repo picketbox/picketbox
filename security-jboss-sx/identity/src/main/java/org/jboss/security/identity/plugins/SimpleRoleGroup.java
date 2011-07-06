@@ -57,7 +57,7 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
    public SimpleRoleGroup(String roleName, List<Role> roles)
    {
       super(roleName);
-      this.roles.addAll(roles);
+      addAll(roles);
    }
 
    public SimpleRoleGroup(Group rolesGroup)
@@ -66,7 +66,8 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       Enumeration<? extends Principal> principals = rolesGroup.members();
       while (principals.hasMoreElements())
       {
-         roles.add(new SimpleRole(principals.nextElement().getName()));
+         SimpleRole role = new SimpleRole(principals.nextElement().getName());
+         addRole(role);
       }
    }
 
@@ -75,7 +76,8 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       super(ROLES_IDENTIFIER);
       for (Principal p : rolesAsPrincipals)
       {
-         roles.add(new SimpleRole(p.getName()));
+         SimpleRole role = new SimpleRole(p.getName());
+         addRole(role);
       }
    }
 
@@ -95,8 +97,8 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
     */
    public synchronized void addRole(Role role)
    {
-	  if (!this.roles.contains(role))
-		 this.roles.add(role);
+      if (!this.roles.contains(role))
+         this.roles.add(role);
    }
 
    /*
@@ -109,11 +111,11 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       {
          for (Role role : roles)
          {
-			if (!this.roles.contains(role))
-			{
-			   this.roles.add(role);
-			}
-		 }
+            if (!this.roles.contains(role))
+            {
+               this.roles.add(role);
+            }
+         }
       }
    }
 
