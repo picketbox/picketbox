@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.resource.security;
+package org.picketbox.datasource.security;
 
 import java.security.AccessController;
 import java.security.Principal;
@@ -28,7 +28,6 @@ import java.security.acl.Group;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
@@ -41,18 +40,17 @@ import org.jboss.security.SimpleGroup;
  * @version $Revision: 71545 $
  */
 
-@SuppressWarnings("unchecked")
 class SubjectActions
 {
    interface AddRolesActions
    {
       AddRolesActions PRIVILEGED = new AddRolesActions()
       {
-         public void addRoles(final Subject subject, final Set roles)
+         public void addRoles(final Subject subject, final Set<Principal> roles)
          {
-            AccessController.doPrivileged(new PrivilegedAction()
+            AccessController.doPrivileged(new PrivilegedAction<Void>()
             {
-               public Object run()
+               public Void run()
                {
                   addSubjectRoles(subject, roles);
                   return null;
@@ -63,16 +61,16 @@ class SubjectActions
 
       AddRolesActions NON_PRIVILEGED = new AddRolesActions()
       {
-         public void addRoles(final Subject subject, final Set roles)
+         public void addRoles(final Subject subject, final Set<Principal> roles)
          {
             addSubjectRoles(subject, roles);
          }
       };
 
-      void addRoles(Subject subject, Set roles);
+      void addRoles(Subject subject, Set<Principal> roles);
    }
 
-   static class AddCredentialsAction implements PrivilegedAction
+   static class AddCredentialsAction implements PrivilegedAction<Void>
    {
       Subject subject;
       PasswordCredential cred;
@@ -81,13 +79,13 @@ class SubjectActions
          this.subject = subject;
          this.cred = cred;
       }
-      public Object run()
+      public Void run()
       {
          subject.getPrivateCredentials().add(cred);
          return null;
       }
    }
-   static class AddPrincipalsAction implements PrivilegedAction
+   static class AddPrincipalsAction implements PrivilegedAction<Void>
    {
       Subject subject;
       Principal p;
@@ -96,33 +94,25 @@ class SubjectActions
          this.subject = subject;
          this.p = p;
       }
-      public Object run()
+      public Void run()
       {
          subject.getPrincipals().add(p);
          return null;
       }
    }
-   static class RemoveCredentialsAction implements PrivilegedAction
+   static class RemoveCredentialsAction implements PrivilegedAction<Void>
    {
       Subject subject;
-      ManagedConnectionFactory mcf;
-      RemoveCredentialsAction(Subject subject, ManagedConnectionFactory mcf)
+      RemoveCredentialsAction(Subject subject)
       {
          this.subject = subject;
-         this.mcf = mcf;
       }
-      public Object run()
+      public Void run()
       {
-         Iterator i = subject.getPrivateCredentials().iterator();
-         while( i.hasNext() )
+         Iterator<PasswordCredential> i = subject.getPrivateCredentials(PasswordCredential.class).iterator();
+         while (i.hasNext())
          {
-            Object o = i.next();
-            if ( o instanceof PasswordCredential )
-            {
-               PasswordCredential pc = (PasswordCredential) o;
-               if( pc.getManagedConnectionFactory() == mcf )
-                  i.remove();
-            }
+            i.remove();
          }
          return null;
       }
@@ -138,15 +128,15 @@ class SubjectActions
       AddPrincipalsAction action = new AddPrincipalsAction(subject, p);
       AccessController.doPrivileged(action);
    }
-   static void removeCredentials(Subject subject, ManagedConnectionFactory mcf)
+   static void removeCredentials(Subject subject)
    {
-      RemoveCredentialsAction action = new RemoveCredentialsAction(subject, mcf);
+      RemoveCredentialsAction action = new RemoveCredentialsAction(subject);
       AccessController.doPrivileged(action);
    }
 
-   static void addRoles(Subject subject, Set runAsRoles)
+   static void addRoles(Subject subject, Set<Principal> runAsRoles)
    {
-      if( System.getSecurityManager() != null )
+      if (System.getSecurityManager() != null)
       {
          AddRolesActions.PRIVILEGED.addRoles(subject, runAsRoles);
       }
@@ -156,14 +146,14 @@ class SubjectActions
       }
    }
 
-   private static Group addSubjectRoles(Subject theSubject, Set roles)
+   private static Group addSubjectRoles(Subject theSubject, Set<Principal> roles)
    {
-      Set subjectGroups = theSubject.getPrincipals(Group.class);
-      Iterator iter = subjectGroups.iterator();
+      Set<Group> subjectGroups = theSubject.getPrincipals(Group.class);
+      Iterator<Group> iter = subjectGroups.iterator();
       Group roleGrp = null;
       while (iter.hasNext())
       {
-         Group grp = (Group) iter.next();
+         Group grp = iter.next();
          String name = grp.getName();
          if (name.equals("Roles"))
             roleGrp = grp;
@@ -176,10 +166,10 @@ class SubjectActions
          theSubject.getPrincipals().add(roleGrp);
       }
 
-      iter = roles.iterator();
-      while (iter.hasNext())
+      Iterator<Principal> iter2 = roles.iterator();
+      while (iter2.hasNext())
       {
-         Principal role = (Principal) iter.next();
+         Principal role = iter2.next();
          roleGrp.addMember(role);
       }
       return roleGrp;

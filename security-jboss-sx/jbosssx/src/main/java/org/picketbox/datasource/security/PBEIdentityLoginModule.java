@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.resource.security;
+package org.picketbox.datasource.security;
 
 import java.security.Principal;
 import java.security.acl.Group;
@@ -102,40 +102,39 @@ public class PBEIdentityLoginModule
    }
    PBEIdentityLoginModule(String algo, char[] pass, byte[] pbesalt, int iter)
    {
-      if( pass != null )
+      if (pass != null)
          pbepass = pass;
-      if( algo != null )
+      if (algo != null)
          pbealgo = algo;
-      if( pbesalt != null )
+      if (pbesalt != null)
          salt = pbesalt;
-      if( iter > 0 )
+      if (iter > 0)
          iterationCount = iter;
    }
 
-   @SuppressWarnings("unchecked")
    @Override
-   public void initialize(Subject subject, CallbackHandler handler, Map sharedState, Map options)
+   public void initialize(Subject subject, CallbackHandler handler, Map<String, ?> sharedState, Map<String, ?> options)
    {
       super.initialize(subject, handler, sharedState, options);
       // NR : we keep this username for compatibility
       username = (String) options.get("username");
-      if( username == null )
+      if (username == null)
       {
       	// NR : try with userName
         username = (String) options.get("userName");      	
-        if( username == null )
+        if (username == null)
         {
          throw new IllegalArgumentException("The user name is a required option");
         }
      }
       password = (String) options.get("password");
-      if( password == null )
+      if (password == null)
       {
          throw new IllegalArgumentException("The password is a required option");
       }
       // Look for the cipher password and algo parameters
       String tmp = (String) options.get("pbepass");
-      if( tmp != null )
+      if (tmp != null)
       {
          try
          {
@@ -147,21 +146,22 @@ public class PBEIdentityLoginModule
          }
       }
       tmp = (String) options.get("pbealgo");
-      if( tmp != null )
+      if (tmp != null)
          pbealgo = tmp;
       tmp = (String) options.get("salt");
-      if( tmp != null )
+      if (tmp != null)
          salt = tmp.substring(0, 8).getBytes();
       tmp = (String) options.get("iterationCount");
-      if( tmp != null )
+      if (tmp != null)
          iterationCount = Integer.parseInt(tmp);
    }
 
+   @Override
    public boolean login() throws LoginException
    {
-      if(trace)
+      if (trace)
          log.trace("login called");
-      if( super.login() == true )
+      if (super.login())
          return true;
 
       super.loginOk = true;
@@ -169,6 +169,7 @@ public class PBEIdentityLoginModule
    }
 
    @SuppressWarnings("unchecked")
+   @Override
    public boolean commit() throws LoginException
    {
       Principal principal = new SimplePrincipal(username);
@@ -179,18 +180,18 @@ public class PBEIdentityLoginModule
       {
          char[] decodedPassword = decode(password);
          PasswordCredential cred = new PasswordCredential(username, decodedPassword);
-         cred.setManagedConnectionFactory(getMcf());
          SubjectActions.addCredentials(subject, cred);
       }
       catch(Exception e)
       {
-         if(trace)
+         if (trace)
             log.trace("Failed to decode password", e);
-         throw new LoginException("Failed to decode password: "+e.getMessage());
+         throw new LoginException("Failed to decode password: " + e.getMessage());
       }
       return true;
    }
 
+   @Override
    public boolean abort()
    {
       username = null;
@@ -200,16 +201,15 @@ public class PBEIdentityLoginModule
 
    protected Principal getIdentity()
    {
-      if(trace)
-         log.trace("getIdentity called, username="+username);
+      if (trace)
+         log.trace("getIdentity called, username=" + username);
       Principal principal = new SimplePrincipal(username);
       return principal;
    }
 
    protected Group[] getRoleSets() throws LoginException
    {
-      Group[] empty = new Group[0];
-      return empty;
+      return new Group[] {};
    }
 
    private String encode(String secret)
@@ -259,17 +259,17 @@ public class PBEIdentityLoginModule
       char[] pass = "jaas is the way".toCharArray();
       byte[] salt = null;
       int iter = -1;
-      if( args.length >= 2 )
+      if (args.length >= 2)
          pass = args[1].toCharArray();
-      if( args.length >= 3 )
+      if (args.length >= 3)
          salt = args[2].getBytes();
-      if( args.length >= 4 )
+      if (args.length >= 4)
          iter = Integer.decode(args[3]).intValue();
-      if( args.length >= 5 )
+      if (args.length >= 5)
          algo = args[4];
 
       PBEIdentityLoginModule pbe = new PBEIdentityLoginModule(algo, pass, salt, iter);
       String encode = pbe.encode(args[0]);
-      System.out.println("Encoded password: "+encode);
+      System.out.println("Encoded password: " + encode);
    }
 }

@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.resource.security;
+package org.picketbox.datasource.security;
 
 
 import java.security.Principal;
@@ -66,35 +66,39 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
    {
    }
 
-   public void initialize(Subject subject, CallbackHandler handler, Map sharedState, Map options)
+   @Override
+   public void initialize(Subject subject, CallbackHandler handler, Map<String, ?> sharedState, Map<String, ?> options)
    {
       super.initialize(subject, handler, sharedState, options);
       principalName = (String) options.get("principal");
-      if( principalName == null )
+      if (principalName == null)
       {
          throw new IllegalArgumentException("Must supply a principal name!");
       }
       userName = (String) options.get("userName");
-      if( userName == null )
+      if (userName == null)
       {
-         throw new IllegalArgumentException("Must supply a user name!");
+         userName = (String) options.get("username");
+         if (userName == null)
+            throw new IllegalArgumentException("Must supply a user name!");
       }
       password = (String) options.get("password");
-      if( password == null )
+      if (password == null)
       {
          log.warn("Creating LoginModule with no configured password!");
          password = "";
       }
-      if(trace)
+      if (trace)
          log.trace("got principal: " + principalName + ", username: " + userName + ", password: " + password);
 
    }
 
+   @Override
    public boolean login() throws LoginException
    {
-      if(trace)
+      if (trace)
          log.trace("login called");
-      if( super.login() == true )
+      if (super.login())
          return true;
 
       Principal principal = new SimplePrincipal(principalName);
@@ -102,7 +106,6 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
       // Put the principal name into the sharedState map
       sharedState.put("javax.security.auth.login.name", principalName);
       PasswordCredential cred = new PasswordCredential(userName, password.toCharArray());
-      cred.setManagedConnectionFactory(getMcf());
       SubjectActions.addCredentials(subject, cred);
       super.loginOk = true;
       return true;
@@ -110,7 +113,7 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
 
    protected Principal getIdentity()
    {
-      if(trace)
+      if (trace)
          log.trace("getIdentity called");
       Principal principal = new SimplePrincipal(principalName);
       return principal;
@@ -121,7 +124,7 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
    */
    protected Group[] getRoleSets() throws LoginException
    {
-      if(trace)
+      if (trace)
          log.trace("getRoleSets called");
       return new Group[] {};
    }

@@ -79,8 +79,18 @@ public class JBossSecuritySubjectFactory implements SubjectFactory
          }
          authenticationManager = securityManagement.getAuthenticationManager(defaultSecurityDomain);
       }
-      if (authenticationManager.isValid(principal, SubjectActions.getCredential(), subject) == false)
-         throw new SecurityException("Unauthenticated caller:" + principal);
+      //AS7-1072: we can't have TCCL null or else LoginContext can't find the login modules
+      ClassLoader tccl = SubjectActions.getContextClassLoader();
+      try
+      {
+         SubjectActions.setContextClassLoader(this.getClass().getClassLoader());
+         if (!authenticationManager.isValid(principal, SubjectActions.getCredential(), subject))
+            throw new SecurityException("Unauthenticated caller:" + principal);
+      }
+      finally
+      {
+         SubjectActions.setContextClassLoader(tccl);
+      }
       return subject;
    }
 

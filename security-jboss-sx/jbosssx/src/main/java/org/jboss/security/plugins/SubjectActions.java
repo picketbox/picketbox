@@ -194,6 +194,22 @@ class SubjectActions
          return loader;
       }
    }
+   
+   private static class SetTCLAction implements PrivilegedAction<Void>
+   {
+      ClassLoader cl;
+      
+      SetTCLAction(ClassLoader cl)
+      {
+         this.cl = cl;
+      }
+      
+      public Void run()
+      {
+         Thread.currentThread().setContextClassLoader(cl);
+         return null;
+      }
+   }
 
    private static class SetContextInfoAction implements PrivilegedAction<Object>
    {
@@ -353,6 +369,11 @@ class SubjectActions
    {
       ClassLoader loader = (ClassLoader) AccessController.doPrivileged(GetTCLAction.ACTION);
       return loader;
+   }
+   
+   static void setContextClassLoader(ClassLoader cl)
+   {
+      AccessController.doPrivileged(new SetTCLAction(cl));
    }
 
    static Object setContextInfo(String key, Object value)

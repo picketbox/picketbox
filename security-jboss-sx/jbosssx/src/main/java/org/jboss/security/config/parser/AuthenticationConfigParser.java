@@ -39,11 +39,6 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import org.jboss.resource.security.CallerIdentityLoginModule;
-import org.jboss.resource.security.ConfiguredIdentityLoginModule;
-import org.jboss.resource.security.JaasSecurityDomainIdentityLoginModule;
-import org.jboss.resource.security.PBEIdentityLoginModule;
-import org.jboss.resource.security.SecureIdentityLoginModule;
 import org.jboss.security.ClientLoginModule;
 import org.jboss.security.auth.spi.BaseCertLoginModule;
 import org.jboss.security.auth.spi.CertRolesLoginModule;
@@ -57,6 +52,11 @@ import org.jboss.security.auth.spi.RunAsLoginModule;
 import org.jboss.security.auth.spi.SimpleServerLoginModule;
 import org.jboss.security.auth.spi.UsersRolesLoginModule;
 import org.jboss.security.config.Element;
+import org.picketbox.datasource.security.CallerIdentityLoginModule;
+import org.picketbox.datasource.security.ConfiguredIdentityLoginModule;
+import org.picketbox.datasource.security.JaasSecurityDomainIdentityLoginModule;
+import org.picketbox.datasource.security.PBEIdentityLoginModule;
+import org.picketbox.datasource.security.SecureIdentityLoginModule;
 
 /**
  * Stax based JAAS authentication configuration Parser

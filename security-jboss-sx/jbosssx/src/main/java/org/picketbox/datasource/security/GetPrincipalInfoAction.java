@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.resource.security;
+package org.picketbox.datasource.security;
 
 import java.io.UnsupportedEncodingException;
 import java.security.AccessController;
@@ -69,28 +69,27 @@ class GetPrincipalInfoAction
    }
 
 
-   @SuppressWarnings("unchecked")
    interface PrincipalActions
    {
       PrincipalActions PRIVILEGED = new PrincipalActions()
       {
-         private final PrivilegedAction peekAction = new PrivilegedAction()
+         private final PrivilegedAction<RunAs> peekAction = new PrivilegedAction<RunAs>()
          {
-            public Object run()
+            public RunAs run()
             {
                return SecurityContextAssociation.peekRunAsIdentity();
             }
          };
 
-         private final PrivilegedAction getPrincipalAction = new PrivilegedAction()
+         private final PrivilegedAction<Principal> getPrincipalAction = new PrivilegedAction<Principal>()
          {
-            public Object run()
+            public Principal run()
             {
                return SecurityContextAssociation.getPrincipal();
             }
          };
 
-         private final PrivilegedAction getCredentialAction = new PrivilegedAction()
+         private final PrivilegedAction<Object> getCredentialAction = new PrivilegedAction<Object>()
          {
             public Object run()
             {

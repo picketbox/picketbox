@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.resource.security;
+package org.picketbox.datasource.security;
 
 import java.security.AccessController;
 import java.security.Principal;
@@ -76,8 +76,9 @@ import org.jboss.security.SimplePrincipal;
  @author Scott.Stark@jboss.org
  @author <a href="mailto:noel.rocher@jboss.org">Noel Rocher</a> 29, june 2004 username & userName issue
  @version $Revision: 71545 $
+ @deprecated security domains are not used for encryption currently
  */
-
+@Deprecated
 @SuppressWarnings("unchecked")
 public class JaasSecurityDomainIdentityLoginModule
    extends AbstractPasswordCredentialLoginModule
@@ -146,11 +147,11 @@ public class JaasSecurityDomainIdentityLoginModule
       // Decode the encrypted password
       try
       {
-         char[] decodedPassword = DecodeAction.decode(password,
-            jaasSecurityDomain, getServer());
-         PasswordCredential cred = new PasswordCredential(username, decodedPassword);
-         cred.setManagedConnectionFactory(getMcf());
-         SubjectActions.addCredentials(subject, cred);
+//         char[] decodedPassword = DecodeAction.decode(password,
+//            jaasSecurityDomain, getServer());
+//         PasswordCredential cred = new PasswordCredential(username, decodedPassword);
+//         cred.setManagedConnectionFactory(getMcf());
+//         SubjectActions.addCredentials(subject, cred);
       }
       catch(Exception e)
       {

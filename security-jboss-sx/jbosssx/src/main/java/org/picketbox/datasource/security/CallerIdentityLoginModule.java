@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.resource.security;
+package org.picketbox.datasource.security;
 
 import java.security.Principal;
 import java.security.acl.Group;
@@ -43,7 +43,7 @@ import org.jboss.security.SimplePrincipal;
  * <code>org.jboss.security.SimplePrincipal.</code>
  * <p>
  *
- * @see org.jboss.resource.security.ConfiguredIdentityLoginModule
+ * @see org.picketbox.datasource.security.ConfiguredIdentityLoginModule
  *
  * @author Scott.Stark@jboss.org
  * @author <a href="mailto:d_jencks@users.sourceforge.net">David Jencks</a>
@@ -73,7 +73,7 @@ public class CallerIdentityLoginModule
    private char[] password;
    /** A flag indicating if the run-as principal roles should be added to the subject */
    private boolean addRunAsRoles;
-   private Set runAsRoles;
+   private Set<Principal> runAsRoles;
 
    /**
     * Default Constructor
@@ -93,8 +93,8 @@ public class CallerIdentityLoginModule
     * @param sharedState
     * @param options
     */
-   public void initialize(Subject subject, CallbackHandler handler,
-      Map sharedState, Map options)
+   @Override
+   public void initialize(Subject subject, CallbackHandler handler, Map<String, ?> sharedState, Map<String, ?> options)
    {
       super.initialize(subject, handler, sharedState, options);
 
@@ -132,6 +132,7 @@ public class CallerIdentityLoginModule
     * @return True if authentication succeeds
     * @throws LoginException
     */
+   @Override
    public boolean login() throws LoginException
    {
       if(trace)
@@ -187,6 +188,7 @@ public class CallerIdentityLoginModule
       return true;
    }
 
+   @Override
    public boolean commit() throws LoginException
    {
       // Put the principal name into the sharedState map
@@ -199,7 +201,6 @@ public class CallerIdentityLoginModule
 
       // Add the PasswordCredential
       PasswordCredential cred = new PasswordCredential(userName, password);
-      cred.setManagedConnectionFactory(getMcf());
       SubjectActions.addCredentials(subject, cred);
       return super.commit();
    }

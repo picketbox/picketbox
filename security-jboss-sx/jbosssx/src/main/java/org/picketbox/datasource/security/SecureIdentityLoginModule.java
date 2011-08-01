@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.resource.security;
+package org.picketbox.datasource.security;
 
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -76,38 +76,41 @@ public class SecureIdentityLoginModule
    private String username;
    private String password;
 
-   public void initialize(Subject subject, CallbackHandler handler, Map sharedState, Map options)
+   @Override
+   public void initialize(Subject subject, CallbackHandler handler, Map<String, ?> sharedState, Map<String, ?> options)
    {
       super.initialize(subject, handler, sharedState, options);
       // NR : we keep this username for compatibility
       username = (String) options.get("username");
-      if( username == null )
+      if (username == null)
       {
       	// NR : try with userName
         username = (String) options.get("userName");      	
-        if( username == null )
+        if (username == null)
         {
          throw new IllegalArgumentException("The user name is a required option");
         }
      }
       password = (String) options.get("password");
-      if( password == null )
+      if (password == null)
       {
          throw new IllegalArgumentException("The password is a required option");
       }
    }
 
+   @Override
    public boolean login() throws LoginException
    {
-      if(trace)
+      if (trace)
          log.trace("login called");
-      if( super.login() == true )
+      if (super.login())
          return true;
 
       super.loginOk = true;
       return true;
    }
 
+   @Override
    public boolean commit() throws LoginException
    {
       Principal principal = new SimplePrincipal(username);
@@ -118,18 +121,18 @@ public class SecureIdentityLoginModule
       {
          char[] decodedPassword = decode(password);
          PasswordCredential cred = new PasswordCredential(username, decodedPassword);
-         cred.setManagedConnectionFactory(getMcf());
          SubjectActions.addCredentials(subject, cred);
       }
       catch(Exception e)
       {
-         if(trace)
+         if (trace)
             log.trace("Failed to decode password", e);
-         throw new LoginException("Failed to decode password: "+e.getMessage());
+         throw new LoginException("Failed to decode password: " + e.getMessage());
       }
       return true;
    }
 
+   @Override
    public boolean abort()
    {
       username = null;
@@ -139,16 +142,15 @@ public class SecureIdentityLoginModule
 
    protected Principal getIdentity()
    {
-      if(trace)
-         log.trace("getIdentity called, username="+username);
+      if (trace)
+         log.trace("getIdentity called, username=" + username);
       Principal principal = new SimplePrincipal(username);
       return principal;
    }
 
    protected Group[] getRoleSets() throws LoginException
    {
-      Group[] empty = new Group[0];
-      return empty;
+      return new Group[] {};
    }
 
    private static String encode(String secret)
