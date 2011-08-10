@@ -25,6 +25,7 @@ import java.security.Principal;
 import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
@@ -57,6 +58,8 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
    public SimpleRoleGroup(String roleName, List<Role> roles)
    {
       super(roleName);
+      if (this.roles == null)
+         this.roles = new ArrayList<Role>();
       addAll(roles);
    }
 
@@ -186,7 +189,7 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       {
          //Dealing with another roleGroup
          RoleGroup anotherRG = (RoleGroup) anotherRole;
-         List<Role> anotherRoles = anotherRG.getRoles();
+         CopyOnWriteArrayList<Role> anotherRoles = new CopyOnWriteArrayList<Role>(anotherRG.getRoles());
          for (Role r : anotherRoles)
          {
             //if any of the roles are not there, no point checking further
@@ -206,7 +209,7 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
    {
       if (anotherRole == null)
          throw new IllegalArgumentException("anotherRole is null");
-      List<Role> roleList = anotherRole.getRoles();
+      CopyOnWriteArrayList<Role> roleList = new CopyOnWriteArrayList<Role>(anotherRole.getRoles());
       for (Role r : roleList)
       {
          if (this.containsAll(r))
