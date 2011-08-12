@@ -241,6 +241,7 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
       return true;
    }
    
+   @SuppressWarnings("rawtypes")
    private InitialLdapContext constructInitialLdapContext(String dn, Object credential) throws NamingException
    {
       Properties env = new Properties();

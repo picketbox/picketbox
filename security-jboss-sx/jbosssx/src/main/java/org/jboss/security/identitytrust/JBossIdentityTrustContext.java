@@ -118,7 +118,7 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
       }
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    private IdentityTrustModule instantiateModule(String name, Map map) throws Exception
    {
       IdentityTrustModule im = null;

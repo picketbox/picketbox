@@ -33,13 +33,11 @@ import java.security.PrivilegedExceptionAction;
  */
 class SecurityActions
 {
-   
-   @SuppressWarnings("unchecked")
    static ClassLoader getContextClassLoader() throws PrivilegedActionException
    {
-      return (ClassLoader) AccessController.doPrivileged(new PrivilegedExceptionAction()
+      return AccessController.doPrivileged(new PrivilegedExceptionAction<ClassLoader>()
       { 
-         public Object run() throws Exception
+         public ClassLoader run() throws Exception
          {
             return Thread.currentThread().getContextClassLoader();
          }

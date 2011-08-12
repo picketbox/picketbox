@@ -59,7 +59,7 @@ public class JBossClientAuthContext implements ClientAuthContext
    /**
     * @see ClientAuth#cleanSubject(Subject, Map)
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"rawtypes"})
    public void cleanSubject(MessageInfo messageInfo, Subject subject) 
    throws AuthException
    { 
@@ -72,8 +72,8 @@ public class JBossClientAuthContext implements ClientAuthContext
    
    /**
     * @see ClientAuth#secureRequest(AuthParam, Subject, Map)
-    */
-   @SuppressWarnings("unchecked")
+    */ 
+   @SuppressWarnings("rawtypes")
    public AuthStatus secureRequest(MessageInfo messageInfo, Subject clientSubject) throws AuthException
    {
       Iterator iter = config.getClientAuthModules().iterator();
@@ -89,8 +89,8 @@ public class JBossClientAuthContext implements ClientAuthContext
    
    /**
     * @see ClientAuth#validateResponse(AuthParam, Subject, Subject, Map)
-    */
-   @SuppressWarnings("unchecked")
+    */ 
+   @SuppressWarnings("rawtypes")
    public AuthStatus validateResponse(MessageInfo messageInfo, Subject clientSubject, 
          Subject serviceSubject) throws AuthException
    {

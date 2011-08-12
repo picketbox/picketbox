@@ -419,7 +419,7 @@ public class SynchronizedJaasSecurityManager implements SubjectSecurityManager, 
 
    /** Validate the cache credential value against the provided credential
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    private boolean validateCache(DomainInfo info, Object credential, Subject theSubject)
    {
       if (trace)

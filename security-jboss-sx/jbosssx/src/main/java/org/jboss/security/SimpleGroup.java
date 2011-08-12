@@ -31,8 +31,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 
-
-@SuppressWarnings("unchecked")
+ 
 /** An implementation of Group that manages a collection of Principal
 objects based on their hashCode() and equals() methods. This class
 is not thread safe.
@@ -40,6 +39,7 @@ is not thread safe.
 @author Scott.Stark@jboss.org
 @version $Revision$
 */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class SimpleGroup extends SimplePrincipal implements Group, Cloneable
 {
     /** The serialVersionUID */
@@ -48,8 +48,8 @@ public class SimpleGroup extends SimplePrincipal implements Group, Cloneable
    private HashMap members;
    
    private static final String OVERRIDE_EQUALS_BEHAVIOR = "org.jboss.security.simpleprincipal.equals.override";
-
-    public SimpleGroup(String groupName)
+ 
+   public SimpleGroup(String groupName)
     {
         super(groupName);
         members = new HashMap(3);

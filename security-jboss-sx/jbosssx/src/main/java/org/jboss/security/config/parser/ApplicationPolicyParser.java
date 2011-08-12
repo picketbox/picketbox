@@ -105,7 +105,7 @@ public class ApplicationPolicyParser implements XMLStreamConstants
       return policies;
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    private void route(XMLEventReader xmlEventReader, ApplicationPolicy appPolicy) throws XMLStreamException
    {
       while(true)
@@ -246,7 +246,7 @@ public class ApplicationPolicyParser implements XMLStreamConstants
       return policies;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    private void route(XMLStreamReader reader, ApplicationPolicy appPolicy) throws XMLStreamException
    {
       while (reader.hasNext() && reader.nextTag() != END_ELEMENT)

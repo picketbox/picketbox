@@ -31,8 +31,8 @@ import javax.security.auth.message.MessageInfo;
  * @author Anil.Saldhana@redhat.com
  */
 public class AllSuccessServerAuthModule extends AbstractServerAuthModule
-{ 
-   @SuppressWarnings("unchecked")
+{  
+   @SuppressWarnings("rawtypes")
    @Override
    public Class[] getSupportedMessageTypes()
    {

@@ -56,7 +56,7 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
    /**
     * @see AuthenticationManager#isValid(MessageInfo, Subject, String, CallbackHandler)
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"rawtypes"})
    public boolean isValid(MessageInfo requestMessage,Subject clientSubject, String layer,
          CallbackHandler handler)
    { 

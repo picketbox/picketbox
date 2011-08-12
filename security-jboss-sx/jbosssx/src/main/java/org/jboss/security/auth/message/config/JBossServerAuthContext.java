@@ -47,6 +47,7 @@ import org.jboss.security.config.ControlFlag;
  *  @since  May 17, 2006 
  *  @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public class JBossServerAuthContext implements ServerAuthContext
 {  
    protected static Logger log = Logger.getLogger(JBossServerAuthContext.class);
@@ -54,16 +55,14 @@ public class JBossServerAuthContext implements ServerAuthContext
    protected boolean trace = log.isTraceEnabled();
    
    private List<ServerAuthModule> modules = new ArrayList<ServerAuthModule>(); 
-   
-   @SuppressWarnings("unchecked")
+     
    private Map<String,Map> moduleOptionsByName = new HashMap<String,Map>();
    
    /**
     * Control Flags for the individual modules
     */
    protected List<ControlFlag> controlFlags = new ArrayList<ControlFlag>();
-   
-   @SuppressWarnings("unchecked")
+     
    public JBossServerAuthContext(List<ServerAuthModule> modules,
          Map<String,Map> moduleNameToOptions, CallbackHandler cbh) throws AuthException
    {
@@ -108,8 +107,7 @@ public class JBossServerAuthContext implements ServerAuthContext
    
    /**
     * @see ServerAuth#validateRequest(AuthParam, Subject, Subject, Map)
-    */
-   @SuppressWarnings("unchecked")
+    */ 
    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, 
          Subject serviceSubject) throws AuthException
    { 

@@ -110,8 +110,8 @@ public class NestablePrincipal extends SimplePrincipal implements Group, Cloneab
         return member.equals(activePrincipal);
     }
     
-    @SuppressWarnings("unchecked")
-   public synchronized Object clone() throws CloneNotSupportedException    
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public synchronized Object clone() throws CloneNotSupportedException    
     {  
        NestablePrincipal clone = (NestablePrincipal) super.clone(); 
        if(clone != null) 

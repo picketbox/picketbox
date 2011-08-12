@@ -106,7 +106,7 @@ class SubjectActions
          this.deepCopy = flag;
       }
       
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({"unchecked", "rawtypes"})
       public Object run()
       {
          Set principals = fromSubject.getPrincipals();

@@ -240,8 +240,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    {
       this.trustManagerFactoryAlgorithm = trustManagerFactoryAlgorithm;
    }
-
-   @Override
+ 
    public String getClientAlias()
    {
       return clientAlias;
@@ -251,8 +250,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    {
       this.clientAlias = clientAlias;
    }
-
-   @Override
+ 
    public String getServerAlias()
    {
       return serverAlias;
@@ -262,8 +260,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    {
       this.serverAlias = serverAlias;
    }
-
-   @Override
+ 
    public boolean isClientAuth()
    {
       return clientAuth;
@@ -273,14 +270,12 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    {
       this.clientAuth = clientAuth;
    }
-
-   @Override
+ 
    public KeyStore getKeyStore()
    {
       return keyStore;
    }
-
-   @Override
+ 
    public KeyStore getTrustStore()
    {
       return trustStore;
@@ -301,25 +296,21 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       this.serviceAuthToken = Util.loadPassword(serviceAuthToken);
    }
 
-   @Override
    public KeyManager[] getKeyManagers() throws SecurityException
    {
       return keyManagers;
    }
 
-   @Override
    public TrustManager[] getTrustManagers() throws SecurityException
    {
       return trustManagers;
    }
 
-   @Override
    public String getSecurityDomain()
    {
       return name;
    }
 
-   @Override
    public Key getKey(String alias, String serviceAuthToken) throws Exception
    {
       log.debug(this + " got request for key with alias '" + alias + "'");
@@ -336,7 +327,6 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       return key;
    }
 
-   @Override
    public Certificate getCertificate(String alias) throws Exception
    {
       log.debug(this + " got request for certifcate with alias '" + alias + "'");
@@ -344,13 +334,11 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       return trustStore.getCertificate(alias);
    }
 
-   @Override
    public void reloadKeyAndTrustStore() throws Exception
    {
       loadKeyAndTrustStore();
    }
    
-   @Override
    public String[] getCipherSuites()
    {
       return cipherSuites;
@@ -362,8 +350,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       this.cipherSuites = cs;
    }
 
-   @Override
-   public String[] getProtocols()
+    public String[] getProtocols()
    {
       return protocols;
    }
@@ -373,8 +360,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       String[] p = protocols.split(",");
       this.protocols = p;
    }
-
-   @Override
+ 
    public Properties getAdditionalProperties()
    {
       return additionalProperties;
@@ -455,6 +441,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       throw new SecurityException("service authentication token verification failed");
    }
 
+   @SuppressWarnings({"rawtypes", "unchecked"})
    private void loadKeyAndTrustStore() throws Exception
    {
       if (keyStorePassword != null)

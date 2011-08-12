@@ -41,7 +41,7 @@ import org.jboss.security.SimplePrincipal;
  *  @author <mailto:Anil.Saldhana@jboss.org>Anil Saldhana
  *  @since  Dec 5, 2005
  */
-@SuppressWarnings("unchecked") 
+@SuppressWarnings({"rawtypes"})
 public class SimpleClientAuthModule implements ClientAuthModule
 {
    private Class[] supportedTypes = null;

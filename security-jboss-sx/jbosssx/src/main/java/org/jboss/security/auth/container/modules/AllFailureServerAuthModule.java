@@ -31,6 +31,7 @@ import javax.security.auth.message.module.ServerAuthModule;
  * Server Auth Module that sends a AuthStatus.FAILURE
  * @author Anil.Saldhana@redhat.com
  */
+@SuppressWarnings({"rawtypes"})
 public class AllFailureServerAuthModule extends AbstractServerAuthModule
 { 
    
@@ -47,8 +48,7 @@ public class AllFailureServerAuthModule extends AbstractServerAuthModule
    
    /**
     * @see ServerAuthModule#getSupportedMessageTypes()
-    */
-   @SuppressWarnings("unchecked")
+    */ 
    @Override
    public Class[] getSupportedMessageTypes()
    {

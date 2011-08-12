@@ -42,8 +42,7 @@ public abstract class AbstractRolesMappingProvider implements MappingProvider<Ro
    protected Logger log;
 
    protected MappingResult<RoleGroup> result;
-   
-   @Override
+    
    public boolean supports(Class<?> p)
    {
       if (RoleGroup.class.isAssignableFrom(p))
@@ -51,8 +50,7 @@ public abstract class AbstractRolesMappingProvider implements MappingProvider<Ro
 
       return false;
    }
-   
-   @Override
+    
    public void setMappingResult(MappingResult<RoleGroup> result)
    {
       this.result = result;

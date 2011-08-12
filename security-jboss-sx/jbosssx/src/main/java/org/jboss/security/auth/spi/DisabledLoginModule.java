@@ -44,15 +44,13 @@ public class DisabledLoginModule implements LoginModule
    private static Logger log = Logger.getLogger(DisabledLoginModule.class);
    
    protected String securityDomain;
-   
-   @Override
+    
    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
          Map<String, ?> options)
    {
       securityDomain = (String) options.get(SecurityConstants.SECURITY_DOMAIN_OPTION);
    }
-
-   @Override
+ 
    public boolean login() throws LoginException
    {
       StringBuffer sb = new StringBuffer();
@@ -69,23 +67,19 @@ public class DisabledLoginModule implements LoginModule
       log.error(sb.toString());
       return false;
    }
-
-   @Override
+ 
    public boolean commit() throws LoginException
    {
       return false;
    }
-
-   @Override
+ 
    public boolean abort() throws LoginException
    {
       return false;
    }
-
-   @Override
+ 
    public boolean logout() throws LoginException
    {
       return false;
    }
-
 }

@@ -30,7 +30,6 @@ import java.util.Map;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
@@ -88,8 +87,10 @@ public class JaasSecurityDomainIdentityLoginModule
    
    private String username;
    private String password;
+   @SuppressWarnings("unused")
    private ObjectName jaasSecurityDomain;
 
+   @SuppressWarnings("rawtypes")
    public void initialize(Subject subject, CallbackHandler handler,
       Map sharedState, Map options)
    {
@@ -183,6 +184,7 @@ public class JaasSecurityDomainIdentityLoginModule
       return empty;
    }
 
+   @SuppressWarnings({"rawtypes", "unused"})
    private static class DecodeAction implements PrivilegedExceptionAction
    {
       String password;

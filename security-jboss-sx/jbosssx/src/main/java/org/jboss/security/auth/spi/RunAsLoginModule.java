@@ -28,7 +28,6 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.spi.LoginModule;
 
 import org.jboss.security.RunAsIdentity;
-import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 
 /** A login module that establishes a run-as role for the duration of the login

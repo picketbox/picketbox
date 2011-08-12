@@ -48,6 +48,7 @@ import org.jboss.security.config.parser.AuthenticationConfigParser;
  * @author <a href="mailto:mmoyses@redhat.com">Marcus Moyses</a>
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public class AuthenticationInfo extends BaseAuthenticationInfo
 {
    public static final AuthPermission GET_CONFIG_ENTRY_PERM = new AuthPermission("getLoginConfiguration");
@@ -105,7 +106,6 @@ public class AuthenticationInfo extends BaseAuthenticationInfo
    }
 
    @Override
-   @SuppressWarnings("unchecked")
    public String toString()
    {
       StringBuffer buffer = new StringBuffer("AppConfigurationEntry[]:\n");

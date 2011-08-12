@@ -47,9 +47,9 @@ public class JBossClientAuthConfig implements ClientAuthConfig
    private String contextId = null;
    @SuppressWarnings("unused")
    private CallbackHandler callbackHandler = null;
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "rawtypes"})
    private List modules = new ArrayList();
-   @SuppressWarnings({"unchecked", "unused"})
+   @SuppressWarnings({  "unused", "rawtypes"})
    private Map contextProperties;
    
    /**
@@ -59,8 +59,8 @@ public class JBossClientAuthConfig implements ClientAuthConfig
     * @param appContext Application Context
     * @param handler Callback Handler to be passed to auth modules
     * @param properties Contextual properties
-    */
-   @SuppressWarnings("unchecked")
+    */ 
+   @SuppressWarnings("rawtypes")
    public JBossClientAuthConfig(String layer, String appContext,
          CallbackHandler handler, Map properties)
    {
@@ -72,8 +72,8 @@ public class JBossClientAuthConfig implements ClientAuthConfig
 
    /**
     * @see ClientAuthConfig#getAuthContext(String, Map)
-    */
-   @SuppressWarnings("unchecked")
+    */ 
+   @SuppressWarnings("rawtypes")
    public ClientAuthContext getAuthContext(String authContextID,
          Subject clientSubject, Map properties)
    throws AuthException
@@ -105,7 +105,7 @@ public class JBossClientAuthConfig implements ClientAuthConfig
    }
 
    //Custom Methods
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"rawtypes"})
    public List getClientAuthModules()
    {
       return modules ;

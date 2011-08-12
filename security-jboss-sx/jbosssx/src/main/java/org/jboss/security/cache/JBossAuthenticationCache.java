@@ -92,7 +92,7 @@ public class JBossAuthenticationCache implements SecurityCache<Principal>
    /**
     * @see SecurityCache#cacheOperation(Object, Map)
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public void cacheOperation(Principal principal, Map<String,Object> map) 
    throws SecurityCacheException
    {

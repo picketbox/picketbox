@@ -49,7 +49,7 @@ import org.jboss.logging.Logger;
  *  @since  Jan 9, 2006 
  *  @version $Revision$
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class AbstractServerAuthModule implements ServerAuthModule
 {  
    /**

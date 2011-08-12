@@ -94,8 +94,8 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
  
    /**
     * @see AuthConfigFactory#registerConfigProvider(String, Map, String, String, String)
-    */
-   @SuppressWarnings("unchecked")
+    */ 
+   @SuppressWarnings("rawtypes")
    public String registerConfigProvider(String className, Map properties, 
          String layer, String appContext, String description)
    throws AuthException, SecurityException

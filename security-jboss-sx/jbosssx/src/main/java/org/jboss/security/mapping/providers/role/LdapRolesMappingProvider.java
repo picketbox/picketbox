@@ -98,8 +98,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
    protected Map<String, Object> options;
    
    protected boolean trace;
-   
-   @Override
+    
    public void init(Map<String, Object> options)
    {
       log = Logger.getLogger(getClass());
@@ -171,8 +170,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
             searchScope = SearchControls.SUBTREE_SCOPE;
       }
    }
-
-   @Override
+ 
    public void performMapping(Map<String, Object> map, RoleGroup mappedObject)
    {
       if (map == null || map.isEmpty())

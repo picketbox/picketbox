@@ -57,6 +57,7 @@ import org.jboss.security.config.parser.StaxBasedConfigParser;
  * @author Anil.Saldhana@jboss.org
  * @version $Revision: 57482 $
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class XMLLoginConfigImpl extends Configuration implements Serializable, ApplicationPolicyRegistration
 {
    /** The serialVersionUID */
@@ -383,8 +384,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
          log.warn("End loadConfig, failed to load config: " + loginConfigURL, e);
       }
    }
-
-   @SuppressWarnings("unchecked")
+ 
    protected String[] loadConfig(URL config) throws Exception
    {
       SecurityManager sm = System.getSecurityManager();
@@ -429,8 +429,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
          }
       }
    }
-
-   @SuppressWarnings("unchecked")
+ 
    private void loadSunConfig(URL sunConfig, ArrayList configNames) throws Exception
    {
       InputStream is = sunConfig.openStream();
@@ -441,8 +440,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
       boolean trace = log.isTraceEnabled();
       SunConfigParser.doParse(configFile, this, trace);
    }
-
-   @SuppressWarnings("unchecked")
+ 
    private void loadXMLConfig(URL loginConfigURL, ArrayList configNames) throws Exception
    {
       StaxBasedConfigParser parser = new StaxBasedConfigParser();

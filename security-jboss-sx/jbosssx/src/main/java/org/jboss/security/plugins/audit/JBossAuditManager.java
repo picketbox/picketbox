@@ -30,7 +30,7 @@ import org.jboss.security.config.SecurityConfiguration;
  *  @author <a href="mailto:Anil.Saldhana@jboss.org">Anil Saldhana</a>
  *  @version $Revision$
  *  @since  Aug 22, 2006
- */
+ */ 
 public class JBossAuditManager implements AuditManager
 {
    private static Logger log = Logger.getLogger(JBossAuditManager.class);
@@ -54,6 +54,7 @@ public class JBossAuditManager implements AuditManager
       this.securityDomain = SecurityUtil.unprefixSecurityDomain(secDomain);  
    }
    
+   @SuppressWarnings("unused")
    public AuditContext getAuditContext() throws PrivilegedActionException
    {
       AuditContext ac = (AuditContext)contexts.get(securityDomain);

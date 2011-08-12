@@ -47,8 +47,7 @@ public class PropertiesRolesMappingProvider extends AbstractRolesMappingProvider
    protected String rolesRsrcName = "roles.properties";
 
    protected Properties roles;
-
-   @Override
+ 
    public void init(Map<String, Object> options)
    {
       log = Logger.getLogger(getClass());
@@ -70,8 +69,7 @@ public class PropertiesRolesMappingProvider extends AbstractRolesMappingProvider
          }
       }
    }
-
-   @Override
+ 
    public void performMapping(Map<String, Object> map, RoleGroup mappedObject)
    {
       if (map == null || map.isEmpty())

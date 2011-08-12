@@ -51,8 +51,7 @@ public class DatabaseRolesMappingProvider extends AbstractRolesMappingProvider
    protected String TX_MGR_JNDI_NAME = "java:/TransactionManager";
 
    protected TransactionManager tm = null;
-
-   @Override
+ 
    public void init(Map<String, Object> options)
    {
       log = Logger.getLogger(getClass());
@@ -84,8 +83,7 @@ public class DatabaseRolesMappingProvider extends AbstractRolesMappingProvider
          }
       }
    }
-
-   @Override
+ 
    public void performMapping(Map<String, Object> map, RoleGroup mappedObject)
    {
       if (map == null || map.isEmpty())

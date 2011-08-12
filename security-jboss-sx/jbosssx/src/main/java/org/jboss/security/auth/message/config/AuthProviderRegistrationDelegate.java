@@ -86,7 +86,7 @@ public class AuthProviderRegistrationDelegate
    /**
     * @see AuthConfigFactory#detachListener(RegistrationListener, String, String)
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public String[] detachListener(RegistrationListener listener, String layer, 
          String appContext)
    { 
@@ -195,7 +195,7 @@ public class AuthProviderRegistrationDelegate
    /**
     * @see AuthConfigFactory#getRegistrationIDs(AuthConfigProvider)
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public String[] getRegistrationIDs(AuthConfigProvider provider)
    {  
       List al = new ArrayList();
@@ -217,7 +217,7 @@ public class AuthProviderRegistrationDelegate
    /**
     * @see AuthConfigFactory#registerConfigProvider(String, Map, String, String, String)
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public String registerConfigProvider(String className, Map properties, 
          String layer, String appContext, String description)
    throws AuthException, SecurityException
@@ -242,7 +242,7 @@ public class AuthProviderRegistrationDelegate
       return this.registerConfigProvider(acp, layer, appContext, description); 
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public String registerConfigProvider(AuthConfigProvider provider,
          String layer,  String appContext,  String description)
    {

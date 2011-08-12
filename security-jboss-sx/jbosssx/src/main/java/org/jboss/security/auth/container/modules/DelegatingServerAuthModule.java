@@ -36,7 +36,7 @@ import org.jboss.logging.Logger;
  *  @since  Jul 25, 2007 
  *  @version $Revision$
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes"})
 public class DelegatingServerAuthModule extends AbstractServerAuthModule
 {  
    private LoginContext loginContext = null;

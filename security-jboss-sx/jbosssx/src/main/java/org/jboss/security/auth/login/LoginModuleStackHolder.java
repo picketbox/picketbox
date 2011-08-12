@@ -34,7 +34,7 @@ import javax.security.auth.login.AppConfigurationEntry;
  *  @author <a href="mailto:Anil.Saldhana@jboss.org">Anil Saldhana</a>
  *  @since  Dec 21, 2005 
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public class LoginModuleStackHolder  
 {
    public static final AuthPermission GET_CONFIG_ENTRY_PERM = new AuthPermission("getLoginConfiguration");
@@ -44,6 +44,7 @@ public class LoginModuleStackHolder
     
    private ArrayList appEntries;
    
+   @SuppressWarnings("unchecked")
    public LoginModuleStackHolder(String name, List entries)
    {
       this.name = name;
@@ -59,6 +60,7 @@ public class LoginModuleStackHolder
       return this.name;
    } 
    
+   @SuppressWarnings("unchecked")
    public void addAppConfigurationEntry(AppConfigurationEntry entry)
    {
       if(appEntries == null)
@@ -66,6 +68,7 @@ public class LoginModuleStackHolder
       this.appEntries.add(entry);
    }
    
+   @SuppressWarnings("unchecked")
    public AppConfigurationEntry[] getAppConfigurationEntry()
    {
       SecurityManager sm = System.getSecurityManager();
@@ -76,6 +79,7 @@ public class LoginModuleStackHolder
       return entries;
    }
    
+   @SuppressWarnings("unchecked")
    public void setAppConfigurationEntry(List entries)
    {
       if(entries  == null)

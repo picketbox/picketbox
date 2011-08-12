@@ -36,6 +36,7 @@ import org.w3c.dom.NodeList;
  * @author Scott.Stark@jboss.org
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public class ConfigUtil
 {
    /** Parse the application-policy/authentication element

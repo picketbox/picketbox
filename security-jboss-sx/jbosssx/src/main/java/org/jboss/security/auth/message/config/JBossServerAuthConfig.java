@@ -60,10 +60,10 @@ public class JBossServerAuthConfig implements ServerAuthConfig
 {
    private String layer;
    private String contextId;
-   private CallbackHandler callbackHandler = new JBossCallbackHandler();
-   @SuppressWarnings("unchecked")
+   private CallbackHandler callbackHandler = new JBossCallbackHandler(); 
+   @SuppressWarnings("rawtypes")
    private List modules = new ArrayList();
-   @SuppressWarnings({"unused", "unchecked"})
+   @SuppressWarnings({"unused", "rawtypes"})
    private Map contextProperties;
 
    /**
@@ -73,8 +73,8 @@ public class JBossServerAuthConfig implements ServerAuthConfig
     * @param appContext Application Context
     * @param handler Callback Handler that will be passed to the modules
     * @param properties Context Properties
-    */
-   @SuppressWarnings("unchecked")
+    */ 
+   @SuppressWarnings("rawtypes")
    public JBossServerAuthConfig(String layer, String appContext,
          CallbackHandler handler, Map properties)
    {
@@ -87,7 +87,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
    /**
     * @see ServerAuthConfig#getAuthContext(String, Map)
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"rawtypes", "unchecked"})
    public ServerAuthContext getAuthContext(String authContextID,
          Subject serviceSubject, Map properties) 
    throws AuthException
@@ -198,7 +198,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
    } 
    
    //Custom Methods
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "rawtypes"})
    public List getServerAuthModules()
    {
       return this.modules ;
@@ -213,8 +213,8 @@ public class JBossServerAuthConfig implements ServerAuthConfig
    {
       throw new RuntimeException("Not Implemented");
    }  
-
-   @SuppressWarnings("unchecked")
+ 
+   @SuppressWarnings({"rawtypes", "unchecked"})
    private ServerAuthModule createSAM(String name )
    throws Exception
    {
@@ -223,7 +223,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
       return (ServerAuthModule) ctr.newInstance(new Object[0]);
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    private ServerAuthModule createSAM(String name, String lmshName )
    throws Exception
    {
