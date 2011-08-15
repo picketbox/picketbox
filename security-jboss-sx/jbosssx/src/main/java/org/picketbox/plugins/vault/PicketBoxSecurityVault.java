@@ -56,8 +56,19 @@ import org.picketbox.util.StringUtil;
 
 /**
  * An instance of {@link SecurityVault} that uses
- * a {@link KeyStore} and the package of the calling class to determine
- * the shared key
+ * a {@link KeyStore} 
+ * The shared key just uses a concatenation of a {@link java.uti.UUID}
+ * and a keystore alias.
+ * 
+ * The following options are expected in the {@link SecurityVault#init(Map)} call:
+ * ENC_FILE_DIR: the location where the encoded files will be kept. End with "/" or "\" based on your platform
+ * KEYSTORE_URL: location where your keystore is located
+ * KEYSTORE_PASSWORD: Masked keystore password.  Has to be prepended with MASK-
+ * KEYSTORE_ALIAS: Alias where the keypair is located
+ * SALT: salt of the masked password. Ensured it is 8 characters in length
+ * ITERATION_COUNT: Iteration Count of the masked password.
+ * KEY_SIZE: Key size of encryption. Default is 128 bytes.
+ * 
  * @author Anil.Saldhana@redhat.com
  * @since Aug 12, 2011
  */
@@ -216,7 +227,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       
       String publicCert = (String) handshakeOptions.get(PUBLIC_CERT);
       if(publicCert == null)
-         throw new SecurityVaultException("Public Cert is null");
+         throw new SecurityVaultException("Public Cert Alias is null");
       
       try
       {
