@@ -396,7 +396,8 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       if (url == null)
       {
          ClassLoader loader = SecurityActions.getContextClassLoader();
-         url = loader.getResource(storeURL);
+         if (loader != null)
+            url = loader.getResource(storeURL);
       }
 
       // Fail if no valid key store was located
