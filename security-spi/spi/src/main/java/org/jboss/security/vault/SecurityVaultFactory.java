@@ -51,6 +51,9 @@ public class SecurityVaultFactory
     */
    public static SecurityVault get(String fqn) throws SecurityVaultException
    {
+      if(fqn == null)
+         return get();
+      
       if(vault == null)
       {
          Class<?> vaultClass = SecurityActions.loadClass(SecurityVaultFactory.class,fqn);
