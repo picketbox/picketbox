@@ -21,6 +21,8 @@
  */
 package org.jboss.security.vault;
 
+import java.util.logging.Logger;
+
 /**
  * A factory to instantiate a {@link SecurityVault}
  * @author Anil.Saldhana@redhat.com
@@ -28,6 +30,7 @@ package org.jboss.security.vault;
  */
 public class SecurityVaultFactory
 {
+   private static Logger log = Logger.getLogger(SecurityVaultFactory.class.getName());
    private static String defaultVault = "org.picketbox.plugins.vault.PicketBoxSecurityVault";
    private static SecurityVault vault= null;
    
@@ -39,6 +42,7 @@ public class SecurityVaultFactory
     */
    public static SecurityVault get() throws SecurityVaultException
    {
+      log.info("Getting Security Vault with implementation of " + defaultVault);
       return get(defaultVault);
    }
    
