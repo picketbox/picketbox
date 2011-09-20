@@ -24,10 +24,6 @@ package org.jboss.security.plugins.auth;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.Principal;
-import java.security.acl.Group;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,8 +42,6 @@ import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.SecurityUtil;
 import org.jboss.security.SubjectSecurityManager;
 import org.jboss.security.auth.callback.JBossCallbackHandler;
-import org.jboss.util.CachePolicy;
-import org.jboss.util.TimedCachePolicy;
 
 /** The JaasSecurityManager is responsible both for authenticating credentials
  associated with principals and for role mapping. This implementation relies
@@ -67,135 +61,6 @@ import org.jboss.util.TimedCachePolicy;
 public class JaasSecurityManagerBase 
    implements SubjectSecurityManager, RealmMapping
 {
-   /** The authentication cache object.
-    */
-   public static class DomainInfo implements TimedCachePolicy.TimedEntry
-   {
-      private static Logger log = Logger.getLogger(DomainInfo.class);
-      private static boolean trace = log.isTraceEnabled();
-      protected LoginContext loginCtx;
-      protected Subject subject;
-      protected Object credential;
-      protected Principal callerPrincipal;
-      private long expirationTime;
-      /** Is there an active authentication in process */
-      private boolean needsDestroy;
-      /** The number of users sharing this DomainInfo */
-      private int activeUsers;
-
-      /**
-       Create a cache entry with the given lifetime in seconds. Since this comes
-       from the TimedCachePolicy, its expected to be <= Integer.MAX_VALUE.
-       
-       @param lifetime - lifetime in seconds. A lifetime <= 0 means no caching
-         with the exception of -1 which indicates that the cache entry never
-         expires.
-       */
-      public DomainInfo(long lifetime)
-      {
-         expirationTime = lifetime;
-         if( expirationTime != -1 )
-            expirationTime *= 1000;
-      }
-
-      synchronized int acquire()
-      {
-         return activeUsers ++;
-      }
-      synchronized int release()
-      {
-         int users = activeUsers --;
-         if( needsDestroy == true && users == 0 )
-         {
-            if( trace )
-               log.trace("needsDestroy is true, doing logout");
-            logout();
-         }
-         return users;
-      }
-      synchronized void logout()
-      {
-         if( trace )
-            log.trace("logout, subject="+subject+", this="+this);
-         try
-         {
-            if( loginCtx != null )
-               loginCtx.logout();
-         }
-         catch(Throwable e)
-         {
-            if( trace )
-               log.trace("Cache entry logout failed", e);
-         }
-      }
-
-      public void init(long now)
-      {
-         expirationTime += now;
-      }
-      public boolean isCurrent(long now)
-      {
-         boolean isCurrent = expirationTime == -1;
-         if( isCurrent == false )
-            isCurrent = expirationTime > now;
-         return isCurrent;
-      }
-      public boolean refresh()
-      {
-         return false;
-      }
-      /**
-       * This 
-       */ 
-      public void destroy()
-      {
-         if( trace )
-         {
-            log.trace("destroy, subject="+subject+", this="+this
-               +", activeUsers="+activeUsers);
-         }
-
-         synchronized( this )
-         {
-            if( activeUsers == 0 )
-               logout();
-            else
-            {
-               if( trace )
-                  log.trace("destroy saw activeUsers="+activeUsers);
-               needsDestroy = true;
-            }
-         }
-      }
-      public Object getValue()
-      {
-         return this;
-      }
-      public String toString()
-      {
-         StringBuffer tmp = new StringBuffer(super.toString());
-         tmp.append('[');
-         tmp.append(SubjectActions.toString(subject));
-         tmp.append(",credential.class=");
-         if( credential != null )
-         {
-            Class<?> c = credential.getClass();
-            tmp.append(c.getName());
-            tmp.append('@');
-            tmp.append(System.identityHashCode(c));
-         }
-         else
-         {
-            tmp.append("null");
-         }
-         tmp.append(",expirationTime=");
-         tmp.append(expirationTime);
-         tmp.append(']');
-
-         return tmp.toString();
-      }
-   }
-
    /** The name of the domain this instance is securing. It is used as
     the appName into the SecurityPolicy.
     */
@@ -203,7 +68,6 @@ public class JaasSecurityManagerBase
    /** A cache of DomainInfo objects keyd by Principal. This is now
     always set externally by our security manager service.
     */
-   private CachePolicy domainCache;
    /** The JAAS callback handler to use in defaultLogin */
    private CallbackHandler handler;
    /** The setSecurityInfo(Principal, Object) method of the handler obj */
@@ -253,17 +117,6 @@ public class JaasSecurityManagerBase
       log.debug("CallbackHandler: "+handler);
    }
 
-   /** The domainCache is typically a shared object that is populated
-    by the login code(LoginModule, etc.) and read by this class in the
-    isValid() method.
-    @see #isValid(Principal, Object, Subject)
-    */
-   public void setCachePolicy(CachePolicy domainCache)
-   {
-      this.domainCache = domainCache;
-      log.debug("CachePolicy set to: "+domainCache);
-   }
-
    /**
     * Flag to specify if deep copy of subject sets needs to be 
     * enabled
@@ -285,15 +138,6 @@ public class JaasSecurityManagerBase
       this.authorizationManager = authorizationManager;
    }
    
-   /** Not really used anymore as the security manager service manages the
-    security domain authentication caches.
-    */
-   public void flushCache()
-   {
-      if( domainCache != null )
-         domainCache.flush();
-   }
-
    /** Get the name of the security domain associated with this security mgr.
     @return Name of the security manager security domain.
     */
@@ -349,18 +193,10 @@ public class JaasSecurityManagerBase
    public boolean isValid(Principal principal, Object credential,
       Subject activeSubject)
    {
-      // Check the cache first
-      DomainInfo cacheInfo = getCacheInfo(principal, true);
       if( trace )
-         log.trace("Begin isValid, principal:"+principal+", cache info: "+cacheInfo);
+         log.trace("Begin isValid, principal:"+principal);
 
       boolean isValid = false;
-      if( cacheInfo != null )
-      {
-         isValid = validateCache(cacheInfo, credential, activeSubject);
-         if( cacheInfo != null )
-            cacheInfo.release();
-      }
       if( isValid == false )
          isValid = authenticate(principal, credential, activeSubject);
       if( trace )
@@ -379,26 +215,7 @@ public class JaasSecurityManagerBase
     */
    public Principal getPrincipal(Principal principal)
    {
-      if(domainCache == null)
-         return principal;
-      Principal result = principal; 
-      // Get the CallerPrincipal group member
-      synchronized( domainCache )
-      {
-         DomainInfo info = getCacheInfo(principal, false);
-         if( trace )
-            log.trace("getPrincipal, cache info: "+info);
-         if( info != null )
-         {
-            result = info.callerPrincipal;
-            // If the mapping did not have a callerPrincipal just use principal
-            if( result == null )
-               result = principal;
-            info.release();
-         }
-      }
-
-      return result;
+      return principal;
    }
 
    /** Does the current Subject have a role(a Principal) that equates to one
@@ -442,7 +259,6 @@ public class JaasSecurityManagerBase
     @return The Set<Principal> for the application domain roles that the
     principal has been assigned.
    */
-   @SuppressWarnings("deprecation")
    public Set<Principal> getUserRoles(Principal principal)
    {
       if(this.authorizationManager == null)
@@ -501,8 +317,6 @@ public class JaasSecurityManagerBase
             }
 
             authenticated = true;
-            // Build the Subject based DomainInfo cache value
-            updateCache(lc, subject, principal, credential);
          }
       }
       catch(LoginException e)
@@ -556,203 +370,4 @@ public class JaasSecurityManagerBase
       return lc;
    }
 
-   /** Validate the cache credential value against the provided credential
-    */
-   @SuppressWarnings({"unchecked", "rawtypes"})
-   private boolean validateCache(DomainInfo info, Object credential,
-      Subject theSubject)
-   {
-      if( trace )
-      {
-         StringBuffer tmp = new StringBuffer("Begin validateCache, info=");
-         tmp.append(info.toString());
-         tmp.append(";credential.class=");
-         if( credential != null )
-         {
-            Class c = credential.getClass();
-            tmp.append(c.getName());
-            tmp.append('@');
-            tmp.append(System.identityHashCode(c));
-         }
-         else
-         {
-            tmp.append("null");
-         }
-         log.trace(tmp.toString());
-      }
-
-      Object subjectCredential = info.credential;
-      boolean isValid = false;
-      // Check for a null credential as can be the case for an anonymous user
-      if( credential == null || subjectCredential == null )
-      {
-         // Both credentials must be null
-         isValid = (credential == null) && (subjectCredential == null);
-      }
-      // See if the credential is assignable to the cache value
-      else if( subjectCredential.getClass().isAssignableFrom(credential.getClass()) )
-      {
-        /* Validate the credential by trying Comparable, char[], byte[],
-         Object[], and finally Object.equals()
-         */
-         if( subjectCredential instanceof Comparable )
-         {
-            Comparable c = (Comparable) subjectCredential;
-            isValid = c.compareTo(credential) == 0;
-         }
-         else if( subjectCredential instanceof char[] )
-         {
-            char[] a1 = (char[]) subjectCredential;
-            char[] a2 = (char[]) credential;
-            isValid = Arrays.equals(a1, a2);
-         }
-         else if( subjectCredential instanceof byte[] )
-         {
-            byte[] a1 = (byte[]) subjectCredential;
-            byte[] a2 = (byte[]) credential;
-            isValid = Arrays.equals(a1, a2);
-         }
-         else if( subjectCredential.getClass().isArray() )
-         {
-            Object[] a1 = (Object[]) subjectCredential;
-            Object[] a2 = (Object[]) credential;
-            isValid = Arrays.equals(a1, a2);
-         }
-         else
-         {
-            isValid = subjectCredential.equals(credential);
-         }
-      }
-      else if( subjectCredential instanceof char[] && credential instanceof String )
-      {
-         char[] a1 = (char[]) subjectCredential;
-         char[] a2 = ((String) credential).toCharArray();
-         isValid = Arrays.equals(a1, a2);
-      }
-      else if( subjectCredential instanceof String && credential instanceof char[] )
-      {
-         char[] a1 = ((String) subjectCredential).toCharArray();
-         char[] a2 = (char[]) credential;
-         isValid = Arrays.equals(a1, a2);         
-      }
-
-      // If the credentials match, set the thread's active Subject
-      if( isValid )
-      {
-         // Copy the current subject into theSubject
-         if( theSubject != null )
-         {
-            SubjectActions.copySubject(info.subject, theSubject, false,this.deepCopySubjectOption);
-         }
-      }
-      if( trace )
-         log.trace("End validateCache, isValid="+isValid);
-
-      return isValid;
-   }
- 
-   /** An accessor method that synchronizes access on the domainCache
-    to avoid a race condition that can occur when the cache entry expires
-    in the presence of multi-threaded access. The allowRefresh flag should
-    be true for authentication accesses and false for other accesses.
-    Previously the other accesses included authorization and caller principal
-    mapping. Now the only use of the 
-
-    @param principal - the caller identity whose cached credentials are to
-    be accessed.
-    @param allowRefresh - a flag indicating if the cache access should flush
-    any expired entries.
-    */
-   private DomainInfo getCacheInfo(Principal principal, boolean allowRefresh)
-   {
-      if( domainCache == null )
-         return null;
-
-      DomainInfo cacheInfo = null;
-      synchronized( domainCache )
-      {
-          if( allowRefresh == true )
-            cacheInfo = (DomainInfo) domainCache.get(principal);
-          else
-            cacheInfo = (DomainInfo) domainCache.peek(principal);
-         if( cacheInfo != null )
-            cacheInfo.acquire();
-      }
-      return cacheInfo;
-   }
-
-   private Subject updateCache(LoginContext lc, Subject subject,
-      Principal principal, Object credential)
-   {
-      // If we don't have a cache there is nothing to update
-      if( domainCache == null )
-         return subject;
-
-      long lifetime = 0;
-      if( domainCache instanceof TimedCachePolicy )
-      {
-         TimedCachePolicy cache = (TimedCachePolicy) domainCache;
-         lifetime = cache.getDefaultLifetime();
-      }
-      DomainInfo info = new DomainInfo(lifetime);
-      info.loginCtx = lc;
-      info.subject = new Subject();
-      SubjectActions.copySubject(subject, info.subject, true, this.deepCopySubjectOption);
-      info.credential = credential;
-
-      if( trace )
-      {
-         log.trace("updateCache, inputSubject="+SubjectActions.toString(subject)
-            +", cacheSubject="+SubjectActions.toString(info.subject));
-      }
-
-     /* Get the Subject callerPrincipal by looking for a Group called
-        'CallerPrincipal'
-      */
-      Set<Group> subjectGroups = subject.getPrincipals(Group.class);
-      Iterator<Group> iter = subjectGroups.iterator();
-      while( iter.hasNext() )
-      {
-         Group grp = iter.next();
-         String name = grp.getName();
-         if( name.equals("CallerPrincipal") )
-         {
-            Enumeration<? extends Principal> members = grp.members();
-            if( members.hasMoreElements() )
-               info.callerPrincipal = members.nextElement();
-         }
-      }
-      
-     /* Handle null principals with no callerPrincipal. This is an indication
-        of an user that has not provided any authentication info, but
-        has been authenticated by the domain login module stack. Here we look
-        for the first non-Group Principal and use that.
-      */
-      if( principal == null && info.callerPrincipal == null )
-      {
-         Set<Principal> subjectPrincipals = subject.getPrincipals(Principal.class);
-         Iterator<? extends Principal> iterPrincipals = subjectPrincipals.iterator();
-         while( iterPrincipals.hasNext() )
-         {
-            Principal p = iterPrincipals.next();
-            if( (p instanceof Group) == false )
-               info.callerPrincipal = p;
-         }
-      }
-
-     /* If the user already exists another login is active. Currently
-        only one is allowed so remove the old and insert the new. Synchronize
-        on the domainCache to ensure the removal and addition are an atomic
-        operation so that getCacheInfo cannot see stale data.
-      */
-      synchronized( domainCache )
-      {
-         if( domainCache.peek(principal) != null )
-            domainCache.remove(principal);
-         domainCache.insert(principal, info);
-         if( trace )
-            log.trace("Inserted cache info: "+info);
-      }
-      return info.subject;
-   } 
 }

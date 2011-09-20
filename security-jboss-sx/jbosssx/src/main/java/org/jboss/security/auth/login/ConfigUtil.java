@@ -26,7 +26,7 @@ import java.util.HashMap;
 
 import javax.security.auth.login.AppConfigurationEntry;
 
-import org.jboss.util.xml.DOMUtils;
+import org.jboss.security.util.xml.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 

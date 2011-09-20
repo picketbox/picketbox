@@ -28,7 +28,7 @@ import java.util.Properties;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.identity.RoleGroup;
-import org.jboss.util.StringPropertyReplacer;
+import org.jboss.security.util.StringPropertyReplacer;
 
 /**
  * A {@code MappingProvider} that reads roles from a properties file in the format

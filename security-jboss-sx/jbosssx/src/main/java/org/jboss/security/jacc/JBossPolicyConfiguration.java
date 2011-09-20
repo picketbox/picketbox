@@ -28,9 +28,9 @@ import javax.security.jacc.PolicyConfiguration;
 import javax.security.jacc.PolicyContextException;
 
 import org.jboss.logging.Logger;
-import org.jboss.util.state.IllegalTransitionException;
-import org.jboss.util.state.State;
-import org.jboss.util.state.StateMachine;
+import org.jboss.security.util.state.IllegalTransitionException;
+import org.jboss.security.util.state.State;
+import org.jboss.security.util.state.StateMachine;
 
 /** The JACC PolicyConfiguration implementation. This class associates a
  * context id with the permission ops it passes along to the global

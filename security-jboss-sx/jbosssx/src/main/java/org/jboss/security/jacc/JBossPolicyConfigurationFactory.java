@@ -29,8 +29,8 @@ import javax.security.jacc.PolicyConfiguration;
 import javax.security.jacc.PolicyConfigurationFactory;
 import javax.security.jacc.PolicyContextException;
 
-import org.jboss.util.state.StateMachine;
-import org.jboss.util.state.xml.StateMachineParser;
+import org.jboss.security.util.state.StateMachine;
+import org.jboss.security.util.state.xml.StateMachineParser;
 
 /** org.jboss.security.provider
  *

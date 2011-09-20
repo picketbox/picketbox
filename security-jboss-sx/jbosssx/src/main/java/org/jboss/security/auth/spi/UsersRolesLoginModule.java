@@ -30,7 +30,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.util.StringPropertyReplacer;
+import org.jboss.security.util.StringPropertyReplacer;
 
 /** A simple Properties map based login module that consults two Java Properties
  formatted text files for username to password("users.properties") and

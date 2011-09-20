@@ -49,7 +49,7 @@ import org.jboss.logging.Logger;
 import org.jboss.security.plugins.PBEUtils;
 import org.jboss.security.vault.SecurityVault;
 import org.jboss.security.vault.SecurityVaultException;
-import org.jboss.util.Base64;
+import org.picketbox.commons.cipher.Base64;
 import org.picketbox.util.EncryptionUtil;
 import org.picketbox.util.KeyStoreUtil;
 import org.picketbox.util.StringUtil;

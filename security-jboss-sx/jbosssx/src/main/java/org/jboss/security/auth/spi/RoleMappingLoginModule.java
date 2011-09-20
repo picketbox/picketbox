@@ -31,7 +31,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.jboss.logging.Logger;
-import org.jboss.util.StringPropertyReplacer;
+import org.jboss.security.util.StringPropertyReplacer;
 
 //$Id$
 
