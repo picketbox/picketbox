@@ -68,7 +68,8 @@ public class JASPILoginModuleDelgateUnitTestCase extends TestCase
    protected void setUp() throws Exception
    {
       factory = AuthConfigFactory.getFactory();
-      factory.registerConfigProvider(new JBossAuthConfigProvider(new HashMap()), layer, appId, "Test Config Provider");
+      factory.registerConfigProvider(new JBossAuthConfigProvider(new HashMap(), null), layer, appId,
+            "Test Config Provider");
 
       JBossSecurityContext jsc = new JBossSecurityContext("conf-jaspi-2");
       SecurityContextAssociation.setSecurityContext(jsc);

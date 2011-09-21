@@ -193,7 +193,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
    /**
     * @see AuthConfig#refresh()
     */
-   public void refresh() throws AuthException, SecurityException
+   public void refresh()
    { 
    } 
    

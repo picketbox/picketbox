@@ -47,7 +47,7 @@ import junit.framework.TestCase;
  * @author Anil.Saldhana@redhat.com
  */
 public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
-{ 
+{
    AuthConfigFactory factory = null;
 
    String layer = SecurityConstants.SERVLET_LAYER;
@@ -60,7 +60,8 @@ public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
    protected void setUp() throws Exception
    {
       factory = AuthConfigFactory.getFactory();
-      factory.registerConfigProvider(new JBossAuthConfigProvider(new HashMap()), layer, appId, "Test Config Provider");
+      factory.registerConfigProvider(new JBossAuthConfigProvider(new HashMap(), null), layer, appId,
+            "Test Config Provider");
 
       SecurityContext jsc = new JBossSecurityContext("conf-jaspi");
       SecurityContextAssociation.setSecurityContext(jsc);
@@ -74,26 +75,22 @@ public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
       xli.setConfigURL(configURL);
       xli.loadConfig();
    }
-   
+
    public void testIsValid()
    {
-      CallbackHandler cbh = new AppCallbackHandler("anil",
-            "anilpwd".toCharArray());
+      CallbackHandler cbh = new AppCallbackHandler("anil", "anilpwd".toCharArray());
       MessageInfo messageInfo = new GenericMessageInfo(new Object(), new Object());
       JASPIServerAuthenticationManager jaspiManager = new JASPIServerAuthenticationManager();
-      boolean valid = jaspiManager.isValid(messageInfo, new Subject(), layer, 
-                                       cbh);
+      boolean valid = jaspiManager.isValid(messageInfo, new Subject(), layer, cbh);
       assertTrue(valid);
    }
-   
+
    public void testIsInValid()
    {
-      CallbackHandler cbh = new AppCallbackHandler("anil",
-            "dead".toCharArray());
+      CallbackHandler cbh = new AppCallbackHandler("anil", "dead".toCharArray());
       MessageInfo messageInfo = new GenericMessageInfo(new Object(), new Object());
       JASPIServerAuthenticationManager jaspiManager = new JASPIServerAuthenticationManager();
-      boolean valid = jaspiManager.isValid(messageInfo, new Subject(), layer, 
-                                       cbh);
+      boolean valid = jaspiManager.isValid(messageInfo, new Subject(), layer, cbh);
       assertFalse(valid);
    }
 }

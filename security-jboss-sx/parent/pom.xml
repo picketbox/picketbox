@@ -105,9 +105,9 @@
          <scope>compile</scope>
       </dependency>
       <dependency>
-         <groupId>org.jboss.javaee</groupId>
-         <artifactId>jboss-jaspi-api</artifactId>
-         <version>1.0.0.${org.jboss.javaee.version}</version>
+         <groupId>org.jboss.spec.javax.security.auth.message</groupId>
+         <artifactId>jboss-jaspi-api_1.0_spec</artifactId>
+         <version>1.0.0.Final</version>
          <scope>compile</scope>
       </dependency>
       <dependency>

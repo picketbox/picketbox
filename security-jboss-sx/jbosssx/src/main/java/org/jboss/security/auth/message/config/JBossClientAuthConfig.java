@@ -100,7 +100,7 @@ public class JBossClientAuthConfig implements ClientAuthConfig
    /**
     * @see AuthConfig#refresh()
     */
-   public void refresh() throws AuthException, SecurityException
+   public void refresh()
    {  
    }
 

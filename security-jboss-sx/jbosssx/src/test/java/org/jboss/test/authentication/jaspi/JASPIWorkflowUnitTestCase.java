@@ -48,7 +48,6 @@ import org.jboss.security.auth.message.config.JBossAuthConfigProvider;
 import org.jboss.security.plugins.JBossSecurityContext;
 import org.jboss.test.SecurityActions;
 
-
 /**
  * Test the Server side workflow for JASPI
  * 
@@ -71,7 +70,8 @@ public class JASPIWorkflowUnitTestCase extends TestCase
    protected void setUp() throws Exception
    {
       factory = AuthConfigFactory.getFactory();
-      factory.registerConfigProvider(new JBossAuthConfigProvider(new HashMap()), layer, appId, "Test Config Provider");
+      factory.registerConfigProvider(new JBossAuthConfigProvider(new HashMap(), null), layer, appId,
+            "Test Config Provider");
 
       SecurityContext jsc = new JBossSecurityContext("conf-jaspi");
       SecurityContextAssociation.setSecurityContext(jsc);
@@ -126,31 +126,29 @@ public class JASPIWorkflowUnitTestCase extends TestCase
          AuthStatus status = sctx.validateRequest(mi, clientSubject, serviceSubject);
          assertEquals(AuthStatus.FAILURE, status);
       }
-      catch(AuthException ae)
+      catch (AuthException ae)
       {
          //Ignore - we are fine
       }
    }
-   
+
    private void validateJAASConfiguration()
    {
       //Lets validate the configuration
       Configuration config = Configuration.getConfiguration();
       AppConfigurationEntry[] appConfigEntries = config.getAppConfigurationEntry("conf-jaspi");
       assertTrue(appConfigEntries.length > 0);
-      for(AppConfigurationEntry appConfigEntry: appConfigEntries)
+      for (AppConfigurationEntry appConfigEntry : appConfigEntries)
       {
-         assertEquals("org.jboss.test.authentication.jaspi.TestLoginModule",
-               appConfigEntry.getLoginModuleName());
+         assertEquals("org.jboss.test.authentication.jaspi.TestLoginModule", appConfigEntry.getLoginModuleName());
          assertEquals(LoginModuleControlFlag.OPTIONAL, appConfigEntry.getControlFlag());
       }
-      
+
       appConfigEntries = config.getAppConfigurationEntry("lm-stack");
       assertTrue(appConfigEntries.length > 0);
-      for(AppConfigurationEntry appConfigEntry: appConfigEntries)
+      for (AppConfigurationEntry appConfigEntry : appConfigEntries)
       {
-         assertEquals("org.jboss.test.authentication.jaspi.TestLoginModule",
-               appConfigEntry.getLoginModuleName());
+         assertEquals("org.jboss.test.authentication.jaspi.TestLoginModule", appConfigEntry.getLoginModuleName());
          assertEquals(LoginModuleControlFlag.OPTIONAL, appConfigEntry.getControlFlag());
       }
    }

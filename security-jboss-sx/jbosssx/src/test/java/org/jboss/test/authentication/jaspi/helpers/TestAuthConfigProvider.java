@@ -50,7 +50,7 @@ public class TestAuthConfigProvider implements AuthConfigProvider
      return new TestServerAuthConfig() ;
    }
 
-   public void refresh() throws AuthException, SecurityException
+   public void refresh()
    { 
    }   
 }

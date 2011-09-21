@@ -65,7 +65,7 @@ public class TestServerAuthConfig implements ServerAuthConfig
       return false;
    }
 
-   public void refresh() throws AuthException, SecurityException
+   public void refresh()
    { 
    } 
 }

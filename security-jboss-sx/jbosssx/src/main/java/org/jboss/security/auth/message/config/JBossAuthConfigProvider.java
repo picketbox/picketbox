@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
+import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ServerAuthConfig;
@@ -50,9 +51,13 @@ public class JBossAuthConfigProvider implements AuthConfigProvider
     * 
     * @param props Context Properties
     */
-   public JBossAuthConfigProvider(Map<String,Object> props)
+   public JBossAuthConfigProvider(Map<String,Object> props, AuthConfigFactory factory)
    {
       this.contextProperties = props;
+      
+      // if a factory has been supplied this provider needs to register itself.
+      if (factory != null)
+         factory.registerConfigProvider(this, null, null, "JBossAuthConfigProvider Self Registration");
    } 
    /**
     * @see AuthConfigProvider#getClientAuthConfig(String, String, CallbackHandler)
@@ -103,7 +108,7 @@ public class JBossAuthConfigProvider implements AuthConfigProvider
    /**
     * @see AuthConfigProvider#refresh()
     */
-   public void refresh() throws AuthException, SecurityException
+   public void refresh()
    { 
    } 
    

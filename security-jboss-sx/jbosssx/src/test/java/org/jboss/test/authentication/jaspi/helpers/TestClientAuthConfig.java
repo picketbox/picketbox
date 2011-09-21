@@ -66,7 +66,7 @@ public class TestClientAuthConfig implements ClientAuthConfig
       return false;
    }
 
-   public void refresh() throws AuthException, SecurityException
+   public void refresh()
    { 
    } 
 }
