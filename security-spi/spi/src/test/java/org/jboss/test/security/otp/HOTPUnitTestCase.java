@@ -46,7 +46,7 @@ public class HOTPUnitTestCase
    
    byte[] secret = userCode.getBytes();
    
-   int SLEEP_TIME = 10;
+   int SLEEP_TIME = 2;
    
    @Test
    public void testHOTP() throws Exception
@@ -70,7 +70,7 @@ public class HOTPUnitTestCase
       //System.out.println( "OTP Generated at " + currentDateTime);
       
       System.out.println( "We are going to sleep for " + SLEEP_TIME + " secs" );
-      Thread.sleep( SLEEP_TIME * 1000 ); //10 secs
+      Thread.sleep( SLEEP_TIME * 1000 ); //2 secs
       
       assertTrue( HOTPUtil.validate( otp1, secret,  2 ) );
    }
