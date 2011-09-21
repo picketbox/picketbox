@@ -59,6 +59,16 @@ public interface SecurityVault
    Set<String> keyList() throws SecurityVaultException;
    
    /**
+    * Check whether an attribute value exists in the vault
+    * @param vaultBlock
+    * @param attributeName
+    * @return
+    * @throws SecurityVaultException
+    * @since v4.0.3
+    */
+   boolean exists(String vaultBlock, String attributeName) throws SecurityVaultException;
+   
+   /**
     * Store an attribute value
     * @param vaultBlock a string value that brings in the uniqueness
     * @param attributeName name of the attribute

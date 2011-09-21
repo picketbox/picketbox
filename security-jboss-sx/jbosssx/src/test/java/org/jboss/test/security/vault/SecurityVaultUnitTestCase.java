@@ -153,6 +153,7 @@ public class SecurityVaultUnitTestCase
       
       vault.store(vaultBlock, attributeName, attributeValue , sharedKey);
       
+      assertTrue(vault.exists(vaultBlock, attributeName));
       //Now retrieve 
       assertEquals(new String(attributeValue), new String(vault.retrieve(vaultBlock, attributeName, sharedKey))); 
       

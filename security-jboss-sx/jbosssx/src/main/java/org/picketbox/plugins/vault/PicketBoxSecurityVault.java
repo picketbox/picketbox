@@ -360,7 +360,15 @@ public class PicketBoxSecurityVault implements SecurityVault
          throw new SecurityVaultException("Decryption of value failed:",e);
       } 
    }
-    
+   /**
+    * @see org.jboss.security.vault.SecurityVault#exists(String, String)
+    */
+   public boolean exists(String vaultBlock, String attributeName) throws SecurityVaultException
+   { 
+      String mapKey = vaultBlock + "_" + attributeName;
+      return theContent.get(mapKey) != null;
+   }
+   
    private String decode(String maskedString, String salt, int iterationCount) throws Exception
    {
       String pbeAlgo = "PBEwithMD5andDES";
