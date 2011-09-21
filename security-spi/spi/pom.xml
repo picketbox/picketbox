@@ -38,8 +38,8 @@
    </build>
    <dependencies>
       <dependency>
-         <groupId>org.jboss.javaee</groupId>
-         <artifactId>jboss-jaspi-api</artifactId>
+         <groupId>org.jboss.spec.javax.security.auth.message</groupId>
+         <artifactId>jboss-jaspi-api_1.0_spec</artifactId>
       </dependency>
       <dependency>
          <groupId>org.picketbox</groupId>
