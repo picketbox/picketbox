@@ -369,6 +369,24 @@ public class PicketBoxSecurityVault implements SecurityVault
       return theContent.get(mapKey) != null;
    }
    
+   /*
+    * @see org.jboss.security.vault.SecurityVault#remove(java.lang.String, java.lang.String, byte[])
+    */
+   public boolean remove(String vaultBlock, String attributeName, byte[] sharedKey)
+		   throws SecurityVaultException 
+   {
+	   String mapKey = vaultBlock + "_" + attributeName;
+	   try
+	   {
+		   theContent.remove(mapKey);
+	   }
+	   catch(Exception e)
+	   {
+		   return false;
+	   }
+	   return true;
+	}
+   
    private String decode(String maskedString, String salt, int iterationCount) throws Exception
    {
       String pbeAlgo = "PBEwithMD5andDES";

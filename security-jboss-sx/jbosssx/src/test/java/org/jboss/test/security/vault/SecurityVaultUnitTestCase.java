@@ -161,6 +161,9 @@ public class SecurityVaultUnitTestCase
       assertEquals(new String(attributeValue), new String(vault.retrieve(vaultBlock+"1", attributeName+"2", sharedKey))); 
       
       System.out.println("Currently storing:" + vault.keyList());
+      
+      assertTrue(vault.remove(vaultBlock+"1", attributeName+"2", sharedKey));
+      assertFalse(vault.exists(vaultBlock+"1", attributeName+"2"));
    }
    
    private String getMaskedPassword(String pwd, String salt, int iterationCount) throws Exception

@@ -86,5 +86,16 @@ public interface SecurityVault
     * @return
     * @throws SecurityVaultException
     */
-   char[] retrieve(String vaultBlock, String attributeName, byte[] sharedKey) throws SecurityVaultException; 
+   char[] retrieve(String vaultBlock, String attributeName, byte[] sharedKey) throws SecurityVaultException;
+   
+   /**
+    * Remove an existing attribute value
+    * @param vaultBlock
+    * @param attributeName
+    * @param sharedKey
+    * @return true if remove was successful, false otherwise
+    * @throws SecurityVaultException
+    * @since v4.0.4.final
+    */
+   boolean remove(String vaultBlock, String attributeName, byte[] sharedKey) throws SecurityVaultException;
 }
