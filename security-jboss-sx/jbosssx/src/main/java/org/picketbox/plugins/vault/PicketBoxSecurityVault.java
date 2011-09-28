@@ -132,7 +132,8 @@ public class PicketBoxSecurityVault implements SecurityVault
       
       String keystoreURL = (String) options.get(KEYSTORE_URL);
       if(keystoreURL == null)
-         throw new SecurityVaultException("Null " + KEYSTORE_URL); 
+         throw new SecurityVaultException("Null " + KEYSTORE_URL);
+      keystoreURL = StringUtil.getSystemPropertyAsString(keystoreURL);
       
       String maskedPassword = (String) options.get(KEYSTORE_PASSWORD);
       if(maskedPassword == null)
