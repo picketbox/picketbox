@@ -21,7 +21,7 @@
  */
 package org.jboss.security.plugins.auth;
 
-import java.util.HashMap;
+import java.util.Properties;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -53,30 +53,43 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
       super(securityDomain, handler); 
    }
 
-   /**
-    * @see AuthenticationManager#isValid(MessageInfo, Subject, String, CallbackHandler)
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.ServerAuthenticationManager#isValid(javax.security.auth.message.MessageInfo, javax.security.auth.Subject, java.lang.String, javax.security.auth.callback.CallbackHandler)
     */
-   @SuppressWarnings({"rawtypes"})
    public boolean isValid(MessageInfo requestMessage,Subject clientSubject, String layer,
          CallbackHandler handler)
-   { 
+   {
+      return this.isValid(requestMessage, clientSubject, layer, PolicyContext.getContextID(), handler);
+   }
+
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.ServerAuthenticationManager#isValid(javax.security.auth.message.MessageInfo, javax.security.auth.Subject, java.lang.String, java.lang.String, javax.security.auth.callback.CallbackHandler)
+    */
+   public boolean isValid(MessageInfo messageInfo, Subject clientSubject, String layer, String appContext, 
+         CallbackHandler callbackHandler) 
+   {
       AuthStatus status = AuthStatus.FAILURE;
       
       try
       {
-         String contextID = PolicyContext.getContextID();
          AuthConfigFactory factory = AuthConfigFactory.getFactory();
-         AuthConfigProvider provider = factory.getConfigProvider(layer,contextID,null); 
+         AuthConfigProvider provider = factory.getConfigProvider(layer,appContext,null); 
          if(provider == null)
-            throw new IllegalStateException("Provider is null for "+ layer + " for "+ contextID);
+            throw new IllegalStateException("Provider is null for "+ layer + " for "+ appContext);
+
+         ServerAuthConfig serverConfig = provider.getServerAuthConfig(layer,appContext,callbackHandler);
+         String authContextId = serverConfig.getAuthContextID(messageInfo);
          
-         ServerAuthConfig serverConfig = provider.getServerAuthConfig(layer,contextID,handler);  
-         ServerAuthContext sctx = serverConfig.getAuthContext(contextID, 
-               new Subject(), new HashMap());
+         Properties properties = new Properties();
+         properties.setProperty("security-domain", super.getSecurityDomain());
+         ServerAuthContext sctx = serverConfig.getAuthContext(authContextId, new Subject(), properties);
+         
          if(clientSubject == null)
             clientSubject = new Subject();
          Subject serviceSubject = new Subject();
-         status = sctx.validateRequest(requestMessage, clientSubject, serviceSubject); 
+         status = sctx.validateRequest(messageInfo, clientSubject, serviceSubject); 
          //TODO: Add caching
       }
       catch(AuthException ae)
@@ -85,6 +98,37 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
             log.trace("AuthException:",ae);
       } 
       return AuthStatus.SUCCESS == status ;
+   }
+   
+   /*
+    * (non-Javadoc)
+    * @see org.jboss.security.ServerAuthenticationManager#secureResponse(javax.security.auth.message.MessageInfo, javax.security.auth.Subject, java.lang.String, java.lang.String, javax.security.auth.callback.CallbackHandler)
+    */
+   public void secureResponse(MessageInfo messageInfo, Subject serviceSubject, String layer, String appContext, 
+         CallbackHandler handler)
+   {
+      try
+      {
+         AuthConfigFactory factory = AuthConfigFactory.getFactory();
+         AuthConfigProvider provider = factory.getConfigProvider(layer, appContext, null); 
+         if(provider == null)
+            throw new IllegalStateException("Provider is null for "+ layer + " for "+ appContext);
+
+         ServerAuthConfig serverConfig = provider.getServerAuthConfig(layer, appContext, handler);
+         String authContextId = serverConfig.getAuthContextID(messageInfo);
+         
+         Properties properties = new Properties();
+         properties.setProperty("security-domain", super.getSecurityDomain());
+         if (serviceSubject == null)
+            serviceSubject = new Subject();
+         ServerAuthContext sctx = serverConfig.getAuthContext(authContextId, serviceSubject, properties);
+         sctx.secureResponse(messageInfo, serviceSubject); 
+      }
+      catch(AuthException ae)
+      {
+         if(trace)
+            log.trace("AuthException:",ae);
+      } 
    }
    
 }

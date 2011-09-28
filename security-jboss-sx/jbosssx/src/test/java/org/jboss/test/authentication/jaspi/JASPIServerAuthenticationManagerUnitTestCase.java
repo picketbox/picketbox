@@ -33,6 +33,7 @@ import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.auth.callback.AppCallbackHandler;
+import org.jboss.security.auth.callback.JBossCallbackHandler;
 import org.jboss.security.auth.login.XMLLoginConfigImpl;
 import org.jboss.security.auth.message.GenericMessageInfo;
 import org.jboss.security.auth.message.config.JBossAuthConfigProvider;
@@ -56,6 +57,8 @@ public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
 
    String configFile = "config/jaspi-config.xml";
 
+   JASPIServerAuthenticationManager jaspiManager;
+   
    @SuppressWarnings("unchecked")
    protected void setUp() throws Exception
    {
@@ -63,8 +66,9 @@ public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
       factory.registerConfigProvider(new JBossAuthConfigProvider(new HashMap(), null), layer, appId,
             "Test Config Provider");
 
-      SecurityContext jsc = new JBossSecurityContext("conf-jaspi");
-      SecurityContextAssociation.setSecurityContext(jsc);
+      jaspiManager = new JASPIServerAuthenticationManager("conf-jaspi", new JBossCallbackHandler());
+//      SecurityContext jsc = new JBossSecurityContext("conf-jaspi");
+//      SecurityContextAssociation.setSecurityContext(jsc);
 
       XMLLoginConfigImpl xli = XMLLoginConfigImpl.getInstance();
       SecurityActions.setJAASConfiguration(xli);
@@ -80,7 +84,6 @@ public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
    {
       CallbackHandler cbh = new AppCallbackHandler("anil", "anilpwd".toCharArray());
       MessageInfo messageInfo = new GenericMessageInfo(new Object(), new Object());
-      JASPIServerAuthenticationManager jaspiManager = new JASPIServerAuthenticationManager();
       boolean valid = jaspiManager.isValid(messageInfo, new Subject(), layer, cbh);
       assertTrue(valid);
    }
@@ -89,7 +92,6 @@ public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
    {
       CallbackHandler cbh = new AppCallbackHandler("anil", "dead".toCharArray());
       MessageInfo messageInfo = new GenericMessageInfo(new Object(), new Object());
-      JASPIServerAuthenticationManager jaspiManager = new JASPIServerAuthenticationManager();
       boolean valid = jaspiManager.isValid(messageInfo, new Subject(), layer, cbh);
       assertFalse(valid);
    }

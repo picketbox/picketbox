@@ -96,9 +96,17 @@ public class JBossServerAuthConfig implements ServerAuthConfig
       
       Map<String,Map> mapOptionsByName = new HashMap<String,Map>();
       SecurityContext securityContext = SecurityActions.getSecurityContext();
-      if(securityContext == null)
-         throw new IllegalStateException("Security Context is null");
-      String secDomain = securityContext.getSecurityDomain();
+      String secDomain = null;
+      if (securityContext != null)
+      {
+         secDomain = securityContext.getSecurityDomain();
+      }
+      else{
+         secDomain = (String) properties.get("security-domain");
+         if(secDomain == null)
+            throw new IllegalStateException("Unable to obtain security domain from " +
+            		"configuration or security context");
+      }
       
       String defaultAppDomain = SecurityConstants.DEFAULT_APPLICATION_POLICY;
       //Get the modules from the SecurityConfiguration

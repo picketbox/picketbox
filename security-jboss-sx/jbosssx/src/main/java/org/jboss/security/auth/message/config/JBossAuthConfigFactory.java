@@ -83,8 +83,8 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       Map<String, Object> props = new HashMap<String, Object>();
       JBossAuthConfigProvider provider = new JBossAuthConfigProvider(props, null);
       // register a few default providers for the layers
-      this.registerConfigProvider(provider, "HTTP", " ", "Default Provider");
-      this.registerConfigProvider(provider, "HttpServlet", " ", "Default Provider");
+      this.registerConfigProvider(provider, "HTTP", null, "Default Provider");
+      this.registerConfigProvider(provider, "HttpServlet", null, "Default Provider");
    }
 
    /*
@@ -98,10 +98,10 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
          throw new IllegalArgumentException("listener is null");
 
       String[] arr = new String[0];
-      String input = (layer + "_" + appContext).toUpperCase();
-      String allLayer = ("NULL" + "_" + appContext).toUpperCase();
-      String allContext = (layer + "_" + "NULL").toUpperCase();
-      String general = "NULL" + "_" + "NULL";
+      String input = layer + "^" + appContext;
+      String allLayer = "null" + "^" + appContext;
+      String allContext = layer + "^" + "null";
+      String general = "null" + "^" + "null";
 
       RegistrationListener origListener = null;
       String key = null;
@@ -141,15 +141,14 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
    {
       if (appContext == null)
          appContext = " ";
-      String input = (layer + "_" + appContext).toUpperCase();
-      String allLayer = ("NULL" + "_" + appContext).toUpperCase();
-      String allContext = (layer + "_" + "NULL").toUpperCase();
-      String general = "NULL" + "_" + "NULL";
-      String blank = (layer + "_" + " ").toUpperCase();
+      String input = layer + "^" + appContext;
+      String allLayer = "null" + "^" + appContext;
+      String allContext = layer + "^" + "null";
+      String general = "null" + "^" + "null";
 
       AuthConfigProvider acp = null;
       String key = null;
-      for (int i = 0; i < 5 && acp == null; i++)
+      for (int i = 0; i < 4 && acp == null; i++)
       {
          if (i == 0)
             key = input;
@@ -159,8 +158,6 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
             key = allContext;
          if (i == 3)
             key = general;
-         if (i == 4)
-            key = blank;
          acp = (AuthConfigProvider) keyProviderMap.get(key);
       }
       
@@ -176,19 +173,20 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
     */
    public RegistrationContext getRegistrationContext(String registrationID)
    {
-      final String description = (String) idToDescriptionMap.get(registrationID);
       String key = (String) idKeyMap.get(registrationID);
-      StringTokenizer st = new StringTokenizer(key, "_");
+      StringTokenizer st = new StringTokenizer(key, "^");
       if (st.countTokens() < 2)
          throw new IllegalStateException("Invalid key obtained=" + key);
+
       final String layer = st.nextToken();
       final String appCtx = st.nextToken();
+      final String description = (String) idToDescriptionMap.get(registrationID);
 
       return new RegistrationContext()
       {
          public String getAppContext()
          {
-            return appCtx.equals("NULL") ? null : appCtx;
+            return appCtx.equals("null") ? null : appCtx;
          }
 
          public String getDescription()
@@ -198,7 +196,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
 
          public String getMessageLayer()
          {
-            return layer.equals("NULL") ? null : layer;
+            return layer.equals("null") ? null : layer;
          }
 
          public boolean isPersistent()
@@ -217,7 +215,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       List<String> al = new ArrayList<String>();
       if (provider == null)
       {
-         al.addAll(idToDescriptionMap.keySet());
+         al.addAll(idKeyMap.keySet());
       }
       else
       {
@@ -276,9 +274,9 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
          throw new IllegalArgumentException("provider is null");
 
       StringBuilder key = new StringBuilder();
-      key.append(layer == null ? "NULL" : layer.toUpperCase());
-      key.append("_");
-      key.append(appContext == null ? "NULL" : appContext.toUpperCase());
+      key.append(layer == null ? "null" : layer);
+      key.append("^");
+      key.append(appContext == null ? "null" : appContext);
 
       String keystr = key.toString();
       keyProviderMap.put(keystr, provider);
@@ -287,12 +285,12 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       UUID guid = UUID.randomUUID();
       String providerID = guid.toString();
       this.idKeyMap.put(providerID, keystr);
+
       List<String> list = this.providerToIDListMap.get(provider);
       if (list == null)
-      {
          list = new ArrayList<String>();
-      }
       list.add(providerID);
+
       this.providerToIDListMap.put(provider, list);
       if (description != null)
          this.idToDescriptionMap.put(providerID, description);

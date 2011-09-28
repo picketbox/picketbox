@@ -42,4 +42,32 @@ public interface ServerAuthenticationManager extends AuthenticationManager
     */
    boolean isValid(MessageInfo requestMessage, Subject clientSubject, String layer,
          CallbackHandler callbackHandler);
+   
+   /**
+    * Authenticate a Subject given the request response JSR-196(JASPI) messages
+    * 
+    * @param messageInfo the object that contains the request and response messages.
+    * @param clientSubject the client subject.
+    * @param layer the message layer for JASPI.
+    * @param appContext the JASPI application context.
+    * @param callbackHandler the callback handler instance.
+    * @return {@code true} if the client subject is valid; {@code false} otherwise.
+    */
+   boolean isValid(MessageInfo messageInfo, Subject clientSubject, String layer, String appContext, 
+         CallbackHandler callbackHandler);
+   
+   /**
+    * <p>
+    * Secures the response encapsulated in the specified {@code MessageInfo} object.
+    * </p>
+    * 
+    * @param messageInfo the object that contains the request and response messages.
+    * @param serviceSubject an optional server {@code Subject} instance.
+    * @param layer  the JASPI message layer. 
+    * @param appContext the JASPI application context.
+    * @param callbackHandler the {@code CallbackHandler} instance that can be used to obtain further information
+    * (such as keys) to secure the response message.
+    */
+   void secureResponse(MessageInfo messageInfo, Subject serviceSubject, String layer, String appContext, 
+         CallbackHandler callbackHandler);
 }
