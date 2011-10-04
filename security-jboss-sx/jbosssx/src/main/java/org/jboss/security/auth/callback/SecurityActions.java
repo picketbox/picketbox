@@ -31,6 +31,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.jacc.PolicyContext;
 import javax.security.jacc.PolicyContextException;
 
+import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 
@@ -44,15 +45,13 @@ public class SecurityActions
 {
    interface PolicyContextActions
    {
-      /** The JACC PolicyContext key for the current Subject */
-      public static final String CALLBACK_HANDLER_KEY = "org.jboss.security.auth.spi.CallbackHandler";
       PolicyContextActions PRIVILEGED = new PolicyContextActions()
       {
          private final PrivilegedExceptionAction<CallbackHandler> exAction = new PrivilegedExceptionAction<CallbackHandler>()
          {
             public CallbackHandler run() throws Exception
             {
-               return (CallbackHandler) PolicyContext.getContext(CALLBACK_HANDLER_KEY);
+               return (CallbackHandler) PolicyContext.getContext(SecurityConstants.CALLBACK_HANDLER_KEY);
             }
          };
          public CallbackHandler getContextCallbackHandler()
@@ -78,7 +77,7 @@ public class SecurityActions
          public CallbackHandler getContextCallbackHandler()
             throws PolicyContextException
          {
-            return (CallbackHandler) PolicyContext.getContext(CALLBACK_HANDLER_KEY);
+            return (CallbackHandler) PolicyContext.getContext(SecurityConstants.CALLBACK_HANDLER_KEY);
          }
       };
 
