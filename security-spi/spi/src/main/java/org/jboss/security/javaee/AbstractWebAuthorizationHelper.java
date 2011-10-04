@@ -22,6 +22,7 @@
 package org.jboss.security.javaee;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -68,7 +69,29 @@ extends AbstractJavaEEHelper
          ServletResponse response,
          Subject callerSubject, 
          String contextID,
-         String canonicalRequestURI); 
+         String canonicalRequestURI);
+   
+   /**
+    * Validate that the caller has the permission to access a web resource
+    * @param contextMap
+    * @param request
+    * @param response
+    * @param callerSubject
+    * @param contextID
+    * @param canonicalRequestURI
+    * @param roles
+    * @return true - permitted
+    * @throws IllegalArgumentException request, response, callerSubject, contextID or canonicalRequestURI is null
+    * @throws IllegalStateException Authorization Manager from Security Context is null
+    */
+   public abstract boolean checkResourcePermission(
+         Map<String, Object> contextMap,
+         ServletRequest request, 
+         ServletResponse response,
+         Subject callerSubject, 
+         String contextID,
+         String canonicalRequestURI,
+         List<String> roles);
 
    /**
     * Validate that the caller has the required role to access a resource
@@ -91,6 +114,28 @@ extends AbstractJavaEEHelper
          Subject callerSubject);
    
    /**
+    * Validate that the caller has the required role to access a resource
+    * @param roleName
+    * @param principal
+    * @param servletName
+    * @param principalRoles
+    * @param contextID
+    * @param callerSubject
+    * @param roles
+    * @return
+    * @throws IllegalArgumentException roleName, contextID, callerSubject is null
+    * @throws IllegalStateException Authorization Manager from Security Context is null
+    */
+   public abstract boolean hasRole(
+         String roleName, 
+         Principal principal, 
+         String servletName, 
+         Set<Principal> principalRoles,  
+         String contextID,
+         Subject callerSubject,
+         List<String> roles);
+   
+   /**
     * Validate whether the transport constraints are met by the caller
     * @param contextMap
     * @param request
@@ -107,4 +152,24 @@ extends AbstractJavaEEHelper
          ServletResponse response, 
          String contextID,
          Subject callerSubject);
+   
+   /**
+    * Validate whether the transport constraints are met by the caller
+    * @param contextMap
+    * @param request
+    * @param response
+    * @param contextID
+    * @param callerSubject
+    * @param roles
+    * @return
+    * @throws IllegalArgumentException request, response, callerSubject or contextID is null
+    * @throws IllegalStateException Authorization Manager from Security Context is null
+    */
+   public abstract boolean hasUserDataPermission(
+         Map<String,Object> contextMap,
+         ServletRequest request, 
+         ServletResponse response, 
+         String contextID,
+         Subject callerSubject,
+         List<String> roles);
 }

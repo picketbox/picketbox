@@ -24,6 +24,7 @@ package org.jboss.security.plugins.javaee;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +34,7 @@ import javax.servlet.ServletResponse;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthorizationManager;
+import org.jboss.security.SecurityConstants;
 import org.jboss.security.audit.AuditLevel;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.AuthorizationException;
@@ -40,6 +42,8 @@ import org.jboss.security.authorization.ResourceKeys;
 import org.jboss.security.authorization.resources.WebResource;
 import org.jboss.security.callbacks.SecurityContextCallbackHandler;
 import org.jboss.security.identity.RoleGroup;
+import org.jboss.security.identity.plugins.SimpleRole;
+import org.jboss.security.identity.plugins.SimpleRoleGroup;
 import org.jboss.security.javaee.AbstractWebAuthorizationHelper;
 
 /**
@@ -61,6 +65,19 @@ extends AbstractWebAuthorizationHelper
          Subject callerSubject, 
          String contextID, 
          String canonicalRequestURI)
+   {
+      return checkResourcePermission(contextMap, request, response, callerSubject, contextID, canonicalRequestURI, null);
+   }
+   
+   @Override
+   public boolean checkResourcePermission(
+         Map<String, Object> contextMap, 
+         ServletRequest request,
+         ServletResponse response, 
+         Subject callerSubject, 
+         String contextID, 
+         String canonicalRequestURI,
+         List<String> roles)
    {
       if(contextID == null)
          throw new IllegalArgumentException("ContextID is null");  
@@ -85,8 +102,18 @@ extends AbstractWebAuthorizationHelper
       webResource.setCallerSubject(callerSubject);
       webResource.setCanonicalRequestURI(canonicalRequestURI);
 
-      SecurityContextCallbackHandler sch = new SecurityContextCallbackHandler(this.securityContext); 
-      RoleGroup callerRoles = authzMgr.getSubjectRoles(callerSubject, sch);
+      SecurityContextCallbackHandler sch = new SecurityContextCallbackHandler(this.securityContext);
+      RoleGroup callerRoles = null;
+      if (roles == null)
+         callerRoles = authzMgr.getSubjectRoles(callerSubject, sch);
+      else
+      {
+         callerRoles = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
+         for (String role : roles)
+         {
+            callerRoles.addRole(new SimpleRole(role));
+         }
+      }
 
       try
       {
@@ -116,6 +143,19 @@ extends AbstractWebAuthorizationHelper
          String contextID,
          Subject callerSubject)
    {
+      return hasRole(roleName, principal, servletName, principalRoles, contextID, callerSubject, null);
+   }
+   
+   @Override
+   public boolean hasRole(
+         String roleName, 
+         Principal principal, 
+         String servletName, 
+         Set<Principal> principalRoles,  
+         String contextID,
+         Subject callerSubject,
+         List<String> roles)
+   {
       if(roleName == null)
          throw new IllegalArgumentException("roleName is null");
       if(contextID == null)
@@ -143,7 +183,17 @@ extends AbstractWebAuthorizationHelper
        
       webResource.setCallerSubject(callerSubject);
       SecurityContextCallbackHandler sch = new SecurityContextCallbackHandler(this.securityContext); 
-      RoleGroup callerRoles = authzMgr.getSubjectRoles(callerSubject, sch);
+      RoleGroup callerRoles = null;
+      if (roles == null)
+         callerRoles = authzMgr.getSubjectRoles(callerSubject, sch);
+      else
+      {
+         callerRoles = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
+         for (String role : roles)
+         {
+            callerRoles.addRole(new SimpleRole(role));
+         }
+      }
       
       try
       {
@@ -171,6 +221,17 @@ extends AbstractWebAuthorizationHelper
          String contextID,
          Subject callerSubject)
    {
+      return hasUserDataPermission(contextMap, request, response, contextID, callerSubject, null);
+   }
+   
+   @Override
+   public boolean hasUserDataPermission(Map<String, Object> contextMap, 
+         ServletRequest request,
+         ServletResponse response,
+         String contextID,
+         Subject callerSubject,
+         List<String> roles)
+   {
       if(contextID == null)
          throw new IllegalArgumentException("ContextID is null"); 
       if(callerSubject == null)
@@ -194,7 +255,17 @@ extends AbstractWebAuthorizationHelper
       
       webResource.setCallerSubject(callerSubject);
       SecurityContextCallbackHandler sch = new SecurityContextCallbackHandler(this.securityContext); 
-      RoleGroup callerRoles = authzMgr.getSubjectRoles(callerSubject, sch);
+      RoleGroup callerRoles = null;
+      if (roles == null)
+         callerRoles = authzMgr.getSubjectRoles(callerSubject, sch);
+      else
+      {
+         callerRoles = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
+         for (String role : roles)
+         {
+            callerRoles.addRole(new SimpleRole(role));
+         }
+      }
       
       try
       {
