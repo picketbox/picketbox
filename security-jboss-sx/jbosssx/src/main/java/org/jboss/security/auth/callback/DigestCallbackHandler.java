@@ -44,7 +44,7 @@ public class DigestCallbackHandler implements CallbackHandler {
     private String realm;
     private String md5a2;
 
-    DigestCallbackHandler(String username, String nonce, String nc, String cnonce, String qop, String realm, String md5a2) {
+    public DigestCallbackHandler(String username, String nonce, String nc, String cnonce, String qop, String realm, String md5a2) {
         this.username = username;
         this.nonce = nonce;
         this.nc = nc;
