@@ -25,6 +25,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.jacc.PolicyContextException;
 import javax.security.jacc.PolicyContextHandler;
 
+import org.jboss.security.SecurityConstants;
+
 /**
  A PolicyContextHandler implementation that allows a dynamic CallbackHandler to
  be associated with the current context for use with authentication.
@@ -34,7 +36,6 @@ import javax.security.jacc.PolicyContextHandler;
  */
 public class CallbackHandlerPolicyContextHandler implements PolicyContextHandler
 {
-   public static final String CALLBACK_HANDLER_KEY = "org.jboss.security.auth.spi.CallbackHandler";
    private static ThreadLocal<CallbackHandler> requestContext = new ThreadLocal<CallbackHandler>();
 
    public static void setCallbackHandler(CallbackHandler bean)
@@ -52,7 +53,7 @@ public class CallbackHandlerPolicyContextHandler implements PolicyContextHandler
       throws PolicyContextException
    {
       Object context = null;
-      if( key.equalsIgnoreCase(CALLBACK_HANDLER_KEY) == true )
+      if (key.equalsIgnoreCase(SecurityConstants.CALLBACK_HANDLER_KEY))
          context = requestContext.get();
       return context;
    }
@@ -60,14 +61,14 @@ public class CallbackHandlerPolicyContextHandler implements PolicyContextHandler
    public String[] getKeys()
       throws PolicyContextException
    {
-      String[] keys = {CALLBACK_HANDLER_KEY};
+      String[] keys = {SecurityConstants.CALLBACK_HANDLER_KEY};
       return keys;
    }
 
    public boolean supports(String key)
       throws PolicyContextException
    {
-      return key.equalsIgnoreCase(CALLBACK_HANDLER_KEY);
+      return key.equalsIgnoreCase(SecurityConstants.CALLBACK_HANDLER_KEY);
    }
 
 }
