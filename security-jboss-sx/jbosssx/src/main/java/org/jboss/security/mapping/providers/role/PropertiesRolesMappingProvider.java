@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.util.StringPropertyReplacer;
 
@@ -65,7 +66,7 @@ public class PropertiesRolesMappingProvider extends AbstractRolesMappingProvider
          }
          catch (IOException ioe)
          {
-            throw new IllegalStateException("Error loading roles properties file", ioe);
+            throw new IllegalStateException(ErrorCodes.PROCESSING_FAILED + "Error loading roles properties file", ioe);
          }
       }
    }
@@ -73,7 +74,7 @@ public class PropertiesRolesMappingProvider extends AbstractRolesMappingProvider
    public void performMapping(Map<String, Object> map, RoleGroup mappedObject)
    {
       if (map == null || map.isEmpty())
-         throw new IllegalArgumentException("Context Map is null or empty");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Context Map is null or empty");
 
       //Obtain the principal to roles mapping
       Principal principal = getCallerPrincipal(map);

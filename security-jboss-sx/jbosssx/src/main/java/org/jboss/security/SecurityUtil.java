@@ -82,7 +82,7 @@ public class SecurityUtil
    public static Group getSubjectRoles(Subject theSubject)
    {
       if (theSubject == null)
-         throw new IllegalArgumentException("Subject is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Subject is null");
       Set<Group> subjectGroups = theSubject.getPrincipals(Group.class);
       Iterator<Group> iter = subjectGroups.iterator();
       Group roles = null;

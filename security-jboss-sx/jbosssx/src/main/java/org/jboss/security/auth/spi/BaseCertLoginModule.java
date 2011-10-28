@@ -41,6 +41,7 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.JSSESecurityDomain;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityDomain;
@@ -184,7 +185,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
             catch(Exception e)
             {
                log.debug("Failed to create principal", e);
-               throw new LoginException("Failed to create principal: "+ e.getMessage());
+               throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to create principal: "+ e.getMessage());
             }
          }
 
@@ -225,7 +226,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
          if (!validateCredential(alias, credential))
          {
             log.debug("Bad credential for alias=" + alias);
-            throw new FailedLoginException("Supplied Credential did not match existing credential for " + alias);
+            throw new FailedLoginException(ErrorCodes.WRONG_VALUE + "Supplied Credential did not match existing credential for " + alias);
          }
       }
 
@@ -295,7 +296,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
       // prompt for a username and password
       if (callbackHandler == null)
       {
-         throw new LoginException("Error: no CallbackHandler available to collect authentication information");
+         throw new LoginException(ErrorCodes.NULL_VALUE + "Error: no CallbackHandler available to collect authentication information");
       }
       NameCallback nc = new NameCallback("Alias: ");
       ObjectCallback oc = new ObjectCallback("Certificate: ");
@@ -338,11 +339,11 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
       catch (IOException e)
       {
          log.debug("Failed to invoke callback", e);
-         throw new LoginException("Failed to invoke callback: "+e.toString());
+         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to invoke callback: "+e.toString());
       }
       catch (UnsupportedCallbackException uce)
       {
-         throw new LoginException("CallbackHandler does not support: "
+         throw new LoginException(ErrorCodes.UNRECOGNIZED_CALLBACK + "CallbackHandler does not support: "
             + uce.getCallback());
       }
 

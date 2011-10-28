@@ -27,6 +27,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.ControlFlag;
@@ -101,7 +102,7 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
       //Get the Configuration
       ApplicationPolicy aPolicy = SecurityConfiguration.getApplicationPolicy( securityDomain);
       if(aPolicy == null)
-         throw new IllegalStateException("ApplicationPolicy not found for "+ securityDomain);
+         throw new IllegalStateException(ErrorCodes.MISSING_VALUE + "ApplicationPolicy not found for "+ securityDomain);
       
       IdentityTrustInfo iti = aPolicy.getIdentityTrustInfo();
       if(iti == null)
@@ -134,7 +135,7 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
             log.debug("Error instantiating IdentityTrustModule:",e);
       } 
       if(im == null)
-         throw new IllegalStateException("IdentityTrustModule has not " +
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "IdentityTrustModule has not " +
                "been instantiated"); 
       im.initialize(this.securityContext, this.callbackHandler, this.sharedState,map); 
       return im;
@@ -232,7 +233,7 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
          IdentityTrustModule module = (IdentityTrustModule)modules.get(i); 
          boolean bool = module.commit();
          if(!bool)
-            throw new IdentityTrustException("commit on modules failed");
+            throw new IdentityTrustException(ErrorCodes.PROCESSING_FAILED + "commit on modules failed");
       } 
    }
    
@@ -245,7 +246,7 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
          IdentityTrustModule module = (IdentityTrustModule)modules.get(i); 
          boolean bool = module.abort(); 
          if(!bool)
-            throw new IdentityTrustException("abort on modules failed");
+            throw new IdentityTrustException(ErrorCodes.PROCESSING_FAILED + "abort on modules failed");
       } 
    }
 }

@@ -37,6 +37,7 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.acl.config.ACLProviderEntry;
 import org.jboss.security.audit.config.AuditProviderEntry;
 import org.jboss.security.auth.login.AuthenticationInfo;
@@ -75,7 +76,7 @@ public class ApplicationPolicyParser implements XMLStreamConstants
               case XMLStreamConstants.START_ELEMENT:  
                  StartElement appPolicyElement = (StartElement) xmlEvent;
                  if("application-policy".equals(StaxParserUtil.getStartElementName(appPolicyElement)) == false)
-                    throw new RuntimeException("<application-policy> element expected at " + 
+                    throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "<application-policy> element expected at " + 
                           StaxParserUtil.getLineColumnNumber(xmlEvent.getLocation()));
                  //We got the application-policy element. It just has one attribute "name"
                  Iterator<Attribute> attrs = appPolicyElement.getAttributes(); 
@@ -191,10 +192,13 @@ public class ApplicationPolicyParser implements XMLStreamConstants
             authInfo.add(entries);
             appPolicy.setIdentityTrustInfo(authInfo); 
          } 
-         else if("application-policy".equals(elementName))
-            break; 
-         else throw new RuntimeException("Unknown element "  + elementName + " at location " + 
-               StaxParserUtil.getLineColumnNumber(xmlEvent.getLocation())); 
+         else if("application-policy".equals(elementName)){
+             break; 
+         } 
+         else {
+        	 throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Unknown element "  + elementName + " at location " + 
+                     StaxParserUtil.getLineColumnNumber(xmlEvent.getLocation()));
+         } 
       }
    }
    

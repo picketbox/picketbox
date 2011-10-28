@@ -28,6 +28,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.security.ErrorCodes;
+
 /** A login module that obtains its security information directly from its
  login module options. The name of the login module comes from the use of
  the login-config.xml descriptor which allows the user/roles content to be
@@ -100,7 +102,7 @@ public class XMLLoginModule extends UsernamePasswordLoginModule
    public boolean login() throws LoginException
    {
       if (users == null)
-         throw new LoginException("Missing usersInfo user/role mapping");
+         throw new LoginException(ErrorCodes.NULL_VALUE + "Missing usersInfo user/role mapping");
 
       return super.login();
    }

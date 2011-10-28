@@ -39,6 +39,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.plugins.TransactionManagerLocator;
 
 
@@ -130,7 +131,7 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
       }
       catch (NamingException e)
       {
-         throw new RuntimeException("Unable to get Transaction Manager", e);
+         throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Unable to get Transaction Manager", e);
       }
    }
 
@@ -156,7 +157,7 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
          try
          {
             if(tm == null)
-               throw new IllegalStateException("Transaction Manager is null");
+               throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Transaction Manager is null");
             tx = tm.suspend();
          }
          catch (SystemException e)
@@ -182,7 +183,7 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
          {
             if(trace)
                log.trace("Query returned no matches from db");
-            throw new FailedLoginException("No matching username found in Principals");
+            throw new FailedLoginException(ErrorCodes.PROCESSING_FAILED + "No matching username found in Principals");
          }
          
          password = rs.getString(1);
@@ -192,13 +193,13 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
       }
       catch(NamingException ex)
       {
-         LoginException le = new LoginException("Error looking up DataSource from: "+dsJndiName);
+         LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Error looking up DataSource from: "+dsJndiName);
          le.initCause(ex);
          throw le;
       }
       catch(SQLException ex)
       {
-         LoginException le = new LoginException("Query failed");
+         LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Query failed");
          le.initCause(ex);
          throw le;
       }

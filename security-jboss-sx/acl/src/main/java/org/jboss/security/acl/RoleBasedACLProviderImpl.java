@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.AuthorizationException;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.identity.Identity;
@@ -105,9 +106,9 @@ public class RoleBasedACLProviderImpl extends ACLProviderImpl
             return false;
          }
          else
-            throw new AuthorizationException("Unable to locate an ACL for the resource " + resource);
+            throw new AuthorizationException(ErrorCodes.PROCESSING_FAILED + "Unable to locate an ACL for the resource " + resource);
       }
-      throw new AuthorizationException("Unable to retrieve ACL: persistece strategy not set");
+      throw new AuthorizationException(ErrorCodes.PROCESSING_FAILED + "Unable to retrieve ACL: persistece strategy not set");
    }
 
    /**

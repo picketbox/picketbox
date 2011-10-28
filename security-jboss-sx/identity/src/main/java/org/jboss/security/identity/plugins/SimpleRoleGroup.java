@@ -30,6 +30,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.RoleType;
@@ -208,7 +209,7 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
    public boolean containsAtleastOneRole(RoleGroup anotherRole)
    {
       if (anotherRole == null)
-         throw new IllegalArgumentException("anotherRole is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "anotherRole is null");
       CopyOnWriteArrayList<Role> roleList = new CopyOnWriteArrayList<Role>(anotherRole.getRoles());
       for (Role r : roleList)
       {

@@ -41,6 +41,7 @@ import javax.security.jacc.WebRoleRefPermission;
 import javax.security.jacc.WebUserDataPermission;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
  
 /**
  * A JAAC Policy provider implementation that delegates any non-JACC permissions
@@ -293,7 +294,7 @@ public class DelegatingPolicy extends Policy
    {
       ContextPolicy policy = (ContextPolicy) openPolicies.get(contextID);
       if (policy == null)
-         throw new PolicyContextException("No ContextPolicy exists for contextID=" + contextID);
+         throw new PolicyContextException(ErrorCodes.NULL_VALUE + "No ContextPolicy exists for contextID=" + contextID);
       return policy;
    }
 

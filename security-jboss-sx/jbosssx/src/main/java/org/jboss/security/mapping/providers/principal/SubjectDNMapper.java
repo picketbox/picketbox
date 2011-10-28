@@ -26,6 +26,7 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.auth.certs.SubjectDNMapping;
 import org.jboss.security.mapping.MappingResult;
  
@@ -56,7 +57,7 @@ public class SubjectDNMapper extends AbstractPrincipalMappingProvider
    public void performMapping(Map<String,Object> contextMap, Principal principal)
    {
       if(contextMap == null)
-         throw new IllegalArgumentException("ContextMap is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextMap is null");
       
       X509Certificate[] certs = (X509Certificate[]) contextMap.get("X509");
       if(certs != null)

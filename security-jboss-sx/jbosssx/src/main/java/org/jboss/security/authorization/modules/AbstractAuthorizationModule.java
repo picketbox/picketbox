@@ -29,6 +29,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.AuthorizationException;
 import org.jboss.security.authorization.AuthorizationModule;
@@ -138,7 +139,7 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
       ResourceType layer = resource.getLayer();
       String delegateStr = (String)delegateMap.get(layer);
       if(delegateStr == null)
-         throw new IllegalStateException("Delegate is missing for layer="+layer);
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Delegate is missing for layer="+layer);
       AuthorizationModuleDelegate delegate = null;
       try
       {
@@ -194,7 +195,7 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
          String keyPair = st.nextToken();
          StringTokenizer keyst = new StringTokenizer(keyPair,"=");
          if(keyst.countTokens() != 2)
-            throw new IllegalStateException("DelegateMap entry invalid:"+keyPair);
+            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "DelegateMap entry invalid:"+keyPair);
          String key = keyst.nextToken();
          String value = keyst.nextToken();
          this.delegateMap.put(ResourceType.valueOf(key),value);

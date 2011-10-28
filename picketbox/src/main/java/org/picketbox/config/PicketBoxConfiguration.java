@@ -28,6 +28,7 @@ import java.net.URL;
 import javax.xml.stream.XMLStreamException;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.config.parser.StaxBasedConfigParser;
 import org.picketbox.exceptions.ConfigurationFileNullException;
 import org.picketbox.exceptions.ConfigurationParsingException;
@@ -52,7 +53,7 @@ public class PicketBoxConfiguration
    public void load(String configFileName) throws ConfigurationFileNullException, ConfigurationParsingException
    {
       if(configFileName == null)
-         throw new ConfigurationFileNullException("configFileName is null");
+         throw new ConfigurationFileNullException(ErrorCodes.NULL_ARGUMENT + "configFileName is null");
       InputStream configStream = loadStream(configFileName);
       load(configStream);   
    }
@@ -66,7 +67,7 @@ public class PicketBoxConfiguration
    public void load(InputStream configStream) throws ConfigurationStreamNullException, ConfigurationParsingException
    {
       if(configStream == null)
-         throw new ConfigurationStreamNullException("configStream is null");
+         throw new ConfigurationStreamNullException(ErrorCodes.NULL_ARGUMENT + "configStream is null");
       
       //Parser will parse the stream and update the JAAS Configuration 
       // set on JDK Configuration.getConfiguration and is an instance of ApplicationPolicyRegistration

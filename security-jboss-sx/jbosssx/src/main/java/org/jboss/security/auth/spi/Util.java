@@ -43,6 +43,7 @@ import org.jboss.crypto.digest.DigestCallback;
 import org.jboss.logging.Logger;
 import org.jboss.security.Base64Encoder;
 import org.jboss.security.Base64Utils;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimpleGroup;
 
 /**
@@ -268,7 +269,7 @@ public class Util
          }
          else
          {
-            throw new IOException("Properties file " + propertiesName + " not available");
+            throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not available");
          }
          if (trace)
             log.trace("Loaded properties, users="+bundle.keySet());
@@ -355,7 +356,7 @@ public class Util
          }
          else
          {
-            throw new IOException("Properties file " + propertiesName + " not available");
+            throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not available");
          }
          if (trace)
             log.trace("Loaded properties, users=" + bundle.keySet());

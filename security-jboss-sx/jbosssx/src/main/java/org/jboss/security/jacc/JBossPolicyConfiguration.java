@@ -28,6 +28,7 @@ import javax.security.jacc.PolicyConfiguration;
 import javax.security.jacc.PolicyContextException;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.util.state.IllegalTransitionException;
 import org.jboss.security.util.state.State;
 import org.jboss.security.util.state.StateMachine;
@@ -61,11 +62,11 @@ public class JBossPolicyConfiguration
       this.configStateMachine = configStateMachine;
 
       if (contextID == null)
-         throw new IllegalArgumentException("contextID cannot be null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "contextID cannot be null");
       if (policy == null)
-         throw new IllegalArgumentException("policy cannot be null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "policy cannot be null");
       if (configStateMachine == null)
-         throw new IllegalArgumentException("configStateMachine cannot be null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "configStateMachine cannot be null");
 
       validateState("getPolicyConfiguration");
       trace = log.isTraceEnabled();
@@ -214,7 +215,7 @@ public class JBossPolicyConfiguration
       catch(IllegalTransitionException e)
       {
          log.debug("validateState failure", e);
-         throw new PolicyContextException("Operation not allowed", e);
+         throw new PolicyContextException(ErrorCodes.PROCESSING_FAILED + "Operation not allowed", e);
       }
    }
 }

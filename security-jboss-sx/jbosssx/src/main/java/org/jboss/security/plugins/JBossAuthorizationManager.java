@@ -42,6 +42,7 @@ import javax.security.auth.callback.CallbackHandler;
 import org.jboss.logging.Logger;
 import org.jboss.security.AnybodyPrincipal;
 import org.jboss.security.AuthorizationManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.NobodyPrincipal;
 import org.jboss.security.RunAs;
 import org.jboss.security.SecurityConstants;
@@ -243,11 +244,11 @@ implements AuthorizationManager
    public void setAuthorizationContext(AuthorizationContext ac)
    {
       if(ac == null)
-         throw new IllegalArgumentException("AuthorizationContext is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "AuthorizationContext is null");
 
       String sc = ac.getSecurityDomain();
       if(this.securityDomain.equals(sc) == false)
-         throw new IllegalArgumentException("The Security Domain "+ sc 
+         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "The Security Domain "+ sc 
                + " does not match with " + this.securityDomain);
       
       lock.lock();
@@ -272,7 +273,7 @@ implements AuthorizationManager
     */
    public Group getTargetRoles(Principal targetPrincipal, Map<String,Object> contextMap)
    {
-      throw new RuntimeException("NYI");
+      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED + "NYI");
    }
 
    //Private Methods
@@ -350,9 +351,9 @@ implements AuthorizationManager
    private RoleGroup getCurrentRoles(Principal principal, Subject subject, SecurityContext sc)
    {
       if(subject == null)
-         throw new IllegalArgumentException("Subject passed is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Subject passed is null");
       if(sc == null)
-         throw new IllegalArgumentException("Sec Ctx sc passed is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Sec Ctx sc passed is null");
       
       Group subjectRoles = getGroupFromSubject(subject);
       
@@ -448,7 +449,7 @@ implements AuthorizationManager
    private Group getGroupFromSubject(Subject theSubject)
    {
       if(theSubject == null)
-         throw new IllegalArgumentException("Subject is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Subject is null");
       Set<Group> subjectGroups = theSubject.getPrincipals(Group.class);
       Iterator<Group> iter = subjectGroups.iterator();
       Group roles = null;
@@ -465,7 +466,7 @@ implements AuthorizationManager
    private RoleGroup getRoleGroup(Group roleGroup)
    {
       if(roleGroup == null)
-         throw new IllegalArgumentException("roleGroup is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roleGroup is null");
       SimpleRoleGroup srg = new SimpleRoleGroup(roleGroup.getName());
       Enumeration<? extends Principal> principals = roleGroup.members();
       while(principals.hasMoreElements())
@@ -479,9 +480,9 @@ implements AuthorizationManager
    private void validateResource(Resource resource)
    {
       if(resource == null)
-         throw new IllegalArgumentException("resource is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "resource is null");
       if(resource.getMap() == null)
-         throw new IllegalArgumentException("resource has null context map");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "resource has null context map");
    }
    
    private RoleGroup getEmptyRoleGroup()

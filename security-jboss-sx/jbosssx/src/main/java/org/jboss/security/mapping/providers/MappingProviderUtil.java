@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.StringTokenizer;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimplePrincipal;
  
 /**
@@ -79,7 +80,7 @@ public class MappingProviderUtil
    public static String[] getRolesFromCommaSeparatedString(String str)
    {
       if(str == null)
-         throw new IllegalArgumentException("str is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "str is null");
       StringTokenizer st = new StringTokenizer(str,",");
       int numTokens = st != null ? st.countTokens() : 0;
       String[] tokens = new String[numTokens];

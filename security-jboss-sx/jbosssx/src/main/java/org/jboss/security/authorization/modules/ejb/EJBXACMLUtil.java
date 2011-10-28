@@ -28,6 +28,7 @@ import java.security.Principal;
 import java.util.List;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.util.JBossXACMLUtil;
 import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
@@ -125,7 +126,7 @@ public class EJBXACMLUtil extends JBossXACMLUtil
          Principal principal, RoleGroup callerRoles ) throws IOException
    {
       if(principal == null)
-         throw new IllegalArgumentException("principal is null"); 
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "principal is null"); 
 
       RequestContext requestCtx = RequestResponseContextFactory.createRequestCtx();
 

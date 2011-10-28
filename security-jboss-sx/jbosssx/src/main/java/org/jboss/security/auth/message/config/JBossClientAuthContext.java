@@ -32,6 +32,8 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ClientAuthContext;
 import javax.security.auth.message.module.ClientAuthModule;
 
+import org.jboss.security.ErrorCodes;
+
 //$Id$
 
 /**
@@ -52,7 +54,7 @@ public class JBossClientAuthContext implements ClientAuthContext
    public JBossClientAuthContext(JBossClientAuthConfig config)
    {
       if(config == null)
-         throw new IllegalArgumentException("config is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "config");
       this.config = config;
    }
    

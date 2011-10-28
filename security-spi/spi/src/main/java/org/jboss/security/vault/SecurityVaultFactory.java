@@ -23,6 +23,8 @@ package org.jboss.security.vault;
 
 import java.util.logging.Logger;
 
+import org.jboss.security.ErrorCodes;
+
 /**
  * A factory to instantiate a {@link SecurityVault}
  * @author Anil.Saldhana@redhat.com
@@ -62,14 +64,14 @@ public class SecurityVaultFactory
       {
          Class<?> vaultClass = SecurityActions.loadClass(SecurityVaultFactory.class,fqn);
          if(vaultClass == null)
-            throw new SecurityVaultException("Unable to create vault:class is null");
+            throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Unable to create vault:class is null");
          try
          {
             vault = (SecurityVault) vaultClass.newInstance();
          }
          catch (Exception e)
          {
-            throw new SecurityVaultException("Unable to create vault:not instantiated",e);
+            throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + "Unable to create vault:not instantiated",e);
          }
       }
       return vault;

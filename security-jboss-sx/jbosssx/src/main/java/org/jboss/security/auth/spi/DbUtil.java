@@ -39,6 +39,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.plugins.TransactionManagerLocator;
 
@@ -79,7 +80,7 @@ class DbUtil
            throw new RuntimeException(e1);
         }
         if(tm == null)
-           throw new IllegalStateException("Transaction Manager is null");
+           throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Transaction Manager is null");
      }      
      Transaction tx = null;
      if (suspendResume)
@@ -120,7 +121,7 @@ class DbUtil
            if( trace )
               log.trace("No roles found");
            if( aslm.getUnauthenticatedIdentity() == null )
-              throw new FailedLoginException("No matching username found in Roles");
+              throw new FailedLoginException(ErrorCodes.PROCESSING_FAILED + "No matching username found in Roles");
            /* We are running with an unauthenticatedIdentity so create an
               empty Roles set and return.
            */
@@ -156,13 +157,13 @@ class DbUtil
      }
      catch(NamingException ex)
      {
-        LoginException le = new LoginException("Error looking up DataSource from: "+dsJndiName);
+        LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Error looking up DataSource from: "+dsJndiName);
         le.initCause(ex);
         throw le;
      }
      catch(SQLException ex)
      {
-        LoginException le = new LoginException("Query failed");
+        LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Query failed");
         le.initCause(ex);
         throw le;
      }

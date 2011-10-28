@@ -91,7 +91,7 @@ public class Util
          else if( passwordCmdType.equals("CLASS") )
             password = invokePasswordClass(passwordCmd);
          else
-            throw new IllegalArgumentException("Unknown passwordCmdType: "+passwordCmdType);
+            throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "Unknown passwordCmdType: "+passwordCmdType);
       }
       return password;
    }

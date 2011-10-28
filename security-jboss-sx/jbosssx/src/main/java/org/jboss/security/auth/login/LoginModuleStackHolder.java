@@ -27,6 +27,8 @@ import java.util.List;
 import javax.security.auth.AuthPermission;
 import javax.security.auth.login.AppConfigurationEntry;
 
+import org.jboss.security.ErrorCodes;
+
 //$Id$
 
 /**
@@ -83,10 +85,9 @@ public class LoginModuleStackHolder
    public void setAppConfigurationEntry(List entries)
    {
       if(entries  == null)
-         throw new IllegalArgumentException("Illegal Null Argument: entries");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "entries");
       if(appEntries == null)
          this.appEntries = new ArrayList();
       this.appEntries.addAll(entries);
    }
-   
 }

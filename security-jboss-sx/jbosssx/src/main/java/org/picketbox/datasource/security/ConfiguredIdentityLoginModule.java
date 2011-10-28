@@ -32,6 +32,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimplePrincipal;
 
 /**
@@ -73,14 +74,14 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
       principalName = (String) options.get("principal");
       if (principalName == null)
       {
-         throw new IllegalArgumentException("Must supply a principal name!");
+         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Must supply a principal name!");
       }
       userName = (String) options.get("userName");
       if (userName == null)
       {
          userName = (String) options.get("username");
          if (userName == null)
-            throw new IllegalArgumentException("Must supply a user name!");
+            throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Must supply a user name!");
       }
       password = (String) options.get("password");
       if (password == null)

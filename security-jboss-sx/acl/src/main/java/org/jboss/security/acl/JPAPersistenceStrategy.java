@@ -11,6 +11,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.Resource;
 
 /**
@@ -59,7 +60,7 @@ public class JPAPersistenceStrategy implements ACLPersistenceStrategy
    public ACL createACL(Resource resource, Collection<ACLEntry> entries)
    {
       if (resource == null)
-         throw new IllegalArgumentException("ACLs cannot be created for null resources");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ACLs cannot be created for null resources");
 
       // check the cache first.
       ACL acl = this.aclMap.get(resource);

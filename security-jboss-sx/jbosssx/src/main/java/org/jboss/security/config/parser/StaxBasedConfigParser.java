@@ -42,6 +42,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.ApplicationPolicyRegistration;
 import org.jboss.security.config.Element;
@@ -87,7 +88,7 @@ public class StaxBasedConfigParser implements XMLStreamConstants
    {
       Configuration config = Configuration.getConfiguration();
       if(config instanceof ApplicationPolicyRegistration == false)
-         throw new IllegalStateException("JAAS Configuration does not support application policy registration");
+         throw new IllegalStateException(ErrorCodes.WRONG_TYPE + "JAAS Configuration does not support application policy registration");
       
       ApplicationPolicyRegistration appPolicyRegistration = (ApplicationPolicyRegistration) config;
       
@@ -114,7 +115,7 @@ public class StaxBasedConfigParser implements XMLStreamConstants
                //But there is no immediate need.
                StartElement policyConfigElement = (StartElement) xmlEvent;
                if("policy".equals(StaxParserUtil.getStartElementName(policyConfigElement)) == false)
-                     throw new IllegalArgumentException("<policy> root element expected at " 
+                     throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "<policy> root element expected at " 
                            + StaxParserUtil.getLineColumnNumber(xmlEvent.getLocation()));
                
                ApplicationPolicyParser appPolicyParser = new ApplicationPolicyParser(); 
@@ -132,7 +133,7 @@ public class StaxBasedConfigParser implements XMLStreamConstants
       Configuration config = Configuration.getConfiguration();
       if (!(config instanceof ApplicationPolicyRegistration))
       {
-         throw new IllegalStateException("JAAS Configuration does not support application policy registration");
+         throw new IllegalStateException(ErrorCodes.WRONG_TYPE + "JAAS Configuration does not support application policy registration");
       }
       
       ApplicationPolicyRegistration appPolicyRegistration = (ApplicationPolicyRegistration) config;
@@ -163,7 +164,7 @@ public class StaxBasedConfigParser implements XMLStreamConstants
          ClassLoader tcl = SecurityActions.getContextClassLoader();
          URL schemaURL = tcl.getResource(schemaFile);
          if(schemaURL == null)
-            throw new RuntimeException("Cannot find schema :" + schemaFile);
+            throw new RuntimeException(ErrorCodes.MISSING_VALUE + "Cannot find schema :" + schemaFile);
          SchemaFactory schemaFactory = SchemaFactory.newInstance( "http://www.w3.org/2001/XMLSchema" );
          Schema schemaGrammar = schemaFactory.newSchema( schemaURL );
 

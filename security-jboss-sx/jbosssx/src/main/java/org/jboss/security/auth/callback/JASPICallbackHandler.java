@@ -32,6 +32,7 @@ import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.security.auth.message.callback.PasswordValidationCallback;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextUtil;
@@ -73,7 +74,7 @@ public class JASPICallbackHandler extends JBossCallbackHandler
          GroupPrincipalCallback groupPrincipalCallback = (GroupPrincipalCallback) callback; 
          SecurityContext currentSC = SecurityActions.getCurrentSecurityContext();
          if( currentSC == null )
-            throw new RuntimeException( " The security context is null " );
+            throw new RuntimeException(ErrorCodes.SECURITY_CONTEXT_NULL);
          
          String[] rolesArray = groupPrincipalCallback.getGroups();
          int sizeOfRoles = rolesArray != null ? rolesArray.length : 0;
@@ -105,7 +106,7 @@ public class JASPICallbackHandler extends JBossCallbackHandler
          
          Subject subject = callerPrincipalCallback.getSubject();
          if( currentSC == null )
-            throw new RuntimeException( " The security context is null " );
+            throw new RuntimeException(ErrorCodes.SECURITY_CONTEXT_NULL);
          
          if( subject != null )
          {
@@ -125,7 +126,7 @@ public class JASPICallbackHandler extends JBossCallbackHandler
 
          SecurityContext currentSC = SecurityActions.getCurrentSecurityContext();
          if( currentSC == null )
-            throw new RuntimeException( " The security context is null " );
+            throw new RuntimeException(ErrorCodes.SECURITY_CONTEXT_NULL);
          String userName = passwordValidationCallback.getUsername();
          char[] password = passwordValidationCallback.getPassword();
          Subject subject = passwordValidationCallback.getSubject();

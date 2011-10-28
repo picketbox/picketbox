@@ -131,9 +131,9 @@ public class SecurityContextFactory
          String fqnClass, ClassLoader classLoader) throws Exception
    {
       if(securityDomain == null)
-         throw new IllegalArgumentException("securityDomain is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "securityDomain is null");
       if(fqnClass == null)
-         throw new IllegalArgumentException("fqnClass is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "fqnClass is null");
       defaultSecurityContextClass = getContextClass(fqnClass, classLoader);
       return createSecurityContext(securityDomain, defaultSecurityContextClass);
    }
@@ -152,9 +152,9 @@ public class SecurityContextFactory
          Class<? extends SecurityContext> clazz) throws Exception
    {
       if(securityDomain == null)
-         throw new IllegalArgumentException("securityDomain is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "securityDomain is null");
       if(clazz == null)
-         throw new IllegalArgumentException("clazz is null"); 
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "clazz is null"); 
       //Get the CTR
       Constructor<? extends SecurityContext> ctr = clazz.getConstructor(new Class[]{String.class});
       return (SecurityContext) ctr.newInstance(new Object[]{securityDomain}); 

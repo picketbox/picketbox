@@ -37,6 +37,7 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.ApplicationPolicyRegistration;
 import org.jboss.security.config.PolicyConfig;
@@ -199,7 +200,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
       ClassLoader tcl = SecurityActions.getContextClassLoader();
       loginConfigURL = tcl.getResource(resourceName);
       if (loginConfigURL == null)
-         throw new IOException("Failed to find resource: " + resourceName);
+         throw new IOException(ErrorCodes.NULL_VALUE + "Failed to find resource: " + resourceName);
    }
 
    public void setParentConfig(Configuration parentConfig)
@@ -434,7 +435,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
    {
       InputStream is = sunConfig.openStream();
       if (is == null)
-         throw new IOException("InputStream is null for: " + sunConfig);
+         throw new IOException(ErrorCodes.NULL_VALUE + "InputStream is null for: " + sunConfig);
 
       InputStreamReader configFile = new InputStreamReader(is);
       boolean trace = log.isTraceEnabled();

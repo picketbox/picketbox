@@ -21,6 +21,8 @@
   */
 package org.jboss.security.config; 
 
+import org.jboss.security.ErrorCodes;
+
 /**
  *  Control Flag for module entries
  *  @author Anil.Saldhana@redhat.com
@@ -84,7 +86,6 @@ public class ControlFlag
          return SUFFICIENT;
       if("OPTIONAL".equalsIgnoreCase(flag))
          return OPTIONAL;
-      throw new IllegalArgumentException(flag + " is not recognized");
-            
+      throw new IllegalArgumentException(ErrorCodes.ILLEGAL_ARGUMENT + flag + " is not recognized");
    }
 }

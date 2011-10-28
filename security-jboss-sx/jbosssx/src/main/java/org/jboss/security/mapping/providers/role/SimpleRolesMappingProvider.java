@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 
 /**
  * A simple {@code MappingProvider} that reads roles from the options map.
@@ -53,7 +54,7 @@ public class SimpleRolesMappingProvider extends PropertiesRolesMappingProvider
          }
          catch (IOException ioe)
          {
-            throw new IllegalStateException("Error loading roles from options", ioe);
+            throw new IllegalStateException(ErrorCodes.PROCESSING_FAILED + "Error loading roles from options", ioe);
          }
       }
    }

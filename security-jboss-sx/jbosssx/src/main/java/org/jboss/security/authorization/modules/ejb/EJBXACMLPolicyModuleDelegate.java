@@ -26,6 +26,7 @@ import java.util.Map;
 import javax.security.auth.Subject;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -64,18 +65,18 @@ public class EJBXACMLPolicyModuleDelegate extends EJBPolicyModuleDelegate
    public int authorize(Resource resource, Subject callerSubject, RoleGroup role)
    {
       if(resource instanceof EJBResource == false)
-         throw new IllegalArgumentException("resource is not an EJBResource");
+         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "resource is not an EJBResource");
       
       EJBResource ejbResource = (EJBResource) resource;
       
       //Get the context map
       Map<String,Object> map = resource.getMap();
       if(map == null)
-         throw new IllegalStateException("Map from the Resource is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Map from the Resource is null");
 
       this.policyRegistration = (PolicyRegistration) map.get(ResourceKeys.POLICY_REGISTRATION);  
       if(this.policyRegistration == null)
-         throw new IllegalStateException("Policy Registration passed is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Policy Registration passed is null");
 
       this.callerRunAs = ejbResource.getCallerRunAsIdentity();
       this.ejbName = ejbResource.getEjbName();
@@ -83,7 +84,7 @@ public class EJBXACMLPolicyModuleDelegate extends EJBPolicyModuleDelegate
       this.ejbPrincipal = ejbResource.getPrincipal();
       this.policyContextID = ejbResource.getPolicyContextID();
       if(policyContextID == null)
-         throw new IllegalStateException("Context ID is null"); 
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Context ID is null"); 
       
       this.securityRoleReferences = ejbResource.getSecurityRoleReferences();
       
@@ -115,7 +116,7 @@ public class EJBXACMLPolicyModuleDelegate extends EJBPolicyModuleDelegate
          
          PolicyDecisionPoint pdp = util.getPDP(policyRegistration, this.policyContextID); 
          if(pdp == null)
-            throw new IllegalStateException("PDP is null");
+            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "PDP is null");
          
          ResponseContext response = pdp.evaluate(requestCtx);
          result = response.getDecision() == XACMLConstants.DECISION_PERMIT ? 

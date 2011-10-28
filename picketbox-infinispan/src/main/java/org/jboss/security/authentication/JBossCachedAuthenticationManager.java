@@ -41,6 +41,7 @@ import javax.security.auth.login.LoginException;
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.CacheableManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
@@ -127,7 +128,7 @@ public class JBossCachedAuthenticationManager
    @Override
    public Principal getTargetPrincipal(Principal anotherDomainPrincipal, Map<String, Object> contextMap)
    {
-      throw new RuntimeException("Not implemented yet");
+      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED + "Not implemented yet");
    }
 
    @Override

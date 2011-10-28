@@ -31,6 +31,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.util.StringPropertyReplacer;
 
 //$Id$
@@ -97,7 +98,7 @@ public class RoleMappingLoginModule extends AbstractServerLoginModule
       //Get the properties file name from the options
       String propFileName = (String)options.get("rolesProperties");
       if(propFileName == null)
-         throw new IllegalStateException("rolesProperties option needs to be provided");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "rolesProperties option needs to be provided");
       // Replace any system property references like ${x}
       propFileName = StringPropertyReplacer.replaceProperties(propFileName);
       Group group = getExistingRolesFromSubject();

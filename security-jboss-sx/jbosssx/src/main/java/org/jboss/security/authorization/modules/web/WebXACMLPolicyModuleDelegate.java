@@ -29,6 +29,7 @@ import javax.security.jacc.PolicyContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -66,23 +67,23 @@ public class WebXACMLPolicyModuleDelegate extends AuthorizationModuleDelegate
    public int authorize(Resource resource, Subject subject, RoleGroup role)
    {
       if(resource instanceof WebResource == false)
-         throw new IllegalArgumentException("resource is not a WebResource");
+         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "resource is not a WebResource");
       
       WebResource webResource = (WebResource) resource;
       
       //Get the contextual map
       Map<String,Object> map = resource.getMap();
       if(map == null)
-         throw new IllegalStateException("Map from the Resource is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Map from the Resource is null");
     
       if(map.size() == 0)
-         throw new IllegalStateException("Map from the Resource is size zero"); 
+         throw new IllegalStateException(ErrorCodes.MISMATCH_SIZE + "Map from the Resource is size zero"); 
       
       HttpServletRequest request = (HttpServletRequest)webResource.getServletRequest();
       
       this.policyRegistration = (PolicyRegistration) map.get(ResourceKeys.POLICY_REGISTRATION);
       if(this.policyRegistration == null)
-         throw new IllegalStateException("PolicyRegistration passed is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "PolicyRegistration passed is null");
       this.policyContextID = webResource.getPolicyContextID();  
       
       Boolean userDataCheck = checkBooleanValue((Boolean)map.get(ResourceKeys.USERDATA_PERM_CHECK));
@@ -93,7 +94,7 @@ public class WebXACMLPolicyModuleDelegate extends AuthorizationModuleDelegate
          return AuthorizationContext.PERMIT; //Base class decision holds good
       
       if(request == null)
-         throw new IllegalStateException("Request is null"); 
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Request is null"); 
       
       return process(request, role);
    } 
@@ -120,7 +121,7 @@ public class WebXACMLPolicyModuleDelegate extends AuthorizationModuleDelegate
    { 
       Principal userP = request.getUserPrincipal();
       if(userP == null)
-         throw new IllegalStateException("User Principal is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "User Principal is null");
       
       int result = AuthorizationContext.DENY;
       WebXACMLUtil util = new WebXACMLUtil();

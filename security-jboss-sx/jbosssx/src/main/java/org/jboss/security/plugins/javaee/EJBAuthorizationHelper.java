@@ -32,6 +32,7 @@ import javax.security.auth.Subject;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthorizationManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.RunAs;
 import org.jboss.security.audit.AuditLevel;
 import org.jboss.security.authorization.AuthorizationContext;
@@ -72,19 +73,19 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
          RoleGroup methodRoles)
    {
       if(ejbName == null)
-         throw new IllegalArgumentException("ejbName is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ejbName is null");
       if(ejbMethod == null)
-         throw new IllegalArgumentException("ejbMethod is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ejbMethod is null");
       if(ejbCS == null)
-         throw new IllegalArgumentException("EJB CodeSource is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "EJB CodeSource is null");
       if(contextID == null)
-         throw new IllegalArgumentException("ContextID is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");
       if(callerSubject == null && callerRunAs == null)
-         throw new IllegalArgumentException("Either callerSubject or callerRunAs should be non-null"); 
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Either callerSubject or callerRunAs should be non-null"); 
 
       AuthorizationManager am = securityContext.getAuthorizationManager();
       if(am == null)
-         throw new IllegalStateException("Authorization Manager is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
 
       HashMap<String,Object> map =  new HashMap<String,Object>();
       try
@@ -153,18 +154,18 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       EJBResource ejbResource = (EJBResource) resource;
 
       if(roleName == null)
-         throw new IllegalArgumentException("roleName is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roleName is null");
       if( ejbResource.getEjbName() == null)
-         throw new IllegalArgumentException("ejbName is null"); 
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ejbName is null"); 
       if( ejbResource.getPolicyContextID() == null)
-         throw new IllegalArgumentException("ContextID is null"); 
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null"); 
       
       AuthorizationManager am = securityContext.getAuthorizationManager();
 
       Subject callerSubject = ejbResource.getCallerSubject();
       
       if(am == null)
-         throw new IllegalStateException("AuthorizationManager is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "AuthorizationManager is null");
       
       try
       {
@@ -204,17 +205,17 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
          String contextID, Set<SecurityRoleRef> securityRoleRefs, boolean enforceEJBRestrictions)
    { 
       if(roleName == null)
-         throw new IllegalArgumentException("roleName is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roleName is null");
       if(ejbName == null)
-         throw new IllegalArgumentException("ejbName is null"); 
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ejbName is null"); 
       if(contextID == null)
-         throw new IllegalArgumentException("ContextID is null");  
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");  
 
       boolean isAuthorized = false;
       AuthorizationManager am = securityContext.getAuthorizationManager();
       
       if(am == null)
-         throw new IllegalStateException("AuthorizationManager is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "AuthorizationManager is null");
       
       HashMap<String,Object> map = new HashMap<String,Object>();
 
@@ -285,7 +286,7 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
           this.version = ejbVersion;  
       }
       else
-         throw new IllegalArgumentException("Invalid ejbVersion:" + ejbVersion);
+         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "Invalid ejbVersion:" + ejbVersion);
    }
 
    @Override
@@ -293,13 +294,13 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
    throws WrongEEResourceException, MissingArgumentsException
    {
       if( resource instanceof EJBResource == false )
-        throw new WrongEEResourceException( "resource is not of type EJBResource" );
+        throw new WrongEEResourceException( ErrorCodes.WRONG_TYPE + "resource is not of type EJBResource" );
       EJBResource ejbResource = (EJBResource) resource;
       validateEJBResource( ejbResource );
       
       AuthorizationManager am = securityContext.getAuthorizationManager();
       if(am == null)
-         throw new IllegalStateException("Authorization Manager is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
 
       try
       {
@@ -342,15 +343,15 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
    private void validateEJBResource( EJBResource ejbResource ) throws MissingArgumentsException
    {
       if( ejbResource.getEjbName() == null )
-         throw new MissingArgumentsException( "ejbName is null" );
+         throw new MissingArgumentsException( ErrorCodes.NULL_ARGUMENT + "ejbName is null" );
       if( ejbResource.getEjbMethod() == null )
-         throw new MissingArgumentsException( "ejbMethod is null" );
+         throw new MissingArgumentsException( ErrorCodes.NULL_ARGUMENT + "ejbMethod is null" );
       if( ejbResource.getCodeSource() == null )
-         throw new MissingArgumentsException("EJB CodeSource is null");
+         throw new MissingArgumentsException(ErrorCodes.NULL_ARGUMENT + "EJB CodeSource is null");
       if( ejbResource.getPolicyContextID() == null )
-         throw new MissingArgumentsException("ContextID is null");
+         throw new MissingArgumentsException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");
       if( ejbResource.getCallerSubject() == null && ejbResource.getCallerRunAsIdentity() == null )
-         throw new MissingArgumentsException("Either callerSubject or callerRunAs should be non-null"); 
+         throw new MissingArgumentsException(ErrorCodes.NULL_ARGUMENT + "Either callerSubject or callerRunAs should be non-null"); 
    }
   
    private PolicyRegistration getPolicyRegistrationFromJNDI() throws Exception

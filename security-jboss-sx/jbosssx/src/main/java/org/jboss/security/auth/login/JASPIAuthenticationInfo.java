@@ -34,6 +34,7 @@ import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.auth.container.config.AuthModuleEntry;
 import org.jboss.security.config.Attribute;
 import org.jboss.security.config.BaseSecurityInfo;
@@ -180,7 +181,7 @@ public class JASPIAuthenticationInfo extends BaseAuthenticationInfo
    public BaseSecurityInfo<Object> merge(BaseSecurityInfo<Object> bi)
    {
       if (bi instanceof JASPIAuthenticationInfo == false)
-         throw new IllegalArgumentException("Base policy does not contain a JASPI authentication configuration");
+         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "Base policy does not contain a JASPI authentication configuration");
       // merge the auth modules
       JASPIAuthenticationInfo merged = (JASPIAuthenticationInfo) super.merge(bi);
       // merge the stacks of login modules

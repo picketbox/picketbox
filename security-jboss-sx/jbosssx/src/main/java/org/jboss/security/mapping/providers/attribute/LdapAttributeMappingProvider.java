@@ -40,6 +40,7 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.identity.Attribute;
 import org.jboss.security.identity.AttributeFactory;
@@ -213,12 +214,12 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
          try
          {
             if(baseDN == null)
-               throw new NamingException(BASE_CTX_DN + " is null");
+               throw new NamingException(ErrorCodes.NULL_VALUE + BASE_CTX_DN + " is null");
             results = ctx.search(baseDN, baseFilter, filterArgs, constraints);
             if (results.hasMore() == false)
             {
                results.close();
-               throw new NamingException("Search of baseDN(" + baseDN + ") found no matches");
+               throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Search of baseDN(" + baseDN + ") found no matches");
             } 
             SearchResult sr = results.next();
             String name = sr.getName();
@@ -226,7 +227,7 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
             if (sr.isRelative() == true)
                userDN = name + "," + baseDN;
             else
-               throw new NamingException("Can't follow referal for authentication: " + name);
+               throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
 
             results.close();
             

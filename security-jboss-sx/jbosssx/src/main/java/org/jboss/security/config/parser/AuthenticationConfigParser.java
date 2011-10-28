@@ -40,6 +40,7 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.jboss.security.ClientLoginModule;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.auth.spi.BaseCertLoginModule;
 import org.jboss.security.auth.spi.CertRolesLoginModule;
 import org.jboss.security.auth.spi.DatabaseCertLoginModule;
@@ -163,7 +164,7 @@ public class AuthenticationConfigParser implements XMLStreamConstants
          return LoginModuleControlFlag.OPTIONAL;
       if("requisite".equalsIgnoreCase(flag))
          return LoginModuleControlFlag.REQUISITE;
-      throw new RuntimeException(flag + " is not recognized");
+      throw new RuntimeException(ErrorCodes.WRONG_TYPE + flag + " is not recognized");
    }
    
    /**

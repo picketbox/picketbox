@@ -38,6 +38,7 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.crypto.digest.DigestCallback;
+import org.jboss.security.ErrorCodes;
 
 
 /** An abstract subclass of AbstractServerLoginModule that imposes
@@ -188,7 +189,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
             catch(Exception e)
             {
                log.debug("Failed to create principal", e);
-               throw new LoginException("Failed to create principal: "+ e.getMessage());
+               throw new LoginException(ErrorCodes.PROCESSING_FAILED  + "Failed to create principal: "+ e.getMessage());
             }
          }
          Object password = sharedState.get("javax.security.auth.login.password");
@@ -235,7 +236,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          catch(Exception e)
          {
             log.debug("Failed to create principal", e);
-            throw new LoginException("Failed to create principal: "+ e.getMessage());
+            throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to create principal: "+ e.getMessage());
          }
 
          // Hash the user entered password if password hashing is in use
@@ -307,7 +308,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
       // prompt for a username and password
       if( callbackHandler == null )
       {
-         throw new LoginException("Error: no CallbackHandler available " +
+         throw new LoginException(ErrorCodes.NULL_VALUE + "Error: no CallbackHandler available " +
          "to collect authentication information");
       }
       
@@ -331,13 +332,13 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
       }
       catch(IOException e)
       {
-         LoginException le = new LoginException("Failed to get username/password");
+         LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to get username/password");
          le.initCause(e);
          throw le;
       }
       catch(UnsupportedCallbackException e)
       {
-         LoginException le = new LoginException("CallbackHandler does not support: " + e.getCallback());
+         LoginException le = new LoginException(ErrorCodes.UNRECOGNIZED_CALLBACK + "CallbackHandler does not support: " + e.getCallback());
          le.initCause(e);
          throw le;
       }

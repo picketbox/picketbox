@@ -10,6 +10,8 @@ import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.HashMap;
 
+import org.jboss.security.ErrorCodes;
+
 /**
  *  Class that provides the Configuration for authentication,
  *  authorization, mapping info etc
@@ -45,7 +47,7 @@ public class SecurityConfiguration
    public static void addApplicationPolicy(ApplicationPolicy aP)
    { 
       if(aP == null)
-         throw new IllegalArgumentException("application policy is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "application policy is null");
       appPolicies.put(aP.getName(), aP);
    }
    

@@ -35,6 +35,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimplePrincipal;
 
 /** A login module for statically defining a data source username and password
@@ -103,20 +104,20 @@ public class JaasSecurityDomainIdentityLoginModule
         username = (String) options.get("userName");      	
         if( username == null )
         {
-         throw new IllegalArgumentException("The user name is a required option");
+         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The user name is a required option");
         }
      }
 
       password = (String) options.get("password");
       if( password == null )
       {
-         throw new IllegalArgumentException("The password is a required option");
+         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The password is a required option");
       }
 
       String name = (String) options.get("jaasSecurityDomain");
       if( name == null )
       {
-         throw new IllegalArgumentException("The jaasSecurityDomain is a required option");
+         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The jaasSecurityDomain is a required option");
       }
 
       try
@@ -125,7 +126,7 @@ public class JaasSecurityDomainIdentityLoginModule
       }
       catch(Exception e)
       {
-         throw new IllegalArgumentException("Invalid jaasSecurityDomain: " + e.getMessage());
+         throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "Invalid jaasSecurityDomain: " + e.getMessage());
       }
    }
 
@@ -158,7 +159,7 @@ public class JaasSecurityDomainIdentityLoginModule
       {
          if(trace)
             log.trace("Failed to decode password", e);
-         throw new LoginException("Failed to decode password: " + e.getMessage());
+         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to decode password: " + e.getMessage());
       }
       return true;
    }

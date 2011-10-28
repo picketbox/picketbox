@@ -127,7 +127,7 @@ public class AltClientLoginModule implements LoginModule
          the username and password from the callback hander.
       */
       if (callbackHandler == null)
-         throw new LoginException("Error: no CallbackHandler available " +
+         throw new LoginException(ErrorCodes.NULL_VALUE + "Error: no CallbackHandler available " +
             "to garner authentication information from the user");
       
       PasswordCallback pc = new PasswordCallback("Password: ", false);
@@ -153,7 +153,7 @@ public class AltClientLoginModule implements LoginModule
       }
       catch (UnsupportedCallbackException uce)
       {
-         throw new LoginException("Error: " + uce.getCallback().toString() +
+         throw new LoginException(ErrorCodes.WRONG_TYPE + "Error: " + uce.getCallback().toString() +
          " not available to garner authentication information " +
          "from the user");
       }

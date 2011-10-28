@@ -29,6 +29,7 @@ import javax.security.auth.Subject;
 
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.authorization.ResourceType;
@@ -72,7 +73,7 @@ public class PBSandbox
 
          AuthenticationManager am = SecurityFactory.getAuthenticationManager(securityDomainName);
          if(am == null)
-            throw new RuntimeException("Authentication Manager is null"); 
+            throw new RuntimeException(ErrorCodes.NULL_VALUE + "Authentication Manager is null"); 
 
          Subject subject = new Subject();
          Principal principal = getPrincipal("anil");
@@ -80,11 +81,11 @@ public class PBSandbox
 
          boolean result = am.isValid(principal, credential); 
          if(result == false)
-            throw new RuntimeException("Authentication Failed");
+            throw new RuntimeException(ErrorCodes.ACCESS_DENIED + "Authentication Failed");
          
          result = am.isValid(principal, credential, subject);
          if(result == false)
-            throw new RuntimeException("Authentication Failed");
+            throw new RuntimeException(ErrorCodes.ACCESS_DENIED + "Authentication Failed");
          
          if(subject.getPrincipals().size() < 1)
             throw new RuntimeException("Subject has zero principals"); 
@@ -107,7 +108,7 @@ public class PBSandbox
 
          AuthenticationManager am = SecurityFactory.getAuthenticationManager(securityDomainName);
          if(am == null)
-            throw new RuntimeException("Authentication Manager is null"); 
+            throw new RuntimeException(ErrorCodes.ACCESS_DENIED + "Authentication Manager is null"); 
 
          Subject subject = new Subject();
          Principal principal = getPrincipal("anil");
@@ -115,19 +116,19 @@ public class PBSandbox
 
          boolean result = am.isValid(principal, credential, subject);
          if(result == false) 
-            throw new RuntimeException("InValid Auth");
+            throw new RuntimeException(ErrorCodes.ACCESS_DENIED + "InValid Auth");
 
          if(subject.getPrincipals().size() < 1)
-            throw new RuntimeException("Subject has zero principals"); 
+            throw new RuntimeException(ErrorCodes.MISMATCH_SIZE + "Subject has zero principals"); 
          
          AuthorizationManager authzM = SecurityFactory.getAuthorizationManager(securityDomainName);
          if(authzM == null)
-            throw new RuntimeException("Authorization Manager is null"); 
+            throw new RuntimeException(ErrorCodes.NULL_VALUE + "Authorization Manager is null"); 
          
          Resource resource = getResource();
          int decision = authzM.authorize(resource, subject);
          if(decision != AuthorizationContext.PERMIT)
-            throw new RuntimeException("Authz is not permit");
+            throw new RuntimeException(ErrorCodes.ACCESS_DENIED + "Authz is not permit");
          
          System.out.println("Authorization successful");
       }

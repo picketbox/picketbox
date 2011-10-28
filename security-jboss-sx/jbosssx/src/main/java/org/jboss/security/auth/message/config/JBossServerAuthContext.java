@@ -37,6 +37,7 @@ import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.config.ControlFlag;
 
 //$Id$
@@ -135,18 +136,10 @@ public class JBossServerAuthContext implements ServerAuthContext
             supportingModules.add(sam); 
       }
       if(supportingModules.size() == 0)
-         throw new RuntimeException("No ServerAuthModule configured to support type:"+requestType);
+         throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "No ServerAuthModule configured to support type:"+requestType);
       
       AuthStatus authStatus = invokeModules(messageInfo, clientSubject, serviceSubject);
       return authStatus;
-      
-      /*for(ServerAuthModule sam:supportingModules)
-      {
-         status = sam.validateRequest(messageInfo, clientSubject, serviceSubject);
-         if(status == AuthStatus.FAILURE)
-            break;
-      }
-      return status;*/
    } 
    
    private AuthStatus invokeModules(MessageInfo messageInfo,
@@ -210,11 +203,11 @@ public class JBossServerAuthContext implements ServerAuthContext
       //All the authorization modules have been visited.
       String msg = getAdditionalErrorMessage(moduleException);
       if(encounteredRequiredError)
-         throw new AuthException("Auth Failed:"+ msg);
+         throw new AuthException(ErrorCodes.PROCESSING_FAILED + "Auth Failed:"+ msg);
       if(overallDecision == AuthStatus.FAILURE && encounteredOptionalError)
-         throw new AuthException("Auth Failed:" + msg);
+         throw new AuthException(ErrorCodes.PROCESSING_FAILED + "Auth Failed:" + msg);
       if(overallDecision == AuthStatus.FAILURE)
-         throw new AuthException("Auth Failed:Denied.");
+         throw new AuthException(ErrorCodes.PROCESSING_FAILED + "Auth Failed:Denied.");
       return AuthStatus.SUCCESS;
    }
    

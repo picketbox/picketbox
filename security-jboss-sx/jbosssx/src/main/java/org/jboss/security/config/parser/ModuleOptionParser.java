@@ -36,6 +36,7 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.config.Element;
 
 /**
@@ -135,7 +136,7 @@ public class ModuleOptionParser implements XMLStreamConstants
                 String nsURI = xmlStartElement.getName().getNamespaceURI();
                 ParserNamespaceSupport parser = getSupportingParser(nsURI);
                 if(parser == null)
-                   throw new RuntimeException("Unknown nsuri:" + nsURI);
+                   throw new RuntimeException(ErrorCodes.WRONG_TYPE + "Unknown nsuri:" + nsURI);
                 return parser.parse(xmlEventReader); 
           }
       } 

@@ -28,7 +28,7 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.jboss.security.auth.callback.MapCallback;
+import org.jboss.security.ErrorCodes;
 
 /**
  * A CallbackHandler that is used to pass the RFC2617 parameters to the login module DigestCallback.
@@ -75,6 +75,6 @@ public class DigestCallbackHandler implements CallbackHandler {
             }
         }
         if (foundCallback == false)
-            throw new UnsupportedCallbackException(firstUnknown, "Unrecognized Callback");
+            throw new UnsupportedCallbackException(firstUnknown, ErrorCodes.UNRECOGNIZED_CALLBACK);
     }
 }

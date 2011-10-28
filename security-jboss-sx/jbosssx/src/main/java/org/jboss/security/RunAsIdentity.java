@@ -60,7 +60,7 @@ public class RunAsIdentity extends SimplePrincipal implements Cloneable, RunAs
       super(principalName != null ? principalName : ANOYMOUS_PRINCIPAL);
 
       if (roleName == null)
-         throw new IllegalArgumentException("The run-as identity must have at least one role");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "The run-as identity must have at least one role");
 
       runAsRoles.add(new SimplePrincipal(roleName));
    }

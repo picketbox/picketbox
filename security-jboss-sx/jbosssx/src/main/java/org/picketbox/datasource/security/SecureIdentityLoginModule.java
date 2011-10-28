@@ -39,6 +39,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimplePrincipal;
 
 /** An example of how one could encrypt the database password for a jca
@@ -88,13 +89,13 @@ public class SecureIdentityLoginModule
         username = (String) options.get("userName");      	
         if (username == null)
         {
-         throw new IllegalArgumentException("The user name is a required option");
+         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The user name is a required option");
         }
      }
       password = (String) options.get("password");
       if (password == null)
       {
-         throw new IllegalArgumentException("The password is a required option");
+         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The password is a required option");
       }
    }
 
@@ -127,7 +128,7 @@ public class SecureIdentityLoginModule
       {
          if (trace)
             log.trace("Failed to decode password", e);
-         throw new LoginException("Failed to decode password: " + e.getMessage());
+         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to decode password: " + e.getMessage());
       }
       return true;
    }

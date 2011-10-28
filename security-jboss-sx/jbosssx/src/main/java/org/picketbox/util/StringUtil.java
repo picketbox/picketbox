@@ -32,6 +32,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec; 
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.plugins.PBEUtils;
 
 /**
@@ -85,7 +86,7 @@ public class StringUtil
    public static String getSystemPropertyAsString(String str)
    {
       if (str == null)
-         throw new IllegalArgumentException("Null str");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Null str");
       if (str.contains("${"))
       {
          Pattern pattern = Pattern.compile("\\$\\{([^}]+)}");
@@ -109,7 +110,7 @@ public class StringUtil
             sysPropertyValue = SecurityActions.getSystemProperty(subString, defaultValue);
             if (sysPropertyValue.isEmpty())
             {
-               throw new IllegalArgumentException("System Property missing:" + matcher.group(1));
+               throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "System Property missing:" + matcher.group(1));
             }
             matcher.appendReplacement(buffer, sysPropertyValue);
          }
@@ -128,7 +129,7 @@ public class StringUtil
    public static void match(String first, String second)
    {
       if (first.equals(second) == false)
-         throw new RuntimeException("Match failed:" + first + " and " + second);
+         throw new RuntimeException(ErrorCodes.VALUE_MISMATCH + "Match failed:" + first + " and " + second);
    }
 
    /**

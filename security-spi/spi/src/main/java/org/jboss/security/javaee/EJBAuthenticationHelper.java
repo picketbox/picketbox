@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.audit.AuditLevel;
 import org.jboss.security.identitytrust.IdentityTrustException;
@@ -43,7 +44,7 @@ public class EJBAuthenticationHelper extends AbstractJavaEEHelper
    public EJBAuthenticationHelper(SecurityContext sc)
    { 
       if(sc == null)
-         throw new IllegalArgumentException("sc is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "sc is null");
       this.securityContext = sc;
    }
    
@@ -60,7 +61,7 @@ public class EJBAuthenticationHelper extends AbstractJavaEEHelper
       {
          td = itm.isTrusted(securityContext);
          if(td == TrustDecision.Deny)
-            throw new IdentityTrustException("Caller denied by identity trust framework"); 
+            throw new IdentityTrustException(ErrorCodes.PROCESSING_FAILED + "Caller denied by identity trust framework"); 
       }
       return td == TrustDecision.Permit;
    }   
@@ -75,9 +76,9 @@ public class EJBAuthenticationHelper extends AbstractJavaEEHelper
    public boolean isValid(Subject subject, String methodName)
    {
       if(subject == null)
-         throw new IllegalArgumentException("subject is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "subject is null");
       if(methodName == null)
-         throw new IllegalArgumentException("methodName is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "methodName is null");
       
       Principal p = securityContext.getUtil().getUserPrincipal();
       Object cred = securityContext.getUtil().getCredential(); 

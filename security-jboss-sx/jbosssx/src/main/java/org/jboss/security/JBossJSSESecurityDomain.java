@@ -413,9 +413,10 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    {
       if (this.serviceAuthToken == null)
       {
-         throw new IllegalStateException(
+         throw new IllegalStateException( ErrorCodes.NULL_ARGUMENT +
                getSecurityDomain()
-                     + " has been requested to provide sensitive security information, but no service authentication token has been configured on it. Use setServiceAuthToken().");
+                     + " has been requested to provide sensitive security information, " +
+                     "but no service authentication token has been configured on it. Use setServiceAuthToken().");
       }
 
       boolean verificationSuccessful = true;
@@ -439,7 +440,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
          }
       }
 
-      throw new SecurityException("service authentication token verification failed");
+      throw new SecurityException(ErrorCodes.ACCESS_DENIED + "service authentication token verification failed");
    }
 
    @SuppressWarnings({"rawtypes", "unchecked"})

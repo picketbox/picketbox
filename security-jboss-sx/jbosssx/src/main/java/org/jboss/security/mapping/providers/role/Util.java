@@ -42,6 +42,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
 
@@ -124,7 +125,7 @@ public class Util
       }
       else
       {
-         throw new IOException("Properties file " + propertiesName + " not available");
+         throw new IOException(ErrorCodes.MISSING_FILE + "Properties file " + propertiesName + " not available");
       }
       if (trace)
          log.debug("Loaded properties, keySet=" + bundle.keySet());
@@ -193,7 +194,7 @@ public class Util
       if (suspendResume)
       {
          if (tm == null)
-            throw new IllegalStateException("Transaction Manager is null");
+            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Transaction Manager is null");
       }
       Transaction tx = null;
       if (suspendResume)
@@ -243,11 +244,11 @@ public class Util
       }
       catch (NamingException ex)
       {
-         throw new IllegalArgumentException("Error looking up DataSource from: " + dsJndiName, ex);
+         throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "Error looking up DataSource from: " + dsJndiName, ex);
       }
       catch (SQLException ex)
       {
-         throw new IllegalArgumentException("Query failed", ex);
+         throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "Query failed", ex);
       }
       finally
       {

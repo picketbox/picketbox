@@ -29,6 +29,7 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
  
 /**
  *  Server Auth Module that delegates work to a login context 
@@ -77,7 +78,7 @@ public class DelegatingServerAuthModule extends AbstractServerAuthModule
 
    public AuthStatus secureResponse(MessageInfo messageInfo, Subject arg1) throws AuthException
    { 
-      throw new RuntimeException("Not Implemented");
+      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED);
    } 
    
    @Override

@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.security.auth.Subject;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
  
 
@@ -98,7 +99,7 @@ public class JBossAuthenticationCache implements SecurityCache<Principal>
    {
       boolean isValid = false;
       if(!cacheHit(principal))
-         throw new SecurityCacheException("Cache Miss");
+         throw new SecurityCacheException(ErrorCodes.PROCESSING_FAILED + "Cache Miss");
       Object cred = map.get(SecurityConstants.CREDENTIAL);
       AuthCacheObject ao = cacheMap.get(principal);
       Object cacheCred = ao.credential;
@@ -157,7 +158,7 @@ public class JBossAuthenticationCache implements SecurityCache<Principal>
       }
       
       if(!isValid)
-         throw new SecurityCacheException("Cache Validation Failed"); 
+         throw new SecurityCacheException(ErrorCodes.PROCESSING_FAILED + "Cache Validation Failed"); 
    }  
 
    /**

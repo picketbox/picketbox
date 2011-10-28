@@ -24,6 +24,7 @@ package org.jboss.security.identity;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.identity.extensions.CertificateIdentityFactory;
 import org.jboss.security.identity.extensions.CredentialIdentityFactory;
  
@@ -43,7 +44,7 @@ public class IdentityFactory
       if(type == IdentityType.CERTIFICATE)
          return  CertificateIdentityFactory.getInstance();
       
-      throw new RuntimeException("Not Yet Implemented:"+type.name());
+      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED + type.name());
    } 
    
    public static Identity getIdentity( Principal principal, Object credential )

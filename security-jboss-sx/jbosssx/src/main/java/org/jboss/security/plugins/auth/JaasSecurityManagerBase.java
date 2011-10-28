@@ -35,6 +35,7 @@ import javax.security.auth.login.LoginException;
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.RealmMapping;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
@@ -280,7 +281,7 @@ public class JaasSecurityManagerBase
    public Principal getTargetPrincipal(Principal anotherDomainPrincipal, 
          Map<String,Object> contextMap)
    {
-      throw new RuntimeException("Not implemented yet");
+      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED + "Not implemented yet");
    }
 
    /** Currently this simply calls defaultLogin() to do a JAAS login using the

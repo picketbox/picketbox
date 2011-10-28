@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.AuthorizationException;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.authorization.ResourceKeys;
@@ -75,7 +76,7 @@ public class ACLProviderImpl implements ACLProvider
       }
       catch (Exception e)
       {
-         throw new RuntimeException("Failed to instantiate persistence strategy class", e);
+         throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Failed to instantiate persistence strategy class", e);
       }
    }
 
@@ -221,7 +222,7 @@ public class ACLProviderImpl implements ACLProvider
    public void setPersistenceStrategy(ACLPersistenceStrategy strategy)
    {
       if (strategy == null)
-         throw new IllegalArgumentException("PersistenceStrategy cannot be null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "PersistenceStrategy cannot be null");
       this.strategy = strategy;
    }
 
@@ -247,7 +248,7 @@ public class ACLProviderImpl implements ACLProvider
          return false;
       }
       else
-         throw new AuthorizationException("Unable to locate an ACL for the resource " + resource);
+         throw new AuthorizationException(ErrorCodes.PROCESSING_FAILED + "Unable to locate an ACL for the resource " + resource);
    }
 
    /**

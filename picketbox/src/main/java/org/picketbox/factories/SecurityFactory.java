@@ -27,6 +27,7 @@ import javax.security.auth.login.Configuration;
 
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.ISecurityManagement;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextFactory;
@@ -55,13 +56,14 @@ public class SecurityFactory
       {
          ClassLoader tcl = SecurityActions.getContextClassLoader();
          if( tcl == null )
-            throw new IllegalStateException( "TCCL has not been set" );
+            throw new IllegalStateException( ErrorCodes.NULL_VALUE + "TCCL has not been set" );
          URL configLocation = tcl.getResource("auth.conf");
          String prop = "java.security.auth.login.config";
          if(SecurityActions.getSystemProperty(prop, null) == null)
          {
             if( configLocation == null )
-               throw new RuntimeException( "Neither system property *java.security.auth.login.config* available or auth.conf present" );
+               throw new RuntimeException( ErrorCodes.NULL_VALUE + 
+            		   "Neither system property *java.security.auth.login.config* available or auth.conf present" );
 
             SecurityActions.setSystemProperty(prop, configLocation.toExternalForm());  
          }
@@ -70,7 +72,7 @@ public class SecurityFactory
       }
       catch(Exception e)
       {
-         throw new RuntimeException("Unable to init SecurityFactory:", e);
+         throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Unable to init SecurityFactory:", e);
       }
    }
    

@@ -32,6 +32,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.RunAsIdentity;
 import org.jboss.security.SimplePrincipal;
 
@@ -171,7 +172,7 @@ public class CallerIdentityLoginModule
       }
       catch (Throwable e)
       {
-         throw new LoginException("Unable to get the calling principal or its credentials for resource association");
+         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Unable to get the calling principal or its credentials for resource association");
       }
 
       // Update userName so that getIdentity is consistent

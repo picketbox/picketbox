@@ -31,6 +31,7 @@ import javax.security.auth.Subject;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.AnybodyPrincipal;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.RunAs;
 import org.jboss.security.RunAsIdentity;
 import org.jboss.security.authorization.AuthorizationContext;
@@ -83,14 +84,14 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
    public int authorize(Resource resource, Subject callerSubject, RoleGroup role)
    {
       if(resource instanceof EJBResource == false)
-         throw new IllegalArgumentException("resource is not an EJBResource");
+         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "resource is not an EJBResource");
       
       EJBResource ejbResource = (EJBResource) resource;
       
       //Get the context map
       Map<String,Object> map = resource.getMap();
       if(map == null)
-         throw new IllegalStateException("Map from the Resource is null"); 
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Map from the Resource is null"); 
       
       this.policyRegistration = (PolicyRegistration) map.get(ResourceKeys.POLICY_REGISTRATION);
       
@@ -127,7 +128,7 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
       if (methodRoles == null)
       {
          if(this.ejbMethod == null)
-            throw new IllegalStateException("ejbMethod is null");
+            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "ejbMethod is null");
          String method = this.ejbMethod.getName();
          String msg = "No method permissions assigned to method=" + method
             + ", interface=" + methodInterface;
@@ -152,11 +153,11 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
             
             // Now actually check if the current caller has one of the required method roles
             if(principalRole == null)
-               throw new IllegalStateException("Principal Role is null");
+               throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Principal Role is null");
             if(methodRoles.containsAtleastOneRole(principalRole) == false)
             {
                if(this.ejbMethod == null)
-                  throw new IllegalStateException("ejbMethod is null");
+                  throw new IllegalStateException(ErrorCodes.NULL_VALUE + "ejbMethod is null");
                
                //Set<Principal> userRoles = am.getUserRoles(ejbPrincipal);
                String method = this.ejbMethod.getName(); 
@@ -236,7 +237,7 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
          // which will throw an exception in case no matching
          // security ref is found.
          if(this.ejbRestrictions)
-            throw new RuntimeException("No matching role found in the deployment descriptor"+
+            throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "No matching role found in the deployment descriptor"+
                   " for "+this.roleName);
          else
          {

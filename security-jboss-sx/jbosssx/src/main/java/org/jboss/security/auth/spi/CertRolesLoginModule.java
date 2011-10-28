@@ -30,6 +30,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.security.ErrorCodes;
+
 /**
  * Certificate Login Module that uses a properties file to store role information.
  * This works just like the UsersRolesLoginModule, only without the users.properties
@@ -111,7 +113,7 @@ public class CertRolesLoginModule extends BaseCertLoginModule
          log.trace("enter: login()");
 
       if (roles == null)
-         throw new LoginException("Missing roles.properties file.");
+         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Missing roles.properties file.");
       boolean wasSuccessful = super.login();
 
       if( trace )

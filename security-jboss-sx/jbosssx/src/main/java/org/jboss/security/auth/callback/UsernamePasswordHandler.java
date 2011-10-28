@@ -27,6 +27,8 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
+import org.jboss.security.ErrorCodes;
+
 /** A simple implementation of CallbackHandler that sets a username and
 password in the handle(Callback[]) method to that passed in to
 the constructor. This is suitable for environments that need non-interactive
@@ -98,7 +100,7 @@ public class UsernamePasswordHandler implements CallbackHandler
          }
          else
          {
-            throw new UnsupportedCallbackException(callbacks[i], "Unrecognized Callback");
+            throw new UnsupportedCallbackException(callbacks[i], ErrorCodes.UNRECOGNIZED_CALLBACK);
          }
       }
    }

@@ -38,6 +38,7 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.Util;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
@@ -117,7 +118,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
             }
             catch (Exception e)
             {
-               throw new IllegalArgumentException("Unable to decode bindCredential", e);
+               throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "Unable to decode bindCredential", e);
             }
          }
          roleFilter = (String) options.get(ROLE_FILTER_OPT);
@@ -174,7 +175,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
    public void performMapping(Map<String, Object> map, RoleGroup mappedObject)
    {
       if (map == null || map.isEmpty())
-         throw new IllegalArgumentException("Context Map is null or empty");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Context Map is null or empty");
 
       //Obtain the principal to roles mapping
       Principal principal = getCallerPrincipal(map);

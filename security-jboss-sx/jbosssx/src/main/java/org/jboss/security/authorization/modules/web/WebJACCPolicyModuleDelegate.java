@@ -37,6 +37,7 @@ import javax.security.jacc.WebUserDataPermission;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -78,14 +79,14 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    public int authorize(Resource resource, Subject callerSubject, RoleGroup role)
    {
       if(resource instanceof WebResource == false)
-         throw new IllegalArgumentException("resource is not a WebResource");
+         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "resource is not a WebResource");
       
       WebResource webResource = (WebResource) resource;
       
       //Get the context map
       Map<String,Object> map = resource.getMap();
       if(map == null)
-         throw new IllegalStateException("Map from the Resource is null"); 
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Map from the Resource is null"); 
       
       //Get the Request Object
       request = (HttpServletRequest) webResource.getServletRequest();
@@ -225,7 +226,7 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
          Set<Principal> roles, String servletName)
    { 
       if(servletName == null)
-         throw new IllegalArgumentException("servletName is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "servletName is null");
       
       WebRoleRefPermission perm = new WebRoleRefPermission(servletName, roleName);
       Principal[] principals = {principal}; 
@@ -287,6 +288,6 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
       if((resourceCheck == Boolean.TRUE && userDataCheck == Boolean.TRUE && roleRefCheck == Boolean.TRUE ) 
            || (resourceCheck == Boolean.TRUE && userDataCheck == Boolean.TRUE) 
            || (userDataCheck == Boolean.TRUE && roleRefCheck == Boolean.TRUE))
-         throw new IllegalStateException("Permission checks must be different"); 
+    	  throw new IllegalStateException(ErrorCodes.INVALID_OPERATION + "Permission checks must be different"); 
    }
 }

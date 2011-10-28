@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.auth.login.LoginModuleStackHolder;
 import org.jboss.security.config.ControlFlag;
 import org.jboss.security.config.ModuleOption;
@@ -72,9 +73,9 @@ public class AuthModuleEntry
    public void addOption(ModuleOption option)
    { 
       if(option == null)
-         throw new IllegalArgumentException("Option is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Option");
       if(options == null)
-         throw new IllegalStateException("Options is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Options");
       options.put(option.getName(), option.getValue());
    }
    
@@ -112,7 +113,7 @@ public class AuthModuleEntry
    public void setLoginModuleStackHolder(LoginModuleStackHolder loginModuleStackHolder)
    {
       if(loginModuleStackHolder == null)
-         throw new IllegalArgumentException("loginModuleStackHolder is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "loginModuleStackHolder");
       this.loginModuleStackHolder = loginModuleStackHolder;
       this.loginModuleStackHolderName = this.loginModuleStackHolder.getName();
    }
@@ -125,7 +126,7 @@ public class AuthModuleEntry
    public void setLoginModuleStackHolderName(String loginModuleStackHolderName)
    {
       if(loginModuleStackHolderName == null)
-         throw new IllegalArgumentException("loginModuleStackHolderName is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "loginModuleStackHolder");
       this.loginModuleStackHolderName = loginModuleStackHolderName;
    }
 

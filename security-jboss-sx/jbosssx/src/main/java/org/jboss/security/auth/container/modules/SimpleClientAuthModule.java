@@ -33,6 +33,7 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ClientAuthModule;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimplePrincipal;
 
 /**
@@ -96,9 +97,9 @@ public class SimpleClientAuthModule implements ClientAuthModule
       Set sourceSet = source.getPrincipals(SimplePrincipal.class);
       Set recipientSet = recipient.getPrincipals(SimplePrincipal.class);
       if(sourceSet == null && recipientSet == null)
-         throw new AuthException("Principals are null");
+         throw new AuthException(ErrorCodes.NULL_VALUE + "Principals");
       if(sourceSet.size() != recipientSet.size())
-         throw new AuthException("Principals size are different");
+         throw new AuthException(ErrorCodes.MISMATCH_SIZE + "Principals");
       return AuthStatus.SUCCESS;
    } 
    

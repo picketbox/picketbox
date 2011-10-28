@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityUtil;
@@ -73,7 +74,7 @@ public class JBossMappingManager implements MappingManager
          aPolicy = SecurityConfiguration.getApplicationPolicy(defaultDomain); 
       } 
       if(aPolicy == null )
-         throw new IllegalStateException("Application Policy is null for the security domain:" 
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Application Policy is null for the security domain:" 
                + securityDomain);
       
       MappingContext<T> mc = null;
@@ -104,7 +105,7 @@ public class JBossMappingManager implements MappingManager
          aPolicy = SecurityConfiguration.getApplicationPolicy(defaultDomain); 
       } 
       if(aPolicy == null )
-         throw new IllegalStateException("Application Policy is null for the security domain:" 
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Application Policy is null for the security domain:" 
                + securityDomain);
       
       MappingContext<T> mc = null;

@@ -46,6 +46,7 @@ import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.plugins.PBEUtils;
 import org.jboss.security.vault.SecurityVault;
 import org.jboss.security.vault.SecurityVaultException;
@@ -125,34 +126,34 @@ public class PicketBoxSecurityVault implements SecurityVault
    public void init(Map<String, Object> options) throws SecurityVaultException
    {
       if(options == null)
-         throw new SecurityVaultException("Options is null");
+         throw new SecurityVaultException(ErrorCodes.NULL_ARGUMENT + "Options is null");
       
       if(options.isEmpty())
-         throw new SecurityVaultException("Options is empty");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Options is empty");
       
       String keystoreURL = (String) options.get(KEYSTORE_URL);
       if(keystoreURL == null)
-         throw new SecurityVaultException("Null " + KEYSTORE_URL);
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Null " + KEYSTORE_URL);
       keystoreURL = StringUtil.getSystemPropertyAsString(keystoreURL);
       
       String maskedPassword = (String) options.get(KEYSTORE_PASSWORD);
       if(maskedPassword == null)
-         throw new SecurityVaultException("Null masked keystore password");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Null masked keystore password");
       if(maskedPassword.startsWith(PASS_MASK_PREFIX) == false)
-         throw new SecurityVaultException("Keystore password is not masked");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Keystore password is not masked");
    
       String salt = (String) options.get(SALT);
       if(salt == null)
-         throw new SecurityVaultException("Salt is null");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Salt is null");
       
       String iterationCountStr = (String) options.get(ITERATION_COUNT);
       if(iterationCountStr == null)
-         throw new SecurityVaultException("Iteration Count is not set");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Iteration Count is not set");
       int iterationCount = Integer.parseInt(iterationCountStr);
       
       String alias = (String) options.get(KEYSTORE_ALIAS);
       if(alias == null)
-         throw new SecurityVaultException("Keystore Alias is null");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Keystore Alias is null");
       
       String keySizeStr = (String) options.get(KEY_SIZE);
       if(keySizeStr != null)
@@ -162,17 +163,17 @@ public class PicketBoxSecurityVault implements SecurityVault
       
       String encFileDir = (String) options.get(ENC_FILE_DIR);
       if(encFileDir == null)
-         throw new SecurityVaultException("Option ENC_FILE_DIR is missing");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Option ENC_FILE_DIR is missing");
 
       try
       {
          decodedEncFileDir = StringUtil.getSystemPropertyAsString(encFileDir);
          if(directoryExists(decodedEncFileDir) == false)
-            throw new SecurityVaultException(decodedEncFileDir + " does not exist");
+            throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + decodedEncFileDir + " does not exist");
          
          if(!(decodedEncFileDir.endsWith("/") || decodedEncFileDir.endsWith("\\")))
          {
-            throw new SecurityVaultException(decodedEncFileDir + "does not end with / or \\");
+            throw new SecurityVaultException(ErrorCodes.WRONG_FORMAT + decodedEncFileDir + "does not end with / or \\");
          }
          if(encodedFileExists(decodedEncFileDir) ==false)
          {
@@ -202,7 +203,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       }
       catch (Exception e)
       { 
-         throw new SecurityVaultException("Unable to get Keystore:",e);
+         throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + "Unable to get Keystore:",e);
       }
       finishedInit = true;
    }
@@ -221,20 +222,21 @@ public class PicketBoxSecurityVault implements SecurityVault
    public byte[] handshake(Map<String, Object> handshakeOptions) throws SecurityVaultException
    {
       if(handshakeOptions == null)
-         throw new SecurityVaultException("Options is null");
+         throw new SecurityVaultException(ErrorCodes.NULL_ARGUMENT + "Options is null");
       
       if(handshakeOptions.isEmpty())
-         throw new SecurityVaultException("Options is empty");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Options is empty");
       
       String publicCert = (String) handshakeOptions.get(PUBLIC_CERT);
       if(publicCert == null)
-         throw new SecurityVaultException("Public Cert Alias is null");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Public Cert Alias is null");
       
       try
       {
          PublicKey publicKey = KeyStoreUtil.getPublicKey(keystore, publicCert, keyStorePWD);
          if(publicKey == null)
-            throw new SecurityVaultException("Could not retrieve Public Key from KeyStore for alias:" + publicCert);
+            throw new SecurityVaultException(ErrorCodes.NULL_VALUE + 
+            		"Could not retrieve Public Key from KeyStore for alias:" + publicCert);
           
       }
       catch (Exception e)
@@ -268,9 +270,9 @@ public class PicketBoxSecurityVault implements SecurityVault
    {
       
       if(StringUtil.isNullOrEmpty(vaultBlock))
-         throw new SecurityVaultException("vaultBlock is null");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "vaultBlock is null");
       if(StringUtil.isNullOrEmpty(attributeName))
-         throw new SecurityVaultException("attributeName is null");
+         throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "attributeName is null");
       
       String mapKey = vaultBlock + "_" + attributeName;
       
@@ -283,7 +285,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       int index = decodedSharedKey.indexOf(LINE_BREAK);
       
       if(index < 0)
-         throw new SecurityVaultException("Shared Key is invalid");
+         throw new SecurityVaultException(ErrorCodes.MISMATCH_SIZE + "Shared Key is invalid");
       
       String alias = decodedSharedKey.substring(index + LINE_BREAK.length());
       
@@ -294,7 +296,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       }
       catch (KeyStoreException e1)
       { 
-         throw new SecurityVaultException("Cannot get certificate:",e1);
+         throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + "Cannot get certificate:",e1);
       }
       
       EncryptionUtil util = new EncryptionUtil(encryptionAlgorithm,keySize);
@@ -308,7 +310,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       }
       catch (Exception e1)
       { 
-         throw new SecurityVaultException("Unable to encrypt data:",e1);
+         throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + "Unable to encrypt data:",e1);
       }
       try
       {
@@ -316,7 +318,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       }
       catch (IOException e)
       { 
-         throw new SecurityVaultException("Unable to write Shared Key File");
+         throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + "Unable to write Shared Key File");
       }
       try
       {
@@ -324,7 +326,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       }
       catch (IOException e)
       { 
-         throw new SecurityVaultException("Unable to write Encoded File");
+         throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + "Unable to write Encoded File");
       }
    }
 
@@ -334,9 +336,9 @@ public class PicketBoxSecurityVault implements SecurityVault
    public char[] retrieve(String vaultBlock, String attributeName, byte[] sharedKey) throws SecurityVaultException
    {
       if(StringUtil.isNullOrEmpty(vaultBlock))
-         throw new SecurityVaultException("vaultBlock is null");
+         throw new SecurityVaultException(ErrorCodes.NULL_ARGUMENT + "vaultBlock is null");
       if(StringUtil.isNullOrEmpty(attributeName))
-         throw new SecurityVaultException("attributeName is null");
+         throw new SecurityVaultException(ErrorCodes.NULL_ARGUMENT + "attributeName is null");
       
       String mapKey = vaultBlock + "_" + attributeName;
       byte[] encryptedValue = theContent.get(mapKey);
@@ -346,7 +348,8 @@ public class PicketBoxSecurityVault implements SecurityVault
       
       boolean matches = Arrays.equals(sharedKey, fromMap);
       if(matches == false)
-         throw new SecurityVaultException("Shared Key does not match for vault block:" + vaultBlock + " and attributeName:" + attributeName);
+         throw new SecurityVaultException(ErrorCodes.VAULT_MISMATCH + 
+        		 "Shared Key does not match for vault block:" + vaultBlock + " and attributeName:" + attributeName);
       
       byte[] secretKey = theContent.get(ADMIN_KEY);
        
@@ -358,7 +361,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       }
       catch (Exception e)
       { 
-         throw new SecurityVaultException("Decryption of value failed:",e);
+         throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + "Decryption of value failed:",e);
       } 
    }
    /**

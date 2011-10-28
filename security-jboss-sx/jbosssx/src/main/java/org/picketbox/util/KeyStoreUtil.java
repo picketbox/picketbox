@@ -37,6 +37,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+
+import org.jboss.security.ErrorCodes;
  
 
 /**
@@ -71,7 +73,7 @@ public class KeyStoreUtil
    public static KeyStore getKeyStore(String fileURL, char[] storePass) throws GeneralSecurityException, IOException
    {
       if (fileURL == null)
-         throw new IllegalArgumentException( "Null fileURL");
+         throw new IllegalArgumentException( ErrorCodes.NULL_ARGUMENT + "Null fileURL");
 
       File file = new File(fileURL);
       FileInputStream fis = new FileInputStream(file);
@@ -89,7 +91,7 @@ public class KeyStoreUtil
    public static KeyStore getKeyStore(URL url, char[] storePass) throws GeneralSecurityException, IOException
    {
       if (url == null)
-         throw new IllegalArgumentException("Null url");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Null url");
 
       return getKeyStore(url.openStream(), storePass);
    }
@@ -108,7 +110,7 @@ public class KeyStoreUtil
          IOException
    {
       if (ksStream == null)
-         throw new IllegalArgumentException( "Null InputStream for the KeyStore");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Null InputStream for the KeyStore");
       KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
       ks.load(ksStream, storePass);
       return ks;

@@ -19,6 +19,7 @@ import javax.security.auth.callback.CallbackHandler;
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.ISecurityManagement;
 import org.jboss.security.RunAs;
 import org.jboss.security.SecurityConstants;
@@ -126,7 +127,7 @@ public class JBossSecurityContext implements SecurityContext, SecurityManagerLoc
          sm.checkPermission(setSecurityManagementPermission);
       
       if(ism == null)
-         throw new IllegalArgumentException("ism is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "ism is null");
       this.iSecurityManagement = ism;  
    }
   
@@ -164,7 +165,7 @@ public class JBossSecurityContext implements SecurityContext, SecurityManagerLoc
          manager.checkPermission(setSecurityDomainPermission);
       
       if (domain == null)
-         throw new IllegalArgumentException("Security domain cannot be null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Security domain cannot be null");
       this.securityDomain = domain;
    }
 

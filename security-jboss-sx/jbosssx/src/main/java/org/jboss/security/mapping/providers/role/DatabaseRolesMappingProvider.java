@@ -28,6 +28,7 @@ import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.plugins.TransactionManagerLocator;
 
@@ -60,10 +61,10 @@ public class DatabaseRolesMappingProvider extends AbstractRolesMappingProvider
       {
          dsJndiName = (String) options.get("dsJndiName");
          if (dsJndiName == null)
-            throw new IllegalArgumentException("Datasource JNDI name can't be null");
+            throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Datasource JNDI name can't be null");
          rolesQuery = (String) options.get("rolesQuery");
          if (rolesQuery == null)
-            throw new IllegalArgumentException("Prepared statement can't be null");
+            throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Prepared statement can't be null");
          String option = (String) options.get("suspendResume");
          if (option != null)
             suspendResume = Boolean.valueOf(option.toString()).booleanValue();
@@ -79,7 +80,7 @@ public class DatabaseRolesMappingProvider extends AbstractRolesMappingProvider
          }
          catch (NamingException e)
          {
-            throw new RuntimeException("Unable to get Transaction Manager", e);
+            throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Unable to get Transaction Manager", e);
          }
       }
    }
@@ -87,7 +88,7 @@ public class DatabaseRolesMappingProvider extends AbstractRolesMappingProvider
    public void performMapping(Map<String, Object> map, RoleGroup mappedObject)
    {
       if (map == null || map.isEmpty())
-         throw new IllegalArgumentException("Context Map is null or empty");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Context Map is null or empty");
       
       //Obtain the principal to roles mapping
       Principal principal = getCallerPrincipal(map);

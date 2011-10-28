@@ -34,6 +34,7 @@ import javax.servlet.ServletResponse;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthorizationManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.audit.AuditLevel;
 import org.jboss.security.authorization.AuthorizationContext;
@@ -80,18 +81,18 @@ extends AbstractWebAuthorizationHelper
          List<String> roles)
    {
       if(contextID == null)
-         throw new IllegalArgumentException("ContextID is null");  
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");  
       if(request == null)
-         throw new IllegalArgumentException("request is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "request is null");
       if(response == null)
-         throw new IllegalArgumentException("response is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "response is null");
       if(canonicalRequestURI == null)
-         throw new IllegalArgumentException("canonicalRequestURI is null");  
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "canonicalRequestURI is null");  
 
       AuthorizationManager authzMgr = securityContext.getAuthorizationManager();
       
       if(authzMgr == null)
-         throw new IllegalStateException("Authorization Manager is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
       
       boolean isAuthorized = false; 
 
@@ -157,16 +158,16 @@ extends AbstractWebAuthorizationHelper
          List<String> roles)
    {
       if(roleName == null)
-         throw new IllegalArgumentException("roleName is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roleName is null");
       if(contextID == null)
-         throw new IllegalArgumentException("ContextID is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");
       
       if(callerSubject == null)
-         throw new IllegalArgumentException("callerSubject is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "callerSubject is null");
             
       AuthorizationManager authzMgr = securityContext.getAuthorizationManager();
       if(authzMgr == null)
-         throw new IllegalStateException("Authorization Manager is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
       
       boolean hasTheRole = false;
       Map<String,Object> map =  new HashMap<String,Object>();  
@@ -233,17 +234,17 @@ extends AbstractWebAuthorizationHelper
          List<String> roles)
    {
       if(contextID == null)
-         throw new IllegalArgumentException("ContextID is null"); 
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null"); 
       if(callerSubject == null)
-         throw new IllegalArgumentException("callerSubject is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "callerSubject is null");
       if(request == null)
-         throw new IllegalArgumentException("request is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "request is null");
       if(response == null)
-         throw new IllegalArgumentException("response is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "response is null");
       
       AuthorizationManager authzMgr = securityContext.getAuthorizationManager();
       if(authzMgr == null)
-         throw new IllegalStateException("Authorization Manager is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
       
       boolean hasPerm =  false;   
       contextMap.put(ResourceKeys.POLICY_REGISTRATION, getPolicyRegistration());

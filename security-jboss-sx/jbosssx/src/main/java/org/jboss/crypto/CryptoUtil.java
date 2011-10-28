@@ -42,6 +42,7 @@ import org.jboss.crypto.digest.DigestCallback;
 import org.jboss.logging.Logger;
 import org.jboss.security.Base64Encoder;
 import org.jboss.security.Base64Utils;
+import org.jboss.security.ErrorCodes;
 
 /** Various security related utilities like MessageDigest
  factories, SecureRandom access, password hashing.
@@ -513,11 +514,11 @@ public class CryptoUtil
       }
       catch(Exception e)
       {
-          throw new KeyException("Failed to create SecretKeySpec from session key, msg="+e.getMessage());
+          throw new KeyException(ErrorCodes.FAILED_TO_CREATE_SECRET_KEY_SPEC + e.getMessage());
       }
       catch(Throwable e)
       {
-         throw new KeyException("Unexpected exception during SecretKeySpec creation, msg="+e.getMessage());
+         throw new KeyException(ErrorCodes.UNEXPECTED_EXCEPTION_CREATE_SECRET_KEY_SPEC + e.getMessage());
       }
       return secretKey;
    }
@@ -559,7 +560,7 @@ public class CryptoUtil
       }
       catch(Throwable e)
       {
-         throw new GeneralSecurityException("Failed to create SealedObject, msg="+e.getMessage());
+         throw new GeneralSecurityException(ErrorCodes.FAILED_TO_CREATE_SEALEDOBJECT + e.getMessage());
       }
       return sealedObject;
    }
@@ -591,7 +592,7 @@ public class CryptoUtil
       }
       catch(Throwable e)
       {
-         throw new GeneralSecurityException("Failed to access SealedObject, msg="+e.getMessage());
+         throw new GeneralSecurityException(ErrorCodes.FAILED_TO_CREATE_SEALEDOBJECT + e.getMessage());
       }
       return data;
    }

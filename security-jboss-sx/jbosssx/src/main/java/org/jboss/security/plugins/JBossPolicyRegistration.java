@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.xml.bind.JAXBElement;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.xacml.core.JBossPDP;
 import org.jboss.security.xacml.factories.PolicyFactory;
@@ -83,7 +84,7 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
          }
          return (T) this.contextIdToXACMLPolicy.get(contextID);
       }
-      throw new RuntimeException("Unsupported type:" + type);
+      throw new RuntimeException(ErrorCodes.UNSUPPORTED_TYPE + "Unsupported type:" + type);
    }
 
    /**
@@ -139,7 +140,7 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
       if (PolicyRegistration.XACML.equalsIgnoreCase(type))
       {
          if(objectModel instanceof JAXBElement == false)
-            throw new IllegalArgumentException("Unsupported model:" + objectModel);
+            throw new IllegalArgumentException(ErrorCodes.UNSUPPORTED_TYPE + "Unsupported model:" + objectModel);
          
          try
          {

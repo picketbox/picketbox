@@ -26,6 +26,8 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
+import org.jboss.security.ErrorCodes;
+
 //$Id$
 
 /**
@@ -71,7 +73,7 @@ public class SecurityClientFactory
    throws Exception 
    {
       if(SecurityClient.class.isAssignableFrom(clazz) == false)
-         throw new IllegalArgumentException("clazz is not of SecurityClient type");
+         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "clazz is not of SecurityClient type");
       //Use reflection to invoke the constructors
       Constructor<?> ctr = clazz.getConstructor(new Class[]{});
       return (SecurityClient) ctr.newInstance(new Object[]{});

@@ -40,6 +40,7 @@ import javax.management.ReflectionException;
 import javax.security.auth.login.Configuration;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 
 /** An mbean that uses the default JAAS login configuration file based
  implementation. 
@@ -107,7 +108,7 @@ public class DefaultLoginConfig implements DynamicMBean
    {
       if( name.equals("AuthConfig") )
          return getAuthConfig();
-      throw new AttributeNotFoundException(name+": is not an attribute");
+      throw new AttributeNotFoundException(ErrorCodes.WRONG_TYPE + name+": is not an attribute");
    }
 
    public AttributeList getAttributes(String[] names)
@@ -194,7 +195,7 @@ public class DefaultLoginConfig implements DynamicMBean
          }
       }
       else
-         throw new AttributeNotFoundException(name+": is not an attribute");      
+         throw new AttributeNotFoundException(ErrorCodes.WRONG_TYPE + name+": is not an attribute");      
    }
 
    public AttributeList setAttributes(AttributeList attributeList)

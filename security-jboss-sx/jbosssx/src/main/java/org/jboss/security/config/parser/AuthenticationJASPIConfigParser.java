@@ -39,6 +39,7 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.auth.container.config.AuthModuleEntry;
 import org.jboss.security.auth.login.JASPIAuthenticationInfo;
 import org.jboss.security.auth.login.LoginModuleStackHolder;
@@ -100,7 +101,7 @@ public class AuthenticationJASPIConfigParser implements XMLStreamConstants
             if (stackHolderRefName != null)
             {
                if (holders.containsKey(stackHolderRefName) == false)
-                  throw new RuntimeException("auth-module references a login module stack that doesn't exist: "
+                  throw new RuntimeException(ErrorCodes.WRONG_TYPE + "auth-module references a login module stack that doesn't exist: "
                         + stackHolderRefName);
                entry.setLoginModuleStackHolder(holders.get(stackHolderRefName));
             }
@@ -202,7 +203,7 @@ public class AuthenticationJASPIConfigParser implements XMLStreamConstants
          return LoginModuleControlFlag.OPTIONAL;
       if ("requisite".equalsIgnoreCase(flag))
          return LoginModuleControlFlag.REQUISITE;
-      throw new RuntimeException(flag + " is not recognized");
+      throw new RuntimeException(ErrorCodes.WRONG_TYPE + flag + " is not recognized");
    }
    
    /**
@@ -262,7 +263,7 @@ public class AuthenticationJASPIConfigParser implements XMLStreamConstants
                if (stackHolderRefName != null)
                {
                   if (!holders.containsKey(stackHolderRefName))
-                     throw new RuntimeException("auth-module references a login module stack that doesn't exist: "
+                     throw new RuntimeException(ErrorCodes.WRONG_TYPE + "auth-module references a login module stack that doesn't exist: "
                            + stackHolderRefName);
                   entry.setLoginModuleStackHolder(holders.get(stackHolderRefName));
                }

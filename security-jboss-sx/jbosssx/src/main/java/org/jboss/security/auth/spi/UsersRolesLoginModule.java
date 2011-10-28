@@ -30,6 +30,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.util.StringPropertyReplacer;
 
 /** A simple Properties map based login module that consults two Java Properties
@@ -147,9 +148,9 @@ public class UsersRolesLoginModule extends UsernamePasswordLoginModule
    public boolean login() throws LoginException
    {
       if (users == null)
-         throw new LoginException("Missing users.properties file.");
+         throw new LoginException(ErrorCodes.NULL_VALUE + "Missing users.properties file.");
       if (roles == null)
-         throw new LoginException("Missing roles.properties file.");
+         throw new LoginException(ErrorCodes.NULL_VALUE + "Missing roles.properties file.");
 
       return super.login();
    }

@@ -38,6 +38,7 @@ import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SimplePrincipal;
@@ -201,7 +202,7 @@ public class PicketBoxProcessor
          Authentication authenticationAnnotation = objectClass.getAnnotation(Authentication.class);
          
          if(securityConfig == null && authenticationAnnotation == null)
-            throw new RuntimeException("@SecurityConfig or @Authentication is needed");
+            throw new RuntimeException(ErrorCodes.NULL_VALUE + "@SecurityConfig or @Authentication is needed");
          
          if(securityConfig != null)
          { 
@@ -258,7 +259,7 @@ public class PicketBoxProcessor
          Subject subject = new Subject();
          boolean valid = authMgr.isValid(principal, credential, subject);
          if(!valid)
-            throw new LoginException("Invalid");
+            throw new LoginException(ErrorCodes.ACCESS_DENIED + "Invalid");
          
          SecurityActions.register(securityContext, principal, credential, subject); 
 
@@ -269,13 +270,13 @@ public class PicketBoxProcessor
          //apply the role mapping logic if it is configured at the security domain level
          RoleGroup roles = authzMgr.getSubjectRoles(subject, cbh); 
          if(roles == null)
-            throw new PicketBoxProcessingException("Roles from subject is null");     
+            throw new PicketBoxProcessingException(ErrorCodes.NULL_VALUE + "Roles from subject is null");     
          
          if(needAuthorization)
          {
             int permit =  authzMgr.authorize(new POJOResource(pojo), subject, roles);
             if(permit != AuthorizationContext.PERMIT)
-               throw new AuthorizationException("Authorization failed"); 
+               throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Authorization failed"); 
          }
       }
       catch(PrivilegedActionException pae)

@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.auth.login.AuthenticationInfo;
 import org.jboss.security.auth.login.BaseAuthenticationInfo;
 import org.jboss.security.auth.login.JASPIAuthenticationInfo;
@@ -69,7 +70,7 @@ public class ApplicationPolicy
    public ApplicationPolicy(String theName)
    {
       if (theName == null)
-         throw new IllegalArgumentException("name is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "name is null");
       this.name = theName;
    }
 
@@ -221,7 +222,7 @@ public class ApplicationPolicy
          return this.getRoleMappingInfo();
       if (t == Principal.class)
          return this.getPrincipalMappingInfo();
-      throw new IllegalStateException("No mapping information available for type:" + t);
+      throw new IllegalStateException(ErrorCodes.PROCESSING_FAILED + "No mapping information available for type:" + t);
    }
 
    /**

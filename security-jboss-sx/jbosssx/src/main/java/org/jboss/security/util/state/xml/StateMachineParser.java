@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.util.state.State;
 import org.jboss.security.util.state.StateMachine;
 import org.jboss.security.util.state.Transition;
@@ -147,7 +148,7 @@ public class StateMachineParser
       }
 
       if (resolveFailed.length() > 0)
-         throw new Exception("Failed to resolve transition targets: " + resolveFailed);
+         throw new Exception(ErrorCodes.PROCESSING_FAILED + "Failed to resolve transition targets: " + resolveFailed);
 
       StateMachine sm = new StateMachine(states, startState, description);
       return sm;

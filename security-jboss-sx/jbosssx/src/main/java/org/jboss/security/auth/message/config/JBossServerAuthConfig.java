@@ -36,6 +36,7 @@ import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.auth.callback.JBossCallbackHandler;
@@ -104,7 +105,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
       else{
          secDomain = (String) properties.get("security-domain");
          if(secDomain == null)
-            throw new IllegalStateException("Unable to obtain security domain from " +
+            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Unable to obtain security domain from " +
             		"configuration or security context");
       }
       
@@ -116,10 +117,10 @@ public class JBossServerAuthConfig implements ServerAuthConfig
          ap = SecurityConfiguration.getApplicationPolicy(defaultAppDomain);
       }
       if(ap == null)
-         throw new IllegalStateException("No Application Policy found");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "No Application Policy found");
       BaseAuthenticationInfo bai = ap.getAuthenticationInfo();
       if(bai == null)
-         throw new IllegalStateException("Authentication Info not set in security domain="+ secDomain 
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authentication Info not set in security domain="+ secDomain 
                + " or "+ defaultAppDomain);
       
       if(bai instanceof AuthenticationInfo)
@@ -219,7 +220,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
 
    public boolean isProtected()
    {
-      throw new RuntimeException("Not Implemented");
+      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED);
    }  
  
    @SuppressWarnings({"rawtypes", "unchecked"})

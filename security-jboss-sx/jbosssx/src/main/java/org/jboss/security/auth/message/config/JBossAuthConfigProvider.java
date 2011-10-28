@@ -31,6 +31,7 @@ import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ServerAuthConfig;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 
 //$Id$
 
@@ -117,7 +118,7 @@ public class JBossAuthConfigProvider implements AuthConfigProvider
    {
       String cbhClass = System.getProperty(cbhProperty);
       if(cbhClass == null)
-         throw new IllegalStateException("CallbackHandler not defined by system property "+
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "CallbackHandler not defined by system property "+
                cbhProperty);
       ClassLoader cl = SecurityActions.getContextClassLoader();
       Class<?> cls = cl.loadClass(cbhClass);

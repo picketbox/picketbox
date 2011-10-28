@@ -30,6 +30,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
+
+import org.jboss.security.ErrorCodes;
  
 
 /**
@@ -83,7 +85,7 @@ public class StaxParserUtil implements XMLStreamConstants
    public static final String trim(String str)
    {
       if(str == null || str.length() == 0)
-         throw new IllegalArgumentException("Input str is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Input str is null");
       return str.trim();
    }
    

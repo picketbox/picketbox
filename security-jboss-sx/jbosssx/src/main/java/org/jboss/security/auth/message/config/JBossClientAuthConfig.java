@@ -33,6 +33,8 @@ import javax.security.auth.message.config.AuthConfig;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ClientAuthContext;
 
+import org.jboss.security.ErrorCodes;
+
 //$Id$
 
 /**
@@ -94,7 +96,7 @@ public class JBossClientAuthConfig implements ClientAuthConfig
     */
    public String getOperation(MessageInfo messageInfo)
    { 
-      throw new IllegalStateException("Not Implemented");
+      throw new IllegalStateException(ErrorCodes.NOT_YET_IMPLEMENTED);
    }
 
    /**
@@ -119,11 +121,11 @@ public class JBossClientAuthConfig implements ClientAuthConfig
 
    public String getAuthContextID(MessageInfo messageInfo)
    {
-      throw new RuntimeException("Not Implemented");
+      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED);
    }
 
    public boolean isProtected()
    { 
-      throw new RuntimeException("Not Implemented");
+      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED);
    } 
 }

@@ -42,6 +42,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.Util;
 
@@ -472,7 +473,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       if (results.hasMore() == false)
       {
          results.close();
-         throw new NamingException("Search of baseDN(" + baseDN + ") found no matches");
+         throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Search of baseDN(" + baseDN + ") found no matches");
       }
 
       SearchResult sr = (SearchResult) results.next();
@@ -492,7 +493,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
           if (sr.isRelative() == true)
                   userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
           else
-                  throw new NamingException("Can't follow referal for authentication: " + name);
+                  throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
       }
 
       results.close();

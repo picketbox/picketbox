@@ -37,6 +37,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.util.StringPropertyReplacer;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -74,7 +75,7 @@ public final class DOMUtils
             }
             catch (ParserConfigurationException e)
             {
-                throw new RuntimeException("Failed to create DocumentBuilder", e);
+                throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Failed to create DocumentBuilder", e);
             }
         }
     };
@@ -252,7 +253,7 @@ public final class DOMUtils
             }
 
             if (namespaceURI.equals(""))
-                throw new IllegalArgumentException("Cannot find namespace uri for: " + qualifiedName);
+                throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Cannot find namespace uri for: " + qualifiedName);
         }
 
         qname = new QName(namespaceURI, localPart, prefix);

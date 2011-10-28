@@ -22,6 +22,7 @@
 package org.jboss.security.plugins.identitytrust;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.identitytrust.IdentityTrustContext;
 import org.jboss.security.identitytrust.IdentityTrustException;
@@ -52,7 +53,7 @@ public class JBossIdentityTrustManager implements IdentityTrustManager
    public void setIdentityTrustContext(IdentityTrustContext itc)
    {
      if(itc == null)
-        throw new IllegalArgumentException("null Identity Trust Context");
+        throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "null Identity Trust Context");
      this.identityTrustContext = itc;
    }
    
@@ -62,12 +63,12 @@ public class JBossIdentityTrustManager implements IdentityTrustManager
    public TrustDecision isTrusted(SecurityContext securityContext)
    {  
       if(securityContext == null)
-         throw new IllegalArgumentException("Security Context is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Security Context is null");
       if(this.identityTrustContext == null)
          this.identityTrustContext = new JBossIdentityTrustContext(securityDomain, securityContext);
       TrustDecision td = TrustDecision.NotApplicable;
       if(this.identityTrustContext == null)
-         throw new IllegalStateException("IdentityTrustContext is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "IdentityTrustContext is null");
        
       try
       {

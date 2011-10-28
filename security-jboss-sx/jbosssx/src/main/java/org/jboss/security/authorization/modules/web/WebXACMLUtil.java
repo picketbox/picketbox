@@ -30,6 +30,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.authorization.util.JBossXACMLUtil;
 import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
@@ -63,9 +64,9 @@ public class WebXACMLUtil extends JBossXACMLUtil
          RoleGroup callerRoles) throws Exception
    { 
       if(request == null)
-         throw new IllegalArgumentException("Http Request is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Http Request is null");
       if(callerRoles == null)
-         throw new IllegalArgumentException("roles is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roles is null");
       String httpMethod = request.getMethod();
       String action = "GET".equals(httpMethod) ? "read" : "write";
    

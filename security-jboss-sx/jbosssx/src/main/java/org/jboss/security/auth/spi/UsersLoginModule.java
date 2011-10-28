@@ -34,6 +34,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.security.ErrorCodes;
+
 /**
  * A simple properties file based login module that consults a Java Properties
  * formatted text files for username to password("users.properties") mapping.
@@ -98,7 +100,7 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
    public boolean login() throws LoginException
    {
       if (users == null)
-         throw new LoginException("Missing users.properties file.");
+         throw new LoginException(ErrorCodes.NULL_VALUE + "Missing users.properties file.");
 
       return super.login();
    }
@@ -138,7 +140,7 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
       ClassLoader loader = SecurityActions.getContextClassLoader();
       URL url = loader.getResource(propertiesName);
       if (url == null)
-         throw new IOException("Properties file " + propertiesName + " not found");
+         throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not found");
 
       super.log.trace("Properties file=" + url);
 
@@ -150,7 +152,7 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
       }
       else
       {
-         throw new IOException("Properties file " + propertiesName + " not avilable");
+         throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not avilable");
       }
       return bundle;
    }

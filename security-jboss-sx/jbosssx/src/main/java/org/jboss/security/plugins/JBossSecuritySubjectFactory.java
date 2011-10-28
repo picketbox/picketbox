@@ -27,6 +27,7 @@ import javax.security.auth.Subject;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.ISecurityManagement;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SubjectFactory;
@@ -85,7 +86,7 @@ public class JBossSecuritySubjectFactory implements SubjectFactory
       {
          SubjectActions.setContextClassLoader(this.getClass().getClassLoader());
          if (!authenticationManager.isValid(principal, SubjectActions.getCredential(), subject))
-            throw new SecurityException("Unauthenticated caller:" + principal);
+            throw new SecurityException(ErrorCodes.ACCESS_DENIED + "Unauthenticated caller:" + principal);
       }
       finally
       {

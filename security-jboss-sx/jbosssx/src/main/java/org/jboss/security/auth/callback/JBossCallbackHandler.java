@@ -32,6 +32,8 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
+import org.jboss.security.ErrorCodes;
+
 /**
  * Serializable Callback Handler
  * @author Anil.Saldhana@redhat.com
@@ -133,7 +135,7 @@ public class JBossCallbackHandler implements CallbackHandler, Serializable
          {
          } 
 
-         throw new UnsupportedCallbackException(c, "Unrecognized Callback");
+         throw new UnsupportedCallbackException(c, ErrorCodes.UNRECOGNIZED_CALLBACK);
       }
       
    }

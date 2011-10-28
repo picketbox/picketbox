@@ -233,7 +233,7 @@ public class SecurityContextAssociation
          sm.checkPermission(GetContextInfo);
 
       if (key == null)
-         throw new IllegalArgumentException("key is null");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "key is null");
       //SECURITY-459 get it from the current security context
       SecurityContext sc = getSecurityContext();
       if (sc != null)

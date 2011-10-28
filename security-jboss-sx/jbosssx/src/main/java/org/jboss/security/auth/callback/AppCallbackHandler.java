@@ -36,6 +36,8 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.TextInputCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
+import org.jboss.security.ErrorCodes;
+
 //$Id$
 
 /** 
@@ -206,14 +208,14 @@ public class AppCallbackHandler implements CallbackHandler
                {
                   Object key = iter.next();
                   if(key instanceof String == false)
-                     throw new SecurityException("key is not a String");
+                     throw new SecurityException(ErrorCodes.KEY_IS_NOT_STRING );
                   mc.setInfo((String)key, keyValuePair.get(key));
                }  
             }
          }
          else
          {
-            throw new UnsupportedCallbackException(c, "Unrecognized Callback");
+            throw new UnsupportedCallbackException(c, ErrorCodes.UNRECOGNIZED_CALLBACK);
          }
       }
    }
@@ -230,7 +232,7 @@ public class AppCallbackHandler implements CallbackHandler
       }
       catch(IOException e)
       {
-         throw new SecurityException("Failed to obtain username, ioe="+e.getMessage());
+         throw new SecurityException(ErrorCodes.FAILED_TO_OBTAIN_USERNAME + e.getMessage());
       }
       return uName;
    }
@@ -248,7 +250,7 @@ public class AppCallbackHandler implements CallbackHandler
       }
       catch(IOException e)
       {
-         throw new SecurityException("Failed to obtain password, ioe="+e.getMessage());
+         throw new SecurityException(ErrorCodes.FAILED_TO_OBTAIN_PASSWORD + e.getMessage());
       }
       return pwd.toCharArray();
    }

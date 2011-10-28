@@ -31,6 +31,8 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
+import org.jboss.security.ErrorCodes;
+
 /** An implementation of CallbackHandler that obtains the values for
  NameCallback and PasswordCallback from the console.
 
@@ -71,7 +73,7 @@ public class ConsoleInputHandler implements CallbackHandler
             }
             catch(IOException e)
             {
-               throw new SecurityException("Failed to obtain username, ioe="+e.getMessage());
+               throw new SecurityException(ErrorCodes.FAILED_TO_OBTAIN_USERNAME + e.getMessage());
             }
          }
          else if (c instanceof PasswordCallback)
@@ -91,12 +93,12 @@ public class ConsoleInputHandler implements CallbackHandler
             }
             catch(IOException e)
             {
-               throw new SecurityException("Failed to obtain password, ioe="+e.getMessage());
+               throw new SecurityException(ErrorCodes.FAILED_TO_OBTAIN_PASSWORD + e.getMessage());
             }
          }
          else
          {
-            throw new UnsupportedCallbackException(callbacks[i], "Unrecognized Callback");
+            throw new UnsupportedCallbackException(callbacks[i], ErrorCodes.UNRECOGNIZED_CALLBACK);
          }
       }
    }

@@ -28,6 +28,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.jboss.security.ErrorCodes;
+
 /** A proxy LoginModule that loads a delegate LoginModule using
 the current thread context class loader. The purpose of this
 module is to work around the current JAAS class loader limitation
@@ -94,9 +96,9 @@ public class ProxyLoginModule implements LoginModule
     public boolean login() throws LoginException
     {
         if( moduleName == null )
-            throw new LoginException("Required moduleName option not given");
+            throw new LoginException(ErrorCodes.NULL_VALUE + "Required moduleName option not given");
         if( delegate == null )
-            throw new LoginException("Failed to load LoginModule: "+moduleName);
+            throw new LoginException(ErrorCodes.NULL_VALUE + "Failed to load LoginModule: "+moduleName);
 
         return delegate.login();
     }

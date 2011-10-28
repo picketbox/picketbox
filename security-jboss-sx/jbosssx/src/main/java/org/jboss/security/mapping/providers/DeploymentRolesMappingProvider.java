@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
@@ -68,7 +69,7 @@ public class DeploymentRolesMappingProvider implements MappingProvider<RoleGroup
    public void performMapping(Map<String,Object> map, RoleGroup mappedObject)
    {  
       if(map == null || map.isEmpty())
-         throw new IllegalArgumentException("Context Map is null or empty");
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Context Map is null or empty");
     
       //Obtain the principal to roles mapping
       Principal principal = (Principal) map.get(SecurityConstants.PRINCIPAL_IDENTIFIER);

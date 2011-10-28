@@ -33,6 +33,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.AuthorizationException;
@@ -110,12 +111,12 @@ public class JBossAuthorizationContext extends AuthorizationContext
    public void setApplicationPolicy(ApplicationPolicy aPolicy)
    {
       if (aPolicy == null)
-         throw new IllegalArgumentException("Application Policy is null:domain=" + this.securityDomainName);
+         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Application Policy is null:domain=" + this.securityDomainName);
       AuthorizationInfo authzInfo = aPolicy.getAuthorizationInfo();
       if (authzInfo == null)
-         throw new IllegalArgumentException("Application Policy has no AuthorizationInfo");
+         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Application Policy has no AuthorizationInfo");
       if (!authzInfo.getName().equals(securityDomainName))
-         throw new IllegalArgumentException("Application Policy ->AuthorizationInfo:" + authzInfo.getName()
+         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "Application Policy ->AuthorizationInfo:" + authzInfo.getName()
                + " does not match required domain name=" + this.securityDomainName);
       this.applicationPolicy = aPolicy;
    }
@@ -157,7 +158,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
                if (result == DENY)
                {
                   invokeAbort( modules, controlFlags );
-                  throw new AuthorizationException("Denied");
+                  throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Denied");
                }
                return null;
             }
@@ -187,7 +188,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
    {
       AuthorizationInfo authzInfo = getAuthorizationInfo(securityDomainName, resource);
       if (authzInfo == null)
-         throw new IllegalStateException("Authorization Info is null");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Info is null");
       AuthorizationModuleEntry[] entries = authzInfo.getAuthorizationModuleEntry();
       int len = entries != null ? entries.length : 0;
       for (int i = 0; i < len; i++)
@@ -268,11 +269,11 @@ public class JBossAuthorizationContext extends AuthorizationContext
       //All the authorization modules have been visited.
       String msg = getAdditionalErrorMessage(moduleException);
       if (encounteredRequiredError)
-         throw new AuthorizationException("Authorization Failed:" + msg);
+         throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Authorization Failed:" + msg);
       if (overallDecision == DENY && encounteredOptionalError)
-         throw new AuthorizationException("Authorization Failed:" + msg);
+         throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Authorization Failed:" + msg);
       if (overallDecision == DENY)
-         throw new AuthorizationException("Authorization Failed:Denied.");
+         throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Authorization Failed:Denied.");
       return PERMIT;
    }
 
@@ -285,7 +286,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
          AuthorizationModule module = (AuthorizationModule) modules.get(i);
          boolean bool = module.commit();
          if (!bool)
-            throw new AuthorizationException("commit on modules failed:" + module.getClass());
+            throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "commit on modules failed:" + module.getClass());
       }
    }
 
@@ -298,7 +299,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
          AuthorizationModule module = (AuthorizationModule) modules.get(i);
          boolean bool = module.abort();
          if (!bool)
-            throw new AuthorizationException("abort on modules failed:" + module.getClass());
+            throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "abort on modules failed:" + module.getClass());
       }
    }
 
@@ -331,7 +332,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
             log.debug("Error instantiating AuthorizationModule:", e);
       }
       if (am == null)
-         throw new IllegalStateException("AuthorizationModule has not " + "been instantiated");
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "AuthorizationModule has not " + "been instantiated");
       am.initialize(this.authenticatedSubject, this.callbackHandler, this.sharedState, map, subjectRoles);
       return am;
    }
@@ -357,7 +358,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
             aPolicy = SecurityConfiguration.getApplicationPolicy(WEB);
       }
       if (aPolicy == null)
-         throw new IllegalStateException("Application Policy is null for domain:" + domainName);
+         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Application Policy is null for domain:" + domainName);
 
       AuthorizationInfo ai = aPolicy.getAuthorizationInfo();
       if (ai == null)
