@@ -202,5 +202,11 @@
          <artifactId>picketbox-commons</artifactId>
          <version>1.0.0.CR1</version> 
       </dependency>
+      <dependency>
+         <groupId>org.hsqldb</groupId>
+         <artifactId>hsqldb</artifactId>
+         <version>2.2.4</version>
+         <scope>test</scope>
+      </dependency>
    </dependencies>
 </project>
