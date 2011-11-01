@@ -27,13 +27,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.sql.DataSource;
@@ -61,7 +61,7 @@ import org.jboss.security.vault.SecurityVaultUtil;
  * @author Anil Saldhana
  * @since Oct 31, 2011
  */
-public class DatabaseCallbackHandler implements CallbackHandler 
+public class DatabaseCallbackHandler extends AbstractCallbackHandler implements CallbackHandler 
 {
 	protected static Logger log = Logger.getLogger(DatabaseCallbackHandler.class);
 	protected boolean trace = log.isTraceEnabled();
@@ -89,12 +89,6 @@ public class DatabaseCallbackHandler implements CallbackHandler
 	 * A DB password to connect
 	 */
 	protected String dsUserPass;
-	
-	/**
-	 * User Name that we are interested in getting the password for
-	 */
-	protected String userName;
-	
 	/**
 	 * A DB Driver Class Name
 	 */
@@ -258,42 +252,39 @@ public class DatabaseCallbackHandler implements CallbackHandler
 	}
 
 	/**
-	 * Given the callbacks, look for {@code NameCallback}
-	 * @param callbacks
-	 * @return
-	 */
-	protected String getUserName(Callback[] callbacks)
-	{
-		if(userName == null)
-		{ 
-			for (int i = 0; i < callbacks.length; i++)
-			{
-				Callback callback = callbacks[i];
-				if(callback instanceof NameCallback)
-				{
-					NameCallback nc = (NameCallback) callback;
-					userName = nc.getName();
-					break;
-				}  
-			}
-		}
-		return userName;
-	}
-
-	/**
 	 * Handle a {@code Callback}
 	 * @param c callback
 	 * @throws UnsupportedCallbackException If the callback is not supported by this handler
 	 */
 	protected void handleCallBack( Callback c ) throws UnsupportedCallbackException
-	{
-		Connection conn = null;
-		String password = null;
+	{ 
+		if(c instanceof VerifyPasswordCallback)
+		{
+			VerifyPasswordCallback vpc = (VerifyPasswordCallback) c;
+			handleVerification(vpc);
+		}
 		if(c instanceof PasswordCallback == false)
 			return;
 
 		PasswordCallback passwdCallback = (PasswordCallback) c;
 
+		passwdCallback.setPassword(getPassword().toCharArray());
+	}
+	
+	protected void handleVerification(VerifyPasswordCallback vpc)
+	{
+		String userPass = vpc.getValue();
+		String passwordFromDB = getPassword();
+		if(userPass.equals(passwordFromDB))
+		{
+			vpc.setVerified(true);
+		}
+	}
+	
+	private String getPassword()
+	{
+		String password = null;
+		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try 
@@ -317,17 +308,11 @@ public class DatabaseCallbackHandler implements CallbackHandler
 		}
 		finally
 		{
-			if(conn != null)
-			{
-				try 
-				{
-					conn.close();
-				} 
-				catch (SQLException e) {}
-			}
+			safeClose(rs);
+			safeClose(ps);
+			safeClose(conn);
 		}
-
-		passwdCallback.setPassword(password.toCharArray());
+		return password;
 	}
 
 	private Connection getConnection() throws SQLException, NamingException
@@ -373,5 +358,47 @@ public class DatabaseCallbackHandler implements CallbackHandler
 		}
 
 		return conn;
+	}
+	
+	protected void safeClose(ResultSet rs)
+	{
+		if( rs != null)
+		{
+			try 
+			{
+				rs.close();
+			} 
+			catch (SQLException e) 
+			{	
+			}
+		}
+	}
+	
+	protected void safeClose(Connection conn)
+	{
+		if( conn != null)
+		{
+			try 
+			{
+				conn.close();
+			} 
+			catch (SQLException e) 
+			{	
+			}
+		}
+	}
+	
+	protected void safeClose(Statement stat)
+	{
+		if( stat != null)
+		{
+			try 
+			{
+				stat.close();
+			} 
+			catch (SQLException e) 
+			{	
+			}
+		}
 	}
 }

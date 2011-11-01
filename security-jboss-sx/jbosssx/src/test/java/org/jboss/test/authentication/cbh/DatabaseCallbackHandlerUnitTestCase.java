@@ -22,6 +22,7 @@
 package org.jboss.test.authentication.cbh;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
@@ -80,7 +81,7 @@ public class DatabaseCallbackHandlerUnitTestCase
 	}
 	
 	@Test
-	public void testCBH() throws Exception
+	public void testPassCBH() throws Exception
 	{
 		query();
 		DatabaseCallbackHandler cbh = new DatabaseCallbackHandler();
@@ -100,6 +101,29 @@ public class DatabaseCallbackHandlerUnitTestCase
 		cbh.handle(new Callback[] {ncb,pcb} );
 		
 		assertEquals("anilpass", new String(pcb.getPassword()));
+	}
+	
+	@Test
+	public void testFailCBH() throws Exception
+	{
+		query();
+		DatabaseCallbackHandler cbh = new DatabaseCallbackHandler();
+		
+		Map<String,String> map = new HashMap<String,String>();
+        map.put(DatabaseCallbackHandler.DB_DRIVERNAME, driverName);
+        map.put(DatabaseCallbackHandler.CONNECTION_URL, connectionURL);
+        map.put(DatabaseCallbackHandler.DB_USERNAME, "sa");
+        map.put(DatabaseCallbackHandler.DB_USERPASS, "");
+        
+        cbh.setConfiguration(map);
+        
+		NameCallback ncb = new NameCallback("Enter");
+		ncb.setName("anil");
+		
+		PasswordCallback pcb = new PasswordCallback("Enter", false);
+		cbh.handle(new Callback[] {ncb,pcb} );
+		
+		assertNotSame("anilpass", new String(pcb.getPassword()));
 	}
 	
 	private void query() throws Exception

@@ -109,4 +109,27 @@ public class SecurityActions
 		}
       });
    }
+   static ClassLoader getContextClassLoader()
+   {
+      return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>()
+      { 
+         public ClassLoader run()
+         { 
+            return Thread.currentThread().getContextClassLoader();
+         }
+       });  
+   }
+   
+
+   static Void setContextClassLoader(final ClassLoader cl)
+   {
+      return AccessController.doPrivileged(new PrivilegedAction<Void>()
+      {
+         public Void run()
+         {
+            Thread.currentThread().setContextClassLoader(cl);
+            return null;
+         }
+      });
+   }
 }
