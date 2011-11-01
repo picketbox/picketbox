@@ -40,6 +40,8 @@ import javax.sql.DataSource;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.ErrorCodes;
+import org.jboss.security.vault.SecurityVaultException;
+import org.jboss.security.vault.SecurityVaultUtil;
 
 /**
  * <p>
@@ -216,6 +218,20 @@ public class DatabaseCallbackHandler implements CallbackHandler
 		}
 		dsUserName = config.get(DB_USERNAME);
 		dsUserPass = config.get(DB_USERPASS);
+		if(dsUserPass != null)
+		{
+			if(SecurityVaultUtil.isVaultFormat(dsUserPass))
+			{
+				try 
+				{
+					dsUserPass = SecurityVaultUtil.getValueAsString(dsUserPass);
+				} 
+				catch (SecurityVaultException e) 
+				{
+					throw new RuntimeException(e);
+				}
+			}
+		}
 
 		tmp = config.get(PRINCIPALS_QUERY);
 		if(tmp != null)
