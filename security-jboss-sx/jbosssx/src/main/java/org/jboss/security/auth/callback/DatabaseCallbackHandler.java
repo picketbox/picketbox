@@ -36,6 +36,7 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.CredentialException;
 import javax.sql.DataSource;
 
 import org.jboss.logging.Logger;
@@ -255,13 +256,21 @@ public class DatabaseCallbackHandler extends AbstractCallbackHandler implements 
 	 * Handle a {@code Callback}
 	 * @param c callback
 	 * @throws UnsupportedCallbackException If the callback is not supported by this handler
+	 * @throws IOException 
 	 */
-	protected void handleCallBack( Callback c ) throws UnsupportedCallbackException
+	protected void handleCallBack( Callback c ) throws UnsupportedCallbackException, IOException
 	{ 
 		if(c instanceof VerifyPasswordCallback)
 		{
 			VerifyPasswordCallback vpc = (VerifyPasswordCallback) c;
-			handleVerification(vpc);
+			try 
+			{
+				handleVerification(vpc);
+			} 
+			catch (CredentialException e) 
+			{
+				throw new IOException(e);
+			}
 		}
 		if(c instanceof PasswordCallback == false)
 			return;
@@ -271,13 +280,17 @@ public class DatabaseCallbackHandler extends AbstractCallbackHandler implements 
 		passwdCallback.setPassword(getPassword().toCharArray());
 	}
 	
-	protected void handleVerification(VerifyPasswordCallback vpc)
+	protected void handleVerification(VerifyPasswordCallback vpc) throws CredentialException
 	{
 		String userPass = vpc.getValue();
 		String passwordFromDB = getPassword();
 		if(userPass.equals(passwordFromDB))
 		{
 			vpc.setVerified(true);
+		}
+		else
+		{
+			throw new CredentialException(ErrorCodes.ACCESS_DENIED + "Passwords don't match");
 		}
 	}
 	

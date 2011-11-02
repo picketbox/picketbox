@@ -24,7 +24,9 @@ package org.jboss.test.authentication.cbh;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -36,10 +38,12 @@ import java.util.Map;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
- 
+import javax.security.auth.login.CredentialException;
+
 import org.jboss.security.auth.callback.DatabaseCallbackHandler;
+import org.jboss.security.auth.callback.VerifyPasswordCallback;
 import org.junit.Before;
-import org.junit.Test; 
+import org.junit.Test;
 
 /**
  * Unit test the {@code DatabaseCallbackHandler}
@@ -124,6 +128,61 @@ public class DatabaseCallbackHandlerUnitTestCase
 		cbh.handle(new Callback[] {ncb,pcb} );
 		
 		assertNotSame("anilpass", new String(pcb.getPassword()));
+	}
+	
+	@Test
+	public void testVerifyPasswordCallbackPass() throws Exception
+	{
+		query();
+		DatabaseCallbackHandler cbh = new DatabaseCallbackHandler();
+		
+		Map<String,String> map = new HashMap<String,String>();
+        map.put(DatabaseCallbackHandler.DB_DRIVERNAME, driverName);
+        map.put(DatabaseCallbackHandler.CONNECTION_URL, connectionURL);
+        map.put(DatabaseCallbackHandler.DB_USERNAME, "sa");
+        map.put(DatabaseCallbackHandler.DB_USERPASS, "");
+        
+        cbh.setConfiguration(map);
+        
+		NameCallback ncb = new NameCallback("Enter");
+		ncb.setName("anil");
+		
+		VerifyPasswordCallback vpc = new VerifyPasswordCallback();
+		vpc.setValue("anilpass");
+		
+		cbh.handle(new Callback[] {ncb,vpc} );
+	}
+	
+	@Test
+	public void testVerifyPasswordCallbackFail() throws Exception
+	{
+		query();
+		DatabaseCallbackHandler cbh = new DatabaseCallbackHandler();
+		
+		Map<String,String> map = new HashMap<String,String>();
+        map.put(DatabaseCallbackHandler.DB_DRIVERNAME, driverName);
+        map.put(DatabaseCallbackHandler.CONNECTION_URL, connectionURL);
+        map.put(DatabaseCallbackHandler.DB_USERNAME, "sa");
+        map.put(DatabaseCallbackHandler.DB_USERPASS, "");
+        
+        cbh.setConfiguration(map);
+        
+		NameCallback ncb = new NameCallback("Enter");
+		ncb.setName("anil");
+		
+		VerifyPasswordCallback vpc = new VerifyPasswordCallback();
+		vpc.setValue("bad");
+		
+		try
+		{
+			cbh.handle(new Callback[] {ncb,vpc} );
+			fail("no exception thrown");
+		}
+		catch(IOException ie)
+		{
+			Throwable cause = ie.getCause();
+			assertTrue( cause instanceof CredentialException);
+		}
 	}
 	
 	private void query() throws Exception
