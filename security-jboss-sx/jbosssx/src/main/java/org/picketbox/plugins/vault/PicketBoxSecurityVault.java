@@ -205,6 +205,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       { 
          throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + "Unable to get Keystore:",e);
       }
+      log.info("Default Security Vault Implementation Initialized and Ready");
       finishedInit = true;
    }
 
