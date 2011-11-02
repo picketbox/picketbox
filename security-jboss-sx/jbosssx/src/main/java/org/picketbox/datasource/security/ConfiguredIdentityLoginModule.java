@@ -34,6 +34,8 @@ import javax.security.auth.login.LoginException;
 import org.jboss.logging.Logger;
 import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimplePrincipal;
+import org.jboss.security.vault.SecurityVaultException;
+import org.jboss.security.vault.SecurityVaultUtil;
 
 /**
  * A simple login module that simply associates the principal specified
@@ -88,6 +90,20 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
       {
          log.warn("Creating LoginModule with no configured password!");
          password = "";
+      }
+      else
+      {
+    	  if(SecurityVaultUtil.isVaultFormat(password))
+    	  {
+    		  try 
+    		  {
+    			  password = SecurityVaultUtil.getValueAsString(password);
+    		  } 
+    		  catch (SecurityVaultException e) 
+    		  {
+    			  throw new RuntimeException(e);
+    		  }
+    	  }
       }
       if (trace)
          log.trace("got principal: " + principalName + ", username: " + userName + ", password: " + password);

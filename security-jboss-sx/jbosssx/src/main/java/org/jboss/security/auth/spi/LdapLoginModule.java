@@ -40,6 +40,7 @@ import javax.naming.ldap.InitialLdapContext;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.security.SimpleGroup;
+import org.jboss.security.vault.SecurityVaultUtil;
 
 /**
  * An implementation of LoginModule that authenticates against an LDAP server
@@ -298,7 +299,12 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
          char[] tmp = DecodeAction.decode(bindCredential, serviceName);
          bindCredential = new String(tmp);
       }
-
+      //Check if the credential is vaultified
+      if(bindCredential != null && SecurityVaultUtil.isVaultFormat(bindCredential))
+      {
+    	  bindCredential = SecurityVaultUtil.getValueAsString(bindCredential);
+      }
+      
       String principalDNPrefix = (String) options.get(PRINCIPAL_DN_PREFIX_OPT);
       if (principalDNPrefix == null)
          principalDNPrefix = "";

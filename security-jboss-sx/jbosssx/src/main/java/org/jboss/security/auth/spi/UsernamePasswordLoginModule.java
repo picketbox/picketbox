@@ -39,6 +39,8 @@ import javax.security.auth.login.LoginException;
 
 import org.jboss.crypto.digest.DigestCallback;
 import org.jboss.security.ErrorCodes;
+import org.jboss.security.vault.SecurityVaultException;
+import org.jboss.security.vault.SecurityVaultUtil;
 
 
 /** An abstract subclass of AbstractServerLoginModule that imposes
@@ -244,6 +246,20 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
             password = createPasswordHash(username, password, "digestCallback");
          // Validate the password supplied by the subclass
          String expectedPassword = getUsersPassword();
+         //Check if the password is vaultified
+         if(SecurityVaultUtil.isVaultFormat(expectedPassword))
+         {
+        	 try 
+        	 {
+        		 expectedPassword = SecurityVaultUtil.getValueAsString(expectedPassword);
+        	 } 
+        	 catch (SecurityVaultException e) 
+        	 {
+        		 LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Unable to get the password value from vault");
+        		 le.initCause(e);
+        		 throw le;
+        	 }
+         }
          // Allow the storeDigestCallback to hash the expected password
          if( hashAlgorithm != null && hashStorePassword == true )
             expectedPassword = createPasswordHash(username, expectedPassword, "storeDigestCallback");

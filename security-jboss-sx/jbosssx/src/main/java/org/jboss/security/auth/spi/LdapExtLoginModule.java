@@ -45,6 +45,7 @@ import javax.security.auth.login.LoginException;
 import org.jboss.security.ErrorCodes;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.Util;
+import org.jboss.security.vault.SecurityVaultUtil;
 
 /**
  The org.jboss.security.auth.spi.LdapExtLoginModule, added in jboss-4.0.3, is an
@@ -363,6 +364,11 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          ObjectName serviceName = new ObjectName(securityDomain);
          char[] tmp = DecodeAction.decode(bindCredential, serviceName);
          bindCredential = new String(tmp);
+      }
+      //Check if the credential is vaultified
+      if(bindCredential != null && SecurityVaultUtil.isVaultFormat(bindCredential))
+      {
+    	  bindCredential = SecurityVaultUtil.getValueAsString(bindCredential);
       }
 
       baseDN = (String) options.get(BASE_CTX_DN);

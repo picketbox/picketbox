@@ -42,6 +42,18 @@ public class SecurityVaultUtil
 	 * @param str
 	 * @return
 	 */
+	public static boolean isVaultFormat(char[] chars) 
+	{
+		String str = new String(chars);
+		return str.startsWith(VAULT_PREFIX);
+	}
+	
+	/**
+	 * Check whether the string has the format of the vault
+	 * 
+	 * @param str
+	 * @return
+	 */
 	public static boolean isVaultFormat(String str) 
 	{
 		return str.startsWith(VAULT_PREFIX);
@@ -95,6 +107,19 @@ public class SecurityVaultUtil
 		if (val != null)
 			return new String(val);
 		return null;
+	}
+	
+	/**
+	 * Get the value from the vault
+	 * @param chars vaultified set of characters
+	 * @return
+	 * @throws SecurityVaultException
+	 */
+	public static char[] getValue(char[] chars)
+			throws SecurityVaultException 
+	{
+		String vaultString = new String(chars);
+		return getValue(vaultString);
 	}
 
 	private static String[] tokens(String vaultString) 

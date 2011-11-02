@@ -35,6 +35,8 @@ import org.jboss.logging.Logger;
 import org.jboss.security.ErrorCodes;
 import org.jboss.security.RunAsIdentity;
 import org.jboss.security.SimplePrincipal;
+import org.jboss.security.vault.SecurityVaultException;
+import org.jboss.security.vault.SecurityVaultUtil;
 
 /**
  * A simple login module that simply associates the principal making the
@@ -114,6 +116,18 @@ public class CallerIdentityLoginModule
       {
          password = pass.toCharArray();
       }
+      if(pass != null && SecurityVaultUtil.isVaultFormat(pass))
+      {
+    	  try 
+    	  {
+			pass = SecurityVaultUtil.getValueAsString(pass);
+		  } 
+    	  catch (SecurityVaultException e) 
+    	  {
+			throw new RuntimeException(e);
+		  }
+    	  password = pass.toCharArray();
+      }
 
       // Check the addRunAsRoles
       String flag = (String) options.get("addRunAsRoles");
@@ -152,6 +166,10 @@ public class CallerIdentityLoginModule
          if( userPassword != null )
          {
             password = userPassword;
+            if(SecurityVaultUtil.isVaultFormat(password))
+            {
+            	password = SecurityVaultUtil.getValue(password);
+            }
          }
 
          if (user != null)
