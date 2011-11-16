@@ -26,8 +26,6 @@ import java.util.List;
 
 import javax.security.auth.AuthPermission;
 
-// $Id$
-
 /**
  * Base Class of the security info
  * 
@@ -45,6 +43,12 @@ public abstract class BaseSecurityInfo<T>
    protected String name;
 
    protected ArrayList<T> moduleEntries = new ArrayList<T>();
+   
+   /**
+    * Name of the JBoss Module that can be optionally configured for
+    * custom login modules etc
+    */
+   protected String jbossModuleName;
 
    public BaseSecurityInfo()
    {
@@ -83,7 +87,25 @@ public abstract class BaseSecurityInfo<T>
 
    public void setName(String name)
    {
-      this.name = name;
+	   this.name = name;
+   }
+
+   /**
+    * Get the name of the JBoss Module
+    * @return
+    */
+   public String getJBossModuleName() 
+   {
+	   return jbossModuleName;
+   }
+
+   /**
+    * Set the name of the JBoss Module
+    * @param jbossModuleName
+    */
+   public void setJBossModuleName(String jbossModuleName) 
+   {
+	   this.jbossModuleName = jbossModuleName;
    }
 
    protected abstract BaseSecurityInfo<T> create(String name);

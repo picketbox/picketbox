@@ -49,6 +49,8 @@ import org.jboss.security.config.ControlFlag;
 import org.jboss.security.config.SecurityConfiguration;
 import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
+import org.jboss.security.plugins.ClassLoaderLocator;
+import org.jboss.security.plugins.ClassLoaderLocatorFactory;
 
 //$Id: JBossAuthorizationContext.java 62954 2007-05-10 04:12:18Z anil.saldhana@jboss.com $
 
@@ -189,23 +191,35 @@ public class JBossAuthorizationContext extends AuthorizationContext
       AuthorizationInfo authzInfo = getAuthorizationInfo(securityDomainName, resource);
       if (authzInfo == null)
          throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Info is null");
+      
+      ClassLoader moduleCL = null;
+      String jbossModuleName = authzInfo.getJBossModuleName();
+      if(jbossModuleName != null)
+      {
+    	  ClassLoaderLocator cll = ClassLoaderLocatorFactory.get();
+    	  if( cll != null)
+    	  {
+    		  moduleCL = cll.get(jbossModuleName);
+    	  }
+      }
       AuthorizationModuleEntry[] entries = authzInfo.getAuthorizationModuleEntry();
       int len = entries != null ? entries.length : 0;
       for (int i = 0; i < len; i++)
       {
-         AuthorizationModuleEntry entry = entries[i];
-         ControlFlag flag = entry.getControlFlag();
-         if (flag == null)
-         {
-            if (trace)
-               log.trace("Null Control flag for entry:" + entry + ". Defaults to REQUIRED!");
-            flag = ControlFlag.REQUIRED;
-         }
-         else if (trace)
-            log.trace("Control flag for entry:" + entry + "is:[" + flag + "]");
+    	  AuthorizationModuleEntry entry = entries[i];
+    	  ControlFlag flag = entry.getControlFlag();
+    	  if (flag == null)
+    	  {
+    		  if (trace)
+    			  log.trace("Null Control flag for entry:" + entry + ". Defaults to REQUIRED!");
+    		  flag = ControlFlag.REQUIRED;
+    	  }
+    	  else if (trace)
+    		  log.trace("Control flag for entry:" + entry + "is:[" + flag + "]");
 
-         controlFlags.add(flag);
-         modules.add(instantiateModule(entry.getPolicyModuleName(), entry.getOptions(), role));
+    	  controlFlags.add(flag);
+    	  AuthorizationModule module = instantiateModule(moduleCL, entry.getPolicyModuleName(), entry.getOptions(), role); 
+    	  modules.add(module);
       }
    }
 
@@ -303,7 +317,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
       }
    }
 
-   private AuthorizationModule instantiateModule(String name, Map<String, Object> map, RoleGroup subjectRoles)
+   private AuthorizationModule instantiateModule(ClassLoader cl, String name, Map<String, Object> map, RoleGroup subjectRoles)
          throws PrivilegedActionException
    {
       AuthorizationModule am = null;
@@ -314,7 +328,11 @@ public class JBossAuthorizationContext extends AuthorizationContext
          {
             try
             {
-               clazz = getClass().getClassLoader().loadClass(name);
+               if(cl == null)
+               {
+            	   cl = getClass().getClassLoader();
+               }
+               clazz = cl.loadClass(name);
             }
             catch (Exception ignore)
             {

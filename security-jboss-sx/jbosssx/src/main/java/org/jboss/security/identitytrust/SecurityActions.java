@@ -61,4 +61,29 @@ class SecurityActions
             } 
          }
       });
-   }}
+   }
+   
+
+   
+   static Class<?> loadClass(final ClassLoader cl, final String name) throws PrivilegedActionException 
+   {
+      return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>()
+      {
+         public Class<?> run() throws PrivilegedActionException
+         {
+        	if(cl == null)
+        	{
+        		return loadClass(name);
+        	}
+            try
+            {
+               return cl.loadClass(name);
+            }
+            catch (Exception ignore)
+            {
+                  return loadClass(name);
+            }
+         }
+      });
+   }
+}

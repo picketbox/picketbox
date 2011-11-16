@@ -35,6 +35,8 @@ import org.jboss.security.config.IdentityTrustInfo;
 import org.jboss.security.config.SecurityConfiguration;
 import org.jboss.security.identitytrust.IdentityTrustManager.TrustDecision;
 import org.jboss.security.identitytrust.config.IdentityTrustModuleEntry;
+import org.jboss.security.plugins.ClassLoaderLocator;
+import org.jboss.security.plugins.ClassLoaderLocatorFactory;
  
 /**
  *  Implementation of the Identity Trust Context
@@ -97,6 +99,7 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
    
    private void initializeModules() throws Exception
    {
+	  ClassLoader moduleCL = null;
       //Clear the modules
       modules.clear();
       //Get the Configuration
@@ -107,6 +110,15 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
       IdentityTrustInfo iti = aPolicy.getIdentityTrustInfo();
       if(iti == null)
          return;
+      String jbossModuleName = iti.getJBossModuleName();
+      if(jbossModuleName != null)
+      {
+    	  ClassLoaderLocator cll = ClassLoaderLocatorFactory.get();
+    	  if(cll != null)
+    	  {
+    		  moduleCL = cll.get(jbossModuleName);
+    	  }
+      }
       IdentityTrustModuleEntry[] itmearr = iti.getIdentityTrustModuleEntry();
       for(IdentityTrustModuleEntry itme: itmearr)
       { 
@@ -115,18 +127,18 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
             cf = ControlFlag.REQUIRED;
          
          this.controlFlags.add(cf); 
-         modules.add(instantiateModule(itme.getName(), itme.getOptions())); 
+         IdentityTrustModule module = instantiateModule(moduleCL, itme.getName(), itme.getOptions()); 
+         modules.add(module); 
       }
    }
    
    @SuppressWarnings({"unchecked", "rawtypes"})
-   private IdentityTrustModule instantiateModule(String name, Map map) throws Exception
+   private IdentityTrustModule instantiateModule(ClassLoader cl, String name, Map map) throws Exception
    {
       IdentityTrustModule im = null;
-      ClassLoader tcl = SecurityActions.getContextClassLoader();
       try
       {
-         Class clazz = tcl.loadClass(name);
+         Class clazz = SecurityActions.loadClass(cl, name);
          im = (IdentityTrustModule)clazz.newInstance();
       }
       catch ( Exception e)

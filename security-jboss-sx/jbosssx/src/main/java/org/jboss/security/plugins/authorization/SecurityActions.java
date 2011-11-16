@@ -35,6 +35,18 @@ import java.security.PrivilegedExceptionAction;
  */
 class SecurityActions
 {
+	static void setContextClassLoader(final ClassLoader tccl) throws PrivilegedActionException
+	{
+		AccessController.doPrivileged(new PrivilegedExceptionAction<ClassLoader>()
+		{ 
+			public ClassLoader run()
+			{
+				Thread.currentThread().setContextClassLoader(tccl);
+				return null;
+			}
+		});
+	}
+
    static ClassLoader getContextClassLoader() throws PrivilegedActionException
    {
       return AccessController.doPrivileged(new PrivilegedExceptionAction<ClassLoader>()

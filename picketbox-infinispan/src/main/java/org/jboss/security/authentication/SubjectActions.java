@@ -348,6 +348,18 @@ class SubjectActions
       return loader;
    }
 
+   static void setContextClassLoader(final ClassLoader cl)
+   {
+	   AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() 
+	   {
+		   public ClassLoader run() 
+		   {
+			   Thread.currentThread().setContextClassLoader(cl);
+			   return null;
+		   }
+	   });
+   }
+   
    static Object setContextInfo(String key, Object value)
    {
       SetContextInfoAction action = new SetContextInfoAction(key, value);

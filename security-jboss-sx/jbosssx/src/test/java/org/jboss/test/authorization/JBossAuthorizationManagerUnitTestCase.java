@@ -101,7 +101,7 @@ public class JBossAuthorizationManagerUnitTestCase extends TestCase
             new SubjectPolicyContextHandler(), true);
    }
    
-   private void setSecurityConfiguration() throws Exception
+   protected void setSecurityConfiguration() throws Exception
    {
       String name = "org.jboss.security.authorization.modules.web.WebAuthorizationModule";
       ApplicationPolicy ap = new ApplicationPolicy("other");

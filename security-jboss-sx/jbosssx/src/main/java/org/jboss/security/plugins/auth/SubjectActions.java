@@ -333,6 +333,18 @@ class SubjectActions
       }
    } 
    
+   static void setContextClassLoader(final ClassLoader cl)
+   {
+	   AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() 
+	   {
+		   public ClassLoader run() 
+		   {
+			   Thread.currentThread().setContextClassLoader(cl);
+			   return null;
+		   }
+	   });
+   }
+   
    static ClassLoader getContextClassLoader()
    {
       ClassLoader loader = (ClassLoader) AccessController.doPrivileged(GetTCLAction.ACTION);

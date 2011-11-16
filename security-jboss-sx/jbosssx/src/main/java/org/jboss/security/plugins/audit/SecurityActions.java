@@ -33,6 +33,18 @@ import java.security.PrivilegedExceptionAction;
  */
 class SecurityActions
 {
+	static void setContextClassLoader(final ClassLoader tccl) throws PrivilegedActionException
+	{
+		AccessController.doPrivileged(new PrivilegedExceptionAction<ClassLoader>()
+		{ 
+			public ClassLoader run()
+			{
+				Thread.currentThread().setContextClassLoader(tccl);
+				return null;
+			}
+	    });
+	}
+
    static ClassLoader getContextClassLoader() throws PrivilegedActionException
    {
       return AccessController.doPrivileged(new PrivilegedExceptionAction<ClassLoader>()
@@ -64,6 +76,28 @@ class SecurityActions
                {
                   throw new PrivilegedActionException(e);
                }
+            }
+         }
+      });
+   }
+   
+   static Class<?> loadClass(final ClassLoader cl, final String name) throws PrivilegedActionException 
+   {
+      return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>()
+      {
+         public Class<?> run() throws PrivilegedActionException
+         {
+        	if(cl == null)
+        	{
+        		return loadClass(name);
+        	}
+            try
+            {
+               return cl.loadClass(name);
+            }
+            catch (Exception ignore)
+            {
+                  return loadClass(name);
             }
          }
       });

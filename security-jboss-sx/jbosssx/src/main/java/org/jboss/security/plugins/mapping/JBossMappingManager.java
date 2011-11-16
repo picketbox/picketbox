@@ -32,11 +32,13 @@ import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityUtil;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.MappingInfo;
-import org.jboss.security.config.SecurityConfiguration; 
+import org.jboss.security.config.SecurityConfiguration;
 import org.jboss.security.mapping.MappingContext;
 import org.jboss.security.mapping.MappingManager;
 import org.jboss.security.mapping.MappingProvider;
 import org.jboss.security.mapping.config.MappingModuleEntry;
+import org.jboss.security.plugins.ClassLoaderLocator;
+import org.jboss.security.plugins.ClassLoaderLocatorFactory;
 
 
 /**
@@ -57,8 +59,7 @@ public class JBossMappingManager implements MappingManager
    public JBossMappingManager(String domain)
    {
       this.securityDomain = SecurityUtil.unprefixSecurityDomain(domain);  
-   }
-   
+   } 
    
    public <T> MappingContext<T> getMappingContext(String mappingType)
    {
@@ -119,25 +120,37 @@ public class JBossMappingManager implements MappingManager
 
    private <T> MappingContext<T> generateMappingContext(MappingContext<T> mc, MappingInfo rmi)
    {
-      MappingModuleEntry[] mpe = rmi.getMappingModuleEntry();
-      ArrayList<MappingProvider<T>> al = new ArrayList<MappingProvider<T>>();
+	   ClassLoader moduleCL = null;
+	   String jbossModuleName = rmi.getJBossModuleName();
+	   if(jbossModuleName != null)
+	   {
+		   ClassLoaderLocator cll = ClassLoaderLocatorFactory.get();
+		   if(cll != null)
+		   {
+			   moduleCL = cll.get(jbossModuleName);
+		   }
+	   }
+	   MappingModuleEntry[] mpe = rmi.getMappingModuleEntry();
+	   ArrayList<MappingProvider<T>> al = new ArrayList<MappingProvider<T>>();
 
-      for(int i = 0 ; i < mpe.length; i++)
-      { 
-         MappingProvider<T> mp = getMappingProvider(mpe[i]);
-         if(mp != null)
-            al.add(mp); 
-      }
-      return new MappingContext<T>(al); 
-   } 
-    
+	   for(int i = 0 ; i < mpe.length; i++)
+	   { 
+		   MappingProvider<T> mp = getMappingProvider(moduleCL, mpe[i]);
+		   if(mp != null)
+		   {
+			   al.add(mp);   
+		   } 
+	   }
+	   return new MappingContext<T>(al); 
+   }
+
    public String getSecurityDomain()
    { 
       return this.securityDomain;
    }
 
    @SuppressWarnings("unchecked")
-   private <T> MappingProvider<T> getMappingProvider(MappingModuleEntry mme)
+   private <T> MappingProvider<T> getMappingProvider(ClassLoader cl, MappingModuleEntry mme)
    {
       MappingProvider<T> mp = null;
       try
@@ -146,15 +159,7 @@ public class JBossMappingManager implements MappingManager
          Class<?> clazz = clazzMap.get(fqn);
          if( clazz == null )
          {
-            try
-            {
-               clazz = getClass().getClassLoader().loadClass(fqn);
-            }
-            catch (Exception e)
-            {
-               ClassLoader tcl = SecurityActions.getContextClassLoader();
-               clazz = tcl.loadClass(fqn);
-            }
+        	clazz = SecurityActions.loadClass(cl, fqn);
             clazzMap.put(fqn, clazz); 
          } 
          mp = (MappingProvider<T>) clazz.newInstance();
@@ -163,7 +168,7 @@ public class JBossMappingManager implements MappingManager
       catch(Exception e)
       {
          if(trace)
-            log.trace("Error in getting Mapping Provider",e);
+            log.trace("Error in getting Mapping Provider:",e);
       } 
       return mp; 
    }

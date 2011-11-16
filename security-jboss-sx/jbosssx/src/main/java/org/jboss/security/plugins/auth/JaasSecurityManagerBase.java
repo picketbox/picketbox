@@ -43,6 +43,11 @@ import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.SecurityUtil;
 import org.jboss.security.SubjectSecurityManager;
 import org.jboss.security.auth.callback.JBossCallbackHandler;
+import org.jboss.security.auth.login.BaseAuthenticationInfo;
+import org.jboss.security.config.ApplicationPolicy;
+import org.jboss.security.config.SecurityConfiguration;
+import org.jboss.security.plugins.ClassLoaderLocator;
+import org.jboss.security.plugins.ClassLoaderLocatorFactory;
 
 /** The JaasSecurityManager is responsible both for authenticating credentials
  associated with principals and for role mapping. This implementation relies
@@ -294,43 +299,72 @@ public class JaasSecurityManagerBase
    private boolean authenticate(Principal principal, Object credential,
       Subject theSubject)
    {
-      Subject subject = null;
-      boolean authenticated = false;
-      LoginException authException = null;
+	   ApplicationPolicy theAppPolicy = SecurityConfiguration.getApplicationPolicy(securityDomain);
+	   if(theAppPolicy != null)
+	   {
+		   BaseAuthenticationInfo authInfo = theAppPolicy.getAuthenticationInfo();
+		   String jbossModuleName = authInfo.getJBossModuleName();
+		   if(jbossModuleName != null)
+		   {
+			   ClassLoader currentTccl = SubjectActions.getContextClassLoader();
+			   ClassLoaderLocator theCLL = ClassLoaderLocatorFactory.get();
+			   if(theCLL != null)
+			   {
+				   ClassLoader newTCCL = theCLL.get(jbossModuleName);
+				   if(newTCCL != null)
+				   {
+					   try
+					   {
+						   SubjectActions.setContextClassLoader(newTCCL);
+						   return proceedWithJaasLogin(principal, credential, theSubject);
+					   }
+					   finally
+					   {
+						   SubjectActions.setContextClassLoader(currentTccl);
+					   }
+				   }
+			   }
+		   }
+	   }
+	   return proceedWithJaasLogin(principal, credential, theSubject);
+   }
+   
+   private boolean proceedWithJaasLogin(Principal principal, Object credential, Subject theSubject)
+   {
+		Subject subject = null;
+		boolean authenticated = false;
+		LoginException authException = null;
+		try {
 
-      try
-      {
-         // Validate the principal using the login configuration for this domain
-         LoginContext lc = defaultLogin(principal, credential);
-         subject = lc.getSubject();
+			// Validate the principal using the login configuration for this
+			// domain
+			LoginContext lc = defaultLogin(principal, credential);
+			subject = lc.getSubject();
 
-         // Set the current subject if login was successful
-         if( subject != null )
-         {
-            // Copy the current subject into theSubject
-            if( theSubject != null )
-            {
-               SubjectActions.copySubject(subject, theSubject, false,this.deepCopySubjectOption);
-            }
-            else
-            {
-               theSubject = subject;
-            }
+			// Set the current subject if login was successful
+			if (subject != null) {
+				// Copy the current subject into theSubject
+				if (theSubject != null) {
+					SubjectActions.copySubject(subject, theSubject, false,
+							this.deepCopySubjectOption);
+				} else {
+					theSubject = subject;
+				}
 
-            authenticated = true;
-         }
-      }
-      catch(LoginException e)
-      {
-         // Don't log anonymous user failures unless trace level logging is on
-         if( principal != null && principal.getName() != null || trace )
-            log.trace("Login failure", e);
-         authException = e;
-      }
-      // Set the security association thread context info exception
-      SubjectActions.setContextInfo("org.jboss.security.exception", authException);
+				authenticated = true;
+			}
+		} catch (LoginException e) {
+			// Don't log anonymous user failures unless trace level logging is
+			// on
+			if (principal != null && principal.getName() != null || trace)
+				log.trace("Login failure", e);
+			authException = e;
+		}
+		// Set the security association thread context info exception
+		SubjectActions.setContextInfo("org.jboss.security.exception",
+				authException);
 
-      return authenticated;
+		return authenticated;
    }
 
    /** Pass the security info to the login modules configured for
@@ -370,5 +404,4 @@ public class JaasSecurityManagerBase
          log.trace("defaultLogin, lc="+lc+", subject="+SubjectActions.toString(subject));
       return lc;
    }
-
 }

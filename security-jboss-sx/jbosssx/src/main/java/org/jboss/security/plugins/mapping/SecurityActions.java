@@ -23,6 +23,8 @@ package org.jboss.security.plugins.mapping;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
  
 /**
  *  Privileged Blocks
@@ -32,6 +34,19 @@ import java.security.PrivilegedAction;
  */
 class SecurityActions
 {
+
+	static void setContextClassLoader(final ClassLoader tccl) throws PrivilegedActionException
+	{
+		AccessController.doPrivileged(new PrivilegedExceptionAction<ClassLoader>()
+	    { 
+			public ClassLoader run()
+			{
+				Thread.currentThread().setContextClassLoader(tccl);
+				return null;
+			}
+		});
+	}
+
   static ClassLoader getContextClassLoader()
   {
      return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>()
@@ -41,5 +56,52 @@ class SecurityActions
            return Thread.currentThread().getContextClassLoader();
         }
      });
-  } 
+  }
+  
+  static Class<?> loadClass(final String name) throws PrivilegedActionException 
+  {
+     return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>()
+     {
+        public Class<?> run() throws PrivilegedActionException
+        {
+           try
+           {
+              return getClass().getClassLoader().loadClass(name);
+           }
+           catch (Exception ignore)
+           {
+              try
+              {
+                 return getContextClassLoader().loadClass(name);
+              }
+              catch (Exception e)
+              {
+                 throw new PrivilegedActionException(e);
+              }
+           }
+        }
+     });
+  }
+  
+  static Class<?> loadClass(final ClassLoader cl, final String name) throws PrivilegedActionException 
+  {
+     return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>()
+     {
+        public Class<?> run() throws PrivilegedActionException
+        {
+       	if(cl == null)
+       	{
+       		return loadClass(name);
+       	}
+           try
+           {
+              return cl.loadClass(name);
+           }
+           catch (Exception ignore)
+           {
+                 return loadClass(name);
+           }
+        }
+     });
+  }
 }

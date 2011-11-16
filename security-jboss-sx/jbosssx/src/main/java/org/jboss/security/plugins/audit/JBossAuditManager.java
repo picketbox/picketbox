@@ -24,6 +24,8 @@ import org.jboss.security.audit.providers.LogAuditProvider;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.AuditInfo;
 import org.jboss.security.config.SecurityConfiguration; 
+import org.jboss.security.plugins.ClassLoaderLocator;
+import org.jboss.security.plugins.ClassLoaderLocatorFactory;
 
 /**
  *  Manages a set of AuditContext
@@ -54,42 +56,31 @@ public class JBossAuditManager implements AuditManager
       this.securityDomain = SecurityUtil.unprefixSecurityDomain(secDomain);  
    }
    
-   @SuppressWarnings("unused")
    public AuditContext getAuditContext() throws PrivilegedActionException
    {
+	  ClassLoader moduleCL = null;
       AuditContext ac = (AuditContext)contexts.get(securityDomain);
       if(ac == null)
       {
-         ac = new JBossAuditContext(securityDomain);
-         ApplicationPolicy ap = SecurityConfiguration.getApplicationPolicy(securityDomain);
-         if(ap != null)
-         {
-            AuditInfo ai = ap.getAuditInfo();
-            if(ai != null)
-            {  
-               AuditProviderEntry[] apeArr = ai.getAuditProviderEntry();
-               List<AuditProviderEntry> list = Arrays.asList(apeArr);
-               for(AuditProviderEntry ape:list)
-               {
-                  String pname = ape.getName();
-                  try
-                  {
-                     Class<?> clazz = clazzMap.get(pname);
-                     if( clazz == null )
-                     {
-                        clazz = SecurityActions.loadClass(pname);
-                        clazzMap.put(pname, clazz); 
-                     }
-                     
-                     ac.addProvider((AuditProvider) clazz.newInstance());
-                  }
-                  catch (Exception e)
-                  {
-                     throw new RuntimeException(e);
-                  } 
-               }
-            }
-         }
+    	  ac = new JBossAuditContext(securityDomain);
+    	  ApplicationPolicy ap = SecurityConfiguration.getApplicationPolicy(securityDomain);
+    	  if(ap != null)
+    	  {
+    		  AuditInfo ai = ap.getAuditInfo();
+    		  if(ai != null)
+    		  {  
+    			  String jbossModuleName = ai.getJBossModuleName();
+    			  if(jbossModuleName != null)
+    			  {
+    				  ClassLoaderLocator cll = ClassLoaderLocatorFactory.get();
+    				   if(cll != null)
+    				   {
+    					   moduleCL = cll.get(jbossModuleName);
+    				   }
+    			  }
+				  ac = instantiate(moduleCL, ai);
+    		  }
+    	  }
       }
       if(ac == null)
       {
@@ -136,5 +127,32 @@ public class JBossAuditManager implements AuditManager
    public String getSecurityDomain()
    { 
       return this.securityDomain;
+   } 
+   
+   private AuditContext instantiate(ClassLoader cl, AuditInfo ai)
+   {
+       AuditContext ac = new JBossAuditContext(securityDomain);
+       AuditProviderEntry[] apeArr = ai.getAuditProviderEntry();
+       List<AuditProviderEntry> list = Arrays.asList(apeArr);
+       for(AuditProviderEntry ape:list)
+       {
+          String pname = ape.getName();
+          try
+          {
+             Class<?> clazz = clazzMap.get(pname);
+             if( clazz == null )
+             {
+                clazz = SecurityActions.loadClass(cl, pname);
+                clazzMap.put(pname, clazz); 
+             }
+             
+             ac.addProvider((AuditProvider) clazz.newInstance());
+          }
+          catch (Exception e)
+          {
+             throw new RuntimeException(e);
+          } 
+       }
+       return ac;
    }
 }
