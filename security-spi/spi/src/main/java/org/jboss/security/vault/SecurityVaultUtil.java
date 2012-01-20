@@ -44,6 +44,10 @@ public class SecurityVaultUtil
 	 */
 	public static boolean isVaultFormat(char[] chars) 
 	{
+		if(chars == null) 
+		{
+			return false;
+		}
 		String str = new String(chars);
 		return str.startsWith(VAULT_PREFIX);
 	}
@@ -56,7 +60,7 @@ public class SecurityVaultUtil
 	 */
 	public static boolean isVaultFormat(String str) 
 	{
-		return str.startsWith(VAULT_PREFIX);
+		return str != null && str.startsWith(VAULT_PREFIX);
 	}
 
 	/**
@@ -118,6 +122,8 @@ public class SecurityVaultUtil
 	public static char[] getValue(char[] chars)
 			throws SecurityVaultException 
 	{
+		if(chars == null)
+			return null;
 		String vaultString = new String(chars);
 		return getValue(vaultString);
 	}

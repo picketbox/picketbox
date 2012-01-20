@@ -40,6 +40,7 @@ import org.jboss.security.plugins.PBEUtils;
 import org.jboss.security.vault.SecurityVault;
 import org.jboss.security.vault.SecurityVaultException;
 import org.jboss.security.vault.SecurityVaultFactory;
+import org.jboss.security.vault.SecurityVaultUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.picketbox.plugins.vault.PicketBoxSecurityVault;
@@ -164,6 +165,13 @@ public class SecurityVaultUnitTestCase
       
       assertTrue(vault.remove(vaultBlock+"1", attributeName+"2", sharedKey));
       assertFalse(vault.exists(vaultBlock+"1", attributeName+"2"));
+   }
+   
+   @Test
+   public void testUtil() throws Exception
+   {
+	   assertFalse(SecurityVaultUtil.isVaultFormat((String)null));
+	   assertFalse(SecurityVaultUtil.isVaultFormat((char[])null));
    }
    
    private String getMaskedPassword(String pwd, String salt, int iterationCount) throws Exception
