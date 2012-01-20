@@ -200,7 +200,7 @@
       <dependency>
          <groupId>org.picketbox</groupId>
          <artifactId>picketbox-commons</artifactId>
-         <version>1.0.0.CR1</version> 
+         <version>1.0.0.final</version> 
       </dependency>
       <dependency>
          <groupId>org.hsqldb</groupId>
