@@ -1,0 +1,90 @@
+<?xml version='1.0'?> 
+ 
+<policy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="urn:jboss:security-config:5.0"
+         xmlns="urn:jboss:security-config:5.0">
+   
+   <application-policy name="conf-javaee">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.JavaEETrustModule"/> 
+       </identity-trust> 
+   </application-policy>  
+   
+   <application-policy name="Permit-Permit-Permit">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/> 
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+       </identity-trust> 
+   </application-policy> 
+   
+   <application-policy name="Permit-Permit-Deny">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/> 
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysDenyTrustModule"/>
+       </identity-trust> 
+   </application-policy> 
+   
+   <application-policy name="Permit-Deny-Permit">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysDenyTrustModule"/> 
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+       </identity-trust> 
+   </application-policy> 
+   
+   <application-policy name="Deny-Permit-Permit">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysDenyTrustModule"/>      <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+       </identity-trust> 
+   </application-policy> 
+   
+   <application-policy name="Permit-Permit-NotApplicable">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/> 
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysNotApplicableTrustModule"/>
+       </identity-trust> 
+   </application-policy> 
+   
+   <application-policy name="NotApplicable-Permit-Permit">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysNotApplicableTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/> 
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+       </identity-trust> 
+   </application-policy>
+   
+   <application-policy name="NotApplicable_Required-Permit_Optional">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysNotApplicableTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule" flag="optional"/> 
+       </identity-trust> 
+   </application-policy>
+   
+   <application-policy name="Permit_Required-Deny_Optional">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysPermitTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysDenyTrustModule" flag="optional"/> 
+       </identity-trust> 
+   </application-policy>
+   
+   <application-policy name="NotApplicable_Required-Deny_Optional">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysNotApplicableTrustModule"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysDenyTrustModule" flag="optional"/> 
+       </identity-trust> 
+   </application-policy>
+   
+   <application-policy name="Permit_Sufficient-Deny_Optional">  
+       <identity-trust>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysNotApplicableTrustModule"
+             flag="sufficient"/>
+         <trust-module code="org.jboss.security.identitytrust.modules.AlwaysDenyTrustModule" flag="optional"/> 
+       </identity-trust> 
+   </application-policy>
+   
+</policy> 

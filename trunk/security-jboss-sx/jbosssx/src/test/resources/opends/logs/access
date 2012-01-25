@@ -1,0 +1,25 @@
+[17/Oct/2008:11:09:09 -0500] CONNECT conn=0 from=127.0.0.1 to=127.0.0.1 protocol=LDAP
+[17/Oct/2008:11:09:09 -0500] BIND conn=0 op=0 msgID=1 type=SIMPLE dn="cn=Directory Manager"
+[17/Oct/2008:11:09:09 -0500] BIND conn=0 op=0 msgID=1 result="Success" authDN="cn=Directory Manager,cn=Root DNs,cn=config" etime=23
+[17/Oct/2008:11:09:09 -0500] UNBIND conn=0 op=1 msgID=2
+[17/Oct/2008:11:09:09 -0500] DISCONNECT conn=0 reason="Client Unbind"
+[17/Oct/2008:11:15:02 -0500] BIND conn=0 op=0 msgID=1 type=SIMPLE dn="cn=Directory Manager"
+[17/Oct/2008:11:15:02 -0500] BIND conn=0 op=0 msgID=1 result="Success" authDN="cn=Directory Manager,cn=Root DNs,cn=config" etime=19
+[17/Oct/2008:11:15:02 -0500] CONNECT conn=0 from=127.0.0.1 to=127.0.0.1 protocol=LDAP
+[17/Oct/2008:11:15:02 -0500] UNBIND conn=0 op=1 msgID=2
+[17/Oct/2008:11:15:02 -0500] DISCONNECT conn=0 reason="Client Unbind"
+[17/Oct/2008:16:58:06 -0500] CONNECT conn=0 from=127.0.0.1 to=127.0.0.1 protocol=LDAP
+[17/Oct/2008:16:58:07 -0500] BIND conn=0 op=0 msgID=1 type=SIMPLE dn="cn=Directory Manager"
+[17/Oct/2008:16:58:07 -0500] BIND conn=0 op=0 msgID=1 result="Success" authDN="cn=Directory Manager,cn=Root DNs,cn=config" etime=22
+[17/Oct/2008:16:58:07 -0500] UNBIND conn=0 op=1 msgID=2
+[17/Oct/2008:16:58:07 -0500] DISCONNECT conn=0 reason="Client Unbind"
+[17/Oct/2008:17:08:59 -0500] CONNECT conn=0 from=127.0.0.1 to=127.0.0.1 protocol=LDAP
+[17/Oct/2008:17:08:59 -0500] BIND conn=0 op=0 msgID=1 type=SIMPLE dn="cn=Directory Manager"
+[17/Oct/2008:17:08:59 -0500] BIND conn=0 op=0 msgID=1 result="Success" authDN="cn=Directory Manager,cn=Root DNs,cn=config" etime=19
+[17/Oct/2008:17:08:59 -0500] UNBIND conn=0 op=1 msgID=2
+[17/Oct/2008:17:08:59 -0500] DISCONNECT conn=0 reason="Client Unbind"
+[17/Oct/2008:19:52:40 -0500] CONNECT conn=0 from=127.0.0.1 to=127.0.0.1 protocol=LDAP
+[17/Oct/2008:19:52:40 -0500] BIND conn=0 op=0 msgID=1 type=SIMPLE dn="cn=Directory Manager"
+[17/Oct/2008:19:52:40 -0500] BIND conn=0 op=0 msgID=1 result="Success" authDN="cn=Directory Manager,cn=Root DNs,cn=config" etime=18
+[17/Oct/2008:19:52:41 -0500] UNBIND conn=0 op=1 msgID=2
+[17/Oct/2008:19:52:41 -0500] DISCONNECT conn=0 reason="Client Unbind"

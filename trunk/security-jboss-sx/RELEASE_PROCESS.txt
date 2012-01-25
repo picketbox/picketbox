@@ -1,0 +1,359 @@
+1 Create a branch for the version you want to release and make the release
+from the branch
+Eg: $> svn copy https://svn.jboss.org/repos/jbossas/projects/security/security-spi/trunk/  https://svn.jboss.org/repos/jbossas/projects/security/security-spi/branches/2.0.2.CR10 -m "SECURITY-298: branch spi"
+
+1.1  Check out the branch
+(Our release process will happen in the branch. Remember the mantra "branch
+and tag a release" )
+
+1.2. Update the spi version in parent/pom.xml to the latest released spi
+- Assuming we are doing a release of 2.0.2.CR7, we have already released 2.0.2.CR7 of SPI project and UPLOADED the generated pom/jars from the local repository to the write enabled maven svn repository (which gets automatically pushed to the http://repository.jboss.org/maven2)
+- So in parent/pom.xml,  change the spi version from SNAPSHOT to 2.0.2.CR7
+
+
+2. Do a dry run (Nothing will change)
+anil@localhost:~/security/security-jboss-sx/trunk$ mvn release:prepare -DdryRun=true
+
+
+[INFO] Scanning for projects...                                                     
+[INFO] Reactor build order:                                                         
+[INFO]   JBossSX - Parent                                                           
+[INFO]   JBoss Security Identity Implementation                                     
+[INFO]   JBoss Security ACL Implementation                                          
+[INFO]   JBoss Security Implementation for the JBAS                                 
+[INFO]   JBoss Security Client                                                      
+[INFO]   JBoss Microcontainer Security Integration                                  
+[INFO]   JBoss Security Implementation for the JBAS - Assembly                      
+[INFO]   JBoss Security Implementation for the JBAS - Parent                        
+[INFO] Searching repository for plugin with prefix: 'release'.                      
+WAGON_VERSION: 1.0-beta-2                                                           
+[INFO]
+------------------------------------------------------------------------     
+[INFO] Building JBoss Security Implementation for the JBAS - Parent                 
+[INFO]    task-segment: [release:prepare] (aggregator-style)                        
+[INFO]
+------------------------------------------------------------------------     
+[INFO] [release:prepare]                                                            
+[INFO] Verifying that there are no local modifications...                           
+[INFO] Executing: svn --non-interactive status                                      
+[INFO] Working directory: /home/anil/security/security-jboss-sx/trunk               
+[INFO] Checking dependencies and plugins for snapshots ...                          
+What is the release version for "JBossSX - Parent"?
+(org.jboss.security:jbosssx-parent) 2.0.2: : 2.0.2.CR7                                                                                  
+What is the release version for "JBoss Security Identity Implementation"?
+(org.jboss.security:identity-impl) 2.0.2: : 2.0.2.CR7                                                             
+What is the release version for "JBoss Security ACL Implementation"?
+(org.jboss.security:jboss-security-acl-impl) 2.0.2: : 2.0.2.CR7                                                        
+What is the release version for "JBoss Security Implementation for the JBAS"?
+(org.jboss.security:jbosssx-bare) 2.0.2: : 2.0.2.CR7                                                          
+What is the release version for "JBoss Security Client"?
+(org.jboss.security:jbosssx-client) 2.0.2: : 2.0.2.CR7                                                                             
+What is the release version for "JBoss Microcontainer Security Integration"?
+(org.jboss.security:jbosssx-mc-int) 2.0.2: : 2.0.2.CR7                                                         
+What is the release version for "JBoss Security Implementation for the JBAS -
+Assembly"? (org.jboss.security:jbosssx) 2.0.2: : 2.0.2.CR7                                                    
+What is the release version for "JBoss Security Implementation for the JBAS -
+Parent"? (org.jboss.security:jbosssx-pom) 2.0.2: : 2.0.2.CR7                                                  
+What is SCM release tag or label for "JBoss Security Implementation for the
+JBAS - Parent"? (org.jboss.security:jbosssx-pom) jbosssx-pom-2.0.2.CR7: :
+2.0.2.CR7                             
+What is the new development version for "JBossSX - Parent"?
+(org.jboss.security:jbosssx-parent) 2.0.3-SNAPSHOT: : 2.0.2-SNAPSHOT                                                            
+What is the new development version for "JBoss Security Identity
+Implementation"? (org.jboss.security:identity-impl) 2.0.3-SNAPSHOT: :
+2.0.2-SNAPSHOT                                       
+What is the new development version for "JBoss Security ACL Implementation"?
+(org.jboss.security:jboss-security-acl-impl) 2.0.3-SNAPSHOT: : 2.0.2-SNAPSHOT                                  
+What is the new development version for "JBoss Security Implementation for the
+JBAS"? (org.jboss.security:jbosssx-bare) 2.0.3-SNAPSHOT: : 2.0.2-SNAPSHOT                                    
+What is the new development version for "JBoss Security Client"?
+(org.jboss.security:jbosssx-client) 2.0.3-SNAPSHOT: : 2.0.2-SNAPSHOT                                                       
+What is the new development version for "JBoss Microcontainer Security
+Integration"? (org.jboss.security:jbosssx-mc-int) 2.0.3-SNAPSHOT: :
+2.0.2-SNAPSHOT                                   
+What is the new development version for "JBoss Security Implementation for the
+JBAS - Assembly"? (org.jboss.security:jbosssx) 2.0.3-SNAPSHOT: :
+2.0.2-SNAPSHOT                              
+What is the new development version for "JBoss Security Implementation for the
+JBAS - Parent"? (org.jboss.security:jbosssx-pom) 2.0.3-SNAPSHOT: :
+2.0.2-SNAPSHOT                            
+[INFO] Transforming 'JBossSX - Parent'...                                                     
+[INFO] Transforming 'JBoss Security Identity Implementation'...                               
+[INFO] Transforming 'JBoss Security ACL Implementation'...                                    
+[INFO] Updating identity-impl to 2.0.2.CR7                                                    
+[INFO] Ignoring artifact version update for expression: ${project.version}                    
+[INFO] Transforming 'JBoss Security Implementation for the JBAS'...                           
+[INFO] Updating jboss-security-acl-impl to 2.0.2.CR7                                          
+[INFO] Ignoring artifact version update for expression: ${project.version}                    
+[INFO] Updating identity-impl to 2.0.2.CR7                                                    
+[INFO] Ignoring artifact version update for expression: ${project.version}                    
+[INFO] Transforming 'JBoss Security Client'...                                                
+[INFO] Transforming 'JBoss Microcontainer Security Integration'...                            
+[INFO] Updating jbosssx-bare to 2.0.2.CR7                                                     
+[INFO] Ignoring artifact version update for expression: ${project.version}                    
+[INFO] Transforming 'JBoss Security Implementation for the JBAS - Assembly'...                
+[INFO] Transforming 'JBoss Security Implementation for the JBAS - Parent'...                  
+[INFO] Not generating release POMs                                                            
+[INFO] Executing preparation goals - since this is simulation mode it is
+running against the original project, not the rewritten ones                                                       
+[INFO] Executing goals 'clean verify'...                                                      
+[INFO] Executing: mvn clean verify --no-plugin-updates -P
+acl-heap-profile,jboss.repository,local-properties,local-properties                                                               
+[INFO] Scanning for projects...                                                               
+        [INFO] Reactor build order:                                                           
+        [INFO]   JBossSX - Parent                                                             
+        [INFO]   JBoss Security Identity Implementation                                       
+        [INFO]   JBoss Security ACL Implementation                                            
+        [INFO]   JBoss Security Implementation for the JBAS                                   
+        [INFO]   JBoss Security Client                                                        
+        [INFO]   JBoss Microcontainer Security Integration                                    
+        [INFO]   JBoss Security Implementation for the JBAS - Assembly                        
+        [INFO]   JBoss Security Implementation for the JBAS - Parent                          
+        WAGON_VERSION: 1.0-beta-2                                                             
+        [INFO]
+------------------------------------------------------------------------       
+        [INFO] Building JBossSX - Parent                                                      
+        [INFO]    task-segment: [clean, verify]                                               
+        [INFO]
+------------------------------------------------------------------------       
+        [INFO] [clean:clean]                                                                  
+        [INFO] [site:attach-descriptor]                                                       
+        [INFO] Preparing source:jar                                                           
+        [WARNING] Removing: jar from forked lifecycle, to prevent recursive
+invocation.       
+        [INFO] No goals needed for project - skipping                                         
+        [INFO] [source:jar {execution: attach-sources}]                                       
+        [INFO]
+------------------------------------------------------------------------       
+        [INFO] Building JBoss Security Identity Implementation                                
+        [INFO]    task-segment: [clean, verify]                                               
+        [INFO]
+------------------------------------------------------------------------       
+        [INFO] [clean:clean]                                                                  
+        [INFO] Deleting directory
+/home/anil/security/security-jboss-sx/trunk/identity/target 
+        [INFO] [resources:resources]                                                          
+        [INFO] Using default encoding to copy filtered resources.                             
+        [INFO] [compiler:compile]                                                             
+        [INFO] Compiling 7 source files to
+/home/anil/security/security-jboss-sx/trunk/identity/target/classes                                                                              
+        [INFO] [resources:testResources]                                                      
+        [INFO] Using default encoding to copy filtered resources.                             
+        [INFO] [compiler:testCompile]                                                         
+        [INFO] Compiling 3 source files to
+/home/anil/security/security-jboss-sx/trunk/identity/target/test-classes                                                                         
+        [INFO] [surefire:test]                                                                
+        [INFO] Surefire report directory:
+/home/anil/security/security-jboss-sx/trunk/identity/target/surefire-reports                                                                      
+                                                                                              
+        -------------------------------------------------------                               
+         T E S T S                                                                            
+        -------------------------------------------------------                               
+        Running org.jboss.test.identity.impl.RoleUnitTestCase                                 
+        Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.089
+sec             
+                                                                                              
+        Results :                                                                             
+                                                                                              
+        Tests run: 4, Failures: 0, Errors: 0, Skipped: 0                                      
+                                                                                              
+                                                                                              
+        -------------------------------------------------------                               
+         T E S T S                                                                            
+        -------------------------------------------------------                               
+        Running org.jboss.test.identity.impl.RoleGroupUnitTestCase                            
+        Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058
+sec             
+                                                                                              
+        Results :                                                                             
+                                                                                              
+        Tests run: 6, Failures: 0, Errors: 0, Skipped: 0                                      
+                                                                                              
+                                                                                              
+        -------------------------------------------------------                               
+         T E S T S                                                                            
+        -------------------------------------------------------                               
+        Running
+org.jboss.test.identity.impl.FilePersistenceStrategyUnitTestCase              
+        Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.062
+sec             
+                                                                                              
+        Results :                                                                             
+                                                                                              
+        Tests run: 13, Failures: 0, Errors: 0, Skipped: 0                                     
+                                                                                              
+        [INFO] [jar:jar]                                                                      
+        [INFO] Building jar:
+/home/anil/security/security-jboss-sx/trunk/identity/target/identity-impl.jar                                                                                  
+        [INFO] Preparing source:jar                                                           
+        [WARNING] Removing: jar from forked lifecycle, to prevent recursive
+invocation.       
+        [INFO] No goals needed for project - skipping                                         
+        [INFO] [source:jar {execution: attach-sources}]                                       
+        [INFO] Building jar:
+/home/anil/security/security-jboss-sx/trunk/identity/target/identity-impl-sources.jar                                                                          
+        [INFO]
+------------------------------------------------------------------------       
+        [INFO] Building JBoss Security ACL Implementation                                     
+        [INFO]    task-segment: [clean, verify]                                               
+        [INFO]
+------------------------------------------------------------------------       
+        [INFO] [clean:clean]                                                                  
+        [INFO] Deleting directory
+/home/anil/security/security-jboss-sx/trunk/acl/target      
+        [INFO] [resources:resources]                                                          
+        [INFO] Using default encoding to copy filtered resources.                             
+        [INFO] [compiler:compile]                                                             
+        [INFO] Compiling 10 source files to
+/home/anil/security/security-jboss-sx/trunk/acl/target/classes                                                                                  
+        [INFO] [resources:testResources]                                                      
+        [INFO] Using default encoding to copy filtered resources.                             
+        [INFO] [compiler:testCompile]                                                         
+        [INFO] Compiling 8 source files to
+/home/anil/security/security-jboss-sx/trunk/acl/target/test-classes                                                                              
+        [INFO] [surefire:test]                                                                
+        [INFO] Surefire report directory:
+/home/anil/security/security-jboss-sx/trunk/acl/target/surefire-reports                                                                           
+        Tests run: 8, Failures: 0, Errors: 0, Skipped: 0                                      
+                                                                                              
+------------------------------------------------------------------------       
+        [INFO] Reactor Summary:                                                               
+        [INFO]
+------------------------------------------------------------------------       
+        [INFO] JBossSX - Parent ...................................... SUCCESS
+[1.724s]       
+        [INFO] JBoss Security Identity Implementation ................ SUCCESS
+[4.644s]       
+        [INFO] JBoss Security ACL Implementation ..................... SUCCESS
+[17.265s]      
+        [INFO] JBoss Security Implementation for the JBAS ............ SUCCESS
+[1:04.979s]    
+        [INFO] JBoss Security Client ................................. SUCCESS
+[0.365s]       
+        [INFO] JBoss Microcontainer Security Integration ............. SUCCESS
+[22.385s]      
+        [INFO] JBoss Security Implementation for the JBAS - Assembly . SUCCESS
+[1.818s]
+        [INFO] JBoss Security Implementation for the JBAS - Parent ... SUCCESS
+[0.011s]
+        [INFO]
+------------------------------------------------------------------------
+        [INFO]
+------------------------------------------------------------------------
+        [INFO] BUILD SUCCESSFUL
+        [INFO]
+------------------------------------------------------------------------
+        [INFO] Total time: 1 minute 55 seconds
+        [INFO] Finished at: Mon Oct 13 09:47:05 CDT 2008
+        [INFO] Final Memory: 50M/292M
+        [INFO]
+------------------------------------------------------------------------
+        [INFO] Full run would be checking in 8 files with message:
+'[maven-release-plugin] prepare release 2.0.2.CR7'
+[INFO] Full run would be tagging /home/anil/security/security-jboss-sx/trunk
+with label: '2.0.2.CR7'
+[INFO] Transforming 'JBossSX - Parent'...
+[INFO] Transforming 'JBoss Security Identity Implementation'...
+[INFO] Transforming 'JBoss Security ACL Implementation'...
+[INFO] Transforming 'JBoss Security Implementation for the JBAS'...
+[INFO] Transforming 'JBoss Security Client'...
+[INFO] Transforming 'JBoss Microcontainer Security Integration'...
+[INFO] Transforming 'JBoss Security Implementation for the JBAS - Assembly'...
+[INFO] Transforming 'JBoss Security Implementation for the JBAS - Parent'...
+[INFO] Not removing release POMs
+[INFO] Full run would be checking in 8 files with message:
+'[maven-release-plugin] prepare for next development iteration'
+[INFO] Release preparation simulation complete.
+[INFO]
+------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO]
+------------------------------------------------------------------------
+[INFO] Total time: 3 minutes 2 seconds
+[INFO] Finished at: Mon Oct 13 09:47:06 CDT 2008
+[INFO] Final Memory: 17M/327M
+[INFO]
+------------------------------------------------------------------------
+
+
+3. Since you did a dry run of the release, we clean it up
+
+anil@localhost:~/security/security-jboss-sx/trunk$ mvn release:clean
+
+
+[INFO] Scanning for projects...
+[INFO] Reactor build order:
+[INFO]   JBossSX - Parent
+[INFO]   JBoss Security Identity Implementation
+[INFO]   JBoss Security ACL Implementation
+[INFO]   JBoss Security Implementation for the JBAS
+[INFO]   JBoss Security Client
+[INFO]   JBoss Microcontainer Security Integration
+[INFO]   JBoss Security Implementation for the JBAS - Assembly
+[INFO]   JBoss Security Implementation for the JBAS - Parent
+[INFO] Searching repository for plugin with prefix: 'release'.
+WAGON_VERSION: 1.0-beta-2
+[INFO]
+------------------------------------------------------------------------
+[INFO] Building JBoss Security Implementation for the JBAS - Parent
+[INFO]    task-segment: [release:clean] (aggregator-style)
+[INFO]
+------------------------------------------------------------------------
+[INFO] [release:clean]
+[INFO] Cleaning up after release...
+[INFO]
+------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO]
+------------------------------------------------------------------------
+[INFO] Total time: 3 seconds
+[INFO] Finished at: Mon Oct 13 09:52:13 CDT 2008
+[INFO] Final Memory: 13M/330M
+[INFO]
+------------------------------------------------------------------------
+
+
+4. Prepare the release  (you repeat the same steps as the release prepare dry
+run, except that this time maven will do something, like tagging and stuff)
+
+$> mvn release:prepare
+
+5. Perform the release
+anil@localhost:~/security/security-jboss-sx/trunk$ mvn release:perform
+[INFO] Scanning for projects...
+[INFO] Reactor build order:
+[INFO]   JBossSX - Parent
+[INFO]   JBoss Security Identity Implementation
+[INFO]   JBoss Security ACL Implementation
+[INFO]   JBoss Security Implementation for the JBAS
+[INFO]   JBoss Security Client
+[INFO]   JBoss Microcontainer Security Integration
+[INFO]   JBoss Security Implementation for the JBAS - Assembly
+[INFO]   JBoss Security Implementation for the JBAS - Parent
+[INFO] Searching repository for plugin with prefix: 'release'.
+WAGON_VERSION: 1.0-beta-2
+[INFO]
+------------------------------------------------------------------------
+[INFO] Building JBoss Security Implementation for the JBAS - Parent
+[INFO]    task-segment: [release:perform] (aggregator-style)
+[INFO]
+------------------------------------------------------------------------
+[INFO] [release:perform]
+[INFO] Checking out the project to perform the release ...
+[INFO] Executing: svn --non-interactive checkout
+https://svn.jboss.org/repos/jbossas/projects/security/security-jboss-sx/tags/2.0.2.CR7
+checkout
+[INFO] Working directory: /home/anil/security/security-jboss-sx/trunk/target
+
+
+
+6. Remember to go to your directory where you set up your local repository(it
+is not your local maven repository)
+where the released pom, jars are sent by the release plugin. You need to do 
+a svn checkin of the artifacts.
+
+
+
+REFERENCES
+JBoss Maven FAQ  [https://www.jboss.org/community/docs/DOC-11363]
+
