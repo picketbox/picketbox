@@ -72,7 +72,7 @@ import org.w3c.dom.NodeList;
  @author Dimitris.Andreadis@jboss.org
  @version $Revision$
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","rawtypes"})
 public class StateMachineParser
 {
    private static Logger log = Logger.getLogger(StateMachineParser.class);
@@ -80,9 +80,17 @@ public class StateMachineParser
    public StateMachine parse(URL source) throws Exception
    {
       // parse the XML document into a DOM structure
-      InputStream in = source.openConnection().getInputStream();
-      Element root = DOMUtils.parse(in);
-
+      InputStream in = null;
+      Element root = null;
+      try
+      {
+         in = source.openConnection().getInputStream();
+         root = DOMUtils.parse(in);
+      }
+      finally
+      {
+         safeClose(in);
+      }
       String description = root.getAttribute("description");
       HashMap nameToStateMap = new HashMap();
       HashMap nameToTransitionsMap = new HashMap();
@@ -152,5 +160,17 @@ public class StateMachineParser
 
       StateMachine sm = new StateMachine(states, startState, description);
       return sm;
+   }
+   private void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
    }
 }

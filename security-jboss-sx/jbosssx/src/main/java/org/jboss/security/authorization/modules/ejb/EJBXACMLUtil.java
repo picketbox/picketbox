@@ -23,6 +23,7 @@ package org.jboss.security.authorization.modules.ejb;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.List;
@@ -86,10 +87,20 @@ public class EJBXACMLUtil extends JBossXACMLUtil
   
       if(trace)
       {
-         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+         ByteArrayOutputStream baos = null;
+         try
+         {
+            baos = new ByteArrayOutputStream();
 
-         requestCtx.marshall(baos);
-         log.trace(new String(baos.toByteArray()));         
+            requestCtx.marshall(baos);
+            log.trace(new String(baos.toByteArray()));
+         }
+         catch(IOException e)
+         {}
+         finally
+         {
+            safeClose(baos);
+         }        
       }
       return requestCtx;
    }
@@ -210,5 +221,17 @@ public class EJBXACMLUtil extends JBossXACMLUtil
         }
      }  
      return subject;
-  }  
+  }
+  private void safeClose(OutputStream os)
+  {
+     try
+     {
+        if(os != null)
+        {
+           os.close();
+        }
+     }
+     catch(Exception e)
+     {}
+  }
 }

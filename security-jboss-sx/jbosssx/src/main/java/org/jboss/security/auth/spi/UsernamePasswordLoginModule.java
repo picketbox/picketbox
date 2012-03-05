@@ -22,6 +22,7 @@
 package org.jboss.security.auth.spi;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
@@ -521,4 +522,16 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
     */
    abstract protected String getUsersPassword() throws LoginException;
    
+   protected void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
 }

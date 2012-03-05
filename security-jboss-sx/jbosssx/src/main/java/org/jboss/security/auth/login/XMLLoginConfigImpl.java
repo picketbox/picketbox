@@ -433,18 +433,63 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
  
    private void loadSunConfig(URL sunConfig, ArrayList configNames) throws Exception
    {
-      InputStream is = sunConfig.openStream();
-      if (is == null)
-         throw new IOException(ErrorCodes.NULL_VALUE + "InputStream is null for: " + sunConfig);
+      InputStream is = null;
+      InputStreamReader configFile = null;
+      try
+      {
+         is = sunConfig.openStream();
+         if (is == null)
+            throw new IOException(ErrorCodes.NULL_VALUE + "InputStream is null for: " + sunConfig);
 
-      InputStreamReader configFile = new InputStreamReader(is);
-      boolean trace = log.isTraceEnabled();
-      SunConfigParser.doParse(configFile, this, trace);
+         configFile = new InputStreamReader(is);
+         boolean trace = log.isTraceEnabled();
+         SunConfigParser.doParse(configFile, this, trace);
+      }
+      finally
+      {
+         safeClose(configFile);
+         safeClose(is);
+      }
    }
  
    private void loadXMLConfig(URL loginConfigURL, ArrayList configNames) throws Exception
    {
-      StaxBasedConfigParser parser = new StaxBasedConfigParser();
-      parser.parse(loginConfigURL.openStream()); 
-   }  
+      InputStream is = null;
+      try
+      {
+         is = loginConfigURL.openStream();
+
+         StaxBasedConfigParser parser = new StaxBasedConfigParser();
+         parser.parse(is);
+      }
+      finally
+      {
+         safeClose(is);
+      }
+   }
+   
+   private void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
+   private void safeClose(InputStreamReader fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
 }

@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -58,8 +59,16 @@ public class KeyStoreUtil
     */
    public static KeyStore getKeyStore(File keyStoreFile, char[] storePass) throws GeneralSecurityException, IOException
    {
-      FileInputStream fis = new FileInputStream(keyStoreFile);
-      return getKeyStore(fis, storePass);
+      FileInputStream fis = null;
+      try
+      {
+         fis = new FileInputStream(keyStoreFile);
+         return getKeyStore(fis, storePass);  
+      }
+      finally
+      {
+         safeClose(fis);
+      }
    }
 
    /**
@@ -76,8 +85,16 @@ public class KeyStoreUtil
          throw new IllegalArgumentException( ErrorCodes.NULL_ARGUMENT + "Null fileURL");
 
       File file = new File(fileURL);
-      FileInputStream fis = new FileInputStream(file);
-      return getKeyStore(fis, storePass);
+      FileInputStream fis = null;
+      try
+      {
+         fis = new FileInputStream(file);
+         return getKeyStore(fis, storePass);
+      }
+      finally
+      {
+         safeClose(fis);
+      }
    }
 
    /**
@@ -93,7 +110,16 @@ public class KeyStoreUtil
       if (url == null)
          throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Null url");
 
-      return getKeyStore(url.openStream(), storePass);
+      InputStream is = null;
+      try
+      {
+         is = url.openStream();
+         return getKeyStore(is, storePass);
+      }
+      finally
+      {
+         safeClose(is);
+      }      
    }
 
    /**
@@ -179,9 +205,17 @@ public class KeyStoreUtil
       keystore.setCertificateEntry(alias, cert);
 
       // Save the new keystore contents
-      FileOutputStream out = new FileOutputStream(keystoreFile);
-      keystore.store(out, storePass);
-      out.close();
+      FileOutputStream out = null;
+      try
+      {
+         out = new FileOutputStream(keystoreFile);
+         keystore.store(out, storePass);
+         out.close();
+      }
+      finally
+      {
+         safeClose(out);
+      }
    }
 
    /**
@@ -208,5 +242,30 @@ public class KeyStoreUtil
          return new KeyPair(publicKey, (PrivateKey)key);
       }
       return null;
+   }
+   
+   private static void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
+   private static void safeClose(OutputStream os)
+   {
+      try
+      {
+         if(os != null)
+         {
+            os.close();
+         }
+      }
+      catch(Exception e)
+      {}
    }
 }

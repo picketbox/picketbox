@@ -25,6 +25,7 @@ import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 
 import org.jboss.logging.Logger;
@@ -68,25 +69,51 @@ public class TmpFilePassword
             break;
          }
       }
-      FileInputStream fis = new FileInputStream(passwordFile);
-      CharArrayWriter writer = new CharArrayWriter();
-      int b;
-      while( (b = fis.read()) >= 0 )
+      FileInputStream fis = null;
+      CharArrayWriter writer = null;
+      try
       {
-         if( b == '\r' || b == '\n' )
-            continue;
-         writer.write(b);
+         fis = new FileInputStream(passwordFile);
+         writer = new CharArrayWriter();
+         int b;
+         while( (b = fis.read()) >= 0 )
+         {
+            if( b == '\r' || b == '\n' )
+               continue;
+            writer.write(b);
+         }
       }
-      fis.close();
+      finally
+      {
+         safeClose(fis);
+      }
+      try
+      {
+         fis = new FileInputStream(passwordFile);
+         writer = new CharArrayWriter();
+         int b;
+         while( (b = fis.read()) >= 0 )
+         {
+            if( b == '\r' || b == '\n' )
+               continue;
+            writer.write(b);
+         }
+      }
+      finally
+      {
+         safeClose(fis);
+      }
+      
       char[] password = writer.toCharArray();
       writer.reset();
       for(int n = 0; n < password.length; n ++)
          writer.write('\0');
 
       // Overwrite the password file
+      RandomAccessFile raf = null;
       try
       {
-         RandomAccessFile raf = new RandomAccessFile(passwordFile, "rws");
+         raf = new RandomAccessFile(passwordFile, "rws");
          for(int i = 0; i < 10; i ++)
          {
             raf.seek(0);
@@ -101,6 +128,35 @@ public class TmpFilePassword
       {
          log.warn("Failed to zero the password file", e);
       }
+      finally
+      {
+         safeClose(raf);
+      }
       return password;
+   }
+   
+   private void safeClose(InputStream is)
+   {
+      try
+      {
+         if( is != null)
+         {
+            is.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
+   private void safeClose(RandomAccessFile f)
+   {
+      try
+      {
+         if(f != null)
+         {
+            f.close();
+         }
+      }
+      catch(Exception e)
+      {}
    }
 }

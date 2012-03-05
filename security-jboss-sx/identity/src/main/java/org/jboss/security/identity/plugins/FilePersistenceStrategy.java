@@ -24,9 +24,10 @@ package org.jboss.security.identity.plugins;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
 import org.jboss.security.identity.Identity;
 
@@ -57,6 +58,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy
    public Identity persistIdentity(Identity identity)
    {
       ObjectOutputStream oos = null;
+      FileOutputStream fos = null;
       try
       {
          File file = new File(path + File.separator + identity.getName());
@@ -65,31 +67,20 @@ public class FilePersistenceStrategy implements PersistenceStrategy
             // identity already exists
             return null;
          }
-         FileOutputStream fos = new FileOutputStream(file);
+         fos = new FileOutputStream(file);
          oos = new ObjectOutputStream(fos);
          oos.writeObject(identity);
          return identity;
       }
       catch (Exception e)
       {
-         //TODO
-         e.printStackTrace();
+         throw new RuntimeException(e);
       }
       finally
       {
-         if (oos != null)
-         {
-            try
-            {
-               oos.close();
-            }
-            catch (IOException e)
-            {
-            }
-         }
+         safeClose(oos);
+         safeClose(fos);
       }
-
-      return null;
    }
 
    /**
@@ -98,33 +89,23 @@ public class FilePersistenceStrategy implements PersistenceStrategy
    public Identity getIdentity(String name)
    {
       ObjectInputStream ois = null;
+      FileInputStream fis = null;
       try
       {
-         FileInputStream fis = new FileInputStream(path + File.separator + name);
+         fis = new FileInputStream(path + File.separator + name);
          ois = new ObjectInputStream(fis);
          Identity identity = (Identity) ois.readObject();
          return identity;
       }
       catch (Exception e)
       {
-         //TODO
-         e.printStackTrace();
+         throw new RuntimeException(e);
       }
       finally
       {
-         if (ois != null)
-         {
-            try
-            {
-               ois.close();
-            }
-            catch (IOException e)
-            {
-            }
-         }
+         safeClose(ois);
+         safeClose(fis);
       }
-
-      return null;
    }
 
    /**
@@ -150,4 +131,29 @@ public class FilePersistenceStrategy implements PersistenceStrategy
       return null;
    }
 
+   private void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
+
+   private void safeClose(OutputStream os)
+   {
+      try
+      {
+         if(os != null)
+         {
+            os.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
 }

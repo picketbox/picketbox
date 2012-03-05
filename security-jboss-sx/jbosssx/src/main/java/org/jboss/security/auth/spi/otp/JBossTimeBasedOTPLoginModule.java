@@ -195,11 +195,12 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
       
       //Load the otp-users.properties file
       ClassLoader tcl = SecurityActions.getContextClassLoader();
-      InputStream is = tcl.getResourceAsStream( "otp-users.properties" );
+      InputStream is = null;
       
       Properties otp = new Properties();
       try
       {
+    	 is = tcl.getResourceAsStream( "otp-users.properties" );
          otp.load( is );
       }
       catch (IOException e )
@@ -207,6 +208,10 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
          LoginException le = new LoginException( "Unable to load the otp users properties");
          le.initCause( e );
          throw le;
+      }
+      finally
+      {
+    	  safeClose(is);
       }
       
       String seed = otp.getProperty( username );
@@ -317,5 +322,17 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
             group.addMember( new SimplePrincipal( st.nextToken().trim() ) ); 
          }
       }
+   }
+   private void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
    }
 }

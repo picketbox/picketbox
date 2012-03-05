@@ -27,6 +27,7 @@ import java.security.acl.Group;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.security.auth.Subject;
@@ -77,8 +78,10 @@ public class JBossSecuritySubjectFactoryUnitTestCase extends TestCase
 
       AppConfigurationEntry[] securityDomain()
       {
+    	 Map<String,Object> options = new HashMap<String,Object>();
+    	 options.put("unauthenticatedIdentity", "guest");
          AppConfigurationEntry ace = new AppConfigurationEntry(TestLoginModule2.class.getName(),
-               AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, new HashMap<String, Object>());
+               AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options);
          AppConfigurationEntry[] entry = {ace};
          return entry;
       }
@@ -226,5 +229,12 @@ public class JBossSecuritySubjectFactoryUnitTestCase extends TestCase
          }
       }
    }
-
+   
+   public void testUnauthenticatedCaller() throws Exception
+   {
+	   JBossSecuritySubjectFactory subjectFactory = new JBossSecuritySubjectFactory();
+	   Subject subject = subjectFactory.createSubject("securityDomain");
+	   assertNotNull(subject);
+	   assertTrue(subject.getPrincipals().contains(new SimplePrincipal("guest")));
+   }
 }

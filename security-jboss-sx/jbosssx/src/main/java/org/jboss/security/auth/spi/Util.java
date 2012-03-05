@@ -233,11 +233,11 @@ public class Util
       Properties defaults = new Properties();
       if( defaultUrl != null )
       {
+         InputStream is = null; 
          try
          {
-            InputStream is = defaultUrl.openStream();
+            is = defaultUrl.openStream();
             defaults.load(is);
-            is.close();
             if (trace)
                log.trace("Loaded defaults, users="+defaults.keySet());
          }
@@ -245,6 +245,10 @@ public class Util
          {
             if (trace)
                log.trace("Failed to load defaults", e);
+         }
+         finally
+         {
+            safeClose(is);
          }
       }
 
@@ -264,8 +268,14 @@ public class Util
          }
          if (is != null)
          {
-            bundle.load(is);
-            is.close();
+            try
+            {
+               bundle.load(is);
+            }
+            finally
+            {
+               safeClose(is);
+            }
          }
          else
          {
@@ -351,8 +361,14 @@ public class Util
          }
          if (is != null)
          {
-            bundle.load(is);
-            is.close();
+            try
+            {
+               bundle.load(is);
+            }
+            finally
+            {
+               safeClose(is);
+            }
          }
          else
          {
@@ -571,5 +587,18 @@ public class Util
     public static byte[] fromb64(String str) throws NumberFormatException
     {
        return Base64Utils.fromb64(str); 
-    } 
+    }
+    
+    private static void safeClose(InputStream fis)
+    {
+       try
+       {
+          if(fis != null)
+          {
+             fis.close();
+          }
+       }
+       catch(Exception e)
+       {}
+    }
 }

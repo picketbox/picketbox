@@ -446,6 +446,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    @SuppressWarnings({"rawtypes", "unchecked"})
    private void loadKeyAndTrustStore() throws Exception
    {
+	  InputStream is = null;
       if (keyStorePassword != null)
       {
          if (keyStoreProvider != null)
@@ -465,13 +466,24 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
          }
          else
             keyStore = KeyStore.getInstance(keyStoreType);
-         InputStream is = null;
-         if ((!"PKCS11".equalsIgnoreCase(keyStoreType) || !"PKCS11IMPLKS".equalsIgnoreCase(keyStoreType))
-               && keyStoreURL != null)
+         is = null;
+         try
          {
-            is = keyStoreURL.openStream();
+        	 if ((!"PKCS11".equalsIgnoreCase(keyStoreType) || !"PKCS11IMPLKS".equalsIgnoreCase(keyStoreType))
+        			 && keyStoreURL != null)
+        	 {
+        		 is = keyStoreURL.openStream();
+        	 }
+        	 else
+        		 throw new RuntimeException(ErrorCodes.WRONG_VALUE + "keyStoreType");
+        	 
+        	 keyStore.load(is, keyStorePassword);
          }
-         keyStore.load(is, keyStorePassword);
+         finally
+         {
+        	 safeClose(is);
+         }
+         
          String algorithm = null;
          if (keyManagerFactoryAlgorithm != null)
             algorithm = keyManagerFactoryAlgorithm;
@@ -507,13 +519,23 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
          }
          else
             trustStore = KeyStore.getInstance(trustStoreType);
-         InputStream is = null;
-         if ((!"PKCS11".equalsIgnoreCase(trustStoreType) || !"PKCS11IMPLKS".equalsIgnoreCase(trustStoreType))
-               && trustStoreURL != null)
+         is = null;
+         try
          {
-            is = trustStoreURL.openStream();
+        	 if ((!"PKCS11".equalsIgnoreCase(trustStoreType) || !"PKCS11IMPLKS".equalsIgnoreCase(trustStoreType))
+        			 && trustStoreURL != null)
+        	 {
+        		 is = trustStoreURL.openStream();
+        	 }
+        	 else
+        		 throw new RuntimeException(ErrorCodes.WRONG_VALUE + "trustStoreType");
+
+        	 trustStore.load(is, trustStorePassword);
          }
-         trustStore.load(is, trustStorePassword);
+         finally
+         {
+        	 safeClose(is);
+         }
          String algorithm = null;
          if (trustManagerFactoryAlgorithm != null)
             algorithm = trustManagerFactoryAlgorithm;
@@ -540,4 +562,16 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       }
    }
 
+   private void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
 }

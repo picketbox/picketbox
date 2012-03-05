@@ -120,8 +120,14 @@ public class Util
       }
       if (is != null)
       {
-         bundle.load(is);
-         is.close();
+         try
+         {
+            bundle.load(is);
+         }
+         finally
+         {
+            safeClose(is);
+         }
       }
       else
       {
@@ -297,5 +303,17 @@ public class Util
          }
       }
    }
-
+   
+   private static void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
 }

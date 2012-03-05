@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -77,9 +78,10 @@ public class FilePassword
       else
       {
          FileOutputStream fos = null;
+         InputStream is = null;
          try
          {
-            InputStream is = url.openStream();
+            is = url.openStream();
             passwordFile = File.createTempFile("temp", null);
             passwordFile.deleteOnExit();
             fos = new FileOutputStream(passwordFile);
@@ -92,14 +94,8 @@ public class FilePassword
          }
          finally
          {
-            try
-            {
-               if (fos != null)
-                  fos.close();
-            }
-            catch (IOException e)
-            {
-            }
+            safeClose(fos);
+            safeClose(is);
          }
       }
    }
@@ -107,9 +103,10 @@ public class FilePassword
    public char[] toCharArray()
       throws IOException
    {
-      RandomAccessFile raf = new RandomAccessFile(passwordFile, "r");
+      RandomAccessFile raf = null;
       try
       {
+         raf = new RandomAccessFile(passwordFile, "r");
          char[] password = decode(raf);
          return password;
       }
@@ -118,6 +115,10 @@ public class FilePassword
          Logger log = Logger.getLogger(FilePassword.class);
          log.error("Failed to decode password file: "+passwordFile, e);
          throw new IOException(e.getMessage());
+      }
+      finally
+      {
+         safeClose(raf);
       }
    }
 
@@ -158,8 +159,45 @@ public class FilePassword
       passwordFile.writeInt(count);
       passwordFile.write(encode);
       passwordFile.close();
-
+   } 
+   
+   private static void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
    }
+   private void safeClose(OutputStream os)
+   {
+      try
+      {
+         if(os != null)
+         {
+            os.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
+   private void safeClose(RandomAccessFile raf)
+   {
+      try
+      {
+         if(raf != null)
+         {
+            raf.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
+   
    /** Write a password in opaque form to a file for use with the FilePassword
     * accessor in conjunction with the JaasSecurityDomain
     * {CLASS}org.jboss.security.plugins.FilePassword:password-file

@@ -54,8 +54,16 @@ public class PicketBoxConfiguration
    {
       if(configFileName == null)
          throw new ConfigurationFileNullException(ErrorCodes.NULL_ARGUMENT + "configFileName is null");
-      InputStream configStream = loadStream(configFileName);
-      load(configStream);   
+      InputStream configStream = null;
+      try
+      {
+         configStream = loadStream(configFileName);
+         load(configStream);
+      }   
+      finally
+      {
+         safeClose(configStream);
+      }
    }
    
    /**
@@ -131,5 +139,17 @@ public class PicketBoxConfiguration
             log.error("Exception loading " + configFileName + " as URL resource",e);
       }
       return configStream;
+   }
+   private void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
    }
 }

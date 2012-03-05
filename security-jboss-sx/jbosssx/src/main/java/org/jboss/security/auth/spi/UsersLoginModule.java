@@ -143,17 +143,24 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
          throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not found");
 
       super.log.trace("Properties file=" + url);
-
-      InputStream is = url.openStream();
-      if (is != null)
+      InputStream is = null;
+      try
       {
-         bundle = new Properties();
-         bundle.load(is);
+         is = url.openStream();
+         if (is != null)
+         {
+            bundle = new Properties();
+            bundle.load(is);
+         }
+         else
+         {
+            throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not avilable");
+         }
+         return bundle;
       }
-      else
+      finally
       {
-         throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not avilable");
+         safeClose(is);
       }
-      return bundle;
    }
 }

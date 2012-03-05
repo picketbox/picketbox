@@ -25,8 +25,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -165,6 +167,9 @@ public class PicketBoxSecurityVault implements SecurityVault
       if(encFileDir == null)
          throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Option ENC_FILE_DIR is missing");
 
+      FileInputStream fis = null, mapFile = null;
+      ObjectInputStream ois = null;
+      ObjectInputStream mapIS = null;
       try
       {
          decodedEncFileDir = StringUtil.getSystemPropertyAsString(encFileDir);
@@ -180,18 +185,25 @@ public class PicketBoxSecurityVault implements SecurityVault
             setUpVault(decodedEncFileDir);
          }
          
-         FileInputStream fis = new FileInputStream(decodedEncFileDir + ENCODED_FILE);
-         ObjectInputStream ois = new ObjectInputStream(fis);
+         fis = new FileInputStream(decodedEncFileDir + ENCODED_FILE);
+         ois = new ObjectInputStream(fis);
          theContent = (Map<String, byte[]>) ois.readObject();
 
-         FileInputStream mapFile = new FileInputStream(decodedEncFileDir + SHARED_KEY_FILE );
-         ObjectInputStream mapIS = new ObjectInputStream(mapFile);
+         mapFile = new FileInputStream(decodedEncFileDir + SHARED_KEY_FILE );
+         mapIS = new ObjectInputStream(mapFile);
          
          sharedKeyMap = (Map<String, byte[]>) mapIS.readObject();
       }
       catch (Exception e)
       { 
          throw new SecurityVaultException(e); 
+      }
+      finally
+      {
+    	  safeClose(fis);
+    	  safeClose(mapFile);
+    	  safeClose(ois);
+    	  safeClose(mapIS);
       }
 
       try
@@ -426,18 +438,36 @@ public class PicketBoxSecurityVault implements SecurityVault
    
    private void writeEncodedFile(String decodedEncFileDir) throws IOException
    {
-      FileOutputStream fos = new FileOutputStream(decodedEncFileDir + ENCODED_FILE);
-      ObjectOutputStream oos = new ObjectOutputStream(fos);
-      oos.writeObject(theContent);
-      oos.close();
+	  FileOutputStream fos = null;
+	  ObjectOutputStream oos = null;
+	  try
+	  {
+	      fos = new FileOutputStream(decodedEncFileDir + ENCODED_FILE);
+	      oos = new ObjectOutputStream(fos);
+	      oos.writeObject(theContent);
+	  }
+	  finally
+	  {
+		  safeClose(oos);
+		  safeClose(fos);
+	  }
    }
    
    private void writeSharedKeyFile(String decodedEncFileDir) throws IOException
    {
-      FileOutputStream fos = new FileOutputStream(decodedEncFileDir + SHARED_KEY_FILE);
-      ObjectOutputStream oos = new ObjectOutputStream(fos);
-      oos.writeObject(sharedKeyMap);
-      oos.close(); 
+	   FileOutputStream fos = null;
+	   ObjectOutputStream oos = null;
+	   try
+	   {
+		   fos = new FileOutputStream(decodedEncFileDir + SHARED_KEY_FILE);
+		   oos = new ObjectOutputStream(fos);
+		   oos.writeObject(sharedKeyMap);
+	   }
+      finally
+      {
+    	  safeClose(oos);
+    	  safeClose(fos);
+      } 
    }
    
    private boolean encodedFileExists(String decodedEncFileDir)
@@ -450,5 +480,31 @@ public class PicketBoxSecurityVault implements SecurityVault
    {
       File file = new File(dir);
       return file != null && file.exists();
+   }
+   
+   private void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
+
+   private void safeClose(OutputStream os)
+   {
+      try
+      {
+         if(os != null)
+         {
+            os.close();
+         }
+      }
+      catch(Exception e)
+      {}
    }
 }

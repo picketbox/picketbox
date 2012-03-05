@@ -22,6 +22,8 @@
 package org.jboss.security.authorization.modules.web;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Enumeration;
@@ -62,20 +64,20 @@ public class WebXACMLUtil extends JBossXACMLUtil
    @SuppressWarnings("unchecked")
    public RequestContext createXACMLRequest(HttpServletRequest request,
          RoleGroup callerRoles) throws Exception
-   { 
+         { 
       if(request == null)
          throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Http Request is null");
       if(callerRoles == null)
          throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roles is null");
       String httpMethod = request.getMethod();
       String action = "GET".equals(httpMethod) ? "read" : "write";
-   
+
       //Non-standard uri
       String actionURIBase = "urn:oasis:names:tc:xacml:2.0:request-param:attribute:";
-      
+
       Principal principal = request.getUserPrincipal(); 
-      
-      
+
+
       RequestContext requestCtx = RequestResponseContextFactory.createRequestCtx();
 
       //Create a subject type
@@ -85,7 +87,7 @@ public class WebXACMLUtil extends JBossXACMLUtil
                   XACMLConstants.ATTRIBUTEID_SUBJECT_ID, 
                   "jboss.org",
                   principal.getName()));
-      
+
       List<Role> rolesList = callerRoles.getRoles();
       if(rolesList != null)
       {
@@ -126,12 +128,12 @@ public class WebXACMLUtil extends JBossXACMLUtil
                      "jboss.org", 
                      paramValue));  
       }
-      
-      
+
+
       //Create an Environment Type (Optional)
       EnvironmentType environmentType = new EnvironmentType();
       environmentType.getAttribute().add( RequestAttributeFactory.createDateTimeAttributeType(
-                                       XACMLConstants.ATTRIBUTEID_CURRENT_TIME, null));
+            XACMLConstants.ATTRIBUTEID_CURRENT_TIME, null));
 
       //Create a Request Type
       RequestType requestType = new RequestType();
@@ -141,14 +143,38 @@ public class WebXACMLUtil extends JBossXACMLUtil
       requestType.setEnvironment(environmentType);
 
       requestCtx.setRequest(requestType);
-      
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      
+
+
       if(trace)
       {
-         requestCtx.marshall(baos);
-         log.trace(new String(baos.toByteArray()));         
+         ByteArrayOutputStream baos = null;
+         try
+         {
+            baos = new ByteArrayOutputStream();
+            requestCtx.marshall(baos);
+            log.trace(new String(baos.toByteArray()));
+         }
+         catch(IOException e)
+         {  
+         }
+         finally
+         {
+            safeClose(baos);
+         }
       }
       return requestCtx;
- }  
+   }
+   
+   private void safeClose(OutputStream os)
+   {
+      try
+      {
+         if(os != null)
+         {
+            os.close();
+         }
+      }
+      catch(Exception e)
+      {}
+   }
 }

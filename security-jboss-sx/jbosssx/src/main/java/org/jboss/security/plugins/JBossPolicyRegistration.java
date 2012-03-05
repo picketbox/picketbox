@@ -92,16 +92,22 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
     */
    public void registerPolicy(String contextID, String type, URL location)
    {
+      InputStream is = null;
       try
       {
          if (trace)
             log.trace("Registering policy for contextId:" + contextID + " type: " + type + "and location:"
                   + location.getPath());
-         registerPolicy(contextID, type, location.openStream());
+         is = location.openStream();
+         registerPolicy(contextID, type, is);
       }
       catch (Exception e)
       {
          log.debug("Error in registering policy:", e);
+      }
+      finally
+      {
+         safeClose(is);
       }
    }
 
@@ -172,5 +178,17 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
             throw new RuntimeException(e);
          }
       }
+   }
+   private void safeClose(InputStream fis)
+   {
+      try
+      {
+         if(fis != null)
+         {
+            fis.close();
+         }
+      }
+      catch(Exception e)
+      {}
    }
 }
