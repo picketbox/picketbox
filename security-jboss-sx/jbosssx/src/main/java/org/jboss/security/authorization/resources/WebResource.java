@@ -191,12 +191,20 @@ public class WebResource extends JavaEEResource
          for(;enparam.hasMoreElements();)
          {
             String paramName = (String)enparam.nextElement();
-            String[] paramValues = httpRequest.getParameterValues(paramName);
-            int len = paramValues != null ? paramValues.length : 0;
-            for(int i = 0 ; i < len ; i++)
-               sb.append(paramValues[i]).append("::"); 
+            sb.append(paramName).append("=");
+            if (paramName.equalsIgnoreCase("j_password"))
+            {
+               sb.append("***");
+            }
+            else
+            {
+               String[] paramValues = httpRequest.getParameterValues(paramName);
+               int len = paramValues != null ? paramValues.length : 0;
+               for(int i = 0 ; i < len ; i++)
+                  sb.append(paramValues[i]).append("::");
+            }
             sb.append(",");
-         } 
+         }
       } 
       //Append Request attribute information
       if(auditFlag.contains("attributes"))
