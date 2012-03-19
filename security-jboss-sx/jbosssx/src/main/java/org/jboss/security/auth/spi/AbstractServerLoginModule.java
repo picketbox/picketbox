@@ -25,7 +25,9 @@ package org.jboss.security.auth.spi;
 import java.lang.reflect.Constructor;
 import java.security.Principal;
 import java.security.acl.Group;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -73,6 +75,23 @@ import org.jboss.security.SimplePrincipal;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractServerLoginModule implements LoginModule
 {
+   // Parameter checking
+   //   All valid options for a module should be listed similarly to this
+   //   Each subclass should call addValidOptions(final String[] moduleValidOptions) from within
+   //   their initialize method BEFORE calling super.initialize()
+   private static final String PASSWORD_STACKING = "password-stacking";
+   private static final String USE_FIRST_PASSWORD = "useFirstPass";
+   private static final String PRINCIPAL_CLASS = "principalClass";
+   private static final String UNAUTHENTICATED_IDENTITY = "unauthenticatedIdentity";
+  
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   PASSWORD_STACKING,USE_FIRST_PASSWORD,PRINCIPAL_CLASS,UNAUTHENTICATED_IDENTITY,
+	   SecurityConstants.SECURITY_DOMAIN_OPTION
+   };
+   
+   private HashSet<String> validOptions;
+   
    protected Subject subject;
    protected CallbackHandler callbackHandler; 
    protected Map sharedState; 
@@ -131,20 +150,27 @@ public abstract class AbstractServerLoginModule implements LoginModule
          log.trace("Security domain: " + 
            (String)options.get(SecurityConstants.SECURITY_DOMAIN_OPTION));         
       }
-      
+	  
+      // if the set is null, the subclass did not implement checking for valid options, so skip altogether to avoid false alarms
+      if (validOptions != null)
+      {
+    	  // otherwise, add our own and check all options against the "valid" list
+         addValidOptions(ALL_VALID_OPTIONS);
+         checkOptions();
+      }      
       /* Check for password sharing options. Any non-null value for
          password_stacking sets useFirstPass as this module has no way to
          validate any shared password.
       */
-      String passwordStacking = (String) options.get("password-stacking");
-      if( passwordStacking != null && passwordStacking.equalsIgnoreCase("useFirstPass") )
+      String passwordStacking = (String) options.get(PASSWORD_STACKING);
+      if( passwordStacking != null && passwordStacking.equalsIgnoreCase(USE_FIRST_PASSWORD) )
          useFirstPass = true;
 
       // Check for a custom Principal implementation
-      principalClassName = (String) options.get("principalClass");
+      principalClassName = (String) options.get(PRINCIPAL_CLASS);
 
       // Check for unauthenticatedIdentity option.
-      String name = (String) options.get("unauthenticatedIdentity");
+      String name = (String) options.get(UNAUTHENTICATED_IDENTITY);
       if( name != null )
       {
          try
@@ -379,5 +405,35 @@ public abstract class AbstractServerLoginModule implements LoginModule
          }
       }
       return callerGroup;
+   }
+
+   /**
+    * Each subclass should call this from within their initialize method BEFORE calling super.initialize()
+    * The base class will then check the options
+    * 
+    * @param moduleValidOptions : the list of options the subclass supports
+    */
+   protected void addValidOptions(final String[] moduleValidOptions)
+   {
+	   if (validOptions==null)
+	   {
+          validOptions = new HashSet<String>();
+	   }
+	   validOptions.addAll(Arrays.asList(moduleValidOptions));
+   }
+   
+   /**
+    * checks the collected valid options against the options passed in
+    * Override when there are special needs like for the SimpleUsersLoginModule
+    */
+   protected void checkOptions()
+   {
+      for (Object key : options.keySet())
+      {
+         if (!validOptions.contains((String)key))
+         {
+            log.warn("Invalid or misspelled option: " + key);
+         }
+      }
    }
 }
