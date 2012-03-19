@@ -22,7 +22,8 @@
 package org.jboss.security.auth.spi;
 
 import java.util.Map;
-
+import java.util.HashSet;
+import java.util.Arrays;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
@@ -40,7 +41,12 @@ import org.jboss.security.SecurityConstants;
  */
 public class DisabledLoginModule implements LoginModule
 {
-
+   // see AbstractServerLoginModule
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   SecurityConstants.SECURITY_DOMAIN_OPTION
+   };
+   
    private static Logger log = Logger.getLogger(DisabledLoginModule.class);
    
    protected String securityDomain;
@@ -48,7 +54,19 @@ public class DisabledLoginModule implements LoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
          Map<String, ?> options)
    {
-      securityDomain = (String) options.get(SecurityConstants.SECURITY_DOMAIN_OPTION);
+	  /* TODO: this module should really extend AbstractServerLoginModule where the options check is integrated.
+	   * the code here has been intentionally kept identical
+	   */
+      HashSet<String> validOptions = new HashSet<String>(Arrays.asList(ALL_VALID_OPTIONS));
+      for (Object key : options.keySet())
+      {
+    	 if (!validOptions.contains((String)key))
+         {
+            log.warn("Invalid or misspelled option: " + key);
+         }
+      }
+	  
+	  securityDomain = (String) options.get(SecurityConstants.SECURITY_DOMAIN_OPTION);
    }
  
    public boolean login() throws LoginException

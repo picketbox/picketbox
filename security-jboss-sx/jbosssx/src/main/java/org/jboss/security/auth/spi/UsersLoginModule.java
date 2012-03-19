@@ -56,7 +56,15 @@ import org.jboss.security.ErrorCodes;
  */
 public class UsersLoginModule extends UsernamePasswordLoginModule
 {
-   /** The name of the properties resource containing user/passwords */
+    // see AbstractServerLoginModule
+   private static final String USER_PROPERTIES = "usersProperties";
+	   
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   USER_PROPERTIES
+   };
+   
+	/** The name of the properties resource containing user/passwords */
    private String usersRsrcName = "users.properties";
    /** The users.properties values */
    private Properties users;
@@ -70,11 +78,12 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler, 
          Map<String,?> sharedState, Map<String,?> options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
       try
       {
          // Check for usersProperties & rolesProperties
-         String option = (String) options.get("usersProperties");
+         String option = (String) options.get(USER_PROPERTIES);
          if (option != null)
             usersRsrcName = option;
 
@@ -154,7 +163,7 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
          }
          else
          {
-            throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not avilable");
+            throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not available");
          }
          return bundle;
       }

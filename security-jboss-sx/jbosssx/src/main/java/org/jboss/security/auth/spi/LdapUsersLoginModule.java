@@ -51,28 +51,29 @@ import org.jboss.security.Util;
  */
 public class LdapUsersLoginModule extends UsernamePasswordLoginModule
 {
+   // see AbstractServerLoginModule
    private static final String BIND_DN = "bindDN";
-
    private static final String BIND_CREDENTIAL = "bindCredential";
-
    private static final String BASE_CTX_DN = "baseCtxDN";
-
    private static final String BASE_FILTER_OPT = "baseFilter";
-
    private static final String SEARCH_TIME_LIMIT_OPT = "searchTimeLimit";
-
    private static final String SEARCH_SCOPE_OPT = "searchScope";
-
    private static final String DISTINGUISHED_NAME_ATTRIBUTE_OPT = "distinguishedNameAttribute";
-
    private static final String PARSE_USERNAME = "parseUsername";
-   
    private static final String USERNAME_BEGIN_STRING = "usernameBeginString";
-   
    private static final String USERNAME_END_STRING = "usernameEndString";
-   
    private static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
-
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   BIND_DN,BIND_CREDENTIAL,BASE_CTX_DN,BASE_FILTER_OPT,
+	   SEARCH_TIME_LIMIT_OPT,SEARCH_SCOPE_OPT,
+	   DISTINGUISHED_NAME_ATTRIBUTE_OPT,
+	   PARSE_USERNAME,USERNAME_BEGIN_STRING,USERNAME_END_STRING,ALLOW_EMPTY_PASSWORDS,
+	   
+	   Context.INITIAL_CONTEXT_FACTORY,Context.SECURITY_AUTHENTICATION,Context.SECURITY_PROTOCOL,
+	   Context.PROVIDER_URL,Context.SECURITY_PRINCIPAL,Context.SECURITY_CREDENTIALS
+   };
+   
    protected String bindDN;
 
    protected String bindCredential;
@@ -134,6 +135,7 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
          Map<String, ?> options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
       trace = log.isTraceEnabled();
       bindDN = (String) options.get(BIND_DN);
@@ -232,7 +234,12 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
          // Validate the user by binding against the userDN
          bindDNAuthentication(ctx, username, credential, baseDN, baseFilter);
       }
-      finally
+      catch(Exception e)
+      {
+    	  log.warn(e);
+    	  throw e;
+      }
+	  finally
       {
          if (ctx != null)
             ctx.close();

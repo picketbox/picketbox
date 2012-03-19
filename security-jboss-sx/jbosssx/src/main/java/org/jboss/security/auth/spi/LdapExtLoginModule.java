@@ -145,44 +145,41 @@ import org.jboss.security.vault.SecurityVaultUtil;
 @SuppressWarnings("rawtypes")
 public class LdapExtLoginModule extends UsernamePasswordLoginModule
 {
+   // see AbstractServerLoginModule
    private static final String ROLES_CTX_DN_OPT = "rolesCtxDN";
-
    private static final String ROLE_ATTRIBUTE_ID_OPT = "roleAttributeID";
-
    private static final String ROLE_ATTRIBUTE_IS_DN_OPT = "roleAttributeIsDN";
-
    private static final String ROLE_NAME_ATTRIBUTE_ID_OPT = "roleNameAttributeID";
-   
    private static final String PARSE_ROLE_NAME_FROM_DN_OPT = "parseRoleNameFromDN";
-
    private static final String BIND_DN = "bindDN";
-
    private static final String BIND_CREDENTIAL = "bindCredential";
-
    private static final String BASE_CTX_DN = "baseCtxDN";
-
    private static final String BASE_FILTER_OPT = "baseFilter";
-
    private static final String ROLE_FILTER_OPT = "roleFilter";
-
    private static final String ROLE_RECURSION = "roleRecursion";
-
    private static final String DEFAULT_ROLE = "defaultRole";
-
    private static final String SEARCH_TIME_LIMIT_OPT = "searchTimeLimit";
-
    private static final String SEARCH_SCOPE_OPT = "searchScope";
-
    private static final String SECURITY_DOMAIN_OPT = "jaasSecurityDomain";
-
    private static final String DISTINGUISHED_NAME_ATTRIBUTE_OPT = "distinguishedNameAttribute";
-
    private static final String PARSE_USERNAME = "parseUsername";
-   
    private static final String USERNAME_BEGIN_STRING = "usernameBeginString";
-   
    private static final String USERNAME_END_STRING = "usernameEndString";
-
+   private static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   ROLES_CTX_DN_OPT,ROLE_ATTRIBUTE_ID_OPT,
+	   ROLE_NAME_ATTRIBUTE_ID_OPT,PARSE_ROLE_NAME_FROM_DN_OPT,
+	   BIND_DN,BIND_CREDENTIAL,BASE_CTX_DN,BASE_FILTER_OPT,
+	   ROLE_FILTER_OPT,ROLE_RECURSION,DEFAULT_ROLE,
+	   SEARCH_TIME_LIMIT_OPT,SEARCH_SCOPE_OPT,SECURITY_DOMAIN_OPT,
+	   DISTINGUISHED_NAME_ATTRIBUTE_OPT,PARSE_USERNAME,USERNAME_BEGIN_STRING,USERNAME_END_STRING,
+	   ALLOW_EMPTY_PASSWORDS,
+	   
+	   Context.INITIAL_CONTEXT_FACTORY,Context.SECURITY_AUTHENTICATION,Context.SECURITY_PROTOCOL,
+	   Context.PROVIDER_URL,Context.SECURITY_PRINCIPAL,Context.SECURITY_CREDENTIALS
+   };
+   
    protected String bindDN;
 
    protected String bindCredential;
@@ -229,6 +226,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    @SuppressWarnings("unchecked")
    public void initialize(Subject subject, CallbackHandler callbackHandler, Map sharedState, Map options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
       trace = log.isTraceEnabled();
    }
@@ -294,7 +292,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          {
             // Check for an allowEmptyPasswords option
             boolean allowEmptyPasswords = true;
-            String flag = (String) options.get("allowEmptyPasswords");
+            String flag = (String) options.get(ALLOW_EMPTY_PASSWORDS);
             if (flag != null)
                allowEmptyPasswords = Boolean.valueOf(flag).booleanValue();
             if (allowEmptyPasswords == false)
@@ -444,7 +442,12 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          constraints.setTimeLimit(searchTimeLimit);
          rolesSearch(ctx, constraints, username, userDN, recursion, 0);
       }
-      finally
+      catch(Exception e)
+      {
+    	  log.warn(e);
+    	  throw e;
+      }
+	  finally
       {
          if (ctx != null)
             ctx.close();

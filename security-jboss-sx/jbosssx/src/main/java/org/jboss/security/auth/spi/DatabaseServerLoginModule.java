@@ -71,6 +71,18 @@ import org.jboss.security.plugins.TransactionManagerLocator;
  */
 public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
 {
+   // see AbstractServerLoginModule
+   private static final String DS_JNDI_NAME = "dsJndiName";
+   private static final String ROLES_QUERY = "rolesQuery";
+   private static final String SUSPEND_RESUME = "suspendResume";
+   private static final String PRINCIPALS_QUERY = "principalsQuery";
+   private static final String TRANSACTION_MANAGER_JNDI_NAME = "transactionManagerJndiName";
+
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   DS_JNDI_NAME,ROLES_QUERY,SUSPEND_RESUME,PRINCIPALS_QUERY
+   };
+   
    /** The JNDI name of the DataSource to use */
    protected String dsJndiName;
    /** The sql query to obtain the user password */
@@ -98,33 +110,38 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map<String,?> sharedState, Map<String,?> options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
-      dsJndiName = (String) options.get("dsJndiName");
+      dsJndiName = (String) options.get(DS_JNDI_NAME);
       if( dsJndiName == null )
          dsJndiName = "java:/DefaultDS";
-      Object tmp = options.get("principalsQuery");
+      Object tmp = options.get(PRINCIPALS_QUERY);
       if( tmp != null )
          principalsQuery = tmp.toString();
-      tmp = options.get("rolesQuery");
+      tmp = options.get(ROLES_QUERY);
       if( tmp != null )
          rolesQuery = tmp.toString();
-      tmp = options.get("suspendResume");
+      tmp = options.get(SUSPEND_RESUME);
       if( tmp != null )
          suspendResume = Boolean.valueOf(tmp.toString()).booleanValue();
-      if (trace)
+	  
+      //Get the Transaction Manager JNDI Name
+      String jname = (String) options.get(TRANSACTION_MANAGER_JNDI_NAME);
+      if(jname != null)
+         this.TX_MGR_JNDI_NAME = jname;
+      
+	  if (trace)
       {
          log.trace("DatabaseServerLoginModule, dsJndiName="+dsJndiName);
          log.trace("principalsQuery="+principalsQuery);
          if (rolesQuery != null)
             log.trace("rolesQuery="+rolesQuery);
          log.trace("suspendResume="+suspendResume);
+         if(jname != null)
+            log.trace("transactionManagerJndiName="+jname);
       }
-      //Get the Transaction Manager JNDI Name
-      String jname = (String) options.get("transactionManagerJndiName");
-      if(jname != null)
-         this.TX_MGR_JNDI_NAME = jname;
-      
-      try
+
+	  try
       {
          if(this.suspendResume)
             tm = this.getTransactionManager();

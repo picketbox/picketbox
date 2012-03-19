@@ -69,6 +69,14 @@ import org.jboss.security.ErrorCodes;
  */
 public class XMLLoginModule extends UsernamePasswordLoginModule
 {
+   // see AbstractServerLoginModule
+   private static final String USER_INFO = "userInfo";
+	   
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   USER_INFO
+   };
+   
    /** The name of the properties resource containing user/passwords */
    private Users users;
 
@@ -80,10 +88,11 @@ public class XMLLoginModule extends UsernamePasswordLoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map<String,?> sharedState, Map<String,?> options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
       try
       {
-         users = (Users) options.get("userInfo");
+         users = (Users) options.get(USER_INFO);
       }
       catch (Exception e)
       {

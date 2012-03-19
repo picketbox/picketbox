@@ -83,5 +83,15 @@ public class SimpleUsersLoginModule extends PropertiesUsersLoginModule
    {
       return !invalidProperties.contains(key);
    }
-
+   
+   /**
+	* This login module cannot participate in the checking of valid options
+	* in AbstractServerLoginModule.
+	* Hence this override to prevent false alarms
+	*/
+   @Override
+   protected void checkOptions()
+   {
+	   // do nothing
+   }
 }

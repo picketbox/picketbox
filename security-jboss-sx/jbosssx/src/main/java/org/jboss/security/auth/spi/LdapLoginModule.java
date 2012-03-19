@@ -26,6 +26,7 @@ import java.security.acl.Group;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.management.ObjectName;
@@ -38,6 +39,8 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.security.auth.login.LoginException;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
 
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.vault.SecurityVaultUtil;
@@ -167,34 +170,44 @@ import org.jboss.security.vault.SecurityVaultUtil;
 @SuppressWarnings("rawtypes")
 public class LdapLoginModule extends UsernamePasswordLoginModule
 {
+   // see AbstractServerLoginModule
    private static final String PRINCIPAL_DN_PREFIX_OPT = "principalDNPrefix";
-
    private static final String PRINCIPAL_DN_SUFFIX_OPT = "principalDNSuffix";
-
    private static final String ROLES_CTX_DN_OPT = "rolesCtxDN";
-
    private static final String USER_ROLES_CTX_DN_ATTRIBUTE_ID_OPT = "userRolesCtxDNAttributeName";
-
    private static final String UID_ATTRIBUTE_ID_OPT = "uidAttributeID";
-
    private static final String ROLE_ATTRIBUTE_ID_OPT = "roleAttributeID";
-
    private static final String MATCH_ON_USER_DN_OPT = "matchOnUserDN";
-
    private static final String ROLE_ATTRIBUTE_IS_DN_OPT = "roleAttributeIsDN";
-
    private static final String ROLE_NAME_ATTRIBUTE_ID_OPT = "roleNameAttributeID";
-
    private static final String SEARCH_TIME_LIMIT_OPT = "searchTimeLimit";
-
    private static final String SEARCH_SCOPE_OPT = "searchScope";
-
    private static final String SECURITY_DOMAIN_OPT = "jaasSecurityDomain";
-
+   private static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
+   
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   PRINCIPAL_DN_PREFIX_OPT,PRINCIPAL_DN_SUFFIX_OPT,ROLES_CTX_DN_OPT,USER_ROLES_CTX_DN_ATTRIBUTE_ID_OPT,
+	   UID_ATTRIBUTE_ID_OPT,ROLE_ATTRIBUTE_ID_OPT,MATCH_ON_USER_DN_OPT,
+	   ROLE_ATTRIBUTE_IS_DN_OPT,ROLE_NAME_ATTRIBUTE_ID_OPT,
+	   SEARCH_TIME_LIMIT_OPT,SEARCH_SCOPE_OPT,SECURITY_DOMAIN_OPT,ALLOW_EMPTY_PASSWORDS,
+	   
+	   Context.INITIAL_CONTEXT_FACTORY,Context.SECURITY_AUTHENTICATION,Context.SECURITY_PROTOCOL,
+	   Context.PROVIDER_URL,Context.SECURITY_PRINCIPAL,Context.SECURITY_CREDENTIALS
+   };
+   
    public LdapLoginModule()
    {
    }
 
+   @Override
+   public void initialize(Subject subject, CallbackHandler callbackHandler,
+      Map<String,?> sharedState, Map<String,?> options)
+   {
+      addValidOptions(ALL_VALID_OPTIONS);
+      super.initialize(subject, callbackHandler, sharedState, options);
+   }
+   
    private transient SimpleGroup userRoles = new SimpleGroup("Roles");
 
    /** Overridden to return an empty password string as typically one cannot
@@ -237,7 +250,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
          {
             // Check for an allowEmptyPasswords option
             boolean allowEmptyPasswords = true;
-            String flag = (String) options.get("allowEmptyPasswords");
+            String flag = (String) options.get(ALLOW_EMPTY_PASSWORDS);
             if (flag != null)
                allowEmptyPasswords = Boolean.valueOf(flag).booleanValue();
             if (allowEmptyPasswords == false)

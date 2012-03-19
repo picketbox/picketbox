@@ -45,6 +45,16 @@ import org.jboss.security.ErrorCodes;
  */
 public class CertRolesLoginModule extends BaseCertLoginModule
 {
+   // see AbstractServerLoginModule
+   private static final String ROLES_PROPERTIES = "rolesProperties";
+   private static final String DEFAULT_ROLES_PROPERTIES = "defaultRolesProperties";
+   private static final String ROLE_GROUP_SEPERATOR = "roleGroupSeperator";
+
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   ROLES_PROPERTIES,DEFAULT_ROLES_PROPERTIES,ROLE_GROUP_SEPERATOR
+   };
+   
    /** The name of the default properties resource containing user/roles */
    private String defaultRolesRsrcName = "defaultRoles.properties";
    /**
@@ -77,6 +87,7 @@ public class CertRolesLoginModule extends BaseCertLoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map<String,?> sharedState, Map<String,?> options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
       trace = log.isTraceEnabled();
       if( trace )
@@ -84,13 +95,13 @@ public class CertRolesLoginModule extends BaseCertLoginModule
 
       try
       {
-         String option = (String) options.get("rolesProperties");
+         String option = (String) options.get(ROLES_PROPERTIES);
          if (option != null)
             rolesRsrcName = option;
-         option = (String) options.get("defaultRolesProperties");
+         option = (String) options.get(DEFAULT_ROLES_PROPERTIES);
          if (option != null)
             defaultRolesRsrcName = option;
-         option = (String) options.get("roleGroupSeperator");
+         option = (String) options.get(ROLE_GROUP_SEPERATOR);
          if( option != null )
             roleGroupSeperator = option.charAt(0);
          // Load the properties file that contains the list of users and passwords

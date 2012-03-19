@@ -22,6 +22,8 @@
 package org.jboss.security.auth.spi;
 
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Arrays;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -29,6 +31,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.jboss.security.ErrorCodes;
+import org.jboss.logging.Logger;
 
 /** A proxy LoginModule that loads a delegate LoginModule using
 the current thread context class loader. The purpose of this
@@ -44,7 +47,16 @@ the non-classpath LoginModule.
 */
 public class ProxyLoginModule implements LoginModule
 {
-    private String moduleName;
+    // see AbstractServerLoginModule
+    private static final String MODULE_NAME = "moduleName";
+
+    private static final String[] ALL_VALID_OPTIONS =
+    {
+	    MODULE_NAME
+    };
+
+    protected Logger log;
+	private String moduleName;
     private LoginModule delegate;
 
     public ProxyLoginModule()
@@ -64,7 +76,21 @@ public class ProxyLoginModule implements LoginModule
     public void initialize(Subject subject, CallbackHandler callbackHandler, 
           Map<String,?> sharedState, Map<String,?> options)
     {
-        moduleName = (String) options.get("moduleName");
+        log = Logger.getLogger(getClass());
+        
+        /* TODO: this module should really extend AbstractServerLoginModule where the options check is integrated.
+  	     * the code here has been intentionally kept identical
+  	     */
+  	    HashSet<String> validOptions = new HashSet<String>(Arrays.asList(ALL_VALID_OPTIONS));
+        for (Object key : options.keySet())
+        {
+      	 if (!validOptions.contains((String)key))
+           {
+              log.warn("Invalid or misspelled option: " + key);
+           }
+        }
+		
+		moduleName = (String) options.get(MODULE_NAME);
         if( moduleName == null )
         {
             System.out.println("Required moduleName option not given");

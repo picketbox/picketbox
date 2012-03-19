@@ -66,6 +66,15 @@ import org.jboss.security.auth.certs.X509CertificateVerifier;
  */
 public class BaseCertLoginModule extends AbstractServerLoginModule
 {
+   // see AbstractServerLoginModule
+   private static final String SECURITY_DOMAIN = "securityDomain";
+   private static final String VERIFIER = "verifier";
+   
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   SECURITY_DOMAIN,VERIFIER
+   };
+   
    /** A principal derived from the certificate alias */
    private Principal identity;
    /** The client certificate */
@@ -95,11 +104,12 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map<String,?> sharedState, Map<String,?> options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
       trace = log.isTraceEnabled();
 
       // Get the security domain and default to "other"
-      String sd = (String) options.get("securityDomain");
+      String sd = (String) options.get(SECURITY_DOMAIN);
       sd = SecurityUtil.unprefixSecurityDomain(sd);
       if (sd == null)
          sd = "other";
@@ -138,7 +148,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
          log.error("Unable to find the securityDomain named: " + sd, e);
       }
 
-      String option = (String) options.get("verifier");
+      String option = (String) options.get(VERIFIER);
       if( option != null )
       {
          try

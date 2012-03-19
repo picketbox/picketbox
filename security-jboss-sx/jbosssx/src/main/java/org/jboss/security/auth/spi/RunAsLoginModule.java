@@ -21,12 +21,15 @@
 */
 package org.jboss.security.auth.spi;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.spi.LoginModule;
 
+import org.jboss.logging.Logger;
 import org.jboss.security.RunAsIdentity;
 import org.jboss.security.SecurityContextAssociation;
 
@@ -39,6 +42,16 @@ import org.jboss.security.SecurityContextAssociation;
  */
 public class RunAsLoginModule implements LoginModule
 {
+    // see AbstractServerLoginModule
+   private static final String ROLE_NAME = "roleName";
+   private static final String PRINCIPLE_NAME = "principalName";
+
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   ROLE_NAME,PRINCIPLE_NAME
+   };
+   
+   private static Logger log;
    private String roleName;
    private String principalName;
    private boolean pushedRole;
@@ -49,11 +62,25 @@ public class RunAsLoginModule implements LoginModule
    public void initialize(Subject subject, CallbackHandler handler,
       Map<String,?> sharedState, Map<String,?> options)
    {
-      roleName = (String) options.get("roleName");
+      log = Logger.getLogger(getClass());
+      
+     /* TODO: this module should really extend AbstractServerLoginModule where the options check is integrated.
+      * the code here has been intentionally kept identical
+      */
+      HashSet<String> validOptions = new HashSet<String>(Arrays.asList(ALL_VALID_OPTIONS));
+      for (Object key : options.keySet())
+      {
+    	 if (!validOptions.contains((String)key))
+         {
+            log.warn("Invalid or misspelled option: " + key);
+         }
+      }
+	  
+      roleName = (String) options.get(ROLE_NAME);
       if( roleName == null )
          roleName = "nobody";
 
-      principalName = (String) options.get("principalName");
+      principalName = (String) options.get(PRINCIPLE_NAME);
       if( principalName == null )
          principalName = "nobody";
    }

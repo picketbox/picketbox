@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.acl.Group;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -108,6 +110,18 @@ import org.jboss.security.otp.TimeBasedOTPUtil;
  */
 public class JBossTimeBasedOTPLoginModule implements LoginModule
 {  
+   // see AbstractServerLoginModule
+   private static final String PASSWORD_STACKING = "password-stacking";
+   private static final String USE_FIRST_PASSWORD = "useFirstPass";
+   private static final String NUM_OF_DIGITS_OPT = "numOfDigits";
+   private static final String ALGORITHM = "algorithm";
+   private static final String ADDITIONAL_ROLES = "additionalRoles";
+   
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   PASSWORD_STACKING,USE_FIRST_PASSWORD,NUM_OF_DIGITS_OPT,ALGORITHM,ADDITIONAL_ROLES
+   };
+   
    private static Logger log = Logger.getLogger( JBossTimeBasedOTPLoginModule.class );
    private boolean trace = log.isTraceEnabled();
 
@@ -131,7 +145,19 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
 
    public void initialize( Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
          Map<String, ?> options )
-   { 
+   {
+      /* TODO: this module should really extend AbstractServerLoginModule where the options check is integrated.
+	   * the code here has been intentionally kept identical
+	   */
+      HashSet<String> validOptions = new HashSet<String>(Arrays.asList(ALL_VALID_OPTIONS));
+      for (Object key : options.keySet())
+      {
+    	 if (!validOptions.contains((String)key))
+         {
+            log.warn("Invalid or misspelled option: " + key);
+         }
+      }
+	  
       this.subject = subject;
       this.callbackHandler = callbackHandler;
       this.lmSharedState.putAll( sharedState );
@@ -141,17 +167,17 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
       password_stacking sets useFirstPass as this module has no way to
       validate any shared password.
        */
-      String passwordStacking = (String) options.get("password-stacking");
-      if( passwordStacking != null && passwordStacking.equalsIgnoreCase("useFirstPass") )
+      String passwordStacking = (String) options.get(PASSWORD_STACKING);
+      if( passwordStacking != null && passwordStacking.equalsIgnoreCase(USE_FIRST_PASSWORD) )
          useFirstPass = true;
       
       //Option for number of digits
-      String numDigitString = (String) options.get( "numOfDigits" );
+      String numDigitString = (String) options.get(NUM_OF_DIGITS_OPT);
       if( numDigitString != null && numDigitString.length() > 0 )
          NUMBER_OF_DIGITS = Integer.parseInt( numDigitString );
       
       //Algorithm
-      String algorithmStr = (String) options.get( "algorithm" );
+      String algorithmStr = (String) options.get(ALGORITHM);
       if( algorithmStr != null && algorithmStr != "" )
       {
          if( algorithmStr.equalsIgnoreCase( TimeBasedOTP.HMAC_SHA256) )
@@ -160,7 +186,7 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
             algorithm = TimeBasedOTP.HMAC_SHA512;
       }
       
-      additionalRoles = (String) options.get( "additionalRoles" ); 
+      additionalRoles = (String) options.get(ADDITIONAL_ROLES); 
    }
 
    /**

@@ -39,6 +39,15 @@ import javax.security.auth.callback.CallbackHandler;
  */
 public class MemoryUsersRolesLoginModule extends UsersRolesLoginModule
 {
+   // see AbstractServerLoginModule
+   private static final String USERS = "users";
+   private static final String ROLES = "roles";
+
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   USERS,ROLES
+   };
+   
    private Properties users;
    private Properties roles;
 
@@ -55,8 +64,9 @@ public class MemoryUsersRolesLoginModule extends UsersRolesLoginModule
       Map<String,?> sharedState, Map<String,?> options)
    {
       // First extract the users/roles Properties from the options
-      this.users = (Properties) options.get("users");
-      this.roles = (Properties) options.get("roles");
+      this.users = (Properties) options.get(USERS);
+      this.roles = (Properties) options.get(ROLES);
+      addValidOptions(ALL_VALID_OPTIONS);
       // Now initialize the superclass which will invoke createUsers/createRoles
       super.initialize(subject, callbackHandler, sharedState, options);
    }

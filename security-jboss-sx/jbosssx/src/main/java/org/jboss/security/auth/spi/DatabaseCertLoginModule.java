@@ -42,6 +42,16 @@ import javax.security.auth.login.LoginException;
  */
 public class DatabaseCertLoginModule extends BaseCertLoginModule
 {
+   // see AbstractServerLoginModule
+   private static final String DS_JNDI_NAME = "dsJndiName";
+   private static final String ROLES_QUERY = "rolesQuery";
+   private static final String SUSPEND_RESUME = "suspendResume";
+
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   DS_JNDI_NAME,ROLES_QUERY,SUSPEND_RESUME
+   };
+   
    /** The JNDI name of the DataSource to use */
    private String dsJndiName;
    /** The sql query to obtain the user roles */
@@ -59,16 +69,17 @@ public class DatabaseCertLoginModule extends BaseCertLoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map<String,?> sharedState, Map<String,?> options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
-      dsJndiName = (String) options.get("dsJndiName");
+      dsJndiName = (String) options.get(DS_JNDI_NAME);
       if( dsJndiName == null )
          dsJndiName = "java:/DefaultDS";
       
-      Object tmp = options.get("rolesQuery");
+      Object tmp = options.get(ROLES_QUERY);
       if( tmp != null )
          rolesQuery = tmp.toString();
 
-      tmp = options.get("suspendResume");
+      tmp = options.get(SUSPEND_RESUME);
       if( tmp != null )
          suspendResume = Boolean.valueOf(tmp.toString()).booleanValue();
 

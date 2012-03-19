@@ -25,7 +25,10 @@ import java.security.Principal;
 import java.security.acl.Group;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
 
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
@@ -49,7 +52,16 @@ import org.jboss.security.util.StringPropertyReplacer;
  *  @version $Revision$
  */
 public class RoleMappingLoginModule extends AbstractServerLoginModule
-{   
+{
+    // see AbstractServerLoginModule
+   private static final String REPLACE_ROLE_OPT = "replaceRole";
+   private static final String ROLES_PROPERTIES = "rolesProperties";
+
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   REPLACE_ROLE_OPT,ROLES_PROPERTIES
+   };
+   
    private static Logger log = Logger.getLogger(RoleMappingLoginModule.class);
    private boolean trace = log.isTraceEnabled(); 
    
@@ -58,6 +70,13 @@ public class RoleMappingLoginModule extends AbstractServerLoginModule
     */
    protected boolean REPLACE_ROLE = false;
     
+   public void initialize(Subject subject, CallbackHandler callbackHandler,
+      Map<String,?> sharedState, Map<String,?> options)
+   {
+      addValidOptions(ALL_VALID_OPTIONS);
+      super.initialize(subject, callbackHandler, sharedState, options);
+   }
+   
    /**
     * @see LoginModule#login()
     */
@@ -91,12 +110,12 @@ public class RoleMappingLoginModule extends AbstractServerLoginModule
     */
    protected Group[] getRoleSets() throws LoginException
    { 
-      String rep = (String)options.get("replaceRole");
+      String rep = (String)options.get(REPLACE_ROLE_OPT);
       if("true".equalsIgnoreCase(rep))
          this.REPLACE_ROLE = true;
       
       //Get the properties file name from the options
-      String propFileName = (String)options.get("rolesProperties");
+      String propFileName = (String)options.get(ROLES_PROPERTIES);
       if(propFileName == null)
          throw new IllegalStateException(ErrorCodes.NULL_VALUE + "rolesProperties option needs to be provided");
       // Replace any system property references like ${x}

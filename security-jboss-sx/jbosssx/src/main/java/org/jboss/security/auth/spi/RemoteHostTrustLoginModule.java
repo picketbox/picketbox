@@ -51,9 +51,14 @@ import org.jboss.security.plugins.HostThreadLocal;
 @SuppressWarnings("rawtypes")
 public class RemoteHostTrustLoginModule extends UsernamePasswordLoginModule
 {
+    // see AbstractServerLoginModule
    private final static String OPTION_TRUSTED_HOSTS = "trustedHosts";
    private final static String OPTION_ROLES = "roles";
-
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   OPTION_TRUSTED_HOSTS,OPTION_ROLES
+   };
+   
    List<String> trustedHosts;
    private String roleNames;
    
@@ -68,6 +73,7 @@ public class RemoteHostTrustLoginModule extends UsernamePasswordLoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map sharedState, Map options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
       boolean trace = log.isTraceEnabled();
       String tmp = (String)options.get(OPTION_TRUSTED_HOSTS);

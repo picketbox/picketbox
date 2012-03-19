@@ -62,6 +62,28 @@ import org.jboss.security.vault.SecurityVaultUtil;
  */
 public abstract class UsernamePasswordLoginModule extends AbstractServerLoginModule
 {
+    // see AbstractServerLoginModule
+   private static final String HASH_ALGORITHM = "hashAlgorithm";
+   private static final String HASH_ENCODING = "hashEncoding";
+   private static final String HASH_CHARSET = "hashCharset";
+   private static final String HASH_STORE_PASSWORD = "hashStorePassword";
+   private static final String HASH_USER_PASSWORD = "hashUserPassword";
+   private static final String DIGEST_CALLBACK = "digestCallback";
+   private static final String STORE_DIGEST_CALLBACK = "storeDigestCallback";
+   private static final String IGNORE_PASSWORD_CASE = "ignorePasswordCase";
+   private static final String LEGACY_CREATE_PASSWORD_HASH = "legacyCreatePasswordHash";
+   private static final String THROW_VALIDATE_ERROR = "throwValidateError";
+   private static final String INPUT_VALIDATOR = "inputValidator";
+		
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+     HASH_ALGORITHM,HASH_ENCODING,HASH_CHARSET,
+     HASH_STORE_PASSWORD,HASH_USER_PASSWORD,
+     DIGEST_CALLBACK,STORE_DIGEST_CALLBACK,
+     IGNORE_PASSWORD_CASE,LEGACY_CREATE_PASSWORD_HASH,
+     THROW_VALIDATE_ERROR,INPUT_VALIDATOR
+   };
+   
    /** The login identity */
    private Principal identity;
    /** The proof of login identity */
@@ -119,42 +141,43 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map<String,?> sharedState, Map<String,?> options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
 
       // Check to see if password hashing has been enabled.
       // If an algorithm is set, check for a format and charset.
-      hashAlgorithm = (String) options.get("hashAlgorithm");
+      hashAlgorithm = (String) options.get(HASH_ALGORITHM);
       if( hashAlgorithm != null )
       {
-         hashEncoding = (String) options.get("hashEncoding");
+         hashEncoding = (String) options.get(HASH_ENCODING);
          if( hashEncoding == null )
             hashEncoding = Util.BASE64_ENCODING;
-         hashCharset = (String) options.get("hashCharset");
+         hashCharset = (String) options.get(HASH_CHARSET);
          if( log.isTraceEnabled() )
          {
             log.trace("Password hashing activated: algorithm = " + hashAlgorithm
                + ", encoding = " + hashEncoding
                + ", charset = " + (hashCharset == null ? "{default}" : hashCharset)
-               + ", callback = " + options.get("digestCallback")
-               + ", storeCallback = " + options.get("storeDigestCallback")
+               + ", callback = " + options.get(DIGEST_CALLBACK)
+               + ", storeCallback = " + options.get(STORE_DIGEST_CALLBACK)
             );
          }
       }
-      String flag = (String) options.get("ignorePasswordCase");
+      String flag = (String) options.get(IGNORE_PASSWORD_CASE);
       ignorePasswordCase = Boolean.valueOf(flag).booleanValue();
-      flag = (String) options.get("hashStorePassword");
+      flag = (String) options.get(HASH_STORE_PASSWORD);
       hashStorePassword = Boolean.valueOf(flag).booleanValue();
-      flag = (String) options.get("hashUserPassword");
+      flag = (String) options.get(HASH_USER_PASSWORD);
       if( flag != null )
          hashUserPassword = Boolean.valueOf(flag).booleanValue();
-      flag = (String) options.get("legacyCreatePasswordHash");
+      flag = (String) options.get(LEGACY_CREATE_PASSWORD_HASH);
       if( flag != null )
          legacyCreatePasswordHash = Boolean.valueOf(flag).booleanValue();
-      flag = (String) options.get("throwValidateError");
+      flag = (String) options.get(THROW_VALIDATE_ERROR);
       if(flag != null)
          this.throwValidateError = Boolean.valueOf(flag).booleanValue();
       // instantiate the input validator class.
-      flag = (String) options.get("inputValidator");
+      flag = (String) options.get(INPUT_VALIDATOR);
       if(flag != null)
       {
          try
@@ -244,7 +267,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
 
          // Hash the user entered password if password hashing is in use
          if( hashAlgorithm != null && hashUserPassword == true )
-            password = createPasswordHash(username, password, "digestCallback");
+            password = createPasswordHash(username, password, DIGEST_CALLBACK);
          // Validate the password supplied by the subclass
          String expectedPassword = getUsersPassword();
          //Check if the password is vaultified
@@ -263,7 +286,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          }
          // Allow the storeDigestCallback to hash the expected password
          if( hashAlgorithm != null && hashStorePassword == true )
-            expectedPassword = createPasswordHash(username, expectedPassword, "storeDigestCallback");
+            expectedPassword = createPasswordHash(username, expectedPassword, STORE_DIGEST_CALLBACK);
          if( validatePassword(password, expectedPassword) == false )
          {
             Throwable ex = getValidateError();

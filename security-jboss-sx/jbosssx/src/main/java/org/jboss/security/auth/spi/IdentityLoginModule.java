@@ -50,6 +50,15 @@ import org.jboss.security.SimplePrincipal;
  */
 public class IdentityLoginModule extends AbstractServerLoginModule
 {
+   // see AbstractServerLoginModule
+   private static final String PRINCIPAL = "principal";
+   private static final String ROLES = "roles";
+
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+	   PRINCIPAL,ROLES
+   };
+   
    private String principalName;
    private String roleNames;
 
@@ -60,11 +69,12 @@ public class IdentityLoginModule extends AbstractServerLoginModule
    public void initialize(Subject subject, CallbackHandler handler, 
          Map<String,?> sharedState, Map<String,?> options)
    {
+      addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, handler, sharedState, options);
-      principalName = (String) options.get("principal");
+      principalName = (String) options.get(PRINCIPAL);
       if( principalName == null )
          principalName = "guest";
-      roleNames = (String) options.get("roles");
+      roleNames = (String) options.get(ROLES);
    }
 
    @SuppressWarnings("unchecked")
