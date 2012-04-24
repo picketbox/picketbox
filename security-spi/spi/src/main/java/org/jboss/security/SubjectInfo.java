@@ -23,6 +23,7 @@ package org.jboss.security;
 
 import java.io.Serializable;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,7 +31,7 @@ import javax.security.auth.Subject;
 
 import org.jboss.security.identity.Identity;
 import org.jboss.security.identity.IdentityFactory;
-import org.jboss.security.identity.RoleGroup; 
+import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.extensions.CredentialIdentityFactory;
 
 
@@ -88,7 +89,7 @@ public class SubjectInfo implements Serializable
       this.roles = roles;
    } 
    
-   public void addIdentity(Identity id)
+   public synchronized void addIdentity(Identity id)
    {
       if(identities == null)
          identities = new HashSet<Identity>();
@@ -103,7 +104,7 @@ public class SubjectInfo implements Serializable
    }
    
    @SuppressWarnings("unchecked")
-   public <T> T getIdentity(Class<T> clazz)
+   public synchronized <T> T getIdentity(Class<T> clazz)
    {
       if( clazz == null )
          throw new IllegalArgumentException( ErrorCodes.NULL_ARGUMENT + "clazz is null" );
@@ -125,10 +126,10 @@ public class SubjectInfo implements Serializable
    
    public Set<Identity> getIdentities()
    {
-      return this.identities;
+      return Collections.unmodifiableSet(identities);
    }
    
-   public void setIdentities(Set<Identity> ids)
+   public synchronized void setIdentities(Set<Identity> ids)
    {
       if(identities == null)
          identities = new HashSet<Identity>();
@@ -139,13 +140,13 @@ public class SubjectInfo implements Serializable
     * Remove an identity
     * @param id
     */
-   public void removeIdentity( Identity id )
+   public synchronized void removeIdentity( Identity id )
    {
       identities.remove( id );
    }
 
    @Override
-   public String toString()
+   public synchronized String toString()
    {
       StringBuilder builder = new StringBuilder(); 
       builder.append("Identities=" + this.identities);

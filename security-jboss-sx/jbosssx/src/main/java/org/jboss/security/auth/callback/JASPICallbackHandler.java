@@ -92,7 +92,7 @@ public class JASPICallbackHandler extends JBossCallbackHandler
          } 
          
          Subject subject = groupPrincipalCallback.getSubject();
-         
+
          if( subject != null )
          {
             currentSC.getSubjectInfo().setAuthenticatedSubject( subject );
@@ -114,11 +114,16 @@ public class JASPICallbackHandler extends JBossCallbackHandler
          } 
          
          Principal callerPrincipal = callerPrincipalCallback.getPrincipal();
+         if (callerPrincipal == null && callerPrincipalCallback.getName() != null)
+            callerPrincipal = new SimplePrincipal(callerPrincipalCallback.getName());
+         
          if( callerPrincipal != null )
          {
+            if (subject != null)
+               subject.getPrincipals().add(callerPrincipal);
             Identity principalBasedIdentity = IdentityFactory.getIdentity( callerPrincipal, null );
             currentSC.getSubjectInfo().addIdentity( principalBasedIdentity ); 
-         } 
+         }
       }
       else if( callback instanceof PasswordValidationCallback )
       {
