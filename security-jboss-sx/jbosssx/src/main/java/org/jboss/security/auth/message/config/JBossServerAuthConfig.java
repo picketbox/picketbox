@@ -48,6 +48,8 @@ import org.jboss.security.auth.login.JASPIAuthenticationInfo;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.ControlFlag;
 import org.jboss.security.config.SecurityConfiguration;
+import org.jboss.security.plugins.ClassLoaderLocator;
+import org.jboss.security.plugins.ClassLoaderLocatorFactory;
 
 //$Id$
 
@@ -136,6 +138,17 @@ public class JBossServerAuthConfig implements ServerAuthConfig
       {
          JASPIAuthenticationInfo jai = (JASPIAuthenticationInfo)bai;
          AuthModuleEntry[] amearr = jai.getAuthModuleEntry();
+
+         // establish the module classloader if a jboss-module has been specified.
+         ClassLoader moduleCL = null;
+         String jbossModule = jai.getJBossModuleName();
+         if (jbossModule != null && !jbossModule.isEmpty())
+         {
+            ClassLoaderLocator locator = ClassLoaderLocatorFactory.get();
+            if (locator != null)
+               moduleCL = locator.get(jbossModule);
+         }
+
          for(AuthModuleEntry ame: amearr)
          {
             if(ame.getLoginModuleStackHolderName() != null)
@@ -144,7 +157,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
                {
                   mapOptionsByName.put(ame.getAuthModuleName(), ame.getOptions());
                   controlFlags.add(ame.getControlFlag());   
-                  ServerAuthModule sam = this.createSAM(ame.getAuthModuleName(), 
+                  ServerAuthModule sam = this.createSAM(moduleCL, ame.getAuthModuleName(), 
                         ame.getLoginModuleStackHolderName());
                   
                   Map options = new HashMap();
@@ -163,7 +176,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
                {
                   mapOptionsByName.put(ame.getAuthModuleName(), ame.getOptions());
                   controlFlags.add(ame.getControlFlag());             
-                  ServerAuthModule sam = this.createSAM(ame.getAuthModuleName());
+                  ServerAuthModule sam = this.createSAM(moduleCL, ame.getAuthModuleName());
                   
                   Map options = new HashMap(); 
                   sam.initialize(null, null, callbackHandler, options);
@@ -224,19 +237,19 @@ public class JBossServerAuthConfig implements ServerAuthConfig
    }  
  
    @SuppressWarnings({"rawtypes", "unchecked"})
-   private ServerAuthModule createSAM(String name )
+   private ServerAuthModule createSAM(ClassLoader moduleCL, String name )
    throws Exception
    {
-      Class clazz = SecurityActions.getContextClassLoader().loadClass(name);
+      Class clazz = SecurityActions.loadClass(moduleCL, name);
       Constructor ctr = clazz.getConstructor(new Class[0]);
       return (ServerAuthModule) ctr.newInstance(new Object[0]);
    }
    
    @SuppressWarnings({"unchecked", "rawtypes"})
-   private ServerAuthModule createSAM(String name, String lmshName )
+   private ServerAuthModule createSAM(ClassLoader moduleCL, String name, String lmshName )
    throws Exception
    {
-      Class clazz = SecurityActions.getContextClassLoader().loadClass(name);
+      Class clazz = SecurityActions.loadClass(moduleCL, name);
       Constructor ctr = clazz.getConstructor(new Class[]{String.class});
       return (ServerAuthModule) ctr.newInstance(new Object[]{lmshName});
    }
