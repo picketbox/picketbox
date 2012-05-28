@@ -136,7 +136,8 @@ public class PicketBoxSecurityVault implements SecurityVault
       String keystoreURL = (String) options.get(KEYSTORE_URL);
       if(keystoreURL == null)
          throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Null " + KEYSTORE_URL);
-      keystoreURL = StringUtil.getSystemPropertyAsString(keystoreURL);
+      keystoreURL = StringUtil.getSystemPropertyAsString(keystoreURL.replaceAll(":", 
+    		  StringUtil.PROPERTY_DEFAULT_SEPARATOR));  // replace single ":" with PL default 
       
       String maskedPassword = (String) options.get(KEYSTORE_PASSWORD);
       if(maskedPassword == null)
@@ -172,7 +173,8 @@ public class PicketBoxSecurityVault implements SecurityVault
       ObjectInputStream mapIS = null;
       try
       {
-         decodedEncFileDir = StringUtil.getSystemPropertyAsString(encFileDir);
+         decodedEncFileDir = StringUtil.getSystemPropertyAsString(encFileDir.replaceAll(":", 
+       		  StringUtil.PROPERTY_DEFAULT_SEPARATOR));  // replace single ":" with PL default 
          if(directoryExists(decodedEncFileDir) == false)
             throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + decodedEncFileDir + " does not exist");
          

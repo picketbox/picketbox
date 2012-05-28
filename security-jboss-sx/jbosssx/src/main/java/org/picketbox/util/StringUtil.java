@@ -42,6 +42,8 @@ import org.jboss.security.plugins.PBEUtils;
  */
 public class StringUtil
 {
+   public static final String PROPERTY_DEFAULT_SEPARATOR = "::";
+	
    /**
     * Check whether the passed string is null or empty
     * @param str
@@ -101,10 +103,10 @@ public class StringUtil
             String defaultValue = "";
 
             //Look for default value
-            if (subString.contains("::"))
+            if (subString.contains(StringUtil.PROPERTY_DEFAULT_SEPARATOR))
             {
-               int index = subString.indexOf("::");
-               defaultValue = subString.substring(index + 2);
+               int index = subString.indexOf(StringUtil.PROPERTY_DEFAULT_SEPARATOR);
+               defaultValue = subString.substring(index + StringUtil.PROPERTY_DEFAULT_SEPARATOR.length());
                subString = subString.substring(0, index);
             }
             sysPropertyValue = SecurityActions.getSystemProperty(subString, defaultValue);
@@ -112,7 +114,8 @@ public class StringUtil
             {
                throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "System Property missing:" + matcher.group(1));
             }
-            matcher.appendReplacement(buffer, sysPropertyValue);
+            // in case of backslash on Win replace with double backslash
+            matcher.appendReplacement(buffer, sysPropertyValue.replace("\\", "\\\\"));
          }
 
          matcher.appendTail(buffer);
