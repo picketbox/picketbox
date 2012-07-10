@@ -30,7 +30,8 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.jboss.security.auth.callback.ObjectCallback; 
+import org.jboss.security.PicketBoxMessages;
+import org.jboss.security.auth.callback.ObjectCallback;
 import org.picketbox.handlers.HandlerContract;
 
 /**
@@ -79,9 +80,9 @@ public class PicketBoxCallbackHandler implements CallbackHandler, HandlerContrac
              ((PasswordCallback)cb).setPassword(passwd);
            }
            else
-           throw new RuntimeException(getClass().getName() + " does not handle a callback of type " +
-                 cb.getClass().getCanonicalName());
-         } 
+           throw PicketBoxMessages.MESSAGES.unableToHandleCallback(cb, this.getClass().getName(),
+                   cb.getClass().getCanonicalName());
+         }
       }
    }
 

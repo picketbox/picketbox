@@ -38,7 +38,6 @@ import javax.crypto.spec.PBEParameterSpec;
 
 import org.jboss.security.plugins.PBEUtils;
 import org.jboss.security.vault.SecurityVault;
-import org.jboss.security.vault.SecurityVaultException;
 import org.jboss.security.vault.SecurityVaultFactory;
 import org.jboss.security.vault.SecurityVaultUtil;
 import org.junit.Before;
@@ -99,7 +98,7 @@ public class SecurityVaultUnitTestCase
          vault.init(options);
          fail("Should have thrown error"); 
       }
-      catch(SecurityVaultException sve)
+      catch(IllegalArgumentException iae)
       {   
       }
       maskedPWD = getMaskedPassword(keyStorePass, salt,iterationCount);

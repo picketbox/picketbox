@@ -41,8 +41,8 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.ApplicationPolicyRegistration;
 import org.jboss.security.config.Element;
@@ -59,9 +59,7 @@ import org.xml.sax.SAXParseException;
  */
 public class StaxBasedConfigParser implements XMLStreamConstants
 {
-   private static Logger log = Logger.getLogger(StaxBasedConfigParser.class);
-   private boolean trace = log.isTraceEnabled();
-   
+
    private String schemaFile = "schema/security-config_5_0.xsd";
    
    /**
@@ -88,8 +86,8 @@ public class StaxBasedConfigParser implements XMLStreamConstants
    {
       Configuration config = Configuration.getConfiguration();
       if(config instanceof ApplicationPolicyRegistration == false)
-         throw new IllegalStateException(ErrorCodes.WRONG_TYPE + "JAAS Configuration does not support application policy registration");
-      
+         throw PicketBoxMessages.MESSAGES.invalidType(ApplicationPolicyRegistration.class.getName());
+
       ApplicationPolicyRegistration appPolicyRegistration = (ApplicationPolicyRegistration) config;
       
       XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
@@ -114,10 +112,10 @@ public class StaxBasedConfigParser implements XMLStreamConstants
                //We got the policy element. We can go over the attributes if we want
                //But there is no immediate need.
                StartElement policyConfigElement = (StartElement) xmlEvent;
-               if("policy".equals(StaxParserUtil.getStartElementName(policyConfigElement)) == false)
-                     throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "<policy> root element expected at " 
-                           + StaxParserUtil.getLineColumnNumber(xmlEvent.getLocation()));
-               
+               String elementName = StaxParserUtil.getStartElementName(policyConfigElement);
+               if("policy".equals(elementName) == false)
+                   throw StaxParserUtil.unexpectedElement(elementName, xmlEvent);
+
                ApplicationPolicyParser appPolicyParser = new ApplicationPolicyParser(); 
                List<ApplicationPolicy> appPolicies = appPolicyParser.parse(xmlEventReader);
                for(ApplicationPolicy appPolicy: appPolicies)
@@ -133,7 +131,7 @@ public class StaxBasedConfigParser implements XMLStreamConstants
       Configuration config = Configuration.getConfiguration();
       if (!(config instanceof ApplicationPolicyRegistration))
       {
-         throw new IllegalStateException(ErrorCodes.WRONG_TYPE + "JAAS Configuration does not support application policy registration");
+         throw PicketBoxMessages.MESSAGES.invalidType(ApplicationPolicyRegistration.class.getName());
       }
       
       ApplicationPolicyRegistration appPolicyRegistration = (ApplicationPolicyRegistration) config;
@@ -164,10 +162,10 @@ public class StaxBasedConfigParser implements XMLStreamConstants
          ClassLoader tcl = SecurityActions.getContextClassLoader();
          URL schemaURL = tcl.getResource(schemaFile);
          if(schemaURL == null)
-            throw new RuntimeException(ErrorCodes.MISSING_VALUE + "Cannot find schema :" + schemaFile);
+            throw PicketBoxMessages.MESSAGES.unableToFindSchema(schemaFile);
+
          SchemaFactory schemaFactory = SchemaFactory.newInstance( "http://www.w3.org/2001/XMLSchema" );
          Schema schemaGrammar = schemaFactory.newSchema( schemaURL );
-
          Validator schemaValidator = schemaGrammar.newValidator();
          schemaValidator.setErrorHandler( new ErrorHandler()
          {
@@ -191,11 +189,11 @@ public class StaxBasedConfigParser implements XMLStreamConstants
             {
                StringBuilder builder = new StringBuilder();
                
-               if(trace)
+               if(PicketBoxLogger.LOGGER.isTraceEnabled())
                {
                   builder.append("[").append(sax.getLineNumber()).append(",").append(sax.getColumnNumber()).append("]");
                   builder.append(":").append(sax.getLocalizedMessage());
-                  log.trace(builder.toString());
+                  PicketBoxLogger.LOGGER.trace(builder.toString());
                }  
             }
          }); 

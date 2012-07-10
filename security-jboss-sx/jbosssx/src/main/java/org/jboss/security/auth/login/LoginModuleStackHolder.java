@@ -27,7 +27,7 @@ import java.util.List;
 import javax.security.auth.AuthPermission;
 import javax.security.auth.login.AppConfigurationEntry;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 //$Id$
 
@@ -85,7 +85,7 @@ public class LoginModuleStackHolder
    public void setAppConfigurationEntry(List entries)
    {
       if(entries  == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "entries");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("entries");
       if(appEntries == null)
          this.appEntries = new ArrayList();
       this.appEntries.addAll(entries);

@@ -31,7 +31,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.MessageInfo;
 
-import org.jboss.security.AuthenticationManager;
 import org.jboss.security.NobodyPrincipal;
 import org.jboss.security.RealmMapping;
 import org.jboss.security.SubjectSecurityManager;
@@ -94,26 +93,17 @@ public class NoAccessSecurityManager
        return false;
     }
     
-    /**
-     * @see AuthenticationManager#isValid(MessageInfo, Subject, String)
-     */
     public boolean isValid(MessageInfo requestMessage, Subject clientSubject, String layer)
     { 
        return false;
     }
     
-    /**
-     * @see AuthenticationManager#isValid(MessageInfo, Subject, String, CallbackHandler)
-     */
     public boolean isValid(MessageInfo requestMessage, Subject clientSubject, String layer,
           CallbackHandler handler)
     { 
        return false;
     }
     
-    /**
-     * @see AuthenticationManager#getTargetPrincipal(Principal,Map)
-     */
     public Principal getTargetPrincipal(Principal anotherDomainPrincipal, Map<String,Object> contextMap)
     {
        return anotherDomainPrincipal;

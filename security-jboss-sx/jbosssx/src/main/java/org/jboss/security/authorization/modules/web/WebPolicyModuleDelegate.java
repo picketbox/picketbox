@@ -23,7 +23,6 @@ package org.jboss.security.authorization.modules.web;
 
 import javax.security.auth.Subject;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.authorization.modules.AuthorizationModuleDelegate;
@@ -41,11 +40,6 @@ import org.jboss.security.identity.RoleGroup;
  */
 public class WebPolicyModuleDelegate extends AuthorizationModuleDelegate
 { 
-   public WebPolicyModuleDelegate()
-   { 
-      log = Logger.getLogger(getClass());
-      trace = log.isTraceEnabled();
-   }
 
    public int authorize(Resource resource, Subject subject, RoleGroup role)
    {

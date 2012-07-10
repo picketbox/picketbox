@@ -29,6 +29,7 @@ import javax.security.jacc.PolicyConfiguration;
 import javax.security.jacc.PolicyConfigurationFactory;
 import javax.security.jacc.PolicyContextException;
 
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.util.state.StateMachine;
 import org.jboss.security.util.state.xml.StateMachineParser;
 
@@ -37,8 +38,7 @@ import org.jboss.security.util.state.xml.StateMachineParser;
  * @author Scott.Stark@jboss.org
  * @version $Revision$
  */
-public class JBossPolicyConfigurationFactory
-   extends PolicyConfigurationFactory
+public class JBossPolicyConfigurationFactory extends PolicyConfigurationFactory
 {
    private StateMachine configStateMachine;
    private ConcurrentHashMap<String,JBossPolicyConfiguration> policyConfigMap 
@@ -61,9 +61,7 @@ public class JBossPolicyConfigurationFactory
       }
       catch(Exception e)
       {
-         IllegalStateException ex = new IllegalStateException("Failed to parse jacc-policy-config-states.xml",e);
-         ex.initCause(e);
-         throw ex;
+         throw PicketBoxMessages.MESSAGES.failedToParseJACCStatesConfigFile(e);
       }
       // Get the DelegatingPolicy
       Policy p = SecurityActions.getPolicy();
@@ -78,7 +76,7 @@ public class JBossPolicyConfigurationFactory
    public PolicyConfiguration getPolicyConfiguration(String contextID, boolean remove)
       throws PolicyContextException
    {
-      JBossPolicyConfiguration pc = (JBossPolicyConfiguration) policyConfigMap.get(contextID);
+      JBossPolicyConfiguration pc = policyConfigMap.get(contextID);
       if( pc == null )
       {
          StateMachine sm = (StateMachine) configStateMachine.clone();
@@ -93,7 +91,7 @@ public class JBossPolicyConfigurationFactory
       throws PolicyContextException
    {
       boolean inService = false;
-      JBossPolicyConfiguration pc = (JBossPolicyConfiguration) policyConfigMap.get(contextID);
+      JBossPolicyConfiguration pc = policyConfigMap.get(contextID);
       if( pc != null )
          inService = pc.inService();
       return inService;

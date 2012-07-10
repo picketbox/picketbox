@@ -27,14 +27,14 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.util.StringPropertyReplacer;
 
 //$Id$
@@ -61,9 +61,6 @@ public class RoleMappingLoginModule extends AbstractServerLoginModule
    {
 	   REPLACE_ROLE_OPT,ROLES_PROPERTIES
    };
-   
-   private static Logger log = Logger.getLogger(RoleMappingLoginModule.class);
-   private boolean trace = log.isTraceEnabled(); 
    
    /**
     * Should the matching role be replaced
@@ -117,7 +114,8 @@ public class RoleMappingLoginModule extends AbstractServerLoginModule
       //Get the properties file name from the options
       String propFileName = (String)options.get(ROLES_PROPERTIES);
       if(propFileName == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "rolesProperties option needs to be provided");
+         throw new LoginException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage(ROLES_PROPERTIES));
+
       // Replace any system property references like ${x}
       propFileName = StringPropertyReplacer.replaceProperties(propFileName);
       Group group = getExistingRolesFromSubject();
@@ -126,25 +124,16 @@ public class RoleMappingLoginModule extends AbstractServerLoginModule
          Properties props = new Properties();
          try
          { 
-            props = Util.loadProperties(propFileName,log); 
+            props = Util.loadProperties(propFileName);
          }  
          catch( Exception  e)
          {
-            if(trace)
-               log.trace("Could not load properties file:" + propFileName, e);
+            PicketBoxLogger.LOGGER.debugFailureToLoadPropertiesFile(propFileName, e);
          }
          if(props != null)
          {
-            try
-            {
-               processRoles(group, props);
-            }
-            catch (Exception e)
-            {
-               if(trace)
-                  log.trace("Could not process roles:", e);
-            }
-         } 
+            processRoles(group, props);
+         }
       } 
       
       return new Group[] {group};
@@ -160,7 +149,7 @@ public class RoleMappingLoginModule extends AbstractServerLoginModule
       Iterator<? extends Principal> iter = subject.getPrincipals().iterator();
       while(iter.hasNext())
       {
-         Principal p = (Principal)iter.next();
+         Principal p = iter.next();
          if(p instanceof Group)
          {
            Group g = (Group) p;
@@ -177,21 +166,26 @@ public class RoleMappingLoginModule extends AbstractServerLoginModule
     * @param group Group that needs to be processed
     * @param props Properties file
     */
-   private void processRoles(Group group,Properties props) throws Exception
+   private void processRoles(Group group,Properties props) //throws Exception
    {
       Enumeration<?> enumer = props.propertyNames();
       while(enumer.hasMoreElements())
       {
          String roleKey = (String)enumer.nextElement();
          String comma_separated_roles = props.getProperty(roleKey);
-         Principal pIdentity = createIdentity(roleKey);
-         if (group != null)
-         {
-            if(group.isMember(pIdentity))
-               Util.parseGroupMembers(group,comma_separated_roles,this);
-            if(REPLACE_ROLE)
-               group.removeMember(pIdentity);
+         try {
+             Principal pIdentity = createIdentity(roleKey);
+             if (group != null)
+             {
+                 if(group.isMember(pIdentity))
+                     Util.parseGroupMembers(group,comma_separated_roles,this);
+                 if(REPLACE_ROLE)
+                     group.removeMember(pIdentity);
+             }
          }
-      } 
+         catch(Exception e) {
+             PicketBoxLogger.LOGGER.debugFailureToCreatePrincipal(roleKey, e);
+         }
+      }
    }
 }

@@ -131,9 +131,9 @@ public class SecurityContextFactory
          String fqnClass, ClassLoader classLoader) throws Exception
    {
       if(securityDomain == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "securityDomain is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("security domain");
       if(fqnClass == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "fqnClass is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("fqnClass");
       defaultSecurityContextClass = getContextClass(fqnClass, classLoader);
       return createSecurityContext(securityDomain, defaultSecurityContextClass);
    }
@@ -152,9 +152,9 @@ public class SecurityContextFactory
          Class<? extends SecurityContext> clazz) throws Exception
    {
       if(securityDomain == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "securityDomain is null");
-      if(clazz == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "clazz is null"); 
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("security domain");
+       if(clazz == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("clazz");
       //Get the CTR
       Constructor<? extends SecurityContext> ctr = clazz.getConstructor(new Class[]{String.class});
       return (SecurityContext) ctr.newInstance(new Object[]{securityDomain}); 
@@ -287,7 +287,6 @@ public class SecurityContextFactory
    /**
     * Return an instance of the SecurityContextUtil given a Class instance of the util class
     * @param sc SecurityContext
-    * @param utilFQN fqn of the util class
     * @return
     */
    public static SecurityContextUtil createUtil(SecurityContext sc, 

@@ -32,9 +32,9 @@ import javax.security.auth.Subject;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.AuthorizationManager;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.audit.AuditLevel;
 import org.jboss.security.authorization.AuthorizationContext;
@@ -56,8 +56,6 @@ import org.jboss.security.javaee.AbstractWebAuthorizationHelper;
 public class WebAuthorizationHelper 
 extends AbstractWebAuthorizationHelper
 {
-   protected static Logger log = Logger.getLogger(WebAuthorizationHelper.class);
-   
    @Override
    public boolean checkResourcePermission(
          Map<String, Object> contextMap, 
@@ -81,19 +79,19 @@ extends AbstractWebAuthorizationHelper
          List<String> roles)
    {
       if(contextID == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");  
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextID");
       if(request == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "request is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("request");
       if(response == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "response is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("response");
       if(canonicalRequestURI == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "canonicalRequestURI is null");  
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("canonicalRequestURI");
 
       AuthorizationManager authzMgr = securityContext.getAuthorizationManager();
       
       if(authzMgr == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("AuthorizationManager");
+
       boolean isAuthorized = false; 
 
       WebResource webResource = new WebResource(Collections.unmodifiableMap(contextMap));
@@ -126,9 +124,8 @@ extends AbstractWebAuthorizationHelper
       }
       catch (AuthorizationException e)
       {
-         isAuthorized = false; 
-         if(log.isTraceEnabled()) 
-            log.trace("hasResourcePermission check failed:"+e.getLocalizedMessage(), e); 
+         isAuthorized = false;
+         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("hasResourcePermission", e);
          if(this.enableAudit)
             authorizationAudit(AuditLevel.ERROR,webResource,e); 
       }
@@ -158,17 +155,16 @@ extends AbstractWebAuthorizationHelper
          List<String> roles)
    {
       if(roleName == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roleName is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("roleName");
       if(contextID == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextID");
       if(callerSubject == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "callerSubject is null");
-            
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("callerSubject");
+
       AuthorizationManager authzMgr = securityContext.getAuthorizationManager();
       if(authzMgr == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("AuthorizationManager");
+
       boolean hasTheRole = false;
       Map<String,Object> map =  new HashMap<String,Object>();  
       map.put(ResourceKeys.ROLENAME, roleName); 
@@ -206,9 +202,8 @@ extends AbstractWebAuthorizationHelper
       }
       catch (AuthorizationException e)
       {
-         hasTheRole = false; 
-         if(log.isTraceEnabled()) 
-            log.trace("hasRole check failed:"+e.getLocalizedMessage(), e); 
+         hasTheRole = false;
+         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("hasRole", e);
          if(this.enableAudit)
             authorizationAudit(AuditLevel.ERROR,webResource,e); 
       }
@@ -234,18 +229,18 @@ extends AbstractWebAuthorizationHelper
          List<String> roles)
    {
       if(contextID == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null"); 
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextID");
       if(callerSubject == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "callerSubject is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("callerSubject");
       if(request == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "request is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("request");
       if(response == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "response is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("response");
+
       AuthorizationManager authzMgr = securityContext.getAuthorizationManager();
       if(authzMgr == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("AuthorizationManager");
+
       boolean hasPerm =  false;   
       contextMap.put(ResourceKeys.POLICY_REGISTRATION, getPolicyRegistration());
       
@@ -278,9 +273,8 @@ extends AbstractWebAuthorizationHelper
       }
       catch (AuthorizationException e)
       {
-         hasPerm = false; 
-         if(log.isTraceEnabled()) 
-            log.trace("hasRole check failed:"+e.getLocalizedMessage(), e); 
+         hasPerm = false;
+         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("hasUserDataPermission", e);
          if(this.enableAudit)
             authorizationAudit(AuditLevel.ERROR,webResource,e); 
       }

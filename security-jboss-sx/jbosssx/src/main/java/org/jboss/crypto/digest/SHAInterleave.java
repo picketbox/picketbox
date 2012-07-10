@@ -27,7 +27,7 @@ import java.security.MessageDigestSpi;
 import java.security.NoSuchAlgorithmException;
 import java.security.ProviderException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /** The SHA_Interleave algorithm as described in section 3.1 of RFC2945. This
  needs an SHA MessageDigest provider to function.
@@ -57,7 +57,7 @@ public class SHAInterleave extends MessageDigestSpi
       }
       catch(NoSuchAlgorithmException e)
       {
-         throw new ProviderException(ErrorCodes.FAILED_TO_OBTAIN_SHA);
+         throw PicketBoxMessages.MESSAGES.failedToObtainSHAMessageDigest(e);
       }
       evenBytes = new ByteArrayOutputStream();
       oddBytes = new ByteArrayOutputStream();

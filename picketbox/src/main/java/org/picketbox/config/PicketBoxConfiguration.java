@@ -27,10 +27,9 @@ import java.net.URL;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.config.parser.StaxBasedConfigParser;
-import org.picketbox.exceptions.ConfigurationFileNullException;
 import org.picketbox.exceptions.ConfigurationParsingException;
 import org.picketbox.exceptions.ConfigurationStreamNullException;
 import org.xml.sax.SAXException;
@@ -42,18 +41,16 @@ import org.xml.sax.SAXException;
  */
 public class PicketBoxConfiguration
 { 
-   private static Logger log = Logger.getLogger(PicketBoxConfiguration.class);
-   
+
    /**
     * Load a configuration file
     * @param configFileName
-    * @throws ConfigurationFileNullException if the passed file name is null
     * @throws ConfigurationParsingException parsing exception
     */
-   public void load(String configFileName) throws ConfigurationFileNullException, ConfigurationParsingException
+   public void load(String configFileName) throws ConfigurationParsingException
    {
       if(configFileName == null)
-         throw new ConfigurationFileNullException(ErrorCodes.NULL_ARGUMENT + "configFileName is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("configFileName");
       InputStream configStream = null;
       try
       {
@@ -69,14 +66,13 @@ public class PicketBoxConfiguration
    /**
     * Load the Configuration Stream
     * @param configStream
-    * @throws ConfigurationStreamNullException if the configuration stream is null
     * @throws ConfigurationParsingException if there is parsing exception
     */
-   public void load(InputStream configStream) throws ConfigurationStreamNullException, ConfigurationParsingException
+   public void load(InputStream configStream) throws ConfigurationParsingException
    {
       if(configStream == null)
-         throw new ConfigurationStreamNullException(ErrorCodes.NULL_ARGUMENT + "configStream is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("configStream");
+
       //Parser will parse the stream and update the JAAS Configuration 
       // set on JDK Configuration.getConfiguration and is an instance of ApplicationPolicyRegistration
       StaxBasedConfigParser parser = new StaxBasedConfigParser();
@@ -109,9 +105,8 @@ public class PicketBoxConfiguration
          configStream = tcl.getResourceAsStream(configFileName);  
       }
       catch(Exception e)
-      { 
-         if(log.isTraceEnabled())
-            log.error("Exception loading " + configFileName + " as tcl resource",e);
+      {
+         PicketBoxLogger.LOGGER.errorLoadingConfigFile(configFileName, e);
       }
       //Try the loading class CL
       try
@@ -120,9 +115,8 @@ public class PicketBoxConfiguration
             configStream = SecurityActions.getClassLoader( getClass() ).getResourceAsStream(configFileName);
       }
       catch(Exception e)
-      { 
-         if(log.isTraceEnabled())
-            log.error("Exception loading " + configFileName + " as cl resource",e);
+      {
+         PicketBoxLogger.LOGGER.errorLoadingConfigFile(configFileName, e);
       }
       //Try the URL stream
       try
@@ -134,9 +128,8 @@ public class PicketBoxConfiguration
          }
       }  
       catch(Exception e)
-      { 
-         if(log.isTraceEnabled())
-            log.error("Exception loading " + configFileName + " as URL resource",e);
+      {
+         PicketBoxLogger.LOGGER.errorLoadingConfigFile(configFileName, e);
       }
       return configStream;
    }

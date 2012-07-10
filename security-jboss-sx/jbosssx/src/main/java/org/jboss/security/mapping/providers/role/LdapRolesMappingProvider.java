@@ -24,9 +24,9 @@ package org.jboss.security.mapping.providers.role;
 import java.security.Principal;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.Map.Entry;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -37,8 +37,8 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.Util;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
@@ -98,13 +98,8 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
    
    protected Map<String, Object> options;
    
-   protected boolean trace;
-    
    public void init(Map<String, Object> options)
    {
-      log = Logger.getLogger(getClass());
-      trace = log.isTraceEnabled();
-      
       if (options != null)
       {
          this.options = options;
@@ -118,7 +113,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
             }
             catch (Exception e)
             {
-               throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "Unable to decode bindCredential", e);
+               throw PicketBoxMessages.MESSAGES.failedToDecodeBindCredential(e);
             }
          }
          roleFilter = (String) options.get(ROLE_FILTER_OPT);
@@ -144,8 +139,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
          }
          catch (Exception e)
          {
-            if (trace)
-               log.trace("Failed to parse: " + strRecursion + ", disabling recursion", e);
+            PicketBoxLogger.LOGGER.debugFailureToParseNumberProperty(ROLE_RECURSION, 0);
             // its okay for this to be 0 as this just disables recursion
             recursion = 0;
          }
@@ -158,8 +152,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
             }
             catch (NumberFormatException e)
             {
-               if (trace)
-                  log.trace("Failed to parse: " + timeLimit + ", using searchTimeLimit=" + searchTimeLimit, e);
+               PicketBoxLogger.LOGGER.debugFailureToParseNumberProperty(SEARCH_TIME_LIMIT_OPT, searchTimeLimit);
             }
          }
          String scope = (String) options.get(SEARCH_SCOPE_OPT);
@@ -172,13 +165,13 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
       }
    }
  
-   public void performMapping(Map<String, Object> map, RoleGroup mappedObject)
+   public void performMapping(Map<String, Object> contextMap, RoleGroup mappedObject)
    {
-      if (map == null || map.isEmpty())
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Context Map is null or empty");
+      if (contextMap == null || contextMap.isEmpty())
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextMap");
 
       //Obtain the principal to roles mapping
-      Principal principal = getCallerPrincipal(map);
+      Principal principal = getCallerPrincipal(contextMap);
 
       if (principal != null)
       {
@@ -200,7 +193,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
          }
          catch (NamingException ne)
          {
-            log.error("Error connecting to LDAP server", ne);
+            PicketBoxLogger.LOGGER.debugIgnoredException(ne);
          }
          finally
          {
@@ -212,7 +205,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
                }
                catch (NamingException ne)
                {
-                  log.error("Error closing context", ne);
+                   PicketBoxLogger.LOGGER.debugIgnoredException(ne);
                }
             }
             if (currentTCCL != null)
@@ -252,22 +245,10 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
          env.setProperty(Context.SECURITY_PRINCIPAL, dn);
       if (credential != null)
          env.put(Context.SECURITY_CREDENTIALS, credential);
-      traceLdapEnv(env);
+      PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(env);
       return new InitialLdapContext(env, null);
    }
    
-   private void traceLdapEnv(Properties env)
-   {
-      if (trace)
-      {
-         Properties tmp = new Properties();
-         tmp.putAll(env);
-         tmp.setProperty(Context.SECURITY_CREDENTIALS, "***");
-         tmp.setProperty(BIND_CREDENTIAL, "***");
-         log.trace("Logging into LDAP server, env=" + tmp.toString());
-      }
-   }
-
    protected void rolesSearch(InitialLdapContext ctx, SearchControls constraints, String user, int recursionMax,
          int nesting, RoleGroup roleGroup) throws NamingException
    {
@@ -298,8 +279,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
                      // Query the roleDN location for the value of roleNameAttributeID
                      String roleDN = roleName;
                      String[] returnAttribute = {roleNameAttributeID};
-                     if (trace)
-                        log.trace("Using roleDN: " + roleDN);
+                     PicketBoxLogger.LOGGER.traceFollowRoleDN(roleDN);
                      try
                      {
                         Attributes result2 = ctx.getAttributes(roleDN, returnAttribute);
@@ -315,8 +295,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
                      }
                      catch (NamingException e)
                      {
-                        if (trace)
-                           log.trace("Failed to query roleNameAttrName", e);
+                        PicketBoxLogger.LOGGER.debugFailureToQueryLDAPAttribute(roleNameAttributeID, roleDN, e);
                      }
                   }
                   else
@@ -365,14 +344,12 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
          try
          {
             SimpleRole role = new SimpleRole(roleName);
-            if (trace)
-               log.trace("Assign user to role " + roleName);
+            PicketBoxLogger.LOGGER.traceAssignUserToRole(roleName);
             roleGroup.addRole(role);
          }
          catch (Exception e)
          {
-            if (trace)
-               log.debug("Failed to create principal: " + roleName, e);
+            PicketBoxLogger.LOGGER.debugFailureToCreatePrincipal(roleName, e);
          }
       }
    }

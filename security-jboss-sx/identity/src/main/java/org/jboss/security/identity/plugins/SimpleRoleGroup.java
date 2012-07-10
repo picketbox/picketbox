@@ -25,12 +25,12 @@ import java.security.Principal;
 import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.RoleType;
@@ -209,7 +209,7 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
    public boolean containsAtleastOneRole(RoleGroup anotherRole)
    {
       if (anotherRole == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "anotherRole is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("anotherRole");
       CopyOnWriteArrayList<Role> roleList = new CopyOnWriteArrayList<Role>(anotherRole.getRoles());
       for (Role r : roleList)
       {

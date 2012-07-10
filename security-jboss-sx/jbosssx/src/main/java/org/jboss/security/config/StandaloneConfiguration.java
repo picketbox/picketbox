@@ -30,6 +30,7 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.auth.login.AuthenticationInfo;
 import org.jboss.security.auth.login.BaseAuthenticationInfo;
@@ -43,8 +44,6 @@ import org.jboss.security.auth.login.BaseAuthenticationInfo;
  */
 public class StandaloneConfiguration extends Configuration implements ApplicationPolicyRegistration
 {
-   protected static Logger log = Logger.getLogger(StandaloneConfiguration.class);
-   
    /** The inherited configuration we delegate to */
    protected Configuration parentConfig;
    
@@ -113,16 +112,12 @@ public class StandaloneConfiguration extends Configuration implements Applicatio
 
       if (authInfo == null)
       {
-         if (log.isTraceEnabled())
-            log.trace("getAppConfigurationEntry(" + appName + "), no entry in appConfigs, tyring parentCont: "
-                  + parentConfig);
+          PicketBoxLogger.LOGGER.traceGetAppConfigEntryViaParent(appName, parentConfig != null ? parentConfig.toString() : null);
          if (parentConfig != null)
             entry = parentConfig.getAppConfigurationEntry(appName);
          if (entry == null)
          {
-            if (log.isTraceEnabled())
-               log.trace("getAppConfigurationEntry(" + appName + "), no entry in parentConfig, trying: "
-                     + SecurityConstants.DEFAULT_APPLICATION_POLICY);
+            PicketBoxLogger.LOGGER.traceGetAppConfigEntryViaDefault(appName, SecurityConstants.DEFAULT_APPLICATION_POLICY);
          }
          ApplicationPolicy defPolicy = getApplicationPolicy(SecurityConstants.DEFAULT_APPLICATION_POLICY);
          authInfo = defPolicy != null ? (AuthenticationInfo) defPolicy.getAuthenticationInfo() : null;
@@ -130,8 +125,7 @@ public class StandaloneConfiguration extends Configuration implements Applicatio
 
       if (authInfo != null)
       {
-         if (log.isTraceEnabled())
-            log.trace("End getAppConfigurationEntry(" + appName + "), authInfo=" + authInfo);
+         PicketBoxLogger.LOGGER.traceEndGetAppConfigEntryWithSuccess(appName, authInfo.toString());
          // Make a copy of the authInfo object
          final BaseAuthenticationInfo theAuthInfo = authInfo;
          PrivilegedAction<AppConfigurationEntry[]> action = new PrivilegedAction<AppConfigurationEntry[]>()
@@ -145,8 +139,7 @@ public class StandaloneConfiguration extends Configuration implements Applicatio
       }
       else
       {
-         if (log.isTraceEnabled())
-            log.trace("End getAppConfigurationEntry(" + appName + "), failed to find entry");
+         PicketBoxLogger.LOGGER.traceEndGetAppConfigEntryWithFailure(appName);
       }
 
       return entry; 

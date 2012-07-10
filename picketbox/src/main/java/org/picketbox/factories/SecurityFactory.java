@@ -27,8 +27,8 @@ import javax.security.auth.login.Configuration;
 
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
-import org.jboss.security.ErrorCodes;
 import org.jboss.security.ISecurityManagement;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextFactory;
 import org.jboss.security.audit.AuditManager;
@@ -49,30 +49,32 @@ public class SecurityFactory
    private static ISecurityManagement securityManagement = new PicketBoxSecurityManagement();
    
    private static Configuration parentConfiguration = null;
-   
+
+   private static String AUTH_CONF_FILE = "auth.conf";
+
+   private static String AUTH_CONF_SYSPROP = "java.security.auth.login.config";
+
    static
    { 
       try
       {
          ClassLoader tcl = SecurityActions.getContextClassLoader();
          if( tcl == null )
-            throw new IllegalStateException( ErrorCodes.NULL_VALUE + "TCCL has not been set" );
-         URL configLocation = tcl.getResource("auth.conf");
-         String prop = "java.security.auth.login.config";
-         if(SecurityActions.getSystemProperty(prop, null) == null)
+            throw PicketBoxMessages.MESSAGES.invalidThreadContextClassLoader();
+         URL configLocation = tcl.getResource(AUTH_CONF_FILE);
+         if(SecurityActions.getSystemProperty(AUTH_CONF_SYSPROP, null) == null)
          {
             if( configLocation == null )
-               throw new RuntimeException( ErrorCodes.NULL_VALUE + 
-            		   "Neither system property *java.security.auth.login.config* available or auth.conf present" );
+               throw PicketBoxMessages.MESSAGES.invalidNullLoginConfig();
 
-            SecurityActions.setSystemProperty(prop, configLocation.toExternalForm());  
+            SecurityActions.setSystemProperty(AUTH_CONF_SYSPROP, configLocation.toExternalForm());
          }
          
          parentConfiguration = Configuration.getConfiguration();
       }
       catch(Exception e)
       {
-         throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Unable to init SecurityFactory:", e);
+         throw PicketBoxMessages.MESSAGES.unableToInitSecurityFactory(e);
       }
    }
    
@@ -153,7 +155,6 @@ public class SecurityFactory
          standaloneConfiguration.setParentConfig(parentConfiguration);
          Configuration.setConfiguration(standaloneConfiguration);
       }
-      setLog4JLogger();
    }
    
    /**
@@ -173,43 +174,6 @@ public class SecurityFactory
       }
       SecurityActions.setSecurityContext(securityContext);
       return securityContext;
-   }
-   
-   /**
-    * <p>
-    * Set the Log4J logger Plugin on the system property
-    * <b>org.jboss.logging.Logger.pluginClass</b>
-    * This is the default behavior of the {@code SecurityFactory#prepare()} method
-    * </p>
-    * <p>
-    * <b>Note:</b> If the system property is already set, there is no change in the system property. 
-    * </p>
-    */ 
-   public static void setLog4JLogger()
-   { 
-      String loggerPluginClass = SecurityActions.getSystemProperty("org.jboss.logging.Logger.pluginClass", "");
-      if(loggerPluginClass.length() < 1)
-         SecurityActions.setSystemProperty("org.jboss.logging.Logger.pluginClass", "org.jboss.logging.log4j.Log4jLoggerPlugin");
-   }
-   
-   /**
-    * <p>
-    * Set the JDK logger Plugin on the system property
-    * <b>org.jboss.logging.Logger.pluginClass</b> 
-    * </p>
-    * <p>
-    * <b>Note:</b> If the system property is already set, there is no change in the system property. Also
-    * you will need to provide logging.properties
-    * </p>
-    */ 
-   public static void setJDKLogger()
-   { 
-      String loggerPluginClass = SecurityActions.getSystemProperty("org.jboss.logging.Logger.pluginClass", "");
-      if(loggerPluginClass.length() < 1)
-      {
-         SecurityActions.setSystemProperty("org.jboss.logging.Logger.pluginClass", "org.jboss.logging.jdk.JDK14LoggerPlugin");
-         SecurityActions.setSystemProperty("java.util.logging.config.file=logging.properties", "logging.properties");
-      }  
    }
    
    /**

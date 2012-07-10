@@ -41,8 +41,8 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
 
@@ -63,14 +63,12 @@ public class Util
     * If this fails or the TCL is not a URLClassLoader getResource(String) is
     * tried.
     * @param propertiesName - the name of the properties file resource
-    * @param log - the logger used for trace level messages
     * @return the loaded properties file if found
     * @exception java.io.IOException thrown if the properties file cannot be found
     *    or loaded 
     */
-   static Properties loadProperties(String propertiesName, Logger log) throws IOException
+   static Properties loadProperties(String propertiesName) throws IOException
    {
-      boolean trace = log.isTraceEnabled();
 
       Properties bundle = null;
       ClassLoader loader = SecurityActions.getContextClassLoader();
@@ -80,8 +78,7 @@ public class Util
       {
          URLClassLoader ucl = (URLClassLoader) loader;
          url = SecurityActions.findResource(ucl, propertiesName);
-         if (log.isTraceEnabled())
-            log.trace("findResource: " + url);
+         PicketBoxLogger.LOGGER.traceAttemptToLoadResource(propertiesName);
       }
       // Do a general resource search
       if (url == null)
@@ -90,8 +87,7 @@ public class Util
          try {
             url = new URL(propertiesName);
          } catch (MalformedURLException mue) {
-            if (trace)
-               log.trace("Failed to open properties as URL", mue);
+            PicketBoxLogger.LOGGER.debugFailureToOpenPropertiesFromURL(mue);
             File tmp = new File(propertiesName);
             if (tmp.exists())
                url = tmp.toURI().toURL();
@@ -99,12 +95,9 @@ public class Util
       }
       if (url == null)
       {
-         String msg = "No properties file " + propertiesName + " found";
-         throw new IOException(msg);
+         throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
       }
 
-      if (log.isTraceEnabled())
-         log.trace("Properties file=" + url);
       Properties defaults = new Properties();
       bundle = new Properties(defaults);
       InputStream is = null;
@@ -114,8 +107,6 @@ public class Util
       }
       catch (PrivilegedActionException e)
       {
-         if (trace)
-            log.trace("Open stream error", e);
          throw new IOException(e.getLocalizedMessage());
       }
       if (is != null)
@@ -131,10 +122,9 @@ public class Util
       }
       else
       {
-         throw new IOException(ErrorCodes.MISSING_FILE + "Properties file " + propertiesName + " not available");
+         throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
       }
-      if (trace)
-         log.debug("Loaded properties, keySet=" + bundle.keySet());
+      PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
 
       return bundle;
    }
@@ -146,18 +136,15 @@ public class Util
     * @param username - name of user
     * @param roleGroup - group containing the user's roles
     * @param roles - the Properties containing the user=roles mappings
-    * @param log - logger
     * @return Group[] containing the sets of roles
     */
-   static void addRolesToGroup(String username, RoleGroup roleGroup, Properties roles, Logger log)
+   static void addRolesToGroup(String username, RoleGroup roleGroup, Properties roles)
    {
-      boolean trace = log.isTraceEnabled();
       String[] roleNames = null;
       if (roles.containsKey(username))
       {
          String value = roles.getProperty(username);
-         if (trace)
-            log.trace("Adding to RoleGroup: " + value);
+         PicketBoxLogger.LOGGER.traceAdditionOfRoleToGroup(value, roleGroup.getRoleName());
          roleNames = parseRoles(value);
       }
       if (roleNames != null)
@@ -186,13 +173,11 @@ public class Util
     * @param roleGroup - group containing the user's roles
     * @param dsJndiName - JNDI name of the datasource
     * @param rolesQuery - prepared statement to query
-    * @param log - logger
     * @param suspendResume - flag to indicate if transactions should be suspended/resumed
     * @param tm - transaction manager
     */
-   static void addRolesToGroup(String username, RoleGroup roleGroup, String dsJndiName, String rolesQuery, Logger log, boolean suspendResume, TransactionManager tm)
+   static void addRolesToGroup(String username, RoleGroup roleGroup, String dsJndiName, String rolesQuery, boolean suspendResume, TransactionManager tm)
    {
-      boolean trace = log.isTraceEnabled();
       Connection conn = null;
       PreparedStatement ps = null;
       ResultSet rs = null;
@@ -200,7 +185,7 @@ public class Util
       if (suspendResume)
       {
          if (tm == null)
-            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Transaction Manager is null");
+            throw PicketBoxMessages.MESSAGES.invalidNullTransactionManager();
       }
       Transaction tx = null;
       if (suspendResume)
@@ -213,8 +198,6 @@ public class Util
          {
             throw new RuntimeException(e);
          }
-         if (trace)
-            log.trace("suspendAnyTransaction");
       }
 
       try
@@ -223,8 +206,7 @@ public class Util
          DataSource ds = (DataSource) ctx.lookup(dsJndiName);
          conn = ds.getConnection();
          // Get the user role names
-         if (trace)
-            log.trace("Excuting query: " + rolesQuery + ", with username: " + username);
+         PicketBoxLogger.LOGGER.traceExecuteQuery(rolesQuery, username);
          ps = conn.prepareStatement(rolesQuery);
          try
          {
@@ -237,8 +219,7 @@ public class Util
          rs = ps.executeQuery();
          if (!rs.next())
          {
-            if (trace)
-               log.trace("No roles found");
+            PicketBoxLogger.LOGGER.traceQueryWithEmptyResult();
          }
          
          do
@@ -250,11 +231,11 @@ public class Util
       }
       catch (NamingException ex)
       {
-         throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "Error looking up DataSource from: " + dsJndiName, ex);
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.failedToLookupDataSourceMessage(dsJndiName), ex);
       }
       catch (SQLException ex)
       {
-         throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "Query failed", ex);
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.failedToProcessQueryMessage(), ex);
       }
       finally
       {
@@ -298,8 +279,6 @@ public class Util
             {
                throw new RuntimeException(e);
             }
-            if (trace)
-               log.trace("resumeAnyTransaction");
          }
       }
    }

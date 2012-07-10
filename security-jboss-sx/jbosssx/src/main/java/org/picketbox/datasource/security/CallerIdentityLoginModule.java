@@ -31,8 +31,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.RunAsIdentity;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.vault.SecurityVaultException;
@@ -58,13 +58,7 @@ import org.jboss.security.vault.SecurityVaultUtil;
 public class CallerIdentityLoginModule
    extends AbstractPasswordCredentialLoginModule
 {
-   /**
-    * Class logger
-    */
-   private static final Logger log = Logger.getLogger(CallerIdentityLoginModule.class);
 
-   private boolean trace = log.isTraceEnabled();
-   
    /**
     * The default username/principal to use for basic connections
     */
@@ -102,41 +96,36 @@ public class CallerIdentityLoginModule
       super.initialize(subject, handler, sharedState, options);
 
       userName = (String) options.get("userName");
-      if (userName == null)
-      {
-         log.debug("No default username supplied.");
-      }
 
       String pass = (String) options.get("password");
-      if (pass == null)
+      if (pass != null)
       {
-         log.debug("No default password supplied.");
-      }
-      else
-      {
-         password = pass.toCharArray();
-      }
-      if(pass != null && SecurityVaultUtil.isVaultFormat(pass))
-      {
-    	  try 
-    	  {
-			pass = SecurityVaultUtil.getValueAsString(pass);
-		  } 
-    	  catch (SecurityVaultException e) 
-    	  {
-			throw new RuntimeException(e);
-		  }
-    	  password = pass.toCharArray();
+         if (SecurityVaultUtil.isVaultFormat(pass))
+         {
+             try
+             {
+                 pass = SecurityVaultUtil.getValueAsString(pass);
+             }
+             catch (SecurityVaultException e)
+             {
+                 throw new RuntimeException(e);
+             }
+             password = pass.toCharArray();
+         }
+         else
+         {
+            password = pass.toCharArray();
+         }
       }
 
       // Check the addRunAsRoles
       String flag = (String) options.get("addRunAsRoles");
       addRunAsRoles = Boolean.valueOf(flag).booleanValue();
 
-      log.debug("got default principal: " + userName + ", username: "
-         + userName + ", password: " + (password == null ? "null" : "****")
-         + " addRunAsRoles: "+addRunAsRoles);
-
+      // Debug the module options.
+      PicketBoxLogger.LOGGER.debugModuleOption("userName", userName);
+      PicketBoxLogger.LOGGER.debugModuleOption("password", password != null ? "****" : null);
+      PicketBoxLogger.LOGGER.debugModuleOption("addRunAsRoles", addRunAsRoles);
    }
 
    /**
@@ -150,8 +139,7 @@ public class CallerIdentityLoginModule
    @Override
    public boolean login() throws LoginException
    {
-      if(trace)
-         log.trace("Caller Association login called");
+      PicketBoxLogger.LOGGER.traceBeginLogin();
 
       //setup to use the default connection info.  This will be overiden if security
       //associations are found
@@ -175,11 +163,8 @@ public class CallerIdentityLoginModule
          if (user != null)
          {
             username = user.getName();
-            if (trace)
-            {
-               log.trace("Current Calling principal is: " + username
-                  + " ThreadName: " + Thread.currentThread().getName());
-            }
+            PicketBoxLogger.LOGGER.traceCurrentCallingPrincipal(username, Thread.currentThread().getName());
+
             // Check for a RunAsIdentity
             RunAsIdentity runAs = GetPrincipalInfoAction.peekRunAsIdentity();
             if( runAs != null )
@@ -190,7 +175,7 @@ public class CallerIdentityLoginModule
       }
       catch (Throwable e)
       {
-         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Unable to get the calling principal or its credentials for resource association");
+         throw PicketBoxMessages.MESSAGES.unableToGetPrincipalOrCredsForAssociation();
       }
 
       // Update userName so that getIdentity is consistent
@@ -226,16 +211,14 @@ public class CallerIdentityLoginModule
 
    protected Principal getIdentity()
    {
-      if(trace)
-         log.trace("getIdentity called");
+      PicketBoxLogger.LOGGER.traceBeginGetIdentity(userName);
       Principal principal = new SimplePrincipal(userName);
       return principal;
    }
 
    protected Group[] getRoleSets() throws LoginException
    {
-      if(trace)
-         log.trace("getRoleSets called");
+      PicketBoxLogger.LOGGER.traceBeginGetRoleSets();
       return new Group[]{};
    }
 }

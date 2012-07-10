@@ -28,6 +28,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.security.PicketBoxLogger;
+
 /**
  * A Certificate Login Module that gets its role information from a database.
  * 
@@ -83,12 +85,7 @@ public class DatabaseCertLoginModule extends BaseCertLoginModule
       if( tmp != null )
          suspendResume = Boolean.valueOf(tmp.toString()).booleanValue();
 
-      if (trace)
-      {
-         log.trace("DatabaseServerLoginModule, dsJndiName="+dsJndiName);
-         log.trace("rolesQuery="+rolesQuery);
-         log.trace("suspendResume="+suspendResume);
-      }
+      PicketBoxLogger.LOGGER.traceDBCertLoginModuleOptions(dsJndiName, "", rolesQuery, suspendResume);
    }
 
    /**

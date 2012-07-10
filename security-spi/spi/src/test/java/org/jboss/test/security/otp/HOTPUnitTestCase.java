@@ -67,8 +67,6 @@ public class HOTPUnitTestCase
       Calendar currentDateTime = Calendar.getInstance( utc );
       String otp1 = this.getOTP( secret, currentDateTime );
       
-      //System.out.println( "OTP Generated at " + currentDateTime);
-      
       System.out.println( "We are going to sleep for " + SLEEP_TIME + " secs" );
       Thread.sleep( SLEEP_TIME * 1000 ); //2 secs
       

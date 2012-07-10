@@ -40,10 +40,10 @@ import java.util.StringTokenizer;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.crypto.digest.DigestCallback;
-import org.jboss.logging.Logger;
 import org.jboss.security.Base64Encoder;
 import org.jboss.security.Base64Utils;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimpleGroup;
 
 /**
@@ -54,8 +54,6 @@ import org.jboss.security.SimpleGroup;
  */
 public class Util
 {
-   private static Logger log = Logger.getLogger(Util.class); 
-
    public static final String BASE64_ENCODING = "BASE64";
    public static final String BASE16_ENCODING = "HEX";
    public static final String RFC2617_ENCODING = "RFC2617";
@@ -77,11 +75,8 @@ public class Util
     * @param aslm - the login module to use for Principal creation
     * @return Group[] containing the sets of roles
     */ 
-   static Group[] getRoleSets(String targetUser, Properties roles,
-      char roleGroupSeperator, AbstractServerLoginModule aslm)
+   static Group[] getRoleSets(String targetUser, Properties roles, char roleGroupSeperator, AbstractServerLoginModule aslm)
    {
-      Logger log = aslm.log;      
-      boolean trace = log.isTraceEnabled();
       Enumeration<?> users = roles.propertyNames();
       SimpleGroup rolesGroup = new SimpleGroup("Roles");
       ArrayList<Group> groups = new ArrayList<Group>();
@@ -90,8 +85,7 @@ public class Util
       {
          String user = (String) users.nextElement();
          String value = roles.getProperty(user);
-         if( trace )
-            log.trace("Checking user: "+user+", roles string: "+value);
+
          // See if this entry is of the form targetUser[.GroupName]=roles
          //JBAS-3742 - skip potential '.' in targetUser
          int index = user.indexOf(roleGroupSeperator, targetUser.length());
@@ -102,20 +96,18 @@ public class Util
          else
             userMatch = targetUser.equals(user);
 
-         // Check for username.RoleGroup pattern
-         if (isRoleGroup == true)
+         String groupName = "Roles";
+          // Check for username.RoleGroup pattern
+          if (isRoleGroup == true)
          {
-            String groupName = user.substring(index + 1);
-            if (groupName.equals("Roles"))
+            groupName = user.substring(index + 1);
+            PicketBoxLogger.LOGGER.traceAdditionOfRoleToGroup(value, groupName);
+             if (groupName.equals("Roles"))
             {
-               if( trace )
-                  log.trace("Adding to Roles: "+value);
                parseGroupMembers(rolesGroup, value, aslm);
             }
             else
             {
-               if( trace )
-                  log.trace("Adding to "+groupName+": "+value);
                SimpleGroup group = new SimpleGroup(groupName);
                parseGroupMembers(group, value, aslm);
                groups.add(group);
@@ -123,8 +115,7 @@ public class Util
          }
          else if (userMatch == true)
          {
-            if( trace )
-               log.trace("Adding to Roles: "+value);
+             PicketBoxLogger.LOGGER.traceAdditionOfRoleToGroup(value, groupName);
             // Place these roles into the Default "Roles" group
             parseGroupMembers(rolesGroup, value, aslm);
          }
@@ -169,16 +160,13 @@ public class Util
     *    that will be used as the default Properties to the ctor of the
     *    propertiesName Properties instance.
     * @param propertiesName - the name of the properties file resource
-    * @param log - the logger used for trace level messages
     * @return the loaded properties file if found
     * @exception java.io.IOException thrown if the properties file cannot be found
     *    or loaded 
     */
-   static Properties loadProperties(String defaultsName, String propertiesName, Logger log)
+   static Properties loadProperties(String defaultsName, String propertiesName)
       throws IOException
    {
-      boolean trace = log.isTraceEnabled();
-      
       Properties bundle = null;
       ClassLoader loader = SecurityActions.getContextClassLoader();
       URL defaultUrl = null;
@@ -189,8 +177,7 @@ public class Util
          URLClassLoader ucl = (URLClassLoader) loader;
          defaultUrl = SecurityActions.findResource(ucl,defaultsName);
          url = SecurityActions.findResource(ucl,propertiesName);
-         if (trace)
-            log.trace("findResource: "+url);
+         PicketBoxLogger.LOGGER.traceAttemptToLoadResource(propertiesName);
       }
       // Do a general resource search
       if( defaultUrl == null ) {
@@ -199,8 +186,7 @@ public class Util
             try {
                defaultUrl = new URL(defaultsName);
             } catch (MalformedURLException mue) {
-               if (trace)
-                  log.trace("Failed to open default properties as URL", mue);
+               PicketBoxLogger.LOGGER.debugFailureToOpenPropertiesFromURL(mue);
                File tmp = new File(defaultsName);
                if (tmp.exists())
                   defaultUrl = tmp.toURI().toURL();
@@ -213,8 +199,7 @@ public class Util
             try {
                url = new URL(propertiesName);
             } catch (MalformedURLException mue) {
-               if (trace)
-                  log.trace("Failed to open properties as URL", mue);
+               PicketBoxLogger.LOGGER.debugFailureToOpenPropertiesFromURL(mue);
                File tmp = new File(propertiesName);
                if (tmp.exists())
                   url = tmp.toURI().toURL();
@@ -223,13 +208,10 @@ public class Util
       }
       if( url == null && defaultUrl == null )
       {
-         String msg = "No properties file: " + propertiesName
-            + " or defaults: " +defaultsName+ " found";
-         throw new IOException(msg);
+         String propertiesFiles = propertiesName + "/" + defaultsName;
+         throw PicketBoxMessages.MESSAGES.unableToFindPropertiesFile(propertiesFiles);
       }
 
-      if (trace)
-         log.trace("Properties file=" + url+", defaults="+defaultUrl);
       Properties defaults = new Properties();
       if( defaultUrl != null )
       {
@@ -238,13 +220,11 @@ public class Util
          {
             is = defaultUrl.openStream();
             defaults.load(is);
-            if (trace)
-               log.trace("Loaded defaults, users="+defaults.keySet());
+            PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(defaultsName, defaults.keySet());
          }
          catch(Throwable e)
          {
-            if (trace)
-               log.trace("Failed to load defaults", e);
+            PicketBoxLogger.LOGGER.debugFailureToLoadPropertiesFile(defaultsName, e);
          }
          finally
          {
@@ -262,8 +242,6 @@ public class Util
          }
          catch (PrivilegedActionException e)
          {
-            if (trace)
-               log.trace("Open stream error", e);
             throw new IOException(e.getLocalizedMessage());
          }
          if (is != null)
@@ -279,10 +257,9 @@ public class Util
          }
          else
          {
-            throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not available");
+            throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
          }
-         if (trace)
-            log.trace("Loaded properties, users="+bundle.keySet());
+         PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
       }
 
       return bundle;
@@ -296,15 +273,12 @@ public class Util
     * If this fails or the TCL is not a URLClassLoader getResource(String) is
     * tried. If not, an absolute path is tried.
     * @param propertiesName - the name of the properties file resource
-    * @param log - the logger used for trace level messages
     * @return the loaded properties file if found
     * @exception java.io.IOException thrown if the properties file cannot be found
     *    or loaded 
     */
-   static Properties loadProperties(String propertiesName, Logger log) throws IOException
+   static Properties loadProperties(String propertiesName) throws IOException
    {
-      boolean trace = log.isTraceEnabled();
-
       Properties bundle = null;
       ClassLoader loader = SecurityActions.getContextClassLoader();
       URL url = null;
@@ -313,8 +287,7 @@ public class Util
       {
          URLClassLoader ucl = (URLClassLoader) loader;
          url = SecurityActions.findResource(ucl, propertiesName);
-         if (trace)
-            log.trace("findResource: " + url);
+         PicketBoxLogger.LOGGER.traceAttemptToLoadResource(propertiesName);
       }
       // Do a general resource search
       if (url == null)
@@ -328,8 +301,7 @@ public class Util
             }
             catch (MalformedURLException mue)
             {
-               if (trace)
-                  log.trace("Failed to open properties as URL", mue);
+               PicketBoxLogger.LOGGER.debugFailureToOpenPropertiesFromURL(mue);
                File tmp = new File(propertiesName);
                if (tmp.exists())
                   url = tmp.toURI().toURL();
@@ -338,12 +310,9 @@ public class Util
       }
       if (url == null)
       {
-         String msg = "No properties file: " + propertiesName + " found";
-         throw new IOException(msg);
+         throw PicketBoxMessages.MESSAGES.unableToFindPropertiesFile(propertiesName);
       }
 
-      if (trace)
-         log.trace("Properties file=" + url);
       Properties defaults = new Properties();
       bundle = new Properties(defaults);
       if (url != null)
@@ -355,8 +324,6 @@ public class Util
          }
          catch (PrivilegedActionException e)
          {
-            if (trace)
-               log.trace("Open stream error", e);
             throw new IOException(e.getLocalizedMessage());
          }
          if (is != null)
@@ -372,10 +339,9 @@ public class Util
          }
          else
          {
-            throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not available");
+            throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
          }
-         if (trace)
-            log.trace("Loaded properties, users=" + bundle.keySet());
+         PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
       }
 
       return bundle;
@@ -391,8 +357,7 @@ public class Util
     * @param group - the Group to add the roles to.
     * @param roles - the comma delimited role names.
     */ 
-   static void parseGroupMembers(Group group, String roles,
-      AbstractServerLoginModule aslm)
+   static void parseGroupMembers(Group group, String roles, AbstractServerLoginModule aslm)
    {
       StringTokenizer tokenizer = new StringTokenizer(roles, ",");
       while (tokenizer.hasMoreTokens())
@@ -405,7 +370,7 @@ public class Util
          }
          catch (Exception e)
          {
-            aslm.log.warn("Failed to create principal for: "+token, e);
+            PicketBoxLogger.LOGGER.debugFailureToCreatePrincipal(token, e);
          }
       }
    }
@@ -425,10 +390,11 @@ public class Util
     */
     public static String createPasswordHash(String hashAlgorithm, String hashEncoding,
        String hashCharset, String username, String password)
-   {
+    {
       return createPasswordHash(hashAlgorithm, hashEncoding,
        hashCharset, username, password, null);
-   }
+    }
+
     /**
      * Calculate a password hash using a MessageDigest.
      *
@@ -461,7 +427,7 @@ public class Util
        }
        catch(UnsupportedEncodingException uee)
        {
-          log.error("charset " + hashCharset + " not found. Using platform default.", uee);
+          PicketBoxLogger.LOGGER.errorFindingCharset(hashCharset, uee);
           passBytes = password.getBytes();
        }
 
@@ -489,12 +455,12 @@ public class Util
           }
           else
           {
-             log.error("Unsupported hash encoding format " + hashEncoding);
+             PicketBoxLogger.LOGGER.unsupportedHashEncodingFormat(hashEncoding);
           }
        }
        catch(Exception e)
        {
-          log.error("Password hash calculation failed ", e);
+          PicketBoxLogger.LOGGER.errorCalculatingPasswordHash(e);
        }
        return passwordHash;
     }

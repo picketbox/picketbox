@@ -21,17 +21,18 @@
 */
 package org.jboss.security.auth.spi;
 
-import java.util.Map;
-import java.util.HashSet;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
-import org.jboss.security.ErrorCodes;
 import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 
 /** A proxy LoginModule that loads a delegate LoginModule using
 the current thread context class loader. The purpose of this
@@ -63,17 +64,7 @@ public class ProxyLoginModule implements LoginModule
     {
     }
 
-// --- Begin LoginModule interface methods
-    /** Initialize this LoginModule. This method loads the LoginModule
-        specified by the moduleName option using the current thread
-        context class loader and then delegates the initialize call
-        to it.
-
-    @param options, include:
-        moduleName: the classname of the module that this proxy module
-        delegates all calls to.
-     */
-    public void initialize(Subject subject, CallbackHandler callbackHandler, 
+    public void initialize(Subject subject, CallbackHandler callbackHandler,
           Map<String,?> sharedState, Map<String,?> options)
     {
         log = Logger.getLogger(getClass());
@@ -84,16 +75,15 @@ public class ProxyLoginModule implements LoginModule
   	    HashSet<String> validOptions = new HashSet<String>(Arrays.asList(ALL_VALID_OPTIONS));
         for (Object key : options.keySet())
         {
-      	 if (!validOptions.contains((String)key))
+      	 if (!validOptions.contains(key))
            {
-              log.warn("Invalid or misspelled option: " + key);
+              PicketBoxLogger.LOGGER.warnInvalidModuleOption((String) key);
            }
         }
 		
 		moduleName = (String) options.get(MODULE_NAME);
         if( moduleName == null )
         {
-            System.out.println("Required moduleName option not given");
             return;
         }
 
@@ -106,7 +96,6 @@ public class ProxyLoginModule implements LoginModule
         }
         catch(Throwable t)
         {
-            System.out.println("ProxyLoginModule failed to load: "+moduleName);
             t.printStackTrace();
             return;
         }
@@ -122,9 +111,9 @@ public class ProxyLoginModule implements LoginModule
     public boolean login() throws LoginException
     {
         if( moduleName == null )
-            throw new LoginException(ErrorCodes.NULL_VALUE + "Required moduleName option not given");
+            throw new LoginException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage(MODULE_NAME));
         if( delegate == null )
-            throw new LoginException(ErrorCodes.NULL_VALUE + "Failed to load LoginModule: "+moduleName);
+            throw PicketBoxMessages.MESSAGES.failedToInstantiateDelegateModule(moduleName);
 
         return delegate.login();
     }

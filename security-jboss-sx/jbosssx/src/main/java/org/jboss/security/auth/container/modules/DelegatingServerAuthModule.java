@@ -27,9 +27,6 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
-
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
  
 /**
  *  Server Auth Module that delegates work to a login context 
@@ -45,8 +42,6 @@ public class DelegatingServerAuthModule extends AbstractServerAuthModule
 
    public DelegatingServerAuthModule()
    {  
-      log = Logger.getLogger(DelegatingServerAuthModule.class);
-      trace = log.isTraceEnabled();
       this.supportedTypes.add(Object.class);
    }
    
@@ -78,7 +73,7 @@ public class DelegatingServerAuthModule extends AbstractServerAuthModule
 
    public AuthStatus secureResponse(MessageInfo messageInfo, Subject arg1) throws AuthException
    { 
-      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED);
+      throw new UnsupportedOperationException();
    } 
    
    @Override
@@ -92,9 +87,7 @@ public class DelegatingServerAuthModule extends AbstractServerAuthModule
       }
       catch (Exception e)
       {
-         if(trace)
-            log.trace("Exception in validate:",e);
-         throw new AuthException(e.getLocalizedMessage());
+          throw new AuthException(e.getLocalizedMessage());
       }   
    }
 

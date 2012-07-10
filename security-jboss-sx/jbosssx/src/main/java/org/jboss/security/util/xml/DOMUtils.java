@@ -36,8 +36,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.util.StringPropertyReplacer;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -58,8 +58,6 @@ import org.xml.sax.SAXException;
 @SuppressWarnings("unchecked")
 public final class DOMUtils
 {
-    private static Logger log = Logger.getLogger(DOMUtils.class);
-
     // All elements created by the same thread are created by the same builder and belong to the same doc
     private static ThreadLocal documentThreadLocal = new ThreadLocal();
     private static ThreadLocal builderThreadLocal = new ThreadLocal() {
@@ -75,7 +73,7 @@ public final class DOMUtils
             }
             catch (ParserConfigurationException e)
             {
-                throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Failed to create DocumentBuilder", e);
+                throw PicketBoxMessages.MESSAGES.failedToCreateDocumentBuilder(e);
             }
         }
     };
@@ -98,15 +96,7 @@ public final class DOMUtils
      */
     public static Element parse(String xmlString) throws IOException
     {
-        try
-        {
-            return parse(new ByteArrayInputStream(xmlString.getBytes("UTF-8")));
-        }
-        catch (IOException e)
-        {
-            log.error("Cannot parse: " + xmlString);
-            throw e;
-        }
+        return parse(new ByteArrayInputStream(xmlString.getBytes("UTF-8")));
     }
 
     /** Parse the given XML stream and return the root Element
@@ -124,7 +114,7 @@ public final class DOMUtils
         }
         catch (SAXException e)
         {
-            throw new IOException(e.toString());
+            throw new IOException(e);
         }
     }
 
@@ -143,7 +133,7 @@ public final class DOMUtils
         }
         catch (SAXException e)
         {
-            throw new IOException(e.toString());
+            throw new IOException(e);
         }
     }
 
@@ -154,7 +144,6 @@ public final class DOMUtils
     public static Element createElement(String localPart)
     {
         Document doc = getOwnerDocument();
-        log.trace("createElement {}" + localPart);
         return doc.createElement(localPart);
     }
 
@@ -166,7 +155,6 @@ public final class DOMUtils
     public static Element createElement(String localPart, String prefix)
     {
         Document doc = getOwnerDocument();
-        log.trace("createElement {}" + prefix + ":" + localPart);
         return doc.createElement(prefix + ":" + localPart);
     }
 
@@ -181,12 +169,10 @@ public final class DOMUtils
         Document doc = getOwnerDocument();
         if (prefix == null || prefix.length() == 0)
         {
-            log.trace("createElement {" + uri + "}" + localPart);
             return doc.createElementNS(uri, localPart);
         }
         else
         {
-            log.trace("createElement {" + uri + "}" + prefix + ":" + localPart);
             return doc.createElementNS(uri, prefix + ":" + localPart);
         }
     }
@@ -253,7 +239,7 @@ public final class DOMUtils
             }
 
             if (namespaceURI.equals(""))
-                throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Cannot find namespace uri for: " + qualifiedName);
+                throw PicketBoxMessages.MESSAGES.failedToFindNamespaceURI(qualifiedName);
         }
 
         qname = new QName(namespaceURI, localPart, prefix);
@@ -392,7 +378,7 @@ public final class DOMUtils
             // change an object in a way which is incorrect with regard to namespaces.
             if (uri == null && qname.startsWith("xmlns"))
             {
-               log.trace("Ignore attribute: [uri=" + uri + ",qname=" + qname + ",value=" + value + "]");
+                PicketBoxLogger.LOGGER.traceIgnoreXMLAttribute(uri, qname, value);
             }
             else
             {

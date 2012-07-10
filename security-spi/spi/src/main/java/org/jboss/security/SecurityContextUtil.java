@@ -88,14 +88,12 @@ public abstract class SecurityContextUtil
    /**
     * Get the Roles associated with the user for the
     * current security context
-    * @param <T>
     * @return
     */
    public abstract RoleGroup getRoles();
    
    /**
     * Set the roles for the user for the current security context
-    * @param <T>
     * @param roles
     */
    public abstract void setRoles(RoleGroup roles);
@@ -190,7 +188,6 @@ public abstract class SecurityContextUtil
     * The context implementation may place the object in its internal
     * data structures (like the Data Map)
     * @param <T> Generic Type
-    * @param sc Security Context Object
     * @param key Key representing the object being set
     * @param obj
     */
@@ -199,7 +196,6 @@ public abstract class SecurityContextUtil
    /**
     * Return an object from the Security Context
     * @param <T>
-    * @param sc Security Context Object
     * @param key key identifies the type of object we are requesting
     * @return
     */
@@ -208,7 +204,6 @@ public abstract class SecurityContextUtil
    /**
     * Remove an object represented by the key from the security context
     * @param <T>
-    * @param sc Security Context Object
     * @param key key identifies the type of object we are requesting
     * @return the removed object
     */

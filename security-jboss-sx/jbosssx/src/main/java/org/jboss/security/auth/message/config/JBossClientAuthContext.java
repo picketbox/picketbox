@@ -22,17 +22,15 @@
 package org.jboss.security.auth.message.config;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.ClientAuth;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ClientAuthContext;
 import javax.security.auth.message.module.ClientAuthModule;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 //$Id$
 
@@ -54,12 +52,12 @@ public class JBossClientAuthContext implements ClientAuthContext
    public JBossClientAuthContext(JBossClientAuthConfig config)
    {
       if(config == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "config");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("config");
       this.config = config;
    }
    
    /**
-    * @see ClientAuth#cleanSubject(Subject, Map)
+    * @see ClientAuthContext#cleanSubject(javax.security.auth.message.MessageInfo, javax.security.auth.Subject)
     */
    @SuppressWarnings({"rawtypes"})
    public void cleanSubject(MessageInfo messageInfo, Subject subject) 
@@ -73,7 +71,7 @@ public class JBossClientAuthContext implements ClientAuthContext
    }
    
    /**
-    * @see ClientAuth#secureRequest(AuthParam, Subject, Map)
+    * @see ClientAuthContext#secureRequest(javax.security.auth.message.MessageInfo, javax.security.auth.Subject
     */ 
    @SuppressWarnings("rawtypes")
    public AuthStatus secureRequest(MessageInfo messageInfo, Subject clientSubject) throws AuthException
@@ -90,7 +88,7 @@ public class JBossClientAuthContext implements ClientAuthContext
    }
    
    /**
-    * @see ClientAuth#validateResponse(AuthParam, Subject, Subject, Map)
+    * @see ClientAuthContext#validateResponse(javax.security.auth.message.MessageInfo, javax.security.auth.Subject, javax.security.auth.Subject)
     */ 
    @SuppressWarnings("rawtypes")
    public AuthStatus validateResponse(MessageInfo messageInfo, Subject clientSubject, 

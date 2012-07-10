@@ -32,14 +32,14 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.plugins.TransactionManagerLocator;
 
 
@@ -129,17 +129,8 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
       String jname = (String) options.get(TRANSACTION_MANAGER_JNDI_NAME);
       if(jname != null)
          this.TX_MGR_JNDI_NAME = jname;
-      
-	  if (trace)
-      {
-         log.trace("DatabaseServerLoginModule, dsJndiName="+dsJndiName);
-         log.trace("principalsQuery="+principalsQuery);
-         if (rolesQuery != null)
-            log.trace("rolesQuery="+rolesQuery);
-         log.trace("suspendResume="+suspendResume);
-         if(jname != null)
-            log.trace("transactionManagerJndiName="+jname);
-      }
+
+      PicketBoxLogger.LOGGER.traceDBCertLoginModuleOptions(dsJndiName, principalsQuery, rolesQuery, suspendResume);
 
 	  try
       {
@@ -148,7 +139,7 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
       }
       catch (NamingException e)
       {
-         throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Unable to get Transaction Manager", e);
+         throw PicketBoxMessages.MESSAGES.failedToGetTransactionManager(e);
       }
    }
 
@@ -160,7 +151,6 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
     */
    protected String getUsersPassword() throws LoginException
    {
-      boolean trace = log.isTraceEnabled();
       String username = getUsername();
       String password = null;
       Connection conn = null;
@@ -174,15 +164,13 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
          try
          {
             if(tm == null)
-               throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Transaction Manager is null");
+               throw PicketBoxMessages.MESSAGES.invalidNullTransactionManager();
             tx = tm.suspend();
          }
          catch (SystemException e)
          {
             throw new RuntimeException(e);
          }
-         if (trace)
-            log.trace("suspendAnyTransaction");
       }
 
       try
@@ -191,32 +179,27 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
          DataSource ds = (DataSource) ctx.lookup(dsJndiName);
          conn = ds.getConnection();
          // Get the password
-         if (trace)
-            log.trace("Excuting query: "+principalsQuery+", with username: "+username);
+         PicketBoxLogger.LOGGER.traceExecuteQuery(principalsQuery, username);
          ps = conn.prepareStatement(principalsQuery);
          ps.setString(1, username);
          rs = ps.executeQuery();
          if( rs.next() == false )
          {
-            if(trace)
-               log.trace("Query returned no matches from db");
-            throw new FailedLoginException(ErrorCodes.PROCESSING_FAILED + "No matching username found in Principals");
+            throw PicketBoxMessages.MESSAGES.noMatchingUsernameFoundInPrincipals();
          }
          
          password = rs.getString(1);
          password = convertRawPassword(password);
-         if(trace)
-            log.trace("Obtained user password");
       }
       catch(NamingException ex)
       {
-         LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Error looking up DataSource from: "+dsJndiName);
+         LoginException le = new LoginException(PicketBoxMessages.MESSAGES.failedToLookupDataSourceMessage(dsJndiName));
          le.initCause(ex);
          throw le;
       }
       catch(SQLException ex)
       {
-         LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Query failed");
+         LoginException le = new LoginException(PicketBoxMessages.MESSAGES.failedToProcessQueryMessage());
          le.initCause(ex);
          throw le;
       }
@@ -260,8 +243,6 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
             {
                throw new RuntimeException(e);
             } 
-            if (log.isTraceEnabled())
-               log.trace("resumeAnyTransaction");
          }
       }
       return password;
@@ -277,8 +258,7 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
       if (rolesQuery != null)
       {
          String username = getUsername();
-         if (log.isTraceEnabled())
-            log.trace("getRoleSets using rolesQuery: "+rolesQuery+", username: "+username);
+         PicketBoxLogger.LOGGER.traceExecuteQuery(rolesQuery, username);
          Group[] roleSets = Util.getRoleSets(username, dsJndiName, rolesQuery, this,
                suspendResume);
          return roleSets;

@@ -42,8 +42,6 @@ public final class SecurityRolesAssociation
    private static ThreadLocal<Map<String,Set<String>>> threadSecurityRoleMapping 
                = new ThreadLocal<Map<String,Set<String>>>();
    
-   private static Logger log = Logger.getLogger(SecurityRolesAssociation.class);
-
    /**
     * Get the current map of SecurityRoleMetaData.
     * The map is principal name  keyed against a set of rolenames
@@ -59,8 +57,7 @@ public final class SecurityRolesAssociation
     */
    public static void setSecurityRoles(Map<String,Set<String>> securityRoles)
    {
-      if(log.isTraceEnabled())
-         log.trace("Setting threadlocal:"+securityRoles);
+      PicketBoxLogger.LOGGER.traceSecRolesAssociationSetSecurityRoles(securityRoles);
       if(securityRoles == null)
          threadSecurityRoleMapping.remove();
       else

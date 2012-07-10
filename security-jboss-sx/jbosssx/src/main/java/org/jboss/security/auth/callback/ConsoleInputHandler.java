@@ -31,7 +31,7 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /** An implementation of CallbackHandler that obtains the values for
  NameCallback and PasswordCallback from the console.
@@ -61,7 +61,7 @@ public class ConsoleInputHandler implements CallbackHandler
             NameCallback nc = (NameCallback) c;
             String prompt = nc.getPrompt();
             if( prompt == null )
-               prompt = "Enter Username: ";
+               prompt = PicketBoxMessages.MESSAGES.enterUsernameMessage();
             // Prompt the user for the username
             System.out.print(prompt);
             InputStreamReader isr = new InputStreamReader(System.in);
@@ -73,7 +73,7 @@ public class ConsoleInputHandler implements CallbackHandler
             }
             catch(IOException e)
             {
-               throw new SecurityException(ErrorCodes.FAILED_TO_OBTAIN_USERNAME + e.getMessage());
+               throw PicketBoxMessages.MESSAGES.failedToObtainUsername(e);
             }
          }
          else if (c instanceof PasswordCallback)
@@ -81,7 +81,7 @@ public class ConsoleInputHandler implements CallbackHandler
             PasswordCallback pc = (PasswordCallback) c;
             String prompt = pc.getPrompt();
             if( prompt == null )
-               prompt = "Enter Password: ";
+               prompt = PicketBoxMessages.MESSAGES.enterPasswordMessage();
             // Prompt the user for the username
             System.out.print(prompt);
             InputStreamReader isr = new InputStreamReader(System.in);
@@ -93,12 +93,12 @@ public class ConsoleInputHandler implements CallbackHandler
             }
             catch(IOException e)
             {
-               throw new SecurityException(ErrorCodes.FAILED_TO_OBTAIN_PASSWORD + e.getMessage());
+               throw PicketBoxMessages.MESSAGES.failedToObtainPassword(e);
             }
          }
          else
          {
-            throw new UnsupportedCallbackException(callbacks[i], ErrorCodes.UNRECOGNIZED_CALLBACK);
+            throw PicketBoxMessages.MESSAGES.unableToHandleCallback(c, this.getClass().getName(), c.getClass().getCanonicalName());
          }
       }
    }

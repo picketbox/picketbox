@@ -93,7 +93,7 @@ public class Users
       }
       public String[] getRoleNames(String roleGroup)
       {
-         Group group = (Group) roleGroups.get(roleGroup);
+         Group group = roleGroups.get(roleGroup);
          String[] names = {};
          if( group != null )
          {
@@ -111,7 +111,7 @@ public class Users
       }
       public void addRole(String roleName, String roleGroup)
       {
-         Group group = (Group) roleGroups.get(roleGroup);
+         Group group = roleGroups.get(roleGroup);
          if( group == null )
          {
             group = new SimpleGroup(roleGroup);

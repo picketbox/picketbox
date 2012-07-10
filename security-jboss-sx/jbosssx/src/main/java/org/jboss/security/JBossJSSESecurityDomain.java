@@ -41,7 +41,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.plugins.SecurityKeyManager;
 
 /**
@@ -51,8 +50,6 @@ import org.jboss.security.plugins.SecurityKeyManager;
  */
 public class JBossJSSESecurityDomain implements JSSESecurityDomain
 {
-
-   private static Logger log = Logger.getLogger(JBossJSSESecurityDomain.class);
 
    private KeyStore keyStore;
 
@@ -313,7 +310,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
 
    public Key getKey(String alias, String serviceAuthToken) throws Exception
    {
-      log.debug(this + " got request for key with alias '" + alias + "'");
+      PicketBoxLogger.LOGGER.traceJSSEDomainGetKey(alias);
 
       Key key = keyStore.getKey(alias, keyStorePassword);
 
@@ -329,8 +326,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
 
    public Certificate getCertificate(String alias) throws Exception
    {
-      log.debug(this + " got request for certifcate with alias '" + alias + "'");
-
+      PicketBoxLogger.LOGGER.traceJSSEDomainGetCertificate(alias);
       return trustStore.getCertificate(alias);
    }
 
@@ -403,8 +399,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
       // Fail if no valid key store was located
       if (url == null)
       {
-         String msg = "Failed to find url=" + storeURL + " as a URL, file or resource";
-         throw new MalformedURLException(msg);
+         throw PicketBoxMessages.MESSAGES.failedToValidateURL(storeURL);
       }
       return url;
    }
@@ -413,10 +408,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
    {
       if (this.serviceAuthToken == null)
       {
-         throw new IllegalStateException( ErrorCodes.NULL_ARGUMENT +
-               getSecurityDomain()
-                     + " has been requested to provide sensitive security information, " +
-                     "but no service authentication token has been configured on it. Use setServiceAuthToken().");
+         throw PicketBoxMessages.MESSAGES.missingServiceAuthToken(this.getSecurityDomain());
       }
 
       boolean verificationSuccessful = true;
@@ -435,12 +427,11 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
 
          if (verificationSuccessful)
          {
-            log.debug("valid service authentication token");
             return;
          }
       }
 
-      throw new SecurityException(ErrorCodes.ACCESS_DENIED + "service authentication token verification failed");
+      throw PicketBoxMessages.MESSAGES.failedToVerifyServiceAuthToken();
    }
 
    @SuppressWarnings({"rawtypes", "unchecked"})
@@ -475,8 +466,8 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
         		 is = keyStoreURL.openStream();
         	 }
         	 else
-        		 throw new RuntimeException(ErrorCodes.WRONG_VALUE + "keyStoreType");
-        	 
+                 throw PicketBoxMessages.MESSAGES.invalidKeyStoreType(keyStoreType);
+
         	 keyStore.load(is, keyStorePassword);
          }
          finally
@@ -528,7 +519,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
         		 is = trustStoreURL.openStream();
         	 }
         	 else
-        		 throw new RuntimeException(ErrorCodes.WRONG_VALUE + "trustStoreType");
+                 throw PicketBoxMessages.MESSAGES.invalidKeyStoreType(trustStoreType);
 
         	 trustStore.load(is, trustStorePassword);
          }

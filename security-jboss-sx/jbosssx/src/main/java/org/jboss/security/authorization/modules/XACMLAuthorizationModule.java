@@ -21,7 +21,6 @@
   */
 package org.jboss.security.authorization.modules;
    
-import org.jboss.logging.Logger;
 import org.jboss.security.authorization.AuthorizationModule;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.authorization.ResourceType;
@@ -40,7 +39,6 @@ public class XACMLAuthorizationModule extends AbstractAuthorizationModule
 { 
    public XACMLAuthorizationModule()
    {
-      log = Logger.getLogger(getClass());
       delegateMap.put(ResourceType.WEB, WebXACMLPolicyModuleDelegate.class.getName());
       delegateMap.put(ResourceType.EJB, EJBXACMLPolicyModuleDelegate.class.getName());
    }  

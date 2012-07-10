@@ -588,11 +588,11 @@ protected void setUp() throws Exception
      try 
      {
         context.login();
-        fail("Login should have failed as the validation of the test module was unsuccessful");
+        fail("Login should have failed as THE validation of the test module was unsuccessful");
      } 
      catch(LoginException le)
      {
-        assertNotNull("Unexpected null root thorwable", le.getCause());
+        assertNotNull("Unexpected null root throwable", le.getCause());
         assertEquals("Invalid root message", "Validate Exception", le.getCause().getMessage());
      }
      

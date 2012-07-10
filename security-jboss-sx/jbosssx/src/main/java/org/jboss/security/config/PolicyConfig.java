@@ -48,12 +48,12 @@ public class PolicyConfig
    
    public ApplicationPolicy get(String name)
    {
-      return (ApplicationPolicy) config.get(name); 
+      return config.get(name);
    }
    
    public ApplicationPolicy remove(String name)
    {
-      return (ApplicationPolicy) config.remove(name); 
+      return config.remove(name);
    }
    
    public void clear()

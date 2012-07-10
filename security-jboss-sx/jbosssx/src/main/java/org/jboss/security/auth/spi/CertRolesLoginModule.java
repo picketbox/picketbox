@@ -30,7 +30,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  * Certificate Login Module that uses a properties file to store role information.
@@ -89,9 +90,8 @@ public class CertRolesLoginModule extends BaseCertLoginModule
    {
       addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
-      trace = log.isTraceEnabled();
-      if( trace )
-         log.trace("enter: initialize(Subject, CallbackHandler, Map, Map)");
+
+      PicketBoxLogger.LOGGER.traceBeginInitialize();
 
       try
       {
@@ -111,25 +111,21 @@ public class CertRolesLoginModule extends BaseCertLoginModule
       {
          // Note that although this exception isn't passed on, users or roles will be null
          // so that any call to login will throw a LoginException.
-         super.log.error("Failed to load users/passwords/role files", e);
+         PicketBoxLogger.LOGGER.errorLoadingUserRolesPropertiesFiles(e);
       }
 
-      if( trace )
-         log.trace("exit: initialize(Subject, CallbackHandler, Map, Map)");
+      PicketBoxLogger.LOGGER.traceEndInitialize();
    }
 
    public boolean login() throws LoginException
    {
-      if( trace )
-         log.trace("enter: login()");
+      PicketBoxLogger.LOGGER.traceBeginLogin();
 
       if (roles == null)
-         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Missing roles.properties file.");
+         throw PicketBoxMessages.MESSAGES.missingPropertiesFile(rolesRsrcName);
       boolean wasSuccessful = super.login();
 
-      if( trace )
-         log.trace("exit: login()");
-
+      PicketBoxLogger.LOGGER.traceEndLogin(wasSuccessful);
       return wasSuccessful;
    }
 
@@ -139,18 +135,14 @@ public class CertRolesLoginModule extends BaseCertLoginModule
     */
    protected Group[] getRoleSets() throws LoginException
    {
-      if( trace )
-         log.trace("enter: getRoleSets()");
       String targetUser = getUsername();
       Group[] roleSets = Util.getRoleSets(targetUser, roles, roleGroupSeperator, this);
-      if( trace )
-         log.trace("exit: getRoleSets()");
       return roleSets;
    }
 
    private void loadRoles() throws IOException
    {
-      roles = Util.loadProperties(defaultRolesRsrcName, rolesRsrcName, log);
+      roles = Util.loadProperties(defaultRolesRsrcName, rolesRsrcName);
    }
 
 }

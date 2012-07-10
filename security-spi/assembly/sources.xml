@@ -5,7 +5,11 @@
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
-    <fileSet>
+      <fileSet>
+          <directory>${basedir}/../common/src/main/java</directory>
+          <outputDirectory>/</outputDirectory>
+      </fileSet>
+      <fileSet>
       <directory>${basedir}/../acl/src/main/java</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>

@@ -26,8 +26,7 @@ import java.security.Principal;
 import java.util.Map;
 import java.util.Properties;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.util.StringPropertyReplacer;
 
@@ -51,8 +50,6 @@ public class PropertiesRolesMappingProvider extends AbstractRolesMappingProvider
  
    public void init(Map<String, Object> options)
    {
-      log = Logger.getLogger(getClass());
-
       if (options != null)
       {
          String option = (String) options.get("rolesProperties");
@@ -66,30 +63,30 @@ public class PropertiesRolesMappingProvider extends AbstractRolesMappingProvider
          }
          catch (IOException ioe)
          {
-            throw new IllegalStateException(ErrorCodes.PROCESSING_FAILED + "Error loading roles properties file", ioe);
+            throw new IllegalStateException(ioe);
          }
       }
    }
  
-   public void performMapping(Map<String, Object> map, RoleGroup mappedObject)
+   public void performMapping(Map<String, Object> contextMap, RoleGroup mappedObject)
    {
-      if (map == null || map.isEmpty())
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Context Map is null or empty");
+      if (contextMap == null || contextMap.isEmpty())
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextMap");
 
       //Obtain the principal to roles mapping
-      Principal principal = getCallerPrincipal(map);
+      Principal principal = getCallerPrincipal(contextMap);
 
       if (principal != null)
       {
          String username = principal.getName();
-         Util.addRolesToGroup(username, mappedObject, roles, log);
+         Util.addRolesToGroup(username, mappedObject, roles);
          result.setMappedObject(mappedObject);
       }
    }
 
    protected Properties loadRoles() throws IOException
    {
-      return Util.loadProperties(rolesRsrcName, log);
+      return Util.loadProperties(rolesRsrcName);
    }
 
 }

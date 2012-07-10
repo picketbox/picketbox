@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.security.auth.callback.Callback;
@@ -36,7 +35,7 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.TextInputCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 //$Id$
 
@@ -163,7 +162,7 @@ public class AppCallbackHandler implements CallbackHandler
             NameCallback nc = (NameCallback) c; 
             String prompt = nc.getPrompt();
             if( prompt == null )
-               prompt = "Enter Username: ";
+               prompt = PicketBoxMessages.MESSAGES.enterUsernameMessage();
             if(this.consoleHandler)
                nc.setName(getUserNameFromConsole(prompt));
             else
@@ -174,7 +173,7 @@ public class AppCallbackHandler implements CallbackHandler
             PasswordCallback pc = (PasswordCallback) c;
             String prompt = pc.getPrompt();
             if( prompt == null )
-               prompt = "Enter Password: ";
+               prompt = PicketBoxMessages.MESSAGES.enterPasswordMessage();
             if(this.consoleHandler)
                pc.setPassword(getPasswordFromConsole(prompt));
             else
@@ -203,19 +202,15 @@ public class AppCallbackHandler implements CallbackHandler
             MapCallback mc = (MapCallback) c;
             if(keyValuePair != null && !keyValuePair.isEmpty())
             {
-               Iterator<?> iter = keyValuePair.keySet().iterator();
-               while(iter.hasNext())
+               for (String key : keyValuePair.keySet())
                {
-                  Object key = iter.next();
-                  if(key instanceof String == false)
-                     throw new SecurityException(ErrorCodes.KEY_IS_NOT_STRING );
-                  mc.setInfo((String)key, keyValuePair.get(key));
+                  mc.setInfo(key, keyValuePair.get(key));
                }  
             }
          }
          else
          {
-            throw new UnsupportedCallbackException(c, ErrorCodes.UNRECOGNIZED_CALLBACK);
+            throw PicketBoxMessages.MESSAGES.unableToHandleCallback(c, this.getClass().getName(), c.getClass().getCanonicalName());
          }
       }
    }
@@ -232,7 +227,7 @@ public class AppCallbackHandler implements CallbackHandler
       }
       catch(IOException e)
       {
-         throw new SecurityException(ErrorCodes.FAILED_TO_OBTAIN_USERNAME + e.getMessage());
+         throw PicketBoxMessages.MESSAGES.failedToObtainUsername(e);
       }
       return uName;
    }
@@ -250,7 +245,7 @@ public class AppCallbackHandler implements CallbackHandler
       }
       catch(IOException e)
       {
-         throw new SecurityException(ErrorCodes.FAILED_TO_OBTAIN_PASSWORD + e.getMessage());
+         throw PicketBoxMessages.MESSAGES.failedToObtainPassword(e);
       }
       return pwd.toCharArray();
    }

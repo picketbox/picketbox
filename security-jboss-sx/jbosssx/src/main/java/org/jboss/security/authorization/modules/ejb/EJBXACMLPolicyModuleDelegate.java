@@ -25,8 +25,8 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -53,30 +53,24 @@ public class EJBXACMLPolicyModuleDelegate extends EJBPolicyModuleDelegate
 {   
    private String policyContextID;
    
-   public EJBXACMLPolicyModuleDelegate()
-   {
-     log = Logger.getLogger(getClass());
-     trace = log.isTraceEnabled();
-   }
-   
    /**
-    * @see AuthorizationModuleDelegate#authorize(Resource)
+    * @see AuthorizationModuleDelegate#authorize(org.jboss.security.authorization.Resource, javax.security.auth.Subject, org.jboss.security.identity.RoleGroup)
     */
    public int authorize(Resource resource, Subject callerSubject, RoleGroup role)
    {
       if(resource instanceof EJBResource == false)
-         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "resource is not an EJBResource");
-      
+         throw PicketBoxMessages.MESSAGES.invalidType(EJBResource.class.getName());
+
       EJBResource ejbResource = (EJBResource) resource;
       
       //Get the context map
       Map<String,Object> map = resource.getMap();
       if(map == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Map from the Resource is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("resourceMap");
 
       this.policyRegistration = (PolicyRegistration) map.get(ResourceKeys.POLICY_REGISTRATION);  
       if(this.policyRegistration == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Policy Registration passed is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty(ResourceKeys.POLICY_REGISTRATION);
 
       this.callerRunAs = ejbResource.getCallerRunAsIdentity();
       this.ejbName = ejbResource.getEjbName();
@@ -84,8 +78,8 @@ public class EJBXACMLPolicyModuleDelegate extends EJBPolicyModuleDelegate
       this.ejbPrincipal = ejbResource.getPrincipal();
       this.policyContextID = ejbResource.getPolicyContextID();
       if(policyContextID == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Context ID is null"); 
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("contextID");
+
       this.securityRoleReferences = ejbResource.getSecurityRoleReferences();
       
       //isCallerInRole checks
@@ -101,8 +95,7 @@ public class EJBXACMLPolicyModuleDelegate extends EJBPolicyModuleDelegate
    //Private Methods
    /**
     * Process the ejb request
-    * @param request
-    * @param sc
+    * @param callerRoles
     * @return
     */ 
    private int process(RoleGroup callerRoles) 
@@ -116,16 +109,15 @@ public class EJBXACMLPolicyModuleDelegate extends EJBPolicyModuleDelegate
          
          PolicyDecisionPoint pdp = util.getPDP(policyRegistration, this.policyContextID); 
          if(pdp == null)
-            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "PDP is null");
-         
+            throw PicketBoxMessages.MESSAGES.invalidNullProperty("PDP");
+
          ResponseContext response = pdp.evaluate(requestCtx);
          result = response.getDecision() == XACMLConstants.DECISION_PERMIT ? 
                AuthorizationContext.PERMIT : AuthorizationContext.DENY;
       }
       catch(Exception e)
       {
-         if(trace)
-            log.trace("Exception in processing:",e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
          result = AuthorizationContext.DENY;
       }  
       return result;

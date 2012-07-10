@@ -28,8 +28,7 @@ import java.util.Map;
 import javax.security.auth.callback.Callback;
 
 import org.jboss.crypto.digest.DigestCallback;
-import org.jboss.security.ErrorCodes;
-import org.jboss.security.auth.callback.MapCallback;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  An implementation of the DigestCallback that support the http digest auth as
@@ -269,7 +268,7 @@ public class RFC2617Digest implements DigestCallback {
                 hA1 = H(A1, digest) + ":" + nonce + ":" + cnonce;
             }
         } else {
-            throw new IllegalArgumentException(ErrorCodes.UNSUPPORTED_ALGO + algorithm);
+            throw PicketBoxMessages.MESSAGES.unsupportedAlgorithm(algorithm);
         }
 
         // 3.2.2.3 A2. First check to see if the A2 hash has been precomputed
@@ -280,7 +279,7 @@ public class RFC2617Digest implements DigestCallback {
             if (qop == null || qop.equals("auth")) {
                 A2 = method + ":" + digestURI;
             } else {
-                throw new IllegalArgumentException(ErrorCodes.UNSUPPORTED_QOP + qop);
+                throw PicketBoxMessages.MESSAGES.unsupportedQOP(qop);
             }
             hA2 = H(A2, digest);
         }

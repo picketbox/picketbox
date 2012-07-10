@@ -27,7 +27,7 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /** A simple implementation of CallbackHandler that sets a username and
 password in the handle(Callback[]) method to that passed in to
@@ -100,7 +100,7 @@ public class UsernamePasswordHandler implements CallbackHandler
          }
          else
          {
-            throw new UnsupportedCallbackException(callbacks[i], ErrorCodes.UNRECOGNIZED_CALLBACK);
+            throw PicketBoxMessages.MESSAGES.unableToHandleCallback(c, this.getClass().getName(), c.getClass().getCanonicalName());
          }
       }
    }

@@ -31,14 +31,13 @@ import java.util.StringTokenizer;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginException;
-import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SimplePrincipal;
@@ -46,11 +45,11 @@ import org.jboss.security.annotation.Authentication;
 import org.jboss.security.annotation.Authorization;
 import org.jboss.security.annotation.Module;
 import org.jboss.security.annotation.ModuleOption;
+import org.jboss.security.annotation.ModuleOption.VALUE_TYPE;
 import org.jboss.security.annotation.SecurityAudit;
 import org.jboss.security.annotation.SecurityConfig;
 import org.jboss.security.annotation.SecurityDomain;
 import org.jboss.security.annotation.SecurityMapping;
-import org.jboss.security.annotation.ModuleOption.VALUE_TYPE;
 import org.jboss.security.audit.config.AuditProviderEntry;
 import org.jboss.security.auth.login.AuthenticationInfo;
 import org.jboss.security.authorization.AuthorizationContext;
@@ -81,8 +80,7 @@ import org.picketbox.factories.SecurityFactory;
  */
 public class PicketBoxProcessor
 {
-   private static Logger log = Logger.getLogger(PicketBoxProcessor.class);
-   
+
    private Principal principal = null;
    private Object credential = null;
    
@@ -202,8 +200,8 @@ public class PicketBoxProcessor
          Authentication authenticationAnnotation = objectClass.getAnnotation(Authentication.class);
          
          if(securityConfig == null && authenticationAnnotation == null)
-            throw new RuntimeException(ErrorCodes.NULL_VALUE + "@SecurityConfig or @Authentication is needed");
-         
+            throw PicketBoxMessages.MESSAGES.invalidSecurityAnnotationConfig();
+
          if(securityConfig != null)
          { 
             PicketBoxConfiguration idtrustConfig = new PicketBoxConfiguration();
@@ -259,10 +257,9 @@ public class PicketBoxProcessor
          Subject subject = new Subject();
          boolean valid = authMgr.isValid(principal, credential, subject);
          if(!valid)
-            throw new LoginException(ErrorCodes.ACCESS_DENIED + "Invalid");
-         
-         SecurityActions.register(securityContext, principal, credential, subject); 
+            throw new LoginException(PicketBoxMessages.MESSAGES.authenticationFailedMessage());
 
+         SecurityActions.register(securityContext, principal, credential, subject); 
          AuthorizationManager authzMgr = SecurityFactory.getAuthorizationManager(securityDomain);
          SecurityContextCallbackHandler cbh = new SecurityContextCallbackHandler(securityContext);
          
@@ -270,31 +267,25 @@ public class PicketBoxProcessor
          //apply the role mapping logic if it is configured at the security domain level
          RoleGroup roles = authzMgr.getSubjectRoles(subject, cbh); 
          if(roles == null)
-            throw new PicketBoxProcessingException(ErrorCodes.NULL_VALUE + "Roles from subject is null");     
+            throw new PicketBoxProcessingException(PicketBoxMessages.MESSAGES.nullRolesInSubjectMessage());
          
          if(needAuthorization)
          {
             int permit =  authzMgr.authorize(new POJOResource(pojo), subject, roles);
             if(permit != AuthorizationContext.PERMIT)
-               throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Authorization failed"); 
+               throw new AuthorizationException(PicketBoxMessages.MESSAGES.authorizationFailedMessage());
          }
       }
       catch(PrivilegedActionException pae)
       {
-         if(log.isTraceEnabled())
-            log.trace("Exception in processing:",pae);
          throw new PicketBoxProcessingException(pae.getCause());
       }
       catch (AuthorizationException e)
       {
-         if(log.isTraceEnabled())
-            log.trace("Authorization Exception:",e);
          throw new PicketBoxProcessingException(e);
       } 
       catch (Exception e)
       {
-         if(log.isTraceEnabled())
-            log.trace("Exception in processing:",e);
          throw new PicketBoxProcessingException(e);
       }
       finally

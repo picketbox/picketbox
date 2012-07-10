@@ -36,7 +36,7 @@ import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.auth.callback.JBossCallbackHandler;
@@ -88,7 +88,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
    }
    
    /**
-    * @see ServerAuthConfig#getAuthContext(String, Map)
+    * @see ServerAuthConfig#getAuthContext(String, javax.security.auth.Subject, java.util.Map)
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
    public ServerAuthContext getAuthContext(String authContextID,
@@ -107,8 +107,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
       else{
          secDomain = (String) properties.get("security-domain");
          if(secDomain == null)
-            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Unable to obtain security domain from " +
-            		"configuration or security context");
+            throw PicketBoxMessages.MESSAGES.failedToObtainSecDomainFromContextOrConfig();
       }
       
       String defaultAppDomain = SecurityConstants.DEFAULT_APPLICATION_POLICY;
@@ -119,12 +118,11 @@ public class JBossServerAuthConfig implements ServerAuthConfig
          ap = SecurityConfiguration.getApplicationPolicy(defaultAppDomain);
       }
       if(ap == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "No Application Policy found");
+         throw PicketBoxMessages.MESSAGES.failedToObtainApplicationPolicy(secDomain);
       BaseAuthenticationInfo bai = ap.getAuthenticationInfo();
       if(bai == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authentication Info not set in security domain="+ secDomain 
-               + " or "+ defaultAppDomain);
-      
+         throw PicketBoxMessages.MESSAGES.failedToObtainAuthenticationInfo(secDomain);
+
       if(bai instanceof AuthenticationInfo)
       {
          //Need to get a wrapper
@@ -196,7 +194,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
    }
  
    /**
-    * @see AuthConfig#getContextID()
+    * @see AuthConfig#getAppContext()
     */
    public String getAppContext()
    { 
@@ -233,7 +231,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
 
    public boolean isProtected()
    {
-      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED);
+      throw new UnsupportedOperationException();
    }  
  
    @SuppressWarnings({"rawtypes", "unchecked"})

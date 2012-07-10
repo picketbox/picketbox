@@ -25,10 +25,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
-import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityUtil;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.MappingInfo;
@@ -49,9 +48,6 @@ import org.jboss.security.plugins.ClassLoaderLocatorFactory;
  */
 public class JBossMappingManager implements MappingManager
 {   
-   protected static final Logger log = Logger.getLogger(JBossMappingManager.class); 
-   protected boolean trace = log.isTraceEnabled();  
-   
    private String securityDomain;
 
    private static Map<String, Class<?> > clazzMap = new WeakHashMap<String, Class<?>>();
@@ -69,15 +65,11 @@ public class JBossMappingManager implements MappingManager
       if(aPolicy == null)
       {
          String defaultDomain = SecurityConstants.DEFAULT_APPLICATION_POLICY;
-         if(trace)
-            log.trace("Application Policy not found for domain=" + securityDomain +
-                  ".Mapping framework will use the default domain:" + defaultDomain);
-         aPolicy = SecurityConfiguration.getApplicationPolicy(defaultDomain); 
+         aPolicy = SecurityConfiguration.getApplicationPolicy(defaultDomain);
       } 
       if(aPolicy == null )
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Application Policy is null for the security domain:" 
-               + securityDomain);
-      
+         throw PicketBoxMessages.MESSAGES.failedToObtainApplicationPolicy(securityDomain);
+
       MappingContext<T> mc = null;
       MappingInfo rmi = aPolicy.getMappingInfo(mappingType);  
 
@@ -87,10 +79,6 @@ public class JBossMappingManager implements MappingManager
       return mc; 
    }
    
-   
-   /**
-    * @see SecurityContext#getMappingContext(String)
-    */
    @SuppressWarnings("deprecation")
    public <T> MappingContext<T> getMappingContext(Class<T> mappingType)
    { 
@@ -100,15 +88,11 @@ public class JBossMappingManager implements MappingManager
       if(aPolicy == null)
       {
          String defaultDomain = SecurityConstants.DEFAULT_APPLICATION_POLICY;
-         if(trace)
-            log.trace("Application Policy not found for domain=" + securityDomain +
-                  ".Mapping framework will use the default domain:" + defaultDomain);
-         aPolicy = SecurityConfiguration.getApplicationPolicy(defaultDomain); 
+         aPolicy = SecurityConfiguration.getApplicationPolicy(defaultDomain);
       } 
       if(aPolicy == null )
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Application Policy is null for the security domain:" 
-               + securityDomain);
-      
+         throw PicketBoxMessages.MESSAGES.failedToObtainApplicationPolicy(securityDomain);
+
       MappingContext<T> mc = null;
       MappingInfo rmi = aPolicy.getMappingInfo(mappingType); 
       if( rmi != null)
@@ -167,9 +151,8 @@ public class JBossMappingManager implements MappingManager
       }
       catch(Exception e)
       {
-         if(trace)
-            log.trace("Error in getting Mapping Provider:",e);
-      } 
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
+      }
       return mp; 
    }
 }

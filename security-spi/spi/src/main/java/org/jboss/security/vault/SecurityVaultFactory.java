@@ -21,9 +21,7 @@
  */
 package org.jboss.security.vault;
 
-import java.util.logging.Logger;
-
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  * A factory to instantiate a {@link SecurityVault}
@@ -32,7 +30,6 @@ import org.jboss.security.ErrorCodes;
  */
 public class SecurityVaultFactory
 {
-   private static Logger log = Logger.getLogger(SecurityVaultFactory.class.getName());
    private static String defaultVault = "org.picketbox.plugins.vault.PicketBoxSecurityVault";
    private static SecurityVault vault= null;
    
@@ -44,7 +41,6 @@ public class SecurityVaultFactory
     */
    public static SecurityVault get() throws SecurityVaultException
    {
-      log.info("Getting Security Vault with implementation of " + defaultVault);
       return get(defaultVault);
    }
    
@@ -64,14 +60,14 @@ public class SecurityVaultFactory
       {
          Class<?> vaultClass = SecurityActions.loadClass(SecurityVaultFactory.class,fqn);
          if(vaultClass == null)
-            throw new SecurityVaultException(ErrorCodes.NULL_VALUE + "Unable to create vault:class is null");
+            throw new SecurityVaultException(PicketBoxMessages.MESSAGES.unableToLoadVaultMessage());
          try
          {
             vault = (SecurityVault) vaultClass.newInstance();
          }
          catch (Exception e)
          {
-            throw new SecurityVaultException(ErrorCodes.PROCESSING_FAILED + "Unable to create vault:not instantiated",e);
+            throw new SecurityVaultException(PicketBoxMessages.MESSAGES.unableToCreateVaultMessage(), e);
          }
       }
       return vault;

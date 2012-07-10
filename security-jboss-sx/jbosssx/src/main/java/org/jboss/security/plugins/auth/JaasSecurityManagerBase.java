@@ -32,10 +32,10 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.RealmMapping;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
@@ -81,10 +81,6 @@ public class JaasSecurityManagerBase
    /** The flag to indicate that the Subject sets need to be deep copied*/
    private boolean deepCopySubjectOption = false; 
    
-   /** The log4j category for the security manager domain
-    */
-   protected Logger log;
-   protected boolean trace;
    private AuthorizationManager authorizationManager;
 
    /** Creates a default JaasSecurityManager for with a securityDomain
@@ -106,8 +102,6 @@ public class JaasSecurityManagerBase
       this.securityDomain = SecurityUtil.unprefixSecurityDomain( securityDomain );
       this.handler = handler;
       String categoryName = getClass().getName()+'.'+securityDomain;
-      this.log = Logger.getLogger(categoryName);
-      this.trace = log.isTraceEnabled();
 
       // Get the setSecurityInfo(Principal principal, Object credential) method
       Class<?>[] sig = {Principal.class, Object.class};
@@ -117,10 +111,8 @@ public class JaasSecurityManagerBase
       }
       catch (Exception e)
       {
-         String msg = "Failed to find setSecurityInfo(Princpal, Object) method in handler";
-         throw new UndeclaredThrowableException(e, msg);
+         throw new UndeclaredThrowableException(e, PicketBoxMessages.MESSAGES.unableToFindSetSecurityInfoMessage());
       } 
-      log.debug("CallbackHandler: "+handler);
    }
 
    /**
@@ -131,8 +123,7 @@ public class JaasSecurityManagerBase
     */
    public void setDeepCopySubjectOption(Boolean flag)
    {
-      log.debug("setDeepCopySubjectOption="+ flag);
-      this.deepCopySubjectOption = (flag == Boolean.TRUE) ;
+      this.deepCopySubjectOption = flag ;
    } 
    
    /**
@@ -199,14 +190,13 @@ public class JaasSecurityManagerBase
    public boolean isValid(Principal principal, Object credential,
       Subject activeSubject)
    {
-      if( trace )
-         log.trace("Begin isValid, principal:"+principal);
+      PicketBoxLogger.LOGGER.traceBeginIsValid(principal, null);
 
       boolean isValid = false;
       if( isValid == false )
          isValid = authenticate(principal, credential, activeSubject);
-      if( trace )
-         log.trace("End isValid, "+isValid); 
+
+      PicketBoxLogger.LOGGER.traceEndIsValid(isValid);
       return isValid;
    } 
 
@@ -250,8 +240,7 @@ public class JaasSecurityManagerBase
       }
       if(this.authorizationManager == null)
       {
-         if(trace)
-            log.trace("doesUserHaveRole:AuthorizationManager is null");
+         PicketBoxLogger.LOGGER.debugNullAuthorizationManager(securityDomain);
          return false;
       }
       return authorizationManager.doesUserHaveRole(principal, rolePrincipals); 
@@ -274,8 +263,8 @@ public class JaasSecurityManagerBase
       }
       if(this.authorizationManager == null)
       {
-         log.trace("doesUserHaveRole:AuthorizationManager is null");
-         return null;
+          PicketBoxLogger.LOGGER.debugNullAuthorizationManager(securityDomain);
+          return null;
       }
       return authorizationManager.getUserRoles(principal);
    } 
@@ -286,7 +275,7 @@ public class JaasSecurityManagerBase
    public Principal getTargetPrincipal(Principal anotherDomainPrincipal, 
          Map<String,Object> contextMap)
    {
-      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED + "Not implemented yet");
+      throw new UnsupportedOperationException();
    }
 
    /** Currently this simply calls defaultLogin() to do a JAAS login using the
@@ -356,8 +345,8 @@ public class JaasSecurityManagerBase
 		} catch (LoginException e) {
 			// Don't log anonymous user failures unless trace level logging is
 			// on
-			if (principal != null && principal.getName() != null || trace)
-				log.trace("Login failure", e);
+			if (principal != null && principal.getName() != null)
+                PicketBoxLogger.LOGGER.errorDuringLogin(e);
 			authException = e;
 		}
 		// Set the security association thread context info exception
@@ -388,20 +377,16 @@ public class JaasSecurityManagerBase
       }
       catch (Throwable e)
       {
-         if( trace )
-            log.trace("Failed to create/setSecurityInfo on handler", e);
-         LoginException le = new LoginException("Failed to setSecurityInfo on handler");
+         LoginException le = new LoginException(PicketBoxMessages.MESSAGES.unableToFindSetSecurityInfoMessage());
          le.initCause(e);
          throw le;
       }
       Subject subject = new Subject();
       LoginContext lc = null;
-      if( trace )
-         log.trace("defaultLogin, principal="+principal);
+      PicketBoxLogger.LOGGER.traceDefaultLoginPrincipal(principal);
       lc = SubjectActions.createLoginContext(securityDomain, subject, theHandler);
       lc.login();
-      if( trace )
-         log.trace("defaultLogin, lc="+lc+", subject="+SubjectActions.toString(subject));
+      PicketBoxLogger.LOGGER.traceDefaultLoginSubject(lc.toString(), SubjectActions.toString(subject));
       return lc;
    }
 }

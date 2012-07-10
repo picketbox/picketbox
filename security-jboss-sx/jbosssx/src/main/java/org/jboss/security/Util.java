@@ -44,8 +44,6 @@ import org.jboss.logging.Logger;
  */
 public class Util
 {
-   private static Logger log = Logger.getLogger(Util.class);
-
    /**
     * Execute a password load command to obtain the char[] contents of a
     * password.
@@ -91,7 +89,7 @@ public class Util
          else if( passwordCmdType.equals("CLASS") )
             password = invokePasswordClass(passwordCmd);
          else
-            throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "Unknown passwordCmdType: "+passwordCmdType);
+            throw PicketBoxMessages.MESSAGES.invalidPasswordCommandType(passwordCmdType);
       }
       return password;
    }
@@ -105,7 +103,7 @@ public class Util
    private static char[] execPasswordCmd(String passwordCmd)
       throws Exception
    {
-      log.debug("Executing command: "+passwordCmd);
+      PicketBoxLogger.LOGGER.traceBeginExecPasswordCmd(passwordCmd);
       String password = execCmd(passwordCmd);
       return password.toCharArray();
    }
@@ -124,7 +122,6 @@ public class Util
          classname = passwordCmd.substring(0, colon);
          ctorArgs = passwordCmd.substring(colon+1);
       }
-      log.debug("Loading class: "+classname+", ctorArgs="+ctorArgs);
       ClassLoader loader = AccessController.doPrivileged(GetTCLAction.ACTION);
       Class<?> c = loader.loadClass(classname);
       Object instance = null;
@@ -149,16 +146,13 @@ public class Util
       // Look for a toCharArray() method
       try
       {
-         log.debug("Checking for toCharArray");
          Class<?>[] sig = {};
          Method toCharArray = c.getMethod("toCharArray", sig);
          Object[] args = {};
-         log.debug("Invoking toCharArray");
          password = (char[]) toCharArray.invoke(instance, args);
       }
       catch(NoSuchMethodException e)
       {
-         log.debug("No toCharArray found, invoking toString");
          String tmp = instance.toString();
          if( tmp != null )
             password = tmp.toCharArray();
@@ -242,7 +236,7 @@ public class Util
             }
             
             int exitCode = p.waitFor();
-            log.debug("Command exited with: "+exitCode);
+            PicketBoxLogger.LOGGER.traceEndExecPasswordCmd(exitCode);
             return line;
          }
       };

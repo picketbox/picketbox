@@ -8,7 +8,11 @@
   	  <directory>../picketbox/target/classes</directory>
   	  <outputDirectory>/</outputDirectory>
   	</fileSet>
-  	<fileSet>
+    <fileSet>
+      <directory>../security-spi/common/target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>../security-spi/acl/target/classes</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>

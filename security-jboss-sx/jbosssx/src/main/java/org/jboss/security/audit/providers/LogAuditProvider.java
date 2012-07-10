@@ -6,7 +6,7 @@
  */ 
 package org.jboss.security.audit.providers;
  
-import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.audit.AbstractAuditProvider;
 import org.jboss.security.audit.AuditEvent;
 
@@ -26,21 +26,17 @@ import org.jboss.security.audit.AuditEvent;
  */
 public class LogAuditProvider extends AbstractAuditProvider
 { 
-   private static final Logger log = Logger.getLogger(LogAuditProvider.class);
-   private boolean trace = log.isTraceEnabled();
-   
+
    public void audit(AuditEvent auditEvent)
    {  
       Exception e = auditEvent.getUnderlyingException();
       if(e != null)
       {
-         if(trace)
-            log.trace(auditEvent, e);
+          PicketBoxLogger.AUDIT_LOGGER.trace(auditEvent, e);
       }
       else
       {
-         if(trace)
-            log.trace(auditEvent);
+          PicketBoxLogger.AUDIT_LOGGER.trace(auditEvent);
       }
    } 
 }

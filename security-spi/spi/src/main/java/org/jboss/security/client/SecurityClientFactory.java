@@ -21,12 +21,12 @@
   */
 package org.jboss.security.client;
 
-import java.lang.reflect.Constructor; 
-import java.security.AccessController; 
+import java.lang.reflect.Constructor;
+import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 //$Id$
 
@@ -73,7 +73,7 @@ public class SecurityClientFactory
    throws Exception 
    {
       if(SecurityClient.class.isAssignableFrom(clazz) == false)
-         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "clazz is not of SecurityClient type");
+         throw PicketBoxMessages.MESSAGES.invalidType(SecurityClient.class.getName());
       //Use reflection to invoke the constructors
       Constructor<?> ctr = clazz.getConstructor(new Class[]{});
       return (SecurityClient) ctr.newInstance(new Object[]{});

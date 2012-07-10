@@ -30,9 +30,9 @@ import java.util.regex.Pattern;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec; 
+import javax.crypto.spec.PBEParameterSpec;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.plugins.PBEUtils;
 
 /**
@@ -88,7 +88,7 @@ public class StringUtil
    public static String getSystemPropertyAsString(String str)
    {
       if (str == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Null str");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("str");
       if (str.contains("${"))
       {
          Pattern pattern = Pattern.compile("\\$\\{([^}]+)}");
@@ -112,7 +112,7 @@ public class StringUtil
             sysPropertyValue = SecurityActions.getSystemProperty(subString, defaultValue);
             if (sysPropertyValue.isEmpty())
             {
-               throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "System Property missing:" + matcher.group(1));
+               throw PicketBoxMessages.MESSAGES.missingSystemProperty(matcher.group(1));
             }
             // in case of backslash on Win replace with double backslash
             matcher.appendReplacement(buffer, sysPropertyValue.replace("\\", "\\\\"));
@@ -132,7 +132,7 @@ public class StringUtil
    public static void match(String first, String second)
    {
       if (first.equals(second) == false)
-         throw new RuntimeException(ErrorCodes.VALUE_MISMATCH + "Match failed:" + first + " and " + second);
+         throw PicketBoxMessages.MESSAGES.failedToMatchStrings(first, second);
    }
 
    /**

@@ -30,7 +30,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.util.StringPropertyReplacer;
 
 /** A simple Properties map based login module that consults two Java Properties
@@ -150,7 +151,7 @@ public class UsersRolesLoginModule extends UsernamePasswordLoginModule
          /* Note that although this exception isn't passed on, users or roles
             will be null so that any call to login will throw a LoginException.
          */
-         super.log.error("Failed to load users/passwords/role files", e);
+         PicketBoxLogger.LOGGER.errorLoadingUserRolesPropertiesFiles(e);
       }
    }
 
@@ -163,11 +164,11 @@ public class UsersRolesLoginModule extends UsernamePasswordLoginModule
    public boolean login() throws LoginException
    {
       if (users == null)
-         throw new LoginException(ErrorCodes.NULL_VALUE + "Missing users.properties file.");
+         throw PicketBoxMessages.MESSAGES.missingPropertiesFile(usersRsrcName);
       if (roles == null)
-         throw new LoginException(ErrorCodes.NULL_VALUE + "Missing roles.properties file.");
+          throw PicketBoxMessages.MESSAGES.missingPropertiesFile(rolesRsrcName);
 
-      return super.login();
+       return super.login();
    }
 
    /** Create the set of roles the user belongs to by parsing the roles.properties
@@ -201,7 +202,7 @@ public class UsersRolesLoginModule extends UsernamePasswordLoginModule
     */ 
    protected void loadUsers() throws IOException
    {
-      users = Util.loadProperties(defaultUsersRsrcName, usersRsrcName, log);
+      users = Util.loadProperties(defaultUsersRsrcName, usersRsrcName);
    }
    /**
     * A hook to allow subclasses to create the users Properties map. This
@@ -227,7 +228,7 @@ public class UsersRolesLoginModule extends UsernamePasswordLoginModule
     */ 
    protected void loadRoles() throws IOException
    {
-      roles = Util.loadProperties(defaultRolesRsrcName, rolesRsrcName, log);
+      roles = Util.loadProperties(defaultRolesRsrcName, rolesRsrcName);
    }
    /**
     * A hook to allow subclasses to create the roles Properties map. This

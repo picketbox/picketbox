@@ -35,8 +35,8 @@ import javax.security.auth.login.Configuration;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.jboss.security.auth.login.XMLLoginConfigImpl;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.AuthorizationException;
@@ -45,11 +45,9 @@ import org.jboss.security.authorization.ResourceType;
 import org.jboss.security.config.ApplicationPolicyRegistration;
 import org.jboss.security.config.parser.StaxBasedConfigParser;
 import org.jboss.security.plugins.authorization.JBossAuthorizationContext;
-import org.jboss.test.JBossTestCase;
-import org.jboss.test.JBossTestSetup;
 
 
-public class AuthorizationContextUnitTestCase extends JBossTestCase
+public class AuthorizationContextUnitTestCase extends TestCase
 { 
    public AuthorizationContextUnitTestCase(String name)
    {
@@ -62,7 +60,7 @@ public class AuthorizationContextUnitTestCase extends JBossTestCase
       TestSuite suite = new TestSuite();
       suite.addTest(new TestSuite(AuthorizationContextUnitTestCase.class));
       // Create an initializer for the test suite
-      TestSetup wrapper = new JBossTestSetup(suite)
+      TestSetup wrapper = new TestSetup(suite)
       { 
          protected void setUp() throws Exception
          {

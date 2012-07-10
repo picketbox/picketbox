@@ -36,11 +36,10 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.CredentialException;
+import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.vault.SecurityVaultException;
 import org.jboss.security.vault.SecurityVaultUtil;
 
@@ -64,9 +63,6 @@ import org.jboss.security.vault.SecurityVaultUtil;
  */
 public class DatabaseCallbackHandler extends AbstractCallbackHandler implements CallbackHandler 
 {
-	protected static Logger log = Logger.getLogger(DatabaseCallbackHandler.class);
-	protected boolean trace = log.isTraceEnabled();
-
 	public static final String CONNECTION_URL = "connectionURL";
 	public static final String DS_JNDI_NAME = "dsJndiName";
 	public static final String DB_DRIVERNAME = "dbDriverName";
@@ -192,7 +188,7 @@ public class DatabaseCallbackHandler extends AbstractCallbackHandler implements 
 	{
 		if(theUserName == null)
 		{
-			throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "un");
+			throw PicketBoxMessages.MESSAGES.invalidNullArgument("userName");
 		}
 		userName = theUserName;
 	}
@@ -267,7 +263,7 @@ public class DatabaseCallbackHandler extends AbstractCallbackHandler implements 
 			{
 				handleVerification(vpc);
 			} 
-			catch (CredentialException e) 
+			catch (LoginException e)
 			{
 				throw new IOException(e);
 			}
@@ -280,7 +276,7 @@ public class DatabaseCallbackHandler extends AbstractCallbackHandler implements 
 		passwdCallback.setPassword(getPassword().toCharArray());
 	}
 	
-	protected void handleVerification(VerifyPasswordCallback vpc) throws CredentialException
+	protected void handleVerification(VerifyPasswordCallback vpc) throws LoginException
 	{
 		String userPass = vpc.getValue();
 		String passwordFromDB = getPassword();
@@ -290,7 +286,7 @@ public class DatabaseCallbackHandler extends AbstractCallbackHandler implements 
 		}
 		else
 		{
-			throw new CredentialException(ErrorCodes.ACCESS_DENIED + "Passwords don't match");
+			throw new LoginException(PicketBoxMessages.MESSAGES.authenticationFailedMessage());
 		}
 	}
 	
@@ -308,9 +304,7 @@ public class DatabaseCallbackHandler extends AbstractCallbackHandler implements 
 			rs = ps.executeQuery();
 			if( rs.next() == false )
 			{
-				if(trace)
-					log.trace("Query returned no matches from db");
-				throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "No matching username found in Principals:" + userName);
+				throw PicketBoxMessages.MESSAGES.unableToFindPrincipalInDB(userName);
 			}
 
 			password = rs.getString(1);
@@ -340,7 +334,7 @@ public class DatabaseCallbackHandler extends AbstractCallbackHandler implements 
 			} 
 			catch (ClassNotFoundException e) 
 			{
-				throw new RuntimeException(ErrorCodes.PROCESSING_FAILED,e);
+				throw new RuntimeException(e);
 			}
 		}
 
@@ -360,7 +354,7 @@ public class DatabaseCallbackHandler extends AbstractCallbackHandler implements 
 			InitialContext ic = new InitialContext();
 			if(dsJndiName == null)
 			{
-				throw new RuntimeException(ErrorCodes.NULL_VALUE + "dsJndiName is null");
+				throw PicketBoxMessages.MESSAGES.unableToLookupDataSource();
 			}
 				
 			DataSource ds = (DataSource) ic.lookup(dsJndiName);

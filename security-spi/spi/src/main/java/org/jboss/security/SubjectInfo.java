@@ -107,7 +107,7 @@ public class SubjectInfo implements Serializable
    public synchronized <T> T getIdentity(Class<T> clazz)
    {
       if( clazz == null )
-         throw new IllegalArgumentException( ErrorCodes.NULL_ARGUMENT + "clazz is null" );
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("clazz");
       if(this.identities != null)
       {
          for(Identity id:identities)
@@ -115,8 +115,6 @@ public class SubjectInfo implements Serializable
             if( id == null )
                break;
             Class<?> idClass = id.getClass();
-            if( idClass == null )
-               throw new RuntimeException( ErrorCodes.NULL_VALUE + id + " has null class " );
             if(clazz.isAssignableFrom( idClass ))
                return (T) id; 
          }

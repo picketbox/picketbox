@@ -28,8 +28,8 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimplePrincipal;
  
 /**
@@ -40,8 +40,6 @@ import org.jboss.security.SimplePrincipal;
  */
 public class MappingProviderUtil
 {
-   public static Logger log = Logger.getLogger(MappingProviderUtil.class);
-   
    /**
     * Add principals passed via an enumeration into a group
     * @param grp
@@ -80,7 +78,7 @@ public class MappingProviderUtil
    public static String[] getRolesFromCommaSeparatedString(String str)
    {
       if(str == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "str is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("str");
       StringTokenizer st = new StringTokenizer(str,",");
       int numTokens = st != null ? st.countTokens() : 0;
       String[] tokens = new String[numTokens];
@@ -107,9 +105,8 @@ public class MappingProviderUtil
       }
       catch (Exception e)
       {
-         if(log.isTraceEnabled())
-            log.trace("Encountered exception in mapping provider:instantiatePrincipal:",e);
-      } 
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
+      }
       return p;
    }
    

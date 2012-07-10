@@ -27,8 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.util.state.State;
 import org.jboss.security.util.state.StateMachine;
 import org.jboss.security.util.state.Transition;
@@ -75,7 +74,6 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings({"unchecked","rawtypes"})
 public class StateMachineParser
 {
-   private static Logger log = Logger.getLogger(StateMachineParser.class);
 
    public StateMachine parse(URL source) throws Exception
    {
@@ -146,9 +144,7 @@ public class StateMachineParser
             State target = (State)nameToStateMap.get(targetName);
             if (target == null)
             {
-               String msg = "Failed to resolve target state: " + targetName + " for transition: " + name;
-               resolveFailed.append(msg);
-               log.debug(msg);
+               resolveFailed.append(PicketBoxMessages.MESSAGES.failedToResolveTargetStateMessage(targetName, name));
             }
             Transition t = new Transition(name, target);
             s.addTransition(t);
@@ -156,7 +152,7 @@ public class StateMachineParser
       }
 
       if (resolveFailed.length() > 0)
-         throw new Exception(ErrorCodes.PROCESSING_FAILED + "Failed to resolve transition targets: " + resolveFailed);
+         throw new Exception(resolveFailed.toString());
 
       StateMachine sm = new StateMachine(states, startState, description);
       return sm;

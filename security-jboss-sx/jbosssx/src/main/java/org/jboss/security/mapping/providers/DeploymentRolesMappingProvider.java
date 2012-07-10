@@ -26,8 +26,8 @@ import java.security.acl.Group;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
@@ -46,9 +46,7 @@ import org.jboss.security.mapping.MappingResult;
  */
 public class DeploymentRolesMappingProvider implements MappingProvider<RoleGroup>
 {
-   private static Logger log = Logger.getLogger(DeploymentRolesMappingProvider.class);
-   private boolean trace = log.isTraceEnabled();
-   
+
    private MappingResult<RoleGroup> result;
 
    public void init(Map<String,Object> options)
@@ -66,21 +64,17 @@ public class DeploymentRolesMappingProvider implements MappingProvider<RoleGroup
     * @see MappingProvider#performMapping(Map, Object)
     */ 
    @SuppressWarnings("unchecked")
-   public void performMapping(Map<String,Object> map, RoleGroup mappedObject)
+   public void performMapping(Map<String,Object> contextMap, RoleGroup mappedObject)
    {  
-      if(map == null || map.isEmpty())
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Context Map is null or empty");
-    
+      if(contextMap == null || contextMap.isEmpty())
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextMap");
+
       //Obtain the principal to roles mapping
-      Principal principal = (Principal) map.get(SecurityConstants.PRINCIPAL_IDENTIFIER);
-      Map<String,Set<String>> principalRolesMap = (Map<String,Set<String>>)map.get(SecurityConstants.DEPLOYMENT_PRINCIPAL_ROLES_MAP);
-      
-      Set<Principal> subjectPrincipals = (Set<Principal>) map.get(SecurityConstants.PRINCIPALS_SET_IDENTIFIER);
-      if(trace)
-      {
-         log.trace("Principal="+principal+":principalRolesMap="+principalRolesMap+":");
-         log.trace("subjectPrincipals="+subjectPrincipals);
-      }
+      Principal principal = (Principal) contextMap.get(SecurityConstants.PRINCIPAL_IDENTIFIER);
+      Map<String,Set<String>> principalRolesMap = (Map<String,Set<String>>)contextMap.get(SecurityConstants.DEPLOYMENT_PRINCIPAL_ROLES_MAP);
+      Set<Principal> subjectPrincipals = (Set<Principal>) contextMap.get(SecurityConstants.PRINCIPALS_SET_IDENTIFIER);
+      PicketBoxLogger.LOGGER.debugMappingProviderOptions(principal, principalRolesMap, subjectPrincipals);
+
       if(principalRolesMap == null || principalRolesMap.isEmpty())
       {
          result.setMappedObject(mappedObject);

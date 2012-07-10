@@ -84,7 +84,7 @@ public class AppPolicy
     public static void setDefaultAppPolicy(AppPolicy policy)
     {
         if( policy == null )
-            throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "The policy argument cannot be null");
+            throw PicketBoxMessages.MESSAGES.invalidNullArgument("policy");
         defaultAppPolicy = policy;
     }
     public static AppPolicy getDefaultAppPolicy()

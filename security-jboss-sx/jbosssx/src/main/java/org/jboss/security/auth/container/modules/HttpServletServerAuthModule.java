@@ -30,7 +30,7 @@ import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.auth.callback.JBossCallbackHandler;
 
@@ -66,7 +66,7 @@ public class HttpServletServerAuthModule extends DelegatingServerAuthModule
 
    public AuthStatus secureResponse(MessageInfo arg0, Subject arg1) throws AuthException
    { 
-      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED);
+      throw new UnsupportedOperationException();
    }
    
    private Principal getUserName(MessageInfo messageInfo)
@@ -74,7 +74,7 @@ public class HttpServletServerAuthModule extends DelegatingServerAuthModule
       Object requestInfo =  messageInfo.getRequestMessage();
       String userNameParam = (String) options.get("userNameParam");
       if(requestInfo instanceof HttpServletRequest == false)
-         throw new IllegalStateException(ErrorCodes.WRONG_TYPE + "request:" + requestInfo);
+         throw PicketBoxMessages.MESSAGES.invalidType(HttpServletRequest.class.getName());
       HttpServletRequest hsr = (HttpServletRequest)requestInfo;
       return new SimplePrincipal(hsr.getParameter(userNameParam));
    }
@@ -84,7 +84,7 @@ public class HttpServletServerAuthModule extends DelegatingServerAuthModule
       Object requestInfo = messageInfo.getRequestMessage();
       String passwordParam = (String) options.get("passwordParam");
       if(requestInfo instanceof HttpServletRequest == false)
-         throw new IllegalStateException(ErrorCodes.WRONG_TYPE + "request:" + requestInfo);
+         throw PicketBoxMessages.MESSAGES.invalidType(HttpServletRequest.class.getName());
       HttpServletRequest hsr = (HttpServletRequest)requestInfo;
       return  hsr.getParameter(passwordParam);
    }

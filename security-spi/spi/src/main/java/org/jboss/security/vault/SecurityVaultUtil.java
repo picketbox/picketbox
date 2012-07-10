@@ -23,9 +23,7 @@ package org.jboss.security.vault;
 
 import java.util.StringTokenizer;
 
-import org.jboss.security.vault.SecurityVault;
-import org.jboss.security.vault.SecurityVaultException;
-import org.jboss.security.vault.SecurityVaultFactory;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  * Common utility methods associated with the {@link SecurityVault}
@@ -39,7 +37,7 @@ public class SecurityVaultUtil
 	/**
 	 * Check whether the string has the format of the vault
 	 * 
-	 * @param str
+	 * @param chars
 	 * @return
 	 */
 	public static boolean isVaultFormat(char[] chars) 
@@ -88,13 +86,12 @@ public class SecurityVaultUtil
 			throws SecurityVaultException 
     {
 		if (!isVaultFormat(vaultString))
-			throw new IllegalArgumentException(
-					"vaultString is of the wrong format:" + vaultString);
+            throw PicketBoxMessages.MESSAGES.invalidVaultStringFormat(vaultString);
 		String[] tokens = tokens(vaultString);
 
 		SecurityVault vault = SecurityVaultFactory.get();
 		if (!vault.isInitialized())
-			throw new SecurityVaultException("Vault is not initialized");
+			throw new SecurityVaultException(PicketBoxMessages.MESSAGES.vaultNotInitializedMessage());
 		return vault.retrieve(tokens[1], tokens[2], tokens[3].getBytes());
 	}
 

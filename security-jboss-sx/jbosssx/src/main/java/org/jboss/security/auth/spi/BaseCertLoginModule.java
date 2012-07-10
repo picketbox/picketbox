@@ -38,11 +38,11 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.ErrorCodes;
 import org.jboss.security.JSSESecurityDomain;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityDomain;
 import org.jboss.security.SecurityUtil;
@@ -106,7 +106,6 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
    {
       addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
-      trace = log.isTraceEnabled();
 
       // Get the security domain and default to "other"
       String sd = (String) options.get(SECURITY_DOMAIN);
@@ -114,38 +113,29 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
       if (sd == null)
          sd = "other";
 
-      if( trace )
-         log.trace("securityDomain=" + sd);
-
       try
       {
          Object tempDomain = new InitialContext().lookup(SecurityConstants.JAAS_CONTEXT_ROOT + sd);
          if (tempDomain instanceof SecurityDomain)
          {
             domain = tempDomain;
-            if( trace )
-            {
-               log.trace("found domain: " + domain.getClass().getName());
-            }
+            PicketBoxLogger.LOGGER.traceSecurityDomainFound(domain.getClass().getName());
          }
          else {
             tempDomain = new InitialContext().lookup(SecurityConstants.JAAS_CONTEXT_ROOT + sd + "/jsse");
             if (tempDomain instanceof JSSESecurityDomain) {
                domain = tempDomain;
-               if( trace )
-               {
-                  log.trace("found domain: " + domain.getClass().getName());
-               }
+               PicketBoxLogger.LOGGER.traceSecurityDomainFound(domain.getClass().getName());
             }
             else
             {
-               log.error("The JSSE security domain " + sd + " is not valid. All authentication using this login module will fail!");
+               PicketBoxLogger.LOGGER.errorGettingJSSESecurityDomain(sd);
             }
          }
       }
       catch (NamingException e)
       {
-         log.error("Unable to find the securityDomain named: " + sd, e);
+         PicketBoxLogger.LOGGER.errorFindingSecurityDomain(sd, e);
       }
 
       String option = (String) options.get(VERIFIER);
@@ -159,15 +149,10 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
          }
          catch(Throwable e)
          {
-            if( trace )
-               log.trace("Failed to create X509CertificateVerifier", e);
-            IllegalArgumentException ex = new IllegalArgumentException("Invalid verifier: "+option);
-            ex.initCause(e);
+            PicketBoxLogger.LOGGER.errorCreatingCertificateVerifier(e);
          }
       }
-
-      if( trace )
-         log.trace("exit: initialize(Subject, CallbackHandler, Map, Map)");
+      PicketBoxLogger.LOGGER.traceEndInitialize();
    }
 
    /**
@@ -176,8 +161,8 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
    @SuppressWarnings("unchecked")
    public boolean login() throws LoginException
    {
-      if( trace )
-         log.trace("enter: login()");
+      PicketBoxLogger.LOGGER.traceBeginLogin();
+
       // See if shared credentials exist
       if (super.login() == true)
       {
@@ -194,8 +179,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
             }
             catch(Exception e)
             {
-               log.debug("Failed to create principal", e);
-               throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to create principal: "+ e.getMessage());
+               throw PicketBoxMessages.MESSAGES.failedToCreatePrincipal(e.getLocalizedMessage());
             }
          }
 
@@ -204,7 +188,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
             credential = (X509Certificate) password;
          else if (password != null)
          {
-            log.debug("javax.security.auth.login.password is not X509Certificate");
+            PicketBoxLogger.LOGGER.debugPasswordNotACertificate();
             super.loginOk = false;
             return false;
          }
@@ -219,7 +203,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
       if (alias == null && credential == null)
       {
          identity = unauthenticatedIdentity;
-         super.log.trace("Authenticating as unauthenticatedIdentity=" + identity);
+         PicketBoxLogger.LOGGER.traceUsingUnauthIdentity(identity.toString());
       }
 
       if (identity == null)
@@ -230,13 +214,12 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
          }
          catch(Exception e)
          {
-            log.debug("Failed to create identity for alias:"+alias, e);
+            PicketBoxLogger.LOGGER.debugFailureToCreateIdentityForAlias(alias, e);
          }
 
          if (!validateCredential(alias, credential))
          {
-            log.debug("Bad credential for alias=" + alias);
-            throw new FailedLoginException(ErrorCodes.WRONG_VALUE + "Supplied Credential did not match existing credential for " + alias);
+            throw PicketBoxMessages.MESSAGES.failedToMatchCredential(alias);
          }
       }
 
@@ -247,11 +230,8 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
          sharedState.put("javax.security.auth.login.password", credential);
       }
       super.loginOk = true;
-      if( trace )
-      {
-         log.trace("User '" + identity + "' authenticated, loginOk=" + loginOk);
-         log.debug("exit: login()");
-      }
+
+      PicketBoxLogger.LOGGER.traceEndLogin(super.loginOk);
       return true;
    }
 
@@ -300,13 +280,12 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
 
    protected Object[] getAliasAndCert() throws LoginException
    {
-      if( trace )
-         log.trace("enter: getAliasAndCert()");
+      PicketBoxLogger.LOGGER.traceBeginGetAliasAndCert();
       Object[] info = { null, null };
       // prompt for a username and password
       if (callbackHandler == null)
       {
-         throw new LoginException(ErrorCodes.NULL_VALUE + "Error: no CallbackHandler available to collect authentication information");
+         throw PicketBoxMessages.MESSAGES.noCallbackHandlerAvailable();
       }
       NameCallback nc = new NameCallback("Alias: ");
       ObjectCallback oc = new ObjectCallback("Certificate: ");
@@ -324,8 +303,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
             if (tmpCert instanceof X509Certificate)
             {
                cert = (X509Certificate) tmpCert;
-               if( trace )
-                  log.trace("found cert " + cert.getSerialNumber().toString(16) + ":" + cert.getSubjectDN().getName());
+               PicketBoxLogger.LOGGER.traceCertificateFound(cert.getSerialNumber().toString(16), cert.getSubjectDN().getName());
             }
             else if( tmpCert instanceof X509Certificate[] )
             {
@@ -335,39 +313,36 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
             }
             else
             {
-               String msg = "Don't know how to obtain X509Certificate from: "
-                  +tmpCert.getClass();
-               log.warn(msg);
-               throw new LoginException(msg);
+               throw PicketBoxMessages.MESSAGES.unableToGetCertificateFromClass(tmpCert != null ? tmpCert.getClass() : null);
             }
          }
          else
          {
-            log.warn("CallbackHandler did not provide a certificate");
+            PicketBoxLogger.LOGGER.warnNullCredentialFromCallbackHandler();
          }
       }
       catch (IOException e)
       {
-         log.debug("Failed to invoke callback", e);
-         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to invoke callback: "+e.toString());
+         LoginException le = PicketBoxMessages.MESSAGES.failedToInvokeCallbackHandler();
+         le.initCause(e);
+         throw le;
       }
       catch (UnsupportedCallbackException uce)
       {
-         throw new LoginException(ErrorCodes.UNRECOGNIZED_CALLBACK + "CallbackHandler does not support: "
-            + uce.getCallback());
+         LoginException le = new LoginException();
+         le.initCause(uce);
+         throw le;
       }
 
       info[0] = alias;
       info[1] = cert;
-      if( trace )
-         log.trace("exit: getAliasAndCert()");
+      PicketBoxLogger.LOGGER.traceEndGetAliasAndCert();
       return info;
    }
 
    protected boolean validateCredential(String alias, X509Certificate cert)
    {
-      if( trace )
-         log.trace("enter: validateCredentail(String, X509Certificate)");
+      PicketBoxLogger.LOGGER.traceBeginValidateCredential();
       boolean isValid = false;
 
       // if we don't have a trust store, we'll just use the key store.
@@ -393,8 +368,7 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
       if( verifier != null )
       {
          // Have the verifier validate the cert
-         if( trace )
-            log.trace("Validating cert using: "+verifier);
+         PicketBoxLogger.LOGGER.traceValidatingUsingVerifier(verifier.getClass());
          isValid = verifier.verify(cert, alias, keyStore, trustStore);
       }
       else if (trustStore != null && cert != null)
@@ -404,13 +378,15 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
          try
          {
             storeCert = (X509Certificate) trustStore.getCertificate(alias);
-            if( trace )
+            if(PicketBoxLogger.LOGGER.isTraceEnabled())
             {
-               StringBuffer buf = new StringBuffer("\n\tSupplied Credential: ");
+               StringBuffer buf = new StringBuffer("\n\t");
+               buf.append(PicketBoxMessages.MESSAGES.suppliedCredentialMessage());
                buf.append(cert.getSerialNumber().toString(16));
                buf.append("\n\t\t");
                buf.append(cert.getSubjectDN().getName());
-               buf.append("\n\n\tExisting Credential: ");
+               buf.append("\n\n\t");
+               buf.append(PicketBoxMessages.MESSAGES.existingCredentialMessage());
                if( storeCert != null )
                {
                   buf.append(storeCert.getSerialNumber().toString(16));
@@ -426,14 +402,14 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
                   {
                      aliases.add(en.nextElement());
                   }
-                  buf.append("No match for alias: "+alias+", we have aliases " + aliases);
+                  buf.append(PicketBoxMessages.MESSAGES.noMatchForAliasMessage(alias, aliases));
                }
-               log.trace(buf.toString());
+               PicketBoxLogger.LOGGER.trace(buf.toString());
             }
          }
          catch (KeyStoreException e)
          {
-            log.warn("failed to find the certificate for " + alias, e);
+            PicketBoxLogger.LOGGER.warnFailureToFindCertForAlias(alias, e);
          }
          // Ensure that the two certs are equal
          if (cert.equals(storeCert))
@@ -441,17 +417,10 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
       }
       else
       {
-         log.warn("Domain, KeyStore, or cert is null. Unable to validate the certificate.");
+         PicketBoxLogger.LOGGER.warnFailureToValidateCertificate();
       }
 
-      if( trace )
-      {
-         log.trace("The supplied certificate "
-               + (isValid ? "matched" : "DID NOT match")
-               + " the certificate in the keystore.");
-
-         log.trace("exit: validateCredentail(String, X509Certificate)");
-      }
+      PicketBoxLogger.LOGGER.traceEndValidateCredential(isValid);
       return isValid;
    }
 

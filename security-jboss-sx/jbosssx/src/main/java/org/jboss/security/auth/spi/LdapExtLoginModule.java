@@ -42,7 +42,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.Util;
 import org.jboss.security.vault.SecurityVaultUtil;
@@ -228,7 +229,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    {
       addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
-      trace = log.isTraceEnabled();
    }
 
    /**
@@ -258,8 +258,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          try
          {
             String username = getUsername();
-            if (trace)
-               log.trace("Binding username: " + username);
+            PicketBoxLogger.LOGGER.traceBindingLDAPUsername(username);
             createLdapInitContext(username, null);
             defaultRole();
          }
@@ -295,10 +294,9 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
             String flag = (String) options.get(ALLOW_EMPTY_PASSWORDS);
             if (flag != null)
                allowEmptyPasswords = Boolean.valueOf(flag).booleanValue();
-            if (allowEmptyPasswords == false)
+            if (!allowEmptyPasswords)
             {
-               if(trace)
-                  log.trace("Rejecting empty password due to allowEmptyPasswords");
+               PicketBoxLogger.LOGGER.traceRejectingEmptyPassword();
                return false;
             }
          }
@@ -324,21 +322,20 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     */
    private void defaultRole()
    {
-      try
+       String defaultRole = (String) options.get(DEFAULT_ROLE);
+       try
       {
-         String defaultRole = (String) options.get(DEFAULT_ROLE);
          if (defaultRole == null || defaultRole.equals(""))
          {
             return;
          }
          Principal p = super.createIdentity(defaultRole);
-         if(trace)
-            log.trace("Assign user to role " + defaultRole);
+         PicketBoxLogger.LOGGER.traceAssignUserToRole(defaultRole);
          userRoles.addMember(p);
       }
       catch (Exception e)
       {
-         super.log.debug("could not add default role to user", e);
+         PicketBoxLogger.LOGGER.debugFailureToCreatePrincipal(defaultRole, e);
       }
    }
 
@@ -392,10 +389,9 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       {
          recursion = Integer.parseInt(strRecursion);
       }
-      catch (Exception e)
+      catch (NumberFormatException e)
       {
-         if (trace)
-            log.trace("Failed to parse: " + strRecursion + ", disabling recursion", e);
+         PicketBoxLogger.LOGGER.debugFailureToParseNumberProperty(ROLE_RECURSION, 0);
          // its okay for this to be 0 as this just disables recursion
          recursion = 0;
       }
@@ -408,8 +404,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          }
          catch (NumberFormatException e)
          {
-            if (trace)
-               log.trace("Failed to parse: " + timeLimit + ", using searchTimeLimit=" + searchTimeLimit, e);
+            PicketBoxLogger.LOGGER.debugFailureToParseNumberProperty(SEARCH_TIME_LIMIT_OPT, this.searchTimeLimit);
          }
       }
       String scope = (String) options.get(SEARCH_SCOPE_OPT);
@@ -444,7 +439,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       }
       catch(Exception e)
       {
-    	  log.warn(e);
     	  throw e;
       }
 	  finally
@@ -482,7 +476,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       if (results.hasMore() == false)
       {
          results.close();
-         throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Search of baseDN(" + baseDN + ") found no matches");
+         throw PicketBoxMessages.MESSAGES.failedToFindBaseContextDN(baseDN);
       }
 
       SearchResult sr = (SearchResult) results.next();
@@ -500,9 +494,9 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       if (userDN == null)
       {
           if (sr.isRelative() == true)
-                  userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
+             userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
           else
-                  throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
+             throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);
       }
 
       results.close();
@@ -574,14 +568,11 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                   {
                       parseRole(roleName);
                   }
-                  else
-                  if (roleAttributeIsDN)
+                  else if (roleAttributeIsDN)
                   {
                      // Query the roleDN location for the value of roleNameAttributeID
                      String roleDN = roleName;
                      String[] returnAttribute = {roleNameAttributeID};
-                     if(trace)
-                        log.trace("Using roleDN: " + roleDN);
                      try
                      {
                         Attributes result2 = ctx.getAttributes(roleDN, returnAttribute);
@@ -597,8 +588,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                      }
                      catch (NamingException e)
                      {
-                        if(trace)
-                           log.trace("Failed to query roleNameAttrName", e);
+                        PicketBoxLogger.LOGGER.debugFailureToQueryLDAPAttribute(roleNameAttributeID, roleDN, e);
                      }
                   }
                   else
@@ -654,20 +644,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          env.setProperty(Context.SECURITY_PRINCIPAL, dn);
       if (credential != null)
          env.put(Context.SECURITY_CREDENTIALS, credential);
-      traceLdapEnv(env);
-      return new InitialLdapContext(env, null);
-   }
-
-   private void traceLdapEnv(Properties env)
-   {
-      if (trace)
-      {
-         Properties tmp = new Properties();
-         tmp.putAll(env);
-         tmp.setProperty(Context.SECURITY_CREDENTIALS, "***");
-         tmp.setProperty(BIND_CREDENTIAL, "***");
-         log.trace("Logging into LDAP server, env=" + tmp.toString());
-      }
+       PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(env);
+       return new InitialLdapContext(env, null);
    }
 
    //JBAS-3438 : Handle "/" correctly
@@ -695,14 +673,12 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          try
          {
             Principal p = super.createIdentity(roleName);
-            if(trace)
-               log.trace("Assign user to role " + roleName);
+            PicketBoxLogger.LOGGER.traceAssignUserToRole(roleName);
             userRoles.addMember(p);
          }
          catch (Exception e)
          {
-            if(trace)
-               log.debug("Failed to create principal: " + roleName, e);
+            PicketBoxLogger.LOGGER.debugFailureToCreatePrincipal(roleName, e);
          }
       }
    }

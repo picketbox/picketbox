@@ -27,8 +27,8 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.auth.certs.SubjectCNMapping;
 import org.jboss.security.mapping.MappingResult;
  
@@ -44,7 +44,6 @@ import org.jboss.security.mapping.MappingResult;
  */
 public class SubjectCNMapper extends AbstractPrincipalMappingProvider
 { 
-   private static final Logger log = Logger.getLogger(SubjectCNMapper.class);
    private MappingResult<Principal> result;
 
    public void init(Map<String,Object> opt)
@@ -61,15 +60,14 @@ public class SubjectCNMapper extends AbstractPrincipalMappingProvider
       if(principal instanceof X500Principal == false)
          return;
       if(contextMap == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextMap is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextMap");
+
       X509Certificate[] certs = (X509Certificate[]) contextMap.get("X509");
       if(certs != null)
       {
         SubjectCNMapping sdn = new SubjectCNMapping();
         principal = sdn.toPrinicipal(certs);
-        if(log.isTraceEnabled())
-           log.trace("Mapped to Principal:"+principal);
+        PicketBoxLogger.LOGGER.traceMappedX500Principal(principal);
       }
       
       result.setMappedObject(principal);

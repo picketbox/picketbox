@@ -29,7 +29,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.spi.LoginModule;
 
-import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.RunAsIdentity;
 import org.jboss.security.SecurityContextAssociation;
 
@@ -42,7 +42,6 @@ import org.jboss.security.SecurityContextAssociation;
  */
 public class RunAsLoginModule implements LoginModule
 {
-    // see AbstractServerLoginModule
    private static final String ROLE_NAME = "roleName";
    private static final String PRINCIPLE_NAME = "principalName";
 
@@ -51,7 +50,6 @@ public class RunAsLoginModule implements LoginModule
 	   ROLE_NAME,PRINCIPLE_NAME
    };
    
-   private static Logger log;
    private String roleName;
    private String principalName;
    private boolean pushedRole;
@@ -62,17 +60,16 @@ public class RunAsLoginModule implements LoginModule
    public void initialize(Subject subject, CallbackHandler handler,
       Map<String,?> sharedState, Map<String,?> options)
    {
-      log = Logger.getLogger(getClass());
-      
+
      /* TODO: this module should really extend AbstractServerLoginModule where the options check is integrated.
       * the code here has been intentionally kept identical
       */
       HashSet<String> validOptions = new HashSet<String>(Arrays.asList(ALL_VALID_OPTIONS));
       for (Object key : options.keySet())
       {
-    	 if (!validOptions.contains((String)key))
+    	 if (!validOptions.contains(key))
          {
-            log.warn("Invalid or misspelled option: " + key);
+            PicketBoxLogger.LOGGER.warnInvalidModuleOption((String)key);
          }
       }
 	  
@@ -85,8 +82,9 @@ public class RunAsLoginModule implements LoginModule
          principalName = "nobody";
    }
 
-   /** Push the run as role using the SecurityAssociation.pushRunAsIdentity method
-    *@see SecurityAssociation#pushRunAsIdentity(RunAsIdentity)
+   /**
+    * Push the run as role using the SecurityAssociation.pushRunAsIdentity method
+    * @see SecurityContextAssociation#pushRunAsIdentity(org.jboss.security.RunAs)
     */
    public boolean login()
    {
@@ -96,15 +94,17 @@ public class RunAsLoginModule implements LoginModule
       return true;
    }
 
-   /** Calls abort to pop the run-as role
+   /**
+    * Calls abort to pop the run-as role
     */
    public boolean commit()
    {
       return abort();
    }
 
-   /** Pop the run as role using the SecurityAssociation.popRunAsIdentity method
-    *@see SecurityAssociation#popRunAsIdentity()
+   /**
+    * Pop the run as role using the SecurityAssociation.popRunAsIdentity method
+    * @see SecurityContextAssociation#popRunAsIdentity()
     */
    public boolean abort()
    {

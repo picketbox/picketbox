@@ -4,7 +4,11 @@
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
-    <fileSet>
+      <fileSet>
+          <directory>${basedir}/../common/target/classes</directory>
+          <outputDirectory>/</outputDirectory>
+      </fileSet>
+      <fileSet>
       <directory>${basedir}/../acl/target/classes</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>

@@ -20,10 +20,9 @@
   * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
   */
 package org.jboss.security.authorization.modules;
- 
+
 import javax.security.auth.Subject;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.authorization.AuthorizationModule;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -39,9 +38,7 @@ import org.jboss.security.identity.RoleGroup;
  */
 public abstract class AuthorizationModuleDelegate
 {
-   protected static Logger log = Logger.getLogger(AuthorizationModuleDelegate.class);
-   protected boolean trace = false;
-   
+
    /**
     * Policy Registration Manager Injected
     */
@@ -59,7 +56,7 @@ public abstract class AuthorizationModuleDelegate
    /**
     * Set the PolicyRegistration manager 
     * Will be used to query for the policies
-    * @param authzManager
+    * @param pm
     */
    public void setPolicyRegistrationManager(PolicyRegistration pm)
    {

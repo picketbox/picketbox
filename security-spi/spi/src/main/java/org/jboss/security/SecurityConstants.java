@@ -60,32 +60,9 @@ public interface SecurityConstants
    String DISABLE_SECDOMAIN_OPTION = "jboss.security.disable.secdomain.option";
 
    /**
-    * Default Authorization Manager context
-    */
-   String AUTHORIZATION_PATH = "java:/authorizationMgr";
-   
-   /**
-    * Default ServerAuthModule that delegates to a Login Module Stack
-    */
-   String JASPI_DELEGATING_MODULE = "org.jboss.security.auth.container.modules.DelegatingServerAuthModule";
-   
-   /**
-    * Default JASPI based secutity manager
-    */
-   String JASPI_AUTHENTICATION_MANAGER = "org.jboss.security.plugins.JASPISecurityManager";
-   
-   /**
-    * Default AuthorizationManager implementation, the AuthorizationManager service uses
-    * 
-    */
-   String DEFAULT_AUTHORIZATION_CLASS = "org.jboss.security.plugins.JBossAuthorizationManager";
-   
-   /**
     * Message Layers
     */
    String SERVLET_LAYER = "HttpServlet";
-   
-   String CONTEXT_ID = "jboss.contextid";
    
    /**
     * Application Policy driving the web authorization layer
@@ -100,7 +77,6 @@ public interface SecurityConstants
    
    /** Policy Context Constants **/
    String SUBJECT_CONTEXT_KEY = "javax.security.auth.Subject.container";
-   String WEB_REQUEST_KEY = "javax.servlet.http.HttpServletRequest";
    String CALLBACK_HANDLER_KEY = "org.jboss.security.auth.spi.CallbackHandler";
    
    /**
@@ -119,8 +95,6 @@ public interface SecurityConstants
    String PRINCIPAL_IDENTIFIER = "Principal";
    String PRINCIPALS_SET_IDENTIFIER = "PrincipalsSet"; 
    String DEPLOYMENT_PRINCIPAL_ROLES_MAP = "deploymentPrincipalRolesMap";
-   
-   String SECURITY_CONTEXT = "SecurityContext";
    
    String CREDENTIAL = "Credential";
    String SUBJECT = "Subject";

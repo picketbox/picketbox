@@ -26,8 +26,10 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import javax.security.auth.login.LoginException;
+
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.ControlFlag;
@@ -46,9 +48,6 @@ import org.jboss.security.plugins.ClassLoaderLocatorFactory;
  */
 public class JBossIdentityTrustContext extends IdentityTrustContext
 { 
-   protected Logger log = Logger.getLogger(JBossIdentityTrustContext.class); 
-   protected boolean trace = log.isTraceEnabled();
-   
    public JBossIdentityTrustContext(String secDomain, SecurityContext sc)
    {
       this.securityDomain = secDomain;
@@ -89,8 +88,6 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
       catch (PrivilegedActionException e)
       {
          Exception exc = e.getException();
-         if(trace)
-            log.trace("Error in isAuthorize:", exc); 
          invokeAbort();
          throw ((IdentityTrustException)exc);
       }
@@ -105,8 +102,8 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
       //Get the Configuration
       ApplicationPolicy aPolicy = SecurityConfiguration.getApplicationPolicy( securityDomain);
       if(aPolicy == null)
-         throw new IllegalStateException(ErrorCodes.MISSING_VALUE + "ApplicationPolicy not found for "+ securityDomain);
-      
+         throw PicketBoxMessages.MESSAGES.failedToObtainApplicationPolicy(securityDomain);
+
       IdentityTrustInfo iti = aPolicy.getIdentityTrustInfo();
       if(iti == null)
          return;
@@ -143,18 +140,15 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
       }
       catch ( Exception e)
       {
-         if(trace)
-            log.debug("Error instantiating IdentityTrustModule:",e);
-      } 
+          PicketBoxLogger.LOGGER.debugIgnoredException(e);
+      }
       if(im == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "IdentityTrustModule has not " +
-               "been instantiated"); 
-      im.initialize(this.securityContext, this.callbackHandler, this.sharedState,map); 
+         throw new LoginException(PicketBoxMessages.MESSAGES.failedToInstantiateClassMessage(IdentityTrustModule.class));
+      im.initialize(this.securityContext, this.callbackHandler, this.sharedState,map);
       return im;
    }
    
-   private TrustDecision invokeTrusted() 
-   throws IdentityTrustException
+   private TrustDecision invokeTrusted() throws IdentityTrustException
    { 
       //Control Flag behavior
       boolean encounteredRequiredDeny = false; 
@@ -172,8 +166,8 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
       
       for(int i = 0; i < length; i++)
       {
-         IdentityTrustModule module = (IdentityTrustModule)modules.get(i);
-         ControlFlag flag = (ControlFlag)this.controlFlags.get(i); 
+         IdentityTrustModule module = modules.get(i);
+         ControlFlag flag = this.controlFlags.get(i);
          try
          {
             decision = module.isTrusted();
@@ -205,19 +199,17 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
          //REQUISITE case
          if(flag == ControlFlag.REQUISITE)
          {
-            if(trace)
-               log.trace("REQUISITE failed for " + module); 
+            PicketBoxLogger.LOGGER.debugRequisiteModuleFailure(module.getClass().getName());
             if(moduleException == null)
-               moduleException = new IdentityTrustException("Identity Trust Validation failed");
+               moduleException = new IdentityTrustException(PicketBoxMessages.MESSAGES.identityTrustValidationFailedMessage());
             else
                throw moduleException;
          }
          //REQUIRED Case
          if(flag == ControlFlag.REQUIRED)
          {
-            if(trace)
-               log.trace("REQUIRED failed for " + module);
-            encounteredRequiredDeny = true;
+             PicketBoxLogger.LOGGER.debugRequiredModuleFailure(module.getClass().getName());
+             encounteredRequiredDeny = true;
          }
          if(flag == ControlFlag.OPTIONAL)
             encounteredOptionalError = true; 
@@ -236,29 +228,27 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
       return PERMIT;
    }
    
-   private void invokeCommit()
-   throws IdentityTrustException
+   private void invokeCommit() throws IdentityTrustException
    {
       int length = modules.size();
       for(int i = 0; i < length; i++)
       {
-         IdentityTrustModule module = (IdentityTrustModule)modules.get(i); 
+         IdentityTrustModule module = modules.get(i);
          boolean bool = module.commit();
          if(!bool)
-            throw new IdentityTrustException(ErrorCodes.PROCESSING_FAILED + "commit on modules failed");
-      } 
+            throw new IdentityTrustException(PicketBoxMessages.MESSAGES.moduleCommitFailedMessage());
+      }
    }
    
-   private void invokeAbort()
-   throws IdentityTrustException
+   private void invokeAbort() throws IdentityTrustException
    {
       int length = modules.size();
       for(int i = 0; i < length; i++)
       {
-         IdentityTrustModule module = (IdentityTrustModule)modules.get(i); 
+         IdentityTrustModule module = modules.get(i);
          boolean bool = module.abort(); 
          if(!bool)
-            throw new IdentityTrustException(ErrorCodes.PROCESSING_FAILED + "abort on modules failed");
-      } 
+            throw new IdentityTrustException(PicketBoxMessages.MESSAGES.moduleAbortFailedMessage());
+      }
    }
 }

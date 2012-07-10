@@ -36,8 +36,8 @@ import javax.security.auth.AuthPermission;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.ApplicationPolicyRegistration;
 import org.jboss.security.config.PolicyConfig;
@@ -67,9 +67,6 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
    private static final String DEFAULT_APP_CONFIG_NAME = "other";
 
    private static final AuthPermission REFRESH_PERM = new AuthPermission("refreshLoginConfiguration");
-
-   private static Logger log = Logger.getLogger(XMLLoginConfigImpl.class);
-   private boolean trace = log.isTraceEnabled();
 
    transient PolicyConfig appConfigs = new PolicyConfig();
 
@@ -112,19 +109,14 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
       SecurityManager sm = System.getSecurityManager();
       if (sm != null)
          sm.checkPermission(REFRESH_PERM);
-      if (log.isTraceEnabled())
-         log.trace("Begin refresh");
       appConfigs.clear();
       loadConfig();
-      if (log.isTraceEnabled())
-         log.trace("End refresh");
    }
 
    @Override
    public AppConfigurationEntry[] getAppConfigurationEntry(String appName)
    {
-      if (log.isTraceEnabled())
-         log.trace("Begin getAppConfigurationEntry(" + appName + "), size=" + appConfigs.size());
+      PicketBoxLogger.LOGGER.traceBeginGetAppConfigEntry(appName, appConfigs.size());
 
       // Load the config if PolicyConfig is empty
       if (this.appConfigs.size() == 0)
@@ -138,25 +130,20 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
 
       if (authInfo == null)
       {
-         if (log.isTraceEnabled())
-            log.trace("getAppConfigurationEntry(" + appName + "), no entry in appConfigs, tyring parentCont: "
-                  + parentConfig);
+         PicketBoxLogger.LOGGER.traceGetAppConfigEntryViaParent(appName, parentConfig != null ? parentConfig.toString() : null);
          if (parentConfig != null)
             entry = parentConfig.getAppConfigurationEntry(appName);
          if (entry == null)
          {
-            if (log.isTraceEnabled())
-               log.trace("getAppConfigurationEntry(" + appName + "), no entry in parentConfig, trying: "
-                     + DEFAULT_APP_CONFIG_NAME);
+            PicketBoxLogger.LOGGER.traceGetAppConfigEntryViaDefault(appName, DEFAULT_APP_CONFIG_NAME);
+            ApplicationPolicy defPolicy = appConfigs.get(DEFAULT_APP_CONFIG_NAME);
+            authInfo = defPolicy != null ? (AuthenticationInfo) defPolicy.getAuthenticationInfo() : null;
          }
-         ApplicationPolicy defPolicy = appConfigs.get(DEFAULT_APP_CONFIG_NAME);
-         authInfo = defPolicy != null ? (AuthenticationInfo) defPolicy.getAuthenticationInfo() : null;
       }
 
       if (authInfo != null)
       {
-         if (log.isTraceEnabled())
-            log.trace("End getAppConfigurationEntry(" + appName + "), authInfo=" + authInfo);
+         PicketBoxLogger.LOGGER.traceEndGetAppConfigEntryWithSuccess(appName, authInfo.toString());
          // Make a copy of the authInfo object
          final BaseAuthenticationInfo theAuthInfo = authInfo;
          PrivilegedAction<AppConfigurationEntry[]> action = new PrivilegedAction<AppConfigurationEntry[]>()
@@ -170,8 +157,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
       }
       else
       {
-         if (log.isTraceEnabled())
-            log.trace("End getAppConfigurationEntry(" + appName + "), failed to find entry");
+         PicketBoxLogger.LOGGER.traceEndGetAppConfigEntryWithFailure(appName);
       }
 
       return entry;
@@ -200,7 +186,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
       ClassLoader tcl = SecurityActions.getContextClassLoader();
       loginConfigURL = tcl.getResource(resourceName);
       if (loginConfigURL == null)
-         throw new IOException(ErrorCodes.NULL_VALUE + "Failed to find resource: " + resourceName);
+         throw PicketBoxMessages.MESSAGES.failedToFindResource(resourceName);
    }
 
    public void setParentConfig(Configuration parentConfig)
@@ -247,8 +233,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
          sm.checkPermission(REFRESH_PERM);
       AuthenticationInfo authInfo = new AuthenticationInfo(appName);
       authInfo.setAppConfigurationEntry(entries);
-      if (log.isTraceEnabled())
-         log.trace("addAppConfig(" + appName + "), authInfo=" + authInfo);
+      PicketBoxLogger.LOGGER.traceAddAppConfig(appName, authInfo.toString());
       ApplicationPolicy aPolicy = new ApplicationPolicy(appName, authInfo);
       appConfigs.add(aPolicy);
       SecurityConfiguration.addApplicationPolicy(aPolicy);
@@ -270,8 +255,6 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
       SecurityManager sm = System.getSecurityManager();
       if (sm != null)
          sm.checkPermission(REFRESH_PERM);
-      if (log.isTraceEnabled())
-         log.trace("removeAppConfig, appName=" + appName);
       appConfigs.remove(appName);
       SecurityConfiguration.removeApplicationPolicy(appName);
    }
@@ -299,8 +282,7 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
       SecurityManager sm = System.getSecurityManager();
       if (sm != null)
          sm.checkPermission(REFRESH_PERM);
-      if (log.isTraceEnabled())
-         log.trace("removeAppConfig, appName=" + appName);
+      PicketBoxLogger.LOGGER.traceRemoveAppConfig(appName);
       appConfigs.remove(appName);
       SecurityConfiguration.removeApplicationPolicy(appName);
       return true;
@@ -367,22 +349,20 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
 
       if (loginConfigURL == null)
       {
-         log.warn("Failed to find config: " + loginConfig);
+         PicketBoxLogger.LOGGER.warnFailureToFindConfig(loginConfig);
          return;
       }
 
-      if (log.isTraceEnabled())
-         log.trace("Begin loadConfig, loginConfigURL=" + loginConfigURL);
+      PicketBoxLogger.LOGGER.traceBeginLoadConfig(loginConfigURL);
       // Try to load the config if found
       try
       {
          loadConfig(loginConfigURL);
-         if (log.isTraceEnabled())
-            log.trace("End loadConfig, loginConfigURL=" + loginConfigURL);
+         PicketBoxLogger.LOGGER.traceEndLoadConfigWithSuccess(loginConfigURL);
       }
       catch (Exception e)
       {
-         log.warn("End loadConfig, failed to load config: " + loginConfigURL, e);
+         PicketBoxLogger.LOGGER.warnEndLoadConfigWithFailure(loginConfigURL, e);
       }
    }
  
@@ -393,18 +373,14 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
          sm.checkPermission(REFRESH_PERM);
 
       ArrayList configNames = new ArrayList();
-      log.debug("Try loading config as XML, url=" + config);
+      PicketBoxLogger.LOGGER.debugLoadConfigAsXML(config);
       try
       {
          loadXMLConfig(config, configNames);
       }
       catch (Throwable e)
       {
-         if(trace)
-         {
-            log.debug("Failed to load config as XML", e);
-            log.debug("Try loading config as Sun format, url=" + config);
-         }
+         PicketBoxLogger.LOGGER.debugLoadConfigAsSun(config, e);
          loadSunConfig(config, configNames);
       }
       String[] names = new String[configNames.size()];
@@ -438,12 +414,8 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
       try
       {
          is = sunConfig.openStream();
-         if (is == null)
-            throw new IOException(ErrorCodes.NULL_VALUE + "InputStream is null for: " + sunConfig);
-
          configFile = new InputStreamReader(is);
-         boolean trace = log.isTraceEnabled();
-         SunConfigParser.doParse(configFile, this, trace);
+         SunConfigParser.doParse(configFile, this, PicketBoxLogger.LOGGER.isTraceEnabled());
       }
       finally
       {

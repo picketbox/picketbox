@@ -30,9 +30,9 @@ import java.util.Set;
 import javax.naming.InitialContext;
 import javax.security.auth.Subject;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.AuthorizationManager;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.RunAs;
 import org.jboss.security.audit.AuditLevel;
 import org.jboss.security.authorization.AuthorizationContext;
@@ -56,8 +56,6 @@ import org.jboss.security.javaee.exceptions.WrongEEResourceException;
  */
 public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
 {
-   protected static Logger log = Logger.getLogger(EJBAuthorizationHelper.class);
-   
    protected String POLICY_REGISTRATION_JNDI = "java:/policyRegistration";
    
    @Override
@@ -66,26 +64,26 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
          Method ejbMethod, 
          Principal ejbPrincipal, 
          String invocationInterfaceString,
-         CodeSource ejbCS, 
+         CodeSource ejbCodeSource,
          Subject callerSubject, 
          RunAs callerRunAs,  
          String contextID,
          RoleGroup methodRoles)
    {
       if(ejbName == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ejbName is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("ejbName");
       if(ejbMethod == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ejbMethod is null");
-      if(ejbCS == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "EJB CodeSource is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("ejbMethod");
+      if(ejbCodeSource == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("ejbCodeSource");
       if(contextID == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextID");
       if(callerSubject == null && callerRunAs == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Either callerSubject or callerRunAs should be non-null"); 
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("callerSubject");
 
       AuthorizationManager am = securityContext.getAuthorizationManager();
       if(am == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("AuthorizationManager");
 
       HashMap<String,Object> map =  new HashMap<String,Object>();
       try
@@ -95,7 +93,7 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       }
       catch(Exception e)
       {
-         log.error("Error getting Policy Registration",e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       
       map.put(ResourceKeys.POLICY_REGISTRATION, this.policyRegistration); 
@@ -108,7 +106,7 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       ejbResource.setEjbMethod(ejbMethod);
       ejbResource.setPrincipal(ejbPrincipal);
       ejbResource.setEjbMethodInterface(invocationInterfaceString);
-      ejbResource.setCodeSource(ejbCS);
+      ejbResource.setCodeSource(ejbCodeSource);
       ejbResource.setCallerRunAsIdentity(callerRunAs);
       ejbResource.setCallerSubject(callerSubject);
       ejbResource.setEjbMethodRoles(methodRoles);
@@ -127,8 +125,7 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       catch (Exception e)
       {
          isAuthorized = false;
-         if(log.isTraceEnabled())
-            log.trace("Error in authorization:",e); 
+         PicketBoxLogger.LOGGER.debugAuthorizationError(e);
          authorizationAudit(AuditLevel.ERROR,ejbResource,e);
       } 
       
@@ -154,19 +151,19 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       EJBResource ejbResource = (EJBResource) resource;
 
       if(roleName == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roleName is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("roleName");
       if( ejbResource.getEjbName() == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ejbName is null"); 
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("ejbName");
       if( ejbResource.getPolicyContextID() == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null"); 
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextID");
+
       AuthorizationManager am = securityContext.getAuthorizationManager();
 
       Subject callerSubject = ejbResource.getCallerSubject();
       
       if(am == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "AuthorizationManager is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("AuthorizationManager");
+
       try
       {
          if(this.policyRegistration == null)
@@ -174,7 +171,7 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       }
       catch(Exception e)
       {
-         log.error("Error getting Policy Registration",e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       
       ejbResource.add( ResourceKeys.POLICY_REGISTRATION, this.policyRegistration );
@@ -192,10 +189,9 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       } 
       catch (Exception e)
       {
-         isAuthorized = false; 
-         if(log.isTraceEnabled()) 
-            log.trace(roleName + "::isCallerInRole check failed:"+e.getLocalizedMessage(), e); 
-         authorizationAudit(AuditLevel.ERROR,ejbResource,e);  
+         isAuthorized = false;
+         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("isCallerInRole", e);
+         authorizationAudit(AuditLevel.ERROR,ejbResource,e);
       } 
       return isAuthorized;  
    }
@@ -205,18 +201,18 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
          String contextID, Set<SecurityRoleRef> securityRoleRefs, boolean enforceEJBRestrictions)
    { 
       if(roleName == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roleName is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("roleName");
       if(ejbName == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ejbName is null"); 
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("ejbName");
       if(contextID == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");  
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextID");
 
       boolean isAuthorized = false;
       AuthorizationManager am = securityContext.getAuthorizationManager();
       
       if(am == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "AuthorizationManager is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("AuthorizationManager");
+
       HashMap<String,Object> map = new HashMap<String,Object>();
 
       try
@@ -226,7 +222,7 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       }
       catch(Exception e)
       {
-         log.error("Error getting Policy Registration",e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       
       
@@ -259,10 +255,9 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       } 
       catch (Exception e)
       {
-         isAuthorized = false; 
-         if(log.isTraceEnabled()) 
-            log.trace(roleName + "::isCallerInRole check failed:"+e.getLocalizedMessage(), e); 
-         authorizationAudit(AuditLevel.ERROR,ejbResource,e);  
+         isAuthorized = false;
+         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("isCallerInRole", e);
+         authorizationAudit(AuditLevel.ERROR,ejbResource,e);
       } 
       return isAuthorized; 
    }
@@ -286,7 +281,7 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
           this.version = ejbVersion;  
       }
       else
-         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "Invalid ejbVersion:" + ejbVersion);
+         throw PicketBoxMessages.MESSAGES.invalidEJBVersion(ejbVersion);
    }
 
    @Override
@@ -294,13 +289,13 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
    throws WrongEEResourceException, MissingArgumentsException
    {
       if( resource instanceof EJBResource == false )
-        throw new WrongEEResourceException( ErrorCodes.WRONG_TYPE + "resource is not of type EJBResource" );
+        throw PicketBoxMessages.MESSAGES.invalidType(EJBResource.class.getName());
       EJBResource ejbResource = (EJBResource) resource;
       validateEJBResource( ejbResource );
       
       AuthorizationManager am = securityContext.getAuthorizationManager();
       if(am == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Manager is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("AuthorizationManager");
 
       try
       {
@@ -309,7 +304,7 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       }
       catch(Exception e)
       {
-         log.error("Error getting Policy Registration",e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       Subject callerSubject = ejbResource.getCallerSubject();
       
@@ -328,9 +323,8 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       catch (Exception e)
       {
          isAuthorized = false;
-         if(log.isTraceEnabled())
-            log.trace("Error in authorization:",e); 
-         authorizationAudit(AuditLevel.ERROR,ejbResource,e);
+         PicketBoxLogger.LOGGER.debugAuthorizationError(e);
+         authorizationAudit(AuditLevel.ERROR, ejbResource, e);
       } 
       
       return isAuthorized;
@@ -343,15 +337,15 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
    private void validateEJBResource( EJBResource ejbResource ) throws MissingArgumentsException
    {
       if( ejbResource.getEjbName() == null )
-         throw new MissingArgumentsException( ErrorCodes.NULL_ARGUMENT + "ejbName is null" );
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("ejbName");
       if( ejbResource.getEjbMethod() == null )
-         throw new MissingArgumentsException( ErrorCodes.NULL_ARGUMENT + "ejbMethod is null" );
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("ejbMethod");
       if( ejbResource.getCodeSource() == null )
-         throw new MissingArgumentsException(ErrorCodes.NULL_ARGUMENT + "EJB CodeSource is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("ejbCodeSource");
       if( ejbResource.getPolicyContextID() == null )
-         throw new MissingArgumentsException(ErrorCodes.NULL_ARGUMENT + "ContextID is null");
-      if( ejbResource.getCallerSubject() == null && ejbResource.getCallerRunAsIdentity() == null )
-         throw new MissingArgumentsException(ErrorCodes.NULL_ARGUMENT + "Either callerSubject or callerRunAs should be non-null"); 
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextID");
+      if( ejbResource.getCallerSubject() == null && ejbResource.getCallerRunAsIdentity() == null)
+         throw new MissingArgumentsException(PicketBoxMessages.MESSAGES.missingCallerInfoMessage());
    }
   
    private PolicyRegistration getPolicyRegistrationFromJNDI() throws Exception

@@ -66,7 +66,7 @@ public class SubjectPolicyContextHandler implements PolicyContextHandler
                
                if( activeSubject != null )
                {
-                  Set<Principal> principalsSet = null;
+                  Set<Principal> principalsSet;
                   if( callerRunAsIdentity == null )
                   {
                      principalsSet = activeSubject.getPrincipals();
@@ -97,10 +97,10 @@ public class SubjectPolicyContextHandler implements PolicyContextHandler
    public Object getContext(String key, Object data)
       throws PolicyContextException
    {
-      if( key.equalsIgnoreCase(SUBJECT_CONTEXT_KEY) == false )
+      if(!key.equalsIgnoreCase(SUBJECT_CONTEXT_KEY))
          return null;
 
-      Subject subject = (Subject) AccessController.doPrivileged(GetSubjectAction.ACTION);
+      Subject subject = AccessController.doPrivileged(GetSubjectAction.ACTION);
       return subject;
    }
 

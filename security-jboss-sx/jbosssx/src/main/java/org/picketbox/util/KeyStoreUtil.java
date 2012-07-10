@@ -39,8 +39,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 
-import org.jboss.security.ErrorCodes;
- 
+import org.jboss.security.PicketBoxMessages;
+
 
 /**
  * Utility to handle Java Keystore
@@ -82,7 +82,7 @@ public class KeyStoreUtil
    public static KeyStore getKeyStore(String fileURL, char[] storePass) throws GeneralSecurityException, IOException
    {
       if (fileURL == null)
-         throw new IllegalArgumentException( ErrorCodes.NULL_ARGUMENT + "Null fileURL");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("fileURL");
 
       File file = new File(fileURL);
       FileInputStream fis = null;
@@ -108,7 +108,7 @@ public class KeyStoreUtil
    public static KeyStore getKeyStore(URL url, char[] storePass) throws GeneralSecurityException, IOException
    {
       if (url == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Null url");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("url");
 
       InputStream is = null;
       try
@@ -136,7 +136,7 @@ public class KeyStoreUtil
          IOException
    {
       if (ksStream == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Null InputStream for the KeyStore");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("ksStream");
       KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
       ks.load(ksStream, storePass);
       return ks;

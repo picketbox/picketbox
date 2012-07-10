@@ -31,8 +31,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.util.JBossXACMLUtil;
 import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
@@ -57,18 +57,15 @@ import org.jboss.security.xacml.interfaces.XACMLConstants;
  */
 public class WebXACMLUtil extends JBossXACMLUtil
 {
-   private static Logger log = Logger.getLogger(WebXACMLUtil.class);
-   private boolean trace = log.isTraceEnabled();
-    
-   
+
    @SuppressWarnings("unchecked")
    public RequestContext createXACMLRequest(HttpServletRequest request,
          RoleGroup callerRoles) throws Exception
          { 
       if(request == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Http Request is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("request");
       if(callerRoles == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roles is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("callerRoles");
       String httpMethod = request.getMethod();
       String action = "GET".equals(httpMethod) ? "read" : "write";
 
@@ -145,14 +142,14 @@ public class WebXACMLUtil extends JBossXACMLUtil
       requestCtx.setRequest(requestType);
 
 
-      if(trace)
+      if(PicketBoxLogger.LOGGER.isDebugEnabled())
       {
          ByteArrayOutputStream baos = null;
          try
          {
             baos = new ByteArrayOutputStream();
             requestCtx.marshall(baos);
-            log.trace(new String(baos.toByteArray()));
+            PicketBoxLogger.LOGGER.debug(new String(baos.toByteArray()));
          }
          catch(IOException e)
          {  

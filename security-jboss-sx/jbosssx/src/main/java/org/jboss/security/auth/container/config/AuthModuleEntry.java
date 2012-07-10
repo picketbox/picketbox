@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.auth.login.LoginModuleStackHolder;
 import org.jboss.security.config.ControlFlag;
 import org.jboss.security.config.ModuleOption;
@@ -73,9 +73,7 @@ public class AuthModuleEntry
    public void addOption(ModuleOption option)
    { 
       if(option == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Option");
-      if(options == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Options");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("option");
       options.put(option.getName(), option.getValue());
    }
    
@@ -89,8 +87,10 @@ public class AuthModuleEntry
    }
    
    public void setOptions(Map<String,Object> options)
-   { 
-      this.options = options;
+   {
+      if (options == null)
+          throw PicketBoxMessages.MESSAGES.invalidNullArgument("options");
+        this.options = options;
    }
    
    /**
@@ -113,7 +113,7 @@ public class AuthModuleEntry
    public void setLoginModuleStackHolder(LoginModuleStackHolder loginModuleStackHolder)
    {
       if(loginModuleStackHolder == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "loginModuleStackHolder");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("loginModuleStackHolder");
       this.loginModuleStackHolder = loginModuleStackHolder;
       this.loginModuleStackHolderName = this.loginModuleStackHolder.getName();
    }
@@ -126,8 +126,8 @@ public class AuthModuleEntry
    public void setLoginModuleStackHolderName(String loginModuleStackHolderName)
    {
       if(loginModuleStackHolderName == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "loginModuleStackHolder");
-      this.loginModuleStackHolderName = loginModuleStackHolderName;
+          throw PicketBoxMessages.MESSAGES.invalidNullArgument("loginModuleStackHolderName");
+       this.loginModuleStackHolderName = loginModuleStackHolderName;
    }
 
    public ControlFlag getControlFlag()

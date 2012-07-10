@@ -23,7 +23,6 @@ package org.jboss.security.auth.callback;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -42,8 +41,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  * <p>
@@ -106,9 +105,6 @@ import org.jboss.security.ErrorCodes;
  */
 public class LdapCallbackHandler extends AbstractCallbackHandler implements CallbackHandler 
 {
-	protected static Logger log = Logger.getLogger(LdapCallbackHandler.class);
-	protected boolean trace = log.isTraceEnabled();
-
 	private static final String PASSWORD_ATTRIBUTE_ID = "passwordAttributeID";
 
 	private static final String BIND_DN = "bindDN";
@@ -129,25 +125,11 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 
 	protected String bindCredential;
 
-	protected String baseDN;
-
-	protected String baseFilter; 
-
 	protected String passwordAttributeID = "userPassword";
  
-	protected int recursion = 0;
-
 	protected int searchTimeLimit = 10000;
 
-	protected int searchScope = SearchControls.SUBTREE_SCOPE; 
-
 	protected String distinguishedNameAttribute;
-
-	protected boolean parseUsername;
-
-	protected String usernameBeginString;
-
-	protected String usernameEndString;
 
 	// simple flag to indicate is the validatePassword method was called
 	protected boolean isPasswordValidated = false;
@@ -238,15 +220,13 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 			}
 			catch (NumberFormatException e)
 			{
-				if (trace)
-					log.trace("Failed to parse: " + timeLimit + ", using searchTimeLimit=" + searchTimeLimit, e);
 			}
 		}
 		if(searchTimeLimit == 0)
 			searchTimeLimit = 10000;
 
-		String baseDN = (String) options.get(BASE_CTX_DN); 
-		String baseFilter = (String) options.get(BASE_FILTER_OPT);
+		String baseDN = options.get(BASE_CTX_DN);
+		String baseFilter = options.get(BASE_FILTER_OPT);
 
 		SearchControls constraints = new SearchControls();
 		constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -260,20 +240,20 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		try
 		{
 			if(baseDN == null)
-				throw new NamingException(ErrorCodes.NULL_VALUE + BASE_CTX_DN + " is null");
+				throw PicketBoxMessages.MESSAGES.invalidNullBaseContextDN();
 			results = ctx.search(baseDN, baseFilter, filterArgs, constraints);
 			if (results.hasMore() == false)
 			{
 				safeClose(results);
-				throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Search of baseDN(" + baseDN + ") found no matches");
-			} 
+				throw PicketBoxMessages.MESSAGES.failedToFindBaseContextDN(baseDN);
+			}
 			SearchResult sr = results.next();
 			String name = sr.getName();
 			String userDN = null;
 			if (sr.isRelative() == true)
 				userDN = name + "," + baseDN;
 			else
-				throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
+				throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);;
 
 			safeClose(results);
 
@@ -284,7 +264,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 			{
 				while (results.hasMore())
 				{
-					sr = (SearchResult) results.next(); 
+					sr = results.next();
 					Attributes attributes = sr.getAttributes();
 					NamingEnumeration<? extends javax.naming.directory.Attribute> ne = attributes.getAll();
 
@@ -309,10 +289,8 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		}
 		catch(NamingException ne)
 		{
-			log.error(ne);
-			return;
-		} 
-		results = null;
+			PicketBoxLogger.LOGGER.error(ne);
+		}
 	}
 	
 	protected void verifyPassword( VerifyPasswordCallback vpc) throws NamingException
@@ -323,8 +301,8 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		if (currentTCCL != null)
 			SecurityActions.setContextClassLoader(null);
 
-		String  baseDN = (String) options.get(BASE_CTX_DN);
-		String  baseFilter = (String) options.get(BASE_FILTER_OPT);
+		String  baseDN = options.get(BASE_CTX_DN);
+		String  baseFilter = options.get(BASE_FILTER_OPT);
 
 		InitialLdapContext ctx= this.constructInitialLdapContext(bindDN, bindCredential);
 		bindDNAuthentication(ctx, userName, credential, baseDN, baseFilter);
@@ -333,18 +311,17 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 	
 	protected String getBindDN()
 	{
-		String bindDN = (String) options.get(BIND_DN);
+		String bindDN = options.get(BIND_DN);
 		if(bindDN == null || bindDN.length() == 0)
 		{
-			if(trace)
-				log.trace("bindDN is not found");
+			PicketBoxLogger.LOGGER.traceBindDNNotFound();
 		}
 		return bindDN;
 	}
 	
 	protected String getBindCredential()
 	{
-		String bindCredential = (String) options.get(BIND_CREDENTIAL);
+		String bindCredential = options.get(BIND_CREDENTIAL);
 		if (bindCredential.startsWith("{EXT}"))
 		{
 			try
@@ -353,10 +330,10 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 			}
 			catch (Exception e1)
 			{
-				log.error("Exception in decrypting bindCredential:",e1);
+				PicketBoxLogger.LOGGER.errorDecryptingBindCredential(e1);
 			}			
 		}
-		String securityDomain = (String) options.get(SECURITY_DOMAIN_OPT);
+		String securityDomain = options.get(SECURITY_DOMAIN_OPT);
 		if (securityDomain != null)
 		{
 			try
@@ -367,7 +344,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 			} 
 			catch (Exception e)
 			{
-				log.error("Exception in decrypting bindCredential:",e);
+				PicketBoxLogger.LOGGER.errorDecryptingBindCredential(e);
 			}
 		}
 		return bindCredential;
@@ -375,7 +352,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 	
 	protected void setPasswordCallbackValue(Object thePass, PasswordCallback passwdCallback)
 	{ 
-		String tmp = null;
+		String tmp;
 		if(thePass instanceof String)
 		{
 		    tmp = (String) thePass;
@@ -392,17 +369,15 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		} 
 		else
 		{
-			throw new RuntimeException(ErrorCodes.WRONG_TYPE + "password type:" + thePass.getClass());
+			throw PicketBoxMessages.MESSAGES.invalidPasswordType(thePass != null ? thePass.getClass() : null);
 		}
 	}
 	
 	private InitialLdapContext constructInitialLdapContext(String dn, Object credential) throws NamingException
 	{
 		Properties env = new Properties();
-		Iterator<Entry<String, String>> iter = options.entrySet().iterator();
-		while (iter.hasNext())
+		for (Entry<String, String> entry : options.entrySet())
 		{
-			Entry<String, String> entry = iter.next();
 			env.put(entry.getKey(), entry.getValue());
 		}
 
@@ -417,13 +392,13 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		if (authType == null)
 			env.setProperty(Context.SECURITY_AUTHENTICATION, "simple");
 		String protocol = env.getProperty(Context.SECURITY_PROTOCOL);
-		String providerURL = (String) options.get(Context.PROVIDER_URL);
+		String providerURL = options.get(Context.PROVIDER_URL);
 		if (providerURL == null)
 			providerURL = "ldap://localhost:" + ((protocol != null && protocol.equals("ssl")) ? "636" : "389");
 
 		env.setProperty(Context.PROVIDER_URL, providerURL);
 		
-		distinguishedNameAttribute = (String) options.get(DISTINGUISHED_NAME_ATTRIBUTE_OPT);
+		distinguishedNameAttribute = options.get(DISTINGUISHED_NAME_ATTRIBUTE_OPT);
 	      if (distinguishedNameAttribute == null)
 	          distinguishedNameAttribute = "distinguishedName";
 
@@ -433,8 +408,8 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 			env.setProperty(Context.SECURITY_PRINCIPAL, dn);
 		if (credential != null)
 			env.put(Context.SECURITY_CREDENTIALS, credential);
-		traceLdapEnv(env);
-		return new InitialLdapContext(env, null);
+        PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(env);
+        return new InitialLdapContext(env, null);
 	}
 	
 	/**
@@ -463,7 +438,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
       if (results.hasMore() == false)
       {
          results.close();
-         throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Search of baseDN(" + baseDN + ") found no matches");
+         throw PicketBoxMessages.MESSAGES.failedToFindBaseContextDN(baseDN);
       }
 
       SearchResult sr = (SearchResult) results.next();
@@ -481,9 +456,9 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
       if (userDN == null)
       {
           if (sr.isRelative() == true)
-                  userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
+              userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
           else
-                  throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
+              throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);
       }
 
       safeClose(results);
@@ -495,17 +470,6 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
       return userDN;
    }
 
-	private void traceLdapEnv(Properties env)
-	{
-		if (trace)
-		{
-			Properties tmp = new Properties();
-			tmp.putAll(env);
-			tmp.setProperty(Context.SECURITY_CREDENTIALS, "***");
-			log.trace("Logging into LDAP server, env=" + tmp.toString());
-		}
-	}
-	
 	@SuppressWarnings("rawtypes")
 	protected void safeClose(NamingEnumeration results)
 	{

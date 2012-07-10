@@ -24,6 +24,8 @@ package org.jboss.security.plugins;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 
+import org.jboss.security.PicketBoxMessages;
+
 /** Read a password from the System.in stream. This may be used as a
  password accessor in conjunction with the JaasSecurityDomain
  {CLASS}org.jboss.security.plugins.ConsolePassword
@@ -41,7 +43,7 @@ public class ConsolePassword
    public char[] toCharArray()
       throws IOException
    {
-      System.err.print("Enter password: ");
+      System.err.print(PicketBoxMessages.MESSAGES.enterPasswordMessage());
       CharArrayWriter writer = new CharArrayWriter();
       int b;
       while( (b = System.in.read()) >= 0 )

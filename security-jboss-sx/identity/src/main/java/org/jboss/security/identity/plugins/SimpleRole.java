@@ -115,7 +115,8 @@ public class SimpleRole implements Role, Cloneable
       if (obj instanceof SimpleRole)
       {
          SimpleRole other = SimpleRole.class.cast(obj);
-         return parent != null ? (roleName.equals(other.roleName) && parent.equals(other.parent)) : (roleName.equals(other.roleName) && other.parent == null);
+         return parent != null ? (roleName.equals(other.roleName) && parent.equals(other.parent)) :
+                 (roleName.equals(other.roleName) && other.parent == null);
       }
       return false;
    }

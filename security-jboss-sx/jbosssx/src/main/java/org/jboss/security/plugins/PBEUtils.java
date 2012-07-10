@@ -28,6 +28,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
 import org.jboss.security.Base64Utils;
+import org.jboss.security.PicketBoxMessages;
 
 /** Ecrypt a password using the JaasSecurityDomain password
  Usage: PBEUtils salt count domain-password password
@@ -85,16 +86,7 @@ public class PBEUtils
    {
       if( args.length != 4 )
       {
-         System.err.println(
-           "Ecrypt a password using the JaasSecurityDomain password"
-          +"Usage: PBEUtils salt count domain-password password"
-          +"salt : the Salt attribute from the JaasSecurityDomain"
-          +"count : the IterationCount attribute from the JaasSecurityDomain"
-          +"domain-password : the plaintext password that maps to the KeyStorePass"
-          +"  attribute from the JaasSecurityDomain"
-          +"password : the plaintext password that should be encrypted with the"
-          +"  JaasSecurityDomain password"
-         );
+         System.err.println(PicketBoxMessages.MESSAGES.pbeUtilsMessage());
       }
 
       byte[] salt = args[0].substring(0, 8).getBytes();

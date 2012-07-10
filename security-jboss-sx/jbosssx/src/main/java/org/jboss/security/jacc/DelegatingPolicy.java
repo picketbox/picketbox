@@ -24,11 +24,9 @@ package org.jboss.security.jacc;
 import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
-import java.security.Permissions;
 import java.security.Policy;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.security.jacc.EJBMethodPermission;
@@ -40,9 +38,9 @@ import javax.security.jacc.WebResourcePermission;
 import javax.security.jacc.WebRoleRefPermission;
 import javax.security.jacc.WebUserDataPermission;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
- 
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
+
 /**
  * A JAAC Policy provider implementation that delegates any non-JACC permissions
  * to the java.security.Policy either passed in to the ctor, or the pre existing
@@ -52,7 +50,6 @@ import org.jboss.security.ErrorCodes;
  */
 public class DelegatingPolicy extends Policy
 {
-   private static Logger log = Logger.getLogger(DelegatingPolicy.class);
    private static DelegatingPolicy instance;
 
    /**
@@ -69,10 +66,6 @@ public class DelegatingPolicy extends Policy
     * state and should be excluded from the active permission set.
     */ 
    private ConcurrentHashMap<String,ContextPolicy> openPolicies = new ConcurrentHashMap<String,ContextPolicy>(); 
-   /**
-    * Flag indicating if our category is at trace level for logging
-    */
-   private boolean trace;
    /**
     * The Policy proxy returned via the PolicyProxy attribute
     */
@@ -103,7 +96,6 @@ public class DelegatingPolicy extends Policy
       if (delegate == null)
          delegate = Policy.getPolicy();
       this.delegate = delegate;
-      this.trace = log.isTraceEnabled();
       if (instance == null)
          instance = this;
       /* When run with a security manager the act of class loading can trigger
@@ -124,12 +116,8 @@ public class DelegatingPolicy extends Policy
          || permission instanceof WebResourcePermission
          || permission instanceof WebRoleRefPermission
          || permission instanceof WebUserDataPermission);
-      if (trace)
-         log.trace("Loaded JACC permissions: " + loadedPerms);
       // Load PolicyContext as this also can trigger permission checks in implies
       Class<?> c = PolicyContext.class;
-      if(trace)
-         log.trace("loaded policy context class"+c);
    }
 
    public Class<?>[] getExternalPermissionTypes()
@@ -186,16 +174,13 @@ public class DelegatingPolicy extends Policy
       else
       { 
          String contextID = PolicyContext.getContextID();
-         ContextPolicy contextPolicy = (ContextPolicy) activePolicies.get(contextID);
+         ContextPolicy contextPolicy = activePolicies.get(contextID);
          if (contextPolicy != null)
             implied = contextPolicy.implies(domain, permission);
-         else if (trace)
-            log.trace("No PolicyContext found for contextID=" + contextID);
+         else
+            PicketBoxLogger.LOGGER.traceNoPolicyContextForId(contextID);
       }
-      if (trace)
-      {
-         log.trace("implied=" + implied);
-      }
+      PicketBoxLogger.LOGGER.debugImpliesResult(implied);
       return implied;
    }
 
@@ -218,7 +203,7 @@ public class DelegatingPolicy extends Policy
       }
       else
       {
-         ContextPolicy policy = (ContextPolicy) activePolicies.get(contextID);
+         ContextPolicy policy = activePolicies.get(contextID);
          if (policy != null)
          {
             pc = policy.getPermissions();
@@ -258,43 +243,12 @@ public class DelegatingPolicy extends Policy
 
    // Policy configuration methods used by the PolicyConfiguration impl
 
-   /**
-    * Access the current ContextPolicy instances
-    * @return Map<String, ContextPolicy> of the contextID to policy mappings
-    */
-   public String listContextPolicies()
-   {
-      StringBuffer tmp = new StringBuffer("<ActiveContextPolicies>");
-      Iterator<String> iter = activePolicies.keySet().iterator();
-      while (iter.hasNext())
-      {
-         String contextID = (String) iter.next();
-         ContextPolicy cp = (ContextPolicy) activePolicies.get(contextID);
-         tmp.append(cp);
-         tmp.append('\n');
-      }
-      tmp.append("</ActiveContextPolicies>");
-
-      tmp.append("<OpenContextPolicies>");
-      iter = openPolicies.keySet().iterator();
-      while (iter.hasNext())
-      {
-         String contextID = (String) iter.next();
-         ContextPolicy cp = (ContextPolicy) openPolicies.get(contextID);
-         tmp.append(cp);
-         tmp.append('\n');
-      }
-      tmp.append("</OpenContextPolicies>");
-
-      return tmp.toString();
-   }
-
    synchronized ContextPolicy getContextPolicy(String contextID)
       throws PolicyContextException
    {
-      ContextPolicy policy = (ContextPolicy) openPolicies.get(contextID);
+      ContextPolicy policy = openPolicies.get(contextID);
       if (policy == null)
-         throw new PolicyContextException(ErrorCodes.NULL_VALUE + "No ContextPolicy exists for contextID=" + contextID);
+         throw new PolicyContextException(PicketBoxMessages.MESSAGES.noPolicyContextForIdMessage(contextID));
       return policy;
    }
 
@@ -310,9 +264,9 @@ public class DelegatingPolicy extends Policy
       throws PolicyContextException
    {
       // Remove from the active policy map
-      ContextPolicy policy = (ContextPolicy) activePolicies.remove(contextID);
+      ContextPolicy policy = activePolicies.remove(contextID);
       if( policy == null )
-         policy = (ContextPolicy) openPolicies.get(contextID);
+         policy = openPolicies.get(contextID);
       if (policy == null)
       {
          policy = new ContextPolicy(contextID);
@@ -393,9 +347,9 @@ public class DelegatingPolicy extends Policy
    public void delete(String contextID)
       throws PolicyContextException
    {
-      ContextPolicy policy = (ContextPolicy) activePolicies.remove(contextID);
+      ContextPolicy policy = activePolicies.remove(contextID);
       if( policy == null )
-         policy = (ContextPolicy) openPolicies.remove(contextID);
+         policy = openPolicies.remove(contextID);
       if( policy != null )
          policy.delete();
    }
@@ -422,16 +376,6 @@ public class DelegatingPolicy extends Policy
    }
    
    //Methods used by subclasses
-   protected Permissions getPermissionsForRole(String role) throws PolicyContextException
-   {
-      Permissions perms = null;
-      String contextID = PolicyContext.getContextID();
-      ContextPolicy contextPolicy = (ContextPolicy) activePolicies.get(contextID);
-      if (contextPolicy != null)  
-         perms = contextPolicy.getPermissionsForRole(role);
-      return perms;
-   }
-
    /**
     * This proxy wrapper restricts the visible methods to only those from the
     * Policy base class.

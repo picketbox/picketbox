@@ -29,9 +29,9 @@ import java.util.Set;
 
 import javax.security.auth.Subject;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.AnybodyPrincipal;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.RunAs;
 import org.jboss.security.RunAsIdentity;
 import org.jboss.security.authorization.AuthorizationContext;
@@ -72,27 +72,21 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
    
    protected boolean ejbRestrictions = false;
    
-   public EJBPolicyModuleDelegate()
-   {
-      log = Logger.getLogger(getClass());
-      trace = log.isTraceEnabled();
-   }
-   
    /**
-    * @see AuthorizationModuleDelegate#authorize(Resource)
+    * @see AuthorizationModuleDelegate#authorize(org.jboss.security.authorization.Resource, javax.security.auth.Subject, org.jboss.security.identity.RoleGroup)
     */
    public int authorize(Resource resource, Subject callerSubject, RoleGroup role)
    {
       if(resource instanceof EJBResource == false)
-         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "resource is not an EJBResource");
-      
+         throw PicketBoxMessages.MESSAGES.invalidType(EJBResource.class.getName());
+
       EJBResource ejbResource = (EJBResource) resource;
       
       //Get the context map
       Map<String,Object> map = resource.getMap();
       if(map == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Map from the Resource is null"); 
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("resourceMap");
+
       this.policyRegistration = (PolicyRegistration) map.get(ResourceKeys.POLICY_REGISTRATION);
       
       this.roleName = (String)map.get(ResourceKeys.ROLENAME);
@@ -116,32 +110,24 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
    //Private Methods
    /**
     * Process the request
-    * @param request
-    * @param sc
+    * @param principalRole
     * @return
     */
    private int process(RoleGroup principalRole)
    {             
       boolean allowed = true;
-      
-      //Get the method permissions  
+
+       if(this.ejbMethod == null)
+           throw PicketBoxMessages.MESSAGES.invalidNullProperty("ejbMethod");
+
+       //Get the method permissions
       if (methodRoles == null)
       {
-         if(this.ejbMethod == null)
-            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "ejbMethod is null");
          String method = this.ejbMethod.getName();
-         String msg = "No method permissions assigned to method=" + method
-            + ", interface=" + methodInterface;
-         if(trace)
-            log.trace("Exception:"+msg); 
-         
-         return AuthorizationContext.DENY; 
+         PicketBoxLogger.LOGGER.traceNoMethodPermissions(method, methodInterface);
+         return AuthorizationContext.DENY;
       }
-      else if (trace)
-      {
-         log.trace("method=" + this.ejbMethod + ", interface=" + this.methodInterface
-            + ", requiredRoles=" + methodRoles);
-      }
+      PicketBoxLogger.LOGGER.debugEJBPolicyModuleDelegateState(ejbMethod.getName(), this.methodInterface, this.methodRoles.toString());
 
       // Check if the caller is allowed to access the method
       if(methodRoles.containsAll(ANYBODY_ROLE) == false) 
@@ -153,20 +139,13 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
             
             // Now actually check if the current caller has one of the required method roles
             if(principalRole == null)
-               throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Principal Role is null");
+               throw PicketBoxMessages.MESSAGES.invalidNullProperty("principalRole");
             if(methodRoles.containsAtleastOneRole(principalRole) == false)
             {
-               if(this.ejbMethod == null)
-                  throw new IllegalStateException(ErrorCodes.NULL_VALUE + "ejbMethod is null");
-               
                //Set<Principal> userRoles = am.getUserRoles(ejbPrincipal);
-               String method = this.ejbMethod.getName(); 
-               String msg = "Insufficient method permissions, principal=" + ejbPrincipal
-                  + ", ejbName=" + this.ejbName
-                  + ", method=" + method + ", interface=" + this.methodInterface
-                  + ", requiredRoles=" + methodRoles + ", principalRoles=" + principalRole;
-               if(trace)
-                  log.trace("Exception:"+msg); 
+               String method = this.ejbMethod.getName();
+               PicketBoxLogger.LOGGER.debugInsufficientMethodPermissions(this.ejbPrincipal, this.ejbName, method,
+                       this.methodInterface, this.methodRoles.toString(), principalRole.toString(), null);
                allowed = false;
             } 
          }
@@ -182,14 +161,9 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
                // Check that the run-as role is in the set of method roles
                if(srg.containsAtleastOneRole(methodRoles) == false)
                {
-                  String method = this.ejbMethod.getName(); 
-                  String msg = "Insufficient method permissions, principal=" + ejbPrincipal
-                  + ", ejbName=" + this.ejbName
-                  + ", method=" + method + ", interface=" + this.methodInterface
-                  + ", requiredRoles=" + methodRoles + ", runAsRoles=" 
-                  + callerRunAsIdentity.getRunAsRoles();
-                  if(trace)
-                     log.trace("Exception:"+msg); 
+                  String method = this.ejbMethod.getName();
+                  PicketBoxLogger.LOGGER.debugInsufficientMethodPermissions(this.ejbPrincipal, this.ejbName, method,
+                          this.methodInterface, this.methodRoles.toString(), null, callerRunAsIdentity.getRunAsRoles().toString());
                   allowed = false;
                }           
             }
@@ -205,8 +179,6 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
       //Check the caller of this beans run-as identity 
       if (ejbPrincipal == null && callerRunAs == null)
       {
-         if(trace)
-            log.trace("ejbPrincipal = null,callerRunAsIdentity = null => DENY" );
          return AuthorizationContext.DENY;
       } 
 
@@ -237,13 +209,7 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
          // which will throw an exception in case no matching
          // security ref is found.
          if(this.ejbRestrictions)
-            throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "No matching role found in the deployment descriptor"+
-                  " for "+this.roleName);
-         else
-         {
-            log.trace("no match found for security role " + roleName +
-                  " in the deployment descriptor for ejb " + this.ejbName); 
-         }
+            throw PicketBoxMessages.MESSAGES.noMatchingRoleFoundInDescriptor(this.roleName);
       }
  
       Role deploymentrole = new SimpleRole(roleName);

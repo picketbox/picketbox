@@ -14,6 +14,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.SecurityUtil;
 import org.jboss.security.audit.AuditContext;
 import org.jboss.security.audit.AuditEvent;
@@ -35,8 +36,6 @@ import org.jboss.security.plugins.ClassLoaderLocatorFactory;
  */ 
 public class JBossAuditManager implements AuditManager
 {
-   private static Logger log = Logger.getLogger(JBossAuditManager.class);
-   
    private static ConcurrentHashMap<String,AuditContext> contexts = new ConcurrentHashMap<String,AuditContext>();
    
    private static AuditContext defaultContext = null;
@@ -84,9 +83,7 @@ public class JBossAuditManager implements AuditManager
       }
       if(ac == null)
       {
-         if(log.isTraceEnabled())
-            log.trace("No audit Context found for "+securityDomain+" ; defaulting to"
-                  + " audit context for other");
+         PicketBoxLogger.LOGGER.traceNoAuditContextFoundForDomain(securityDomain);
          ac = defaultContext;
       }
       return ac;

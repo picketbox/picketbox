@@ -26,7 +26,6 @@ import java.security.Principal;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.ErrorCodes;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.SecurityContextFactory;
@@ -56,7 +55,7 @@ public class JBossSecurityClient extends SecurityClient
    @Override
    protected void peformSASLLogin()
    {
-     throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED + "Not Implemented");
+     throw new UnsupportedOperationException();
    }
 
    @Override

@@ -37,8 +37,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.NestableGroup;
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.SimplePrincipal;
@@ -96,9 +96,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
    protected CallbackHandler callbackHandler; 
    protected Map sharedState; 
    protected Map options;
-   protected Logger log;
-   protected boolean trace = false;
-   
+
    /** Flag indicating if the shared credential should be used */
    protected boolean useFirstPass;
    /** Flag indicating if the login phase succeeded. Subclasses that override
@@ -139,18 +137,9 @@ public abstract class AbstractServerLoginModule implements LoginModule
       this.callbackHandler = callbackHandler;
       this.sharedState = sharedState;
       this.options = options;
-      log = Logger.getLogger(getClass());
-      trace = log.isTraceEnabled();
-      
-      if(trace)
-      {
-         log.trace("initialize");
 
-         //log securityDomain, if set.
-         log.trace("Security domain: " + 
-           (String)options.get(SecurityConstants.SECURITY_DOMAIN_OPTION));         
-      }
-	  
+      PicketBoxLogger.LOGGER.traceBeginInitialize();
+
       // if the set is null, the subclass did not implement checking for valid options, so skip altogether to avoid false alarms
       if (validOptions != null)
       {
@@ -176,12 +165,11 @@ public abstract class AbstractServerLoginModule implements LoginModule
          try
          {
             unauthenticatedIdentity = createIdentity(name);
-            if(trace)
-               log.trace("Saw unauthenticatedIdentity="+name);
+            PicketBoxLogger.LOGGER.traceUnauthenticatedIdentity(name);
          }
          catch(Exception e)
          {
-            log.warn("Failed to create custom unauthenticatedIdentity", e);
+            PicketBoxLogger.LOGGER.warnFailureToCreateUnauthIdentity(e);
          }
       }
    }
@@ -197,8 +185,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
     */
    public boolean login() throws LoginException
    {
-      if(trace)
-         log.trace("login");
+      PicketBoxLogger.LOGGER.traceBeginLogin();
       loginOk = false;
       // If useFirstPass is true, look for the shared password
       if( useFirstPass == true )
@@ -216,7 +203,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
          }
          catch(Exception e)
          {   // Dump the exception and continue
-            log.error("login failed", e);
+            PicketBoxLogger.LOGGER.errorDuringLogin(e);
          }
       }
       return false;
@@ -234,8 +221,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
     */
    public boolean commit() throws LoginException
    {
-      if(trace)
-         log.trace("commit, loginOk="+loginOk);
+      PicketBoxLogger.LOGGER.traceBeginCommit(loginOk);
       if( loginOk == false )
          return false;
 
@@ -282,8 +268,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
     */
    public boolean abort() throws LoginException
    {
-      if(trace)
-         log.trace("abort");
+      PicketBoxLogger.LOGGER.traceBeginAbort();
       return true;
    }
    
@@ -292,8 +277,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
     */
    public boolean logout() throws LoginException
    {
-      if(trace)
-         log.trace("logout");
+      PicketBoxLogger.LOGGER.traceBeginLogout();
       // Remove the user identity
       Principal identity = getIdentity();
       Set<Principal> principals = subject.getPrincipals();
@@ -430,9 +414,9 @@ public abstract class AbstractServerLoginModule implements LoginModule
    {
       for (Object key : options.keySet())
       {
-         if (!validOptions.contains((String)key))
+         if (!validOptions.contains(key))
          {
-            log.warn("Invalid or misspelled option: " + key);
+            PicketBoxLogger.LOGGER.warnInvalidModuleOption((String)key);
          }
       }
    }

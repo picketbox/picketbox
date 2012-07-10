@@ -37,7 +37,6 @@ import javax.security.auth.login.LoginException;
 import javax.security.jacc.PolicyContext;
 import javax.security.jacc.PolicyContextException;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
@@ -51,8 +50,6 @@ import org.jboss.security.SecurityContextFactory;
  */
 class SubjectActions
 {
-   private static Logger log = Logger.getLogger(SubjectActions.class);
-   
    private static class ToStringSubjectAction implements PrivilegedAction<String>
    {
       Subject subject;
@@ -94,8 +91,6 @@ class SubjectActions
          }
          catch(PolicyContextException pce)
          {
-            if(log.isTraceEnabled())
-               log.trace("Error obtaining subject:", pce);
             SecurityContext sc = getSecurityContext();
             subject = sc.getUtil().getSubject();
          }
@@ -318,7 +313,7 @@ class SubjectActions
 
    static Subject getActiveSubject()
    {
-      Subject subject = (Subject) AccessController.doPrivileged(GetSubjectAction.ACTION);
+      Subject subject = AccessController.doPrivileged(GetSubjectAction.ACTION);
       return subject;
    }
    static void copySubject(Subject fromSubject, Subject toSubject)
@@ -352,7 +347,7 @@ class SubjectActions
       LoginContextAction action = new LoginContextAction(securityDomain, subject, handler);
       try
       {
-         LoginContext lc = (LoginContext) AccessController.doPrivileged(action);
+         LoginContext lc = AccessController.doPrivileged(action);
          return lc;
       }
       catch(PrivilegedActionException e)
@@ -361,13 +356,13 @@ class SubjectActions
          if( ex instanceof LoginException )
             throw (LoginException) ex;
          else
-            throw new LoginException(ex.getMessage());
+            throw new LoginException(ex.getLocalizedMessage());
       }
    } 
    
    static ClassLoader getContextClassLoader()
    {
-      ClassLoader loader = (ClassLoader) AccessController.doPrivileged(GetTCLAction.ACTION);
+      ClassLoader loader = AccessController.doPrivileged(GetTCLAction.ACTION);
       return loader;
    }
    

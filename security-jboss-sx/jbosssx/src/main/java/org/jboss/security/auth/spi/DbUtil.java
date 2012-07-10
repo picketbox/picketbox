@@ -31,15 +31,14 @@ import java.util.HashMap;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.plugins.TransactionManagerLocator;
 
@@ -59,8 +58,6 @@ class DbUtil
      String rolesQuery, AbstractServerLoginModule aslm, boolean suspendResume)
      throws LoginException
   {
-     Logger log = aslm.log;
-     boolean trace = log.isTraceEnabled();
      Connection conn = null;
      HashMap<String,Group> setsMap = new HashMap<String,Group>();
      PreparedStatement ps = null;
@@ -80,8 +77,8 @@ class DbUtil
            throw new RuntimeException(e1);
         }
         if(tm == null)
-           throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Transaction Manager is null");
-     }      
+           throw PicketBoxMessages.MESSAGES.invalidNullTransactionManager();
+     }
      Transaction tx = null;
      if (suspendResume)
      {
@@ -94,8 +91,6 @@ class DbUtil
         {
            throw new RuntimeException(e);
         }
-        if( trace )
-           log.trace("suspendAnyTransaction");
      }
 
      try
@@ -104,8 +99,7 @@ class DbUtil
         DataSource ds = (DataSource) ctx.lookup(dsJndiName);
         conn = ds.getConnection();
         // Get the user role names
-        if (trace)
-           log.trace("Excuting query: "+rolesQuery+", with username: "+username);
+        PicketBoxLogger.LOGGER.traceExecuteQuery(rolesQuery, username);
         ps = conn.prepareStatement(rolesQuery);
         try
         {
@@ -118,13 +112,9 @@ class DbUtil
         rs = ps.executeQuery();
         if( rs.next() == false )
         {
-           if( trace )
-              log.trace("No roles found");
            if( aslm.getUnauthenticatedIdentity() == null )
-              throw new FailedLoginException(ErrorCodes.PROCESSING_FAILED + "No matching username found in Roles");
-           /* We are running with an unauthenticatedIdentity so create an
-              empty Roles set and return.
-           */
+              throw PicketBoxMessages.MESSAGES.noMatchingUsernameFoundInRoles();
+           /* We are running with an unauthenticatedIdentity so create an empty Roles set and return. */
            Group[] roleSets = { new SimpleGroup("Roles") };
            return roleSets;
         }
@@ -145,25 +135,23 @@ class DbUtil
            try
            {
               Principal p = aslm.createIdentity(name);
-              if( trace )
-                 log.trace("Assign user to role " + name);
               group.addMember(p);
            }
            catch(Exception e)
            {
-              log.debug("Failed to create principal: "+name, e);
+              PicketBoxLogger.LOGGER.debugFailureToCreatePrincipal(name, e);
            }
         } while( rs.next() );
      }
      catch(NamingException ex)
      {
-        LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Error looking up DataSource from: "+dsJndiName);
+        LoginException le = new LoginException(PicketBoxMessages.MESSAGES.failedToLookupDataSourceMessage(dsJndiName));
         le.initCause(ex);
         throw le;
      }
      catch(SQLException ex)
      {
-        LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Query failed");
+        LoginException le = new LoginException(PicketBoxMessages.MESSAGES.failedToProcessQueryMessage());
         le.initCause(ex);
         throw le;
      }
@@ -207,8 +195,6 @@ class DbUtil
            {
               throw new RuntimeException(e);
            }
-           if( trace )
-              log.trace("resumeAnyTransaction");
         }
      }
      

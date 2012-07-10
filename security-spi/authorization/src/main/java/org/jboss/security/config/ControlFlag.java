@@ -19,9 +19,9 @@
   * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
   * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
   */
-package org.jboss.security.config; 
+package org.jboss.security.config;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  *  Control Flag for module entries
@@ -86,6 +86,7 @@ public class ControlFlag
          return SUFFICIENT;
       if("OPTIONAL".equalsIgnoreCase(flag))
          return OPTIONAL;
-      throw new IllegalArgumentException(ErrorCodes.ILLEGAL_ARGUMENT + flag + " is not recognized");
+
+      throw PicketBoxMessages.MESSAGES.invalidControlFlag(flag);
    }
 }

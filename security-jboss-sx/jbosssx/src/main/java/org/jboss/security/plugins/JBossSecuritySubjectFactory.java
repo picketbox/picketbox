@@ -25,10 +25,10 @@ import java.security.Principal;
 
 import javax.security.auth.Subject;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
-import org.jboss.security.ErrorCodes;
 import org.jboss.security.ISecurityManagement;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SubjectFactory;
 import org.jboss.security.auth.callback.JBossCallbackHandler;
@@ -44,8 +44,6 @@ import org.jboss.security.auth.callback.JBossCallbackHandler;
  */
 public class JBossSecuritySubjectFactory implements SubjectFactory
 {
-
-   private static Logger log = Logger.getLogger(JBossSecuritySubjectFactory.class);
 
    private ISecurityManagement securityManagement;
 
@@ -64,7 +62,7 @@ public class JBossSecuritySubjectFactory implements SubjectFactory
    {
       if (securityManagement == null)
       {
-         log.warn("SecurityManagement is not set. Creating a default one");
+         PicketBoxLogger.LOGGER.warnSecurityMagementNotSet();
          securityManagement = new DefaultSecurityManagement(new JBossCallbackHandler());
       }
       Subject subject = new Subject();
@@ -74,10 +72,7 @@ public class JBossSecuritySubjectFactory implements SubjectFactory
       if (authenticationManager == null)
       {
          String defaultSecurityDomain = SecurityConstants.DEFAULT_APPLICATION_POLICY;
-         if (log.isTraceEnabled())
-         {
-            log.trace("AuthenticationManager for " + securityDomainName + " not found. Using " + defaultSecurityDomain);
-         }
+         PicketBoxLogger.LOGGER.debugNullAuthenticationManager(securityDomainName);
          authenticationManager = securityManagement.getAuthenticationManager(defaultSecurityDomain);
       }
       //AS7-1072: we can't have TCCL null or else LoginContext can't find the login modules
@@ -86,7 +81,7 @@ public class JBossSecuritySubjectFactory implements SubjectFactory
       {
          SubjectActions.setContextClassLoader(this.getClass().getClassLoader());
          if (!authenticationManager.isValid(principal, SubjectActions.getCredential(), subject))
-            throw new SecurityException(ErrorCodes.ACCESS_DENIED + "Unauthenticated caller:" + principal);
+            throw new SecurityException(PicketBoxMessages.MESSAGES.authenticationFailedMessage());
       }
       finally
       {

@@ -32,8 +32,8 @@ import java.util.WeakHashMap;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.AuthorizationException;
@@ -47,7 +47,6 @@ import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.AuthorizationInfo;
 import org.jboss.security.config.ControlFlag;
 import org.jboss.security.config.SecurityConfiguration;
-import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.plugins.ClassLoaderLocator;
 import org.jboss.security.plugins.ClassLoaderLocatorFactory;
@@ -72,10 +71,6 @@ import org.jboss.security.plugins.ClassLoaderLocatorFactory;
  */
 public class JBossAuthorizationContext extends AuthorizationContext
 {
-   private static Logger log = Logger.getLogger(JBossAuthorizationContext.class);
-
-   private boolean trace = log.isTraceEnabled();
-
    private final String EJB = SecurityConstants.DEFAULT_EJB_APPLICATION_POLICY;
    private final String WEB = SecurityConstants.DEFAULT_WEB_APPLICATION_POLICY;
 
@@ -106,21 +101,20 @@ public class JBossAuthorizationContext extends AuthorizationContext
 
    /**
     * Inject an ApplicationPolicy that contains AuthorizationInfo
-    * @param aPolicy
+    * @param appPolicy
     * @throws IllegalArgumentException if ApplicationPolicy is null or
     *    does not contain AuthorizationInfo or domain name does not match
     */
-   public void setApplicationPolicy(ApplicationPolicy aPolicy)
+   public void setApplicationPolicy(ApplicationPolicy appPolicy)
    {
-      if (aPolicy == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Application Policy is null:domain=" + this.securityDomainName);
-      AuthorizationInfo authzInfo = aPolicy.getAuthorizationInfo();
+      if (appPolicy == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("appPolicy");
+      AuthorizationInfo authzInfo = appPolicy.getAuthorizationInfo();
       if (authzInfo == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Application Policy has no AuthorizationInfo");
+         throw PicketBoxMessages.MESSAGES.failedToObtainInfoFromAppPolicy("AuthorizationInfo");
       if (!authzInfo.getName().equals(securityDomainName))
-         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "Application Policy ->AuthorizationInfo:" + authzInfo.getName()
-               + " does not match required domain name=" + this.securityDomainName);
-      this.applicationPolicy = aPolicy;
+         throw PicketBoxMessages.MESSAGES.unexpectedSecurityDomainInInfo("AuthorizationInfo", this.securityDomainName);
+      this.applicationPolicy = appPolicy;
    }
 
    /**
@@ -136,7 +130,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
    }
 
    /**
-    * @see AuthorizationContext#authorize(Resource, Role)
+    * @see AuthorizationContext#authorize(org.jboss.security.authorization.Resource, javax.security.auth.Subject, org.jboss.security.identity.RoleGroup)
     */
    public int authorize(final Resource resource, final Subject subject, final RoleGroup callerRoles)
          throws AuthorizationException
@@ -160,7 +154,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
                if (result == DENY)
                {
                   invokeAbort( modules, controlFlags );
-                  throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Denied");
+                  throw new AuthorizationException(PicketBoxMessages.MESSAGES.authorizationFailedMessage());
                }
                return null;
             }
@@ -169,8 +163,6 @@ public class JBossAuthorizationContext extends AuthorizationContext
       catch (PrivilegedActionException e)
       {
          Exception exc = e.getException();
-         if (trace)
-            log.trace("Error in authorize:", exc);
          invokeAbort( modules, controlFlags );
          throw ((AuthorizationException) exc);
       }
@@ -190,8 +182,8 @@ public class JBossAuthorizationContext extends AuthorizationContext
    {
       AuthorizationInfo authzInfo = getAuthorizationInfo(securityDomainName, resource);
       if (authzInfo == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Authorization Info is null");
-      
+         throw PicketBoxMessages.MESSAGES.failedToObtainAuthorizationInfo(securityDomainName);
+
       ClassLoader moduleCL = null;
       String jbossModuleName = authzInfo.getJBossModuleName();
       if(jbossModuleName != null)
@@ -210,12 +202,8 @@ public class JBossAuthorizationContext extends AuthorizationContext
     	  ControlFlag flag = entry.getControlFlag();
     	  if (flag == null)
     	  {
-    		  if (trace)
-    			  log.trace("Null Control flag for entry:" + entry + ". Defaults to REQUIRED!");
     		  flag = ControlFlag.REQUIRED;
     	  }
-    	  else if (trace)
-    		  log.trace("Control flag for entry:" + entry + "is:[" + flag + "]");
 
     	  controlFlags.add(flag);
     	  AuthorizationModule module = instantiateModule(moduleCL, entry.getPolicyModuleName(), entry.getOptions(), role); 
@@ -235,8 +223,8 @@ public class JBossAuthorizationContext extends AuthorizationContext
       int length = modules.size();
       for (int i = 0; i < length; i++)
       {
-         AuthorizationModule module = (AuthorizationModule) modules.get(i);
-         ControlFlag flag = (ControlFlag) controlFlags.get(i);
+         AuthorizationModule module = modules.get(i);
+         ControlFlag flag = controlFlags.get(i);
          int decision = DENY;
          try
          {
@@ -261,18 +249,16 @@ public class JBossAuthorizationContext extends AuthorizationContext
          //REQUISITE case
          if (flag == ControlFlag.REQUISITE)
          {
-            if (trace)
-               log.trace("REQUISITE failed for " + module);
+            PicketBoxLogger.LOGGER.debugRequisiteModuleFailure(module.getClass().getName());
             if (moduleException == null)
-               moduleException = new AuthorizationException("Authorization failed");
+               moduleException = new AuthorizationException(PicketBoxMessages.MESSAGES.authorizationFailedMessage());
             else
                throw moduleException;
          }
          //REQUIRED Case
          if (flag == ControlFlag.REQUIRED)
          {
-            if (trace)
-               log.trace("REQUIRED failed for " + module);
+            PicketBoxLogger.LOGGER.debugRequiredModuleFailure(module.getClass().getName());
             if (encounteredRequiredError == false)
                encounteredRequiredError = true;
          }
@@ -283,11 +269,11 @@ public class JBossAuthorizationContext extends AuthorizationContext
       //All the authorization modules have been visited.
       String msg = getAdditionalErrorMessage(moduleException);
       if (encounteredRequiredError)
-         throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Authorization Failed:" + msg);
+         throw new AuthorizationException(PicketBoxMessages.MESSAGES.authorizationFailedMessage() + msg);
       if (overallDecision == DENY && encounteredOptionalError)
-         throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Authorization Failed:" + msg);
+         throw new AuthorizationException(PicketBoxMessages.MESSAGES.authorizationFailedMessage() + msg);
       if (overallDecision == DENY)
-         throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "Authorization Failed:Denied.");
+         throw new AuthorizationException(PicketBoxMessages.MESSAGES.authorizationFailedMessage());
       return PERMIT;
    }
 
@@ -297,10 +283,10 @@ public class JBossAuthorizationContext extends AuthorizationContext
       int length = modules.size();
       for (int i = 0; i < length; i++)
       {
-         AuthorizationModule module = (AuthorizationModule) modules.get(i);
+         AuthorizationModule module = modules.get(i);
          boolean bool = module.commit();
          if (!bool)
-            throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "commit on modules failed:" + module.getClass());
+            throw new AuthorizationException(PicketBoxMessages.MESSAGES.moduleCommitFailedMessage());
       }
    }
 
@@ -310,10 +296,10 @@ public class JBossAuthorizationContext extends AuthorizationContext
       int length = modules.size();
       for (int i = 0; i < length; i++)
       {
-         AuthorizationModule module = (AuthorizationModule) modules.get(i);
+         AuthorizationModule module = modules.get(i);
          boolean bool = module.abort();
          if (!bool)
-            throw new AuthorizationException(ErrorCodes.ACCESS_DENIED + "abort on modules failed:" + module.getClass());
+            throw new AuthorizationException(PicketBoxMessages.MESSAGES.moduleAbortFailedMessage());
       }
    }
 
@@ -346,11 +332,10 @@ public class JBossAuthorizationContext extends AuthorizationContext
       }
       catch (Exception e)
       {
-         if (trace)
-            log.debug("Error instantiating AuthorizationModule:", e);
+         PicketBoxLogger.LOGGER.debugFailureToInstantiateClass(name, e);
       }
       if (am == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "AuthorizationModule has not " + "been instantiated");
+         throw new IllegalStateException(PicketBoxMessages.MESSAGES.failedToInstantiateClassMessage(AuthorizationModule.class));
       am.initialize(this.authenticatedSubject, this.callbackHandler, this.sharedState, map, subjectRoles);
       return am;
    }
@@ -367,16 +352,13 @@ public class JBossAuthorizationContext extends AuthorizationContext
 
       if (aPolicy == null)
       {
-         if (trace)
-            log.trace("Application Policy not obtained for domain=" + domainName
-                  + ". Trying to obtain the App policy for the default domain of the layer:" + layer);
          if (layer == ResourceType.EJB)
             aPolicy = SecurityConfiguration.getApplicationPolicy(EJB);
          else if (layer == ResourceType.WEB)
             aPolicy = SecurityConfiguration.getApplicationPolicy(WEB);
       }
       if (aPolicy == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Application Policy is null for domain:" + domainName);
+         throw PicketBoxMessages.MESSAGES.failedToObtainApplicationPolicy(domainName);
 
       AuthorizationInfo ai = aPolicy.getAuthorizationInfo();
       if (ai == null)
@@ -395,8 +377,6 @@ public class JBossAuthorizationContext extends AuthorizationContext
          ai = SecurityConfiguration.getApplicationPolicy(WEB).getAuthorizationInfo();
       else
       {
-         if (log.isTraceEnabled())
-            log.trace("AuthorizationInfo not found. Providing default authorization info");
          ai = new AuthorizationInfo(SecurityConstants.DEFAULT_APPLICATION_POLICY);
          ai.add(new AuthorizationModuleEntry(DelegatingAuthorizationModule.class.getName()));
       }

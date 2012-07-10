@@ -106,7 +106,7 @@ public class Base64Utils
    {
       int len = str.length();
       if(len == 0)
-         throw new NumberFormatException(ErrorCodes.MISMATCH_SIZE + "Empty Base64 string");
+         throw PicketBoxMessages.MESSAGES.invalidEmptyBase64String();
 
       byte[] a = new byte[len + 1];
       char c;
@@ -121,7 +121,7 @@ public class Base64Utils
                ;
          } catch(Exception e)
          {
-            throw new NumberFormatException(ErrorCodes.PROCESSING_FAILED + "Illegal Base64 character");
+            throw PicketBoxMessages.MESSAGES.illegalBase64Character();
          }
          a[i] = (byte) j;
       }

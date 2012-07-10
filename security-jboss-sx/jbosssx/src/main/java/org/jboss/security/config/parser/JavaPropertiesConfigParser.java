@@ -29,8 +29,6 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import org.jboss.security.ErrorCodes;
-
 /**
  * Able to read in Java properties into module options
  * @author Anil.Saldhana@redhat.com
@@ -77,7 +75,7 @@ public class JavaPropertiesConfigParser implements ParserNamespaceSupport
          
          String key = null, value = null;
          if(peekedStartElementName.contains("property") == false)
-            throw new RuntimeException(ErrorCodes.MISSING_VALUE + "property element not found");
+            throw StaxParserUtil.unexpectedElement(peekedStartElementName, xmlEvent);
          xmlEvent = xmlEventReader.nextEvent();
          peekedStartElement = (StartElement) xmlEvent;
          peekedStartElementName = StaxParserUtil.getStartElementName(peekedStartElement);
@@ -86,9 +84,9 @@ public class JavaPropertiesConfigParser implements ParserNamespaceSupport
             key = xmlEventReader.getElementText();
             xmlEvent = xmlEventReader.nextEvent();
             value = xmlEventReader.getElementText();
-         } else if("value".equals(peekedStartElementName))
+         } else
          {
-            throw new RuntimeException(ErrorCodes.MISSING_VALUE + "key element not found. Check order of key and value");
+            throw StaxParserUtil.unexpectedElement(peekedStartElementName, xmlEvent);
          }
          props.put(key, value);
 

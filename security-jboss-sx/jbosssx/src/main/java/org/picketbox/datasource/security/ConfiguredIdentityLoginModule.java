@@ -31,8 +31,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.vault.SecurityVaultException;
 import org.jboss.security.vault.SecurityVaultUtil;
@@ -61,10 +61,6 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
    private String userName;
    private String password;
 
-   private static final Logger log = Logger.getLogger(ConfiguredIdentityLoginModule.class);
-   private boolean trace = log.isTraceEnabled();
-
-
    public ConfiguredIdentityLoginModule()
    {
    }
@@ -76,19 +72,19 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
       principalName = (String) options.get("principal");
       if (principalName == null)
       {
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Must supply a principal name!");
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage("principal"));
       }
       userName = (String) options.get("userName");
       if (userName == null)
       {
          userName = (String) options.get("username");
          if (userName == null)
-            throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Must supply a user name!");
+            throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage("username"));
       }
       password = (String) options.get("password");
       if (password == null)
       {
-         log.warn("Creating LoginModule with no configured password!");
+         PicketBoxLogger.LOGGER.warnModuleCreationWithEmptyPassword();
          password = "";
       }
       else
@@ -105,16 +101,15 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
     		  }
     	  }
       }
-      if (trace)
-         log.trace("got principal: " + principalName + ", username: " + userName + ", password: " + password);
-
+      PicketBoxLogger.LOGGER.debugModuleOption("principal", principalName);
+      PicketBoxLogger.LOGGER.debugModuleOption("username", userName);
+      PicketBoxLogger.LOGGER.debugModuleOption("password", password);
    }
 
    @Override
    public boolean login() throws LoginException
    {
-      if (trace)
-         log.trace("login called");
+      PicketBoxLogger.LOGGER.traceBeginLogin();
       if (super.login())
          return true;
 
@@ -130,8 +125,7 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
 
    protected Principal getIdentity()
    {
-      if (trace)
-         log.trace("getIdentity called");
+      PicketBoxLogger.LOGGER.traceBeginGetIdentity(principalName);
       Principal principal = new SimplePrincipal(principalName);
       return principal;
    }
@@ -141,8 +135,7 @@ public class ConfiguredIdentityLoginModule extends AbstractPasswordCredentialLog
    */
    protected Group[] getRoleSets() throws LoginException
    {
-      if (trace)
-         log.trace("getRoleSets called");
+      PicketBoxLogger.LOGGER.traceBeginGetRoleSets();
       return new Group[] {};
    }
    

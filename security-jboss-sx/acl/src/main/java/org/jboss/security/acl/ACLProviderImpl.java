@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.AuthorizationException;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.authorization.ResourceKeys;
@@ -76,7 +76,7 @@ public class ACLProviderImpl implements ACLProvider
       }
       catch (Exception e)
       {
-         throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Failed to instantiate persistence strategy class", e);
+         throw PicketBoxMessages.MESSAGES.unableToCreateACLPersistenceStrategy(e);
       }
    }
 
@@ -219,11 +219,11 @@ public class ACLProviderImpl implements ACLProvider
     * 
     * @see org.jboss.security.acl.ACLProvider#setPersistenceStrategy(org.jboss.security.acl.ACLPersistenceStrategy)
     */
-   public void setPersistenceStrategy(ACLPersistenceStrategy strategy)
+   public void setPersistenceStrategy(ACLPersistenceStrategy persistenceStrategy)
    {
-      if (strategy == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "PersistenceStrategy cannot be null");
-      this.strategy = strategy;
+      if (persistenceStrategy == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("persistenceStrategy");
+      this.strategy = persistenceStrategy;
    }
 
    /*
@@ -248,7 +248,8 @@ public class ACLProviderImpl implements ACLProvider
          return false;
       }
       else
-         throw new AuthorizationException(ErrorCodes.PROCESSING_FAILED + "Unable to locate an ACL for the resource " + resource);
+         throw new AuthorizationException(PicketBoxMessages.MESSAGES.unableToLocateACLForResourceMessage(
+                 resource != null ? resource.toString() : null));
    }
 
    /**

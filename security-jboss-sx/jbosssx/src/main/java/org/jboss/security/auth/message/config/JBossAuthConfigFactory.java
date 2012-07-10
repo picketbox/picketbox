@@ -33,8 +33,7 @@ import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.config.RegistrationListener;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 //$Id$
 
@@ -47,8 +46,6 @@ import org.jboss.security.ErrorCodes;
  */
 public class JBossAuthConfigFactory extends AuthConfigFactory
 {
-   private static Logger log = Logger.getLogger(JBossAuthConfigFactory.class);
-
    /**
     * Map of String key to provider
     */
@@ -95,7 +92,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
    public String[] detachListener(RegistrationListener listener, String layer, String appContext)
    { 
       if (listener == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "listener");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("listener");
 
       String[] arr = new String[0];
       String input = layer + "^" + appContext;
@@ -173,10 +170,10 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
     */
    public RegistrationContext getRegistrationContext(String registrationID)
    {
-      String key = (String) idKeyMap.get(registrationID);
+      String key = idKeyMap.get(registrationID);
       StringTokenizer st = new StringTokenizer(key, "^");
       if (st.countTokens() < 2)
-         throw new IllegalStateException(ErrorCodes.MISMATCH_SIZE + "Invalid key obtained=" + key);
+         throw PicketBoxMessages.MESSAGES.invalidKeyFormat(key);
 
       final String layer = st.nextToken();
       final String appCtx = st.nextToken();
@@ -245,7 +242,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
          String description)
    {
       if (className == null || className.length() == 0)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "className is null or zero length");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("className");
 
       // Instantiate the provider
       AuthConfigProvider acp = null;
@@ -258,8 +255,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       }
       catch (Exception e)
       {
-         log.error("Cannot register provider:" + className + ":", e);
-         throw new SecurityException(ErrorCodes.CANNOT_REGISTER_PROVIDER + className + ":reason=" + e);
+         throw PicketBoxMessages.MESSAGES.failedToRegisterAuthConfigProvider(className, e);
       }
 
       return this.registerConfigProvider(acp, layer, appContext, description);
@@ -272,7 +268,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
    public String registerConfigProvider(AuthConfigProvider provider, String layer, String appContext, String description)
    {
       if (provider == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "provider");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("provider");
 
       StringBuilder key = new StringBuilder();
       key.append(layer == null ? "null" : layer);
@@ -311,7 +307,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
    public boolean removeRegistration(String registrationID)
    {
       if (registrationID == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "registrationID");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("registrationID");
 
       String key = idKeyMap.get(registrationID);
       if (key != null)

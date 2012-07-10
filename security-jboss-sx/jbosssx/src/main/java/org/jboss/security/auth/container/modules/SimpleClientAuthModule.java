@@ -33,7 +33,7 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ClientAuthModule;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimplePrincipal;
 
 /**
@@ -64,7 +64,7 @@ public class SimpleClientAuthModule implements ClientAuthModule
    } 
 
    /**
-    * @see ClientAuthModule#initialize(MessagePolicy, MessagePolicy, CallbackHandler, Map, boolean)
+    * @see ClientAuthModule#initialize(javax.security.auth.message.MessagePolicy, javax.security.auth.message.MessagePolicy, javax.security.auth.callback.CallbackHandler, java.util.Map)
     */
    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, 
          CallbackHandler handler, Map options)
@@ -77,7 +77,7 @@ public class SimpleClientAuthModule implements ClientAuthModule
    }
 
    /**
-    * @see ClientAuthModule#secureRequest(AuthParam, Subject, Map)
+    * @see ClientAuthModule#secureRequest(javax.security.auth.message.MessageInfo, javax.security.auth.Subject)
     */
    public AuthStatus secureRequest(MessageInfo param, Subject source) 
    throws AuthException
@@ -88,7 +88,7 @@ public class SimpleClientAuthModule implements ClientAuthModule
    }
 
    /**
-    * @see ClientAuthModule#validateResponse(AuthParam, Subject, Subject, Map)
+    * @see ClientAuthModule#validateResponse(javax.security.auth.message.MessageInfo, javax.security.auth.Subject, javax.security.auth.Subject)
     */
    public AuthStatus validateResponse(MessageInfo messageInfo, Subject source, Subject recipient) throws AuthException
    {  
@@ -97,9 +97,9 @@ public class SimpleClientAuthModule implements ClientAuthModule
       Set sourceSet = source.getPrincipals(SimplePrincipal.class);
       Set recipientSet = recipient.getPrincipals(SimplePrincipal.class);
       if(sourceSet == null && recipientSet == null)
-         throw new AuthException(ErrorCodes.NULL_VALUE + "Principals");
+         throw new AuthException();
       if(sourceSet.size() != recipientSet.size())
-         throw new AuthException(ErrorCodes.MISMATCH_SIZE + "Principals");
+         throw new AuthException(PicketBoxMessages.MESSAGES.sizeMismatchMessage("source", "recipient"));
       return AuthStatus.SUCCESS;
    } 
    
@@ -112,7 +112,7 @@ public class SimpleClientAuthModule implements ClientAuthModule
    }
 
    /**
-    * @see ClientAuth#cleanSubject(Subject, Map)
+    * @see ClientAuth#cleanSubject(javax.security.auth.message.MessageInfo, javax.security.auth.Subject)
     */
    public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException
    { 

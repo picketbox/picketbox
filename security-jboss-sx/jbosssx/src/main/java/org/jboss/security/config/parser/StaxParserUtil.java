@@ -24,15 +24,15 @@ package org.jboss.security.config.parser;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 
-import org.jboss.security.ErrorCodes;
- 
+import org.jboss.security.PicketBoxMessages;
+
 
 /**
  * Utility for the stax based parser
@@ -54,19 +54,6 @@ public class StaxParserUtil implements XMLStreamConstants
    }
    
    /**
-    * Given a {@code Location}, return a formatted string
-    * [lineNum,colNum]
-    * @param location
-    * @return
-    */
-   public static String getLineColumnNumber(Location location)
-   {
-     StringBuilder builder = new StringBuilder("[");
-     builder.append(location.getLineNumber()).append(",").append(location.getColumnNumber()).append("]");
-     return builder.toString();
-   }
-   
-   /**
     * Return the name of the start element
     * @param startElement
     * @return
@@ -78,15 +65,15 @@ public class StaxParserUtil implements XMLStreamConstants
    
    /**
     * Given a string, trim it
-    * @param str
+    * @param inputStr
     * @return
     * @throws {@code IllegalArgumentException} if the passed str is null
     */
-   public static final String trim(String str)
+   public static final String trim(String inputStr)
    {
-      if(str == null || str.length() == 0)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Input str is null");
-      return str.trim();
+      if(inputStr == null || inputStr.length() == 0)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("inputStr");
+      return inputStr.trim();
    }
    
    /**
@@ -109,7 +96,7 @@ public class StaxParserUtil implements XMLStreamConstants
             b.append(", ");
          }
       }
-      return new XMLStreamException("Missing required attribute(s): " + b, reader.getLocation());
+      return PicketBoxMessages.MESSAGES.missingRequiredAttributes(b.toString(), reader.getLocation());
    }
 
    /**
@@ -120,7 +107,30 @@ public class StaxParserUtil implements XMLStreamConstants
     */
    public static XMLStreamException unexpectedElement(final XMLStreamReader reader)
    {
-      return new XMLStreamException("Unexpected element '" + reader.getName() + "' encountered", reader.getLocation());
+      return PicketBoxMessages.MESSAGES.unexpectedElement(reader.getName().toString(), reader.getLocation());
+   }
+
+    /**
+     * Get an exception reporting an unexpected XML element.
+     *
+     * @param elementName the unexpected element name
+     * @param event the XML event
+     * @return the constructed exception
+     */
+   public static XMLStreamException unexpectedElement(final String elementName, XMLEvent event)
+   {
+       return PicketBoxMessages.MESSAGES.unexpectedElement(elementName, event.getLocation());
+   }
+
+    /**
+     * Get an exceptioon reporting an unexpected nasmespace URI.
+     *
+     * @param namespaceURI the unexpected namespace URI.
+     * @return the constructed exception.
+     */
+   public static XMLStreamException unexpectedNS(String namespaceURI, XMLEvent event)
+   {
+       return PicketBoxMessages.MESSAGES.unexpectedNamespace(namespaceURI, event.getLocation());
    }
 
    /**
@@ -132,8 +142,7 @@ public class StaxParserUtil implements XMLStreamConstants
     */
    public static XMLStreamException unexpectedAttribute(final XMLStreamReader reader, final int index)
    {
-      return new XMLStreamException("Unexpected attribute '" + reader.getAttributeName(index) + "' encountered", reader
-            .getLocation());
+       return PicketBoxMessages.MESSAGES.unexpectedAttribute(reader.getAttributeName(index).toString(), reader.getLocation());
    }
 
    /**

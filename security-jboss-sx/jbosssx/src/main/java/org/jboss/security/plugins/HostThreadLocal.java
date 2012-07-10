@@ -22,6 +22,7 @@
 package org.jboss.security.plugins;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 
 /**
  * Supports the RemoteHostTrustLoginModule and RemoteHostValve, holds the remote host in a thread local.
@@ -30,24 +31,18 @@ import org.jboss.logging.Logger;
  */
 public class HostThreadLocal 
 {
-   private static Logger log = Logger.getLogger(HostThreadLocal.class);
    private static ThreadLocal<String> host = new ThreadLocal<String>();
 
    public static String get() 
    {
-      if (log.isTraceEnabled()) 
-      {
-          log.trace("returning "+host.get()+" for tid "+Thread.currentThread().getId());
-      }
-      return (String)host.get();
+      String hostName = host.get();
+      PicketBoxLogger.LOGGER.traceHostThreadLocalGet(hostName, Thread.currentThread().getId());
+      return hostName;
    }
 
    public static void set(String hostVal) 
    {
-      if (log.isTraceEnabled()) 
-      {
-          log.trace("setting "+hostVal+" for tid "+Thread.currentThread().getId());
-      }
+      PicketBoxLogger.LOGGER.traceHostThreadLocalSet(hostVal, Thread.currentThread().getId());
       host.set(hostVal);
    }
 

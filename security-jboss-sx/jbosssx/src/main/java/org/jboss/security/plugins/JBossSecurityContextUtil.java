@@ -31,7 +31,7 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.RunAs;
 import org.jboss.security.RunAsIdentity;
 import org.jboss.security.SecurityContext;
@@ -118,13 +118,13 @@ public class JBossSecurityContextUtil extends SecurityContextUtil
    {   
       validateSecurityContext();
       if(key == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Key is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("key");
       if(obj != null)
       {
          if(RUNAS_IDENTITY_IDENTIFIER.equals(key) && obj instanceof RunAsIdentity == false)
-            throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "Not RunAsIdentity:"+obj); 
+            throw PicketBoxMessages.MESSAGES.invalidType(RunAsIdentity.class.getName());
          if(ROLES_IDENTIFIER.equals(key) &&  obj instanceof Group == false)
-            throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "Not Group:"+obj); 
+            throw PicketBoxMessages.MESSAGES.invalidType(Group.class.getName());
       }
       if(RUNAS_IDENTITY_IDENTIFIER.equals(key))
          setRunAsIdentity( (RunAsIdentity) obj);
@@ -137,7 +137,7 @@ public class JBossSecurityContextUtil extends SecurityContextUtil
    public <T> T remove(String key)
    { 
       if(key == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Key is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("key");
       Map<String,Object> contextMap = securityContext.getData();
       if(RUNAS_IDENTITY_IDENTIFIER.equals(key))
       {
@@ -201,6 +201,6 @@ public class JBossSecurityContextUtil extends SecurityContextUtil
    private void validateSecurityContext()
    {
       if(securityContext == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "SecurityContext is null: set it on the util"); 
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("securityDomain");
    }
 }

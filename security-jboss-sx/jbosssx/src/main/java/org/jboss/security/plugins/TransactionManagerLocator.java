@@ -29,6 +29,7 @@ import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 
 /**
  *  Locate a Transaction Manager
@@ -70,9 +71,8 @@ public class TransactionManagerLocator
             tm = this.getJBossTM();
          }
          catch (Exception ignore)
-         { 
-            if(trace)
-               log.trace("Exception in getJBossTM:", ignore);
+         {
+            PicketBoxLogger.LOGGER.debugIgnoredException(ignore);
             if (transactionManager != null)
                tm = transactionManager;
          }

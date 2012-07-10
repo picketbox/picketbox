@@ -21,6 +21,7 @@
   */
 package org.jboss.test.security.client;
 
+import junit.framework.TestCase;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.SecurityContextFactory;
@@ -28,7 +29,6 @@ import org.jboss.security.SubjectInfo;
 import org.jboss.security.client.JBossSecurityClient;
 import org.jboss.security.client.SecurityClient;
 import org.jboss.security.client.SecurityClientFactory;
-import org.jboss.test.AbstractJBossSXTest;
  
 /**
  *  Test the JBoss Security Client
@@ -36,7 +36,7 @@ import org.jboss.test.AbstractJBossSXTest;
  *  @since  Aug 16, 2007 
  *  @version $Revision$
  */
-public class JBossSecurityClientTestCase extends AbstractJBossSXTest
+public class JBossSecurityClientTestCase extends TestCase
 { 
    public JBossSecurityClientTestCase(String name)
    {

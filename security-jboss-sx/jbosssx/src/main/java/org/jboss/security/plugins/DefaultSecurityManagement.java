@@ -53,7 +53,7 @@ public class DefaultSecurityManagement implements ISecurityManagement
    }
    
    /**
-    * @see ISecurityManagement#getAuditManager()
+    * @see ISecurityManagement#getAuditManager(String)
     */
    public AuditManager getAuditManager(String securityDomain)
    {
@@ -61,7 +61,7 @@ public class DefaultSecurityManagement implements ISecurityManagement
    }
    
    /**
-    * @see ISecurityManagement#getAuthenticationManager()
+    * @see ISecurityManagement#getAuthenticationManager(String)
     */
    public AuthenticationManager getAuthenticationManager(String securityDomain)
    {
@@ -69,7 +69,7 @@ public class DefaultSecurityManagement implements ISecurityManagement
    }
 
    /**
-    * @see ISecurityManagement#getAuthorizationManager()
+    * @see ISecurityManagement#getAuthorizationManager(String)
     */
    public AuthorizationManager getAuthorizationManager(String securityDomain)
    {
@@ -77,7 +77,7 @@ public class DefaultSecurityManagement implements ISecurityManagement
    }
 
    /**
-    * @see ISecurityManagement#getIdentityTrustManager()
+    * @see ISecurityManagement#getIdentityTrustManager(String)
     */
    public IdentityTrustManager getIdentityTrustManager(String securityDomain)
    {
@@ -85,7 +85,7 @@ public class DefaultSecurityManagement implements ISecurityManagement
    }
 
    /**
-    * @see ISecurityManagement#getMappingManager()
+    * @see ISecurityManagement#getMappingManager(String)
     */
    public MappingManager getMappingManager(String securityDomain)
    {

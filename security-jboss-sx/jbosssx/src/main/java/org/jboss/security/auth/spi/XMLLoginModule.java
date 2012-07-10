@@ -28,7 +28,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 
 /** A login module that obtains its security information directly from its
  login module options. The name of the login module comes from the use of
@@ -98,7 +99,7 @@ public class XMLLoginModule extends UsernamePasswordLoginModule
       {
          // Note that although this exception isn't passed on, users or roles will be null
          // so that any call to login will throw a LoginException.
-         super.log.error("Failed to load users/passwords/role files", e);
+         PicketBoxLogger.LOGGER.errorLoadingUserRolesPropertiesFiles(e);
       }
    }
 
@@ -111,7 +112,7 @@ public class XMLLoginModule extends UsernamePasswordLoginModule
    public boolean login() throws LoginException
    {
       if (users == null)
-         throw new LoginException(ErrorCodes.NULL_VALUE + "Missing usersInfo user/role mapping");
+         throw PicketBoxMessages.MESSAGES.missingXMLUserRolesMapping();
 
       return super.login();
    }

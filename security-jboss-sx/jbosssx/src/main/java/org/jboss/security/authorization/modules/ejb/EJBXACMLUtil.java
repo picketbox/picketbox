@@ -28,8 +28,8 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.List;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.util.JBossXACMLUtil;
 import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
@@ -54,9 +54,7 @@ import org.jboss.security.xacml.interfaces.XACMLConstants;
  */
 public class EJBXACMLUtil extends JBossXACMLUtil
 {
-   private static Logger log = Logger.getLogger(EJBXACMLUtil.class);
-   private boolean trace = log.isTraceEnabled();
-   
+
    public RequestContext createXACMLRequest( String ejbName, Method ejbMethod, Principal principal, RoleGroup callerRoles )
    throws Exception
    {
@@ -85,7 +83,7 @@ public class EJBXACMLUtil extends JBossXACMLUtil
 
       RequestContext requestCtx = this.getRequestContext( ejbName, actionType, principal, callerRoles );
   
-      if(trace)
+      if(PicketBoxLogger.LOGGER.isDebugEnabled())
       {
          ByteArrayOutputStream baos = null;
          try
@@ -93,7 +91,7 @@ public class EJBXACMLUtil extends JBossXACMLUtil
             baos = new ByteArrayOutputStream();
 
             requestCtx.marshall(baos);
-            log.trace(new String(baos.toByteArray()));
+            PicketBoxLogger.LOGGER.debug(new String(baos.toByteArray()));
          }
          catch(IOException e)
          {}
@@ -122,13 +120,13 @@ public class EJBXACMLUtil extends JBossXACMLUtil
       ActionType actionType = getActionType( action );
 
       RequestContext requestCtx = this.getRequestContext(ejbName, actionType, principal, callerRoles);
-  
-      if(trace)
+
+      if(PicketBoxLogger.LOGGER.isDebugEnabled())
       {
          ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
          requestCtx.marshall(baos);
-         log.trace(new String(baos.toByteArray()));         
+         PicketBoxLogger.LOGGER.debug(new String(baos.toByteArray()));
       }
       return requestCtx;
   }
@@ -137,7 +135,7 @@ public class EJBXACMLUtil extends JBossXACMLUtil
          Principal principal, RoleGroup callerRoles ) throws IOException
    {
       if(principal == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "principal is null"); 
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("principal");
 
       RequestContext requestCtx = RequestResponseContextFactory.createRequestCtx();
 

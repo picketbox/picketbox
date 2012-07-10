@@ -39,8 +39,6 @@ import org.jboss.security.mapping.MappingResult;
  */
 public abstract class AbstractRolesMappingProvider implements MappingProvider<RoleGroup>
 {
-   protected Logger log;
-
    protected MappingResult<RoleGroup> result;
     
    public boolean supports(Class<?> p)

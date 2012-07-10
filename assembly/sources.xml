@@ -14,6 +14,10 @@
       <outputDirectory>/</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>../security-spi/common/src/main/java</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>../security-spi/acl/src/main/java</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>

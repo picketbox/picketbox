@@ -26,6 +26,12 @@
       <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/security-spi/tags/4.0.10-SNAPSHOT</developerConnection>
       <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/picketbox/security-spi/tags/4.0.10-SNAPSHOT</url>
     </scm>
+    <dependencies>
+      <dependency>
+        <groupId>org.picketbox</groupId>
+        <artifactId>common-spi</artifactId>
+      </dependency>
+    </dependencies>
     <reporting>
       <plugins>
         <plugin>

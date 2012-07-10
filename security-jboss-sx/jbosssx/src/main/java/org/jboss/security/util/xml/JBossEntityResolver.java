@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.util.StringPropertyReplacer;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -54,8 +55,6 @@ import org.xml.sax.SAXException;
 @SuppressWarnings("unchecked")
 public class JBossEntityResolver implements EntityResolver
 {
-   private static final Logger log = Logger.getLogger(JBossEntityResolver.class);
-
    /** A class wide Map<String, String> of publicId/systemId to dtd/xsd file */
    private static Map entities = new ConcurrentHashMap ();
    /** A class flag indicating whether an attempt to resolve a systemID as a
@@ -294,8 +293,6 @@ public class JBossEntityResolver implements EntityResolver
       if( publicId == null && systemId == null )
          return null;
 
-      boolean trace = log.isTraceEnabled();
-
       boolean resolvePublicIdFirst = true;
       if(publicId != null && systemId != null)
       {
@@ -308,10 +305,7 @@ public class JBossEntityResolver implements EntityResolver
          if(registeredSystemId != null && !registeredSystemId.equals(systemId))
          {
             resolvePublicIdFirst = false;
-            if(trace)
-               log.trace("systemId argument '" + systemId + "' for publicId '" +
-                     publicId + "' is different from the registered systemId '" +
-                     registeredSystemId + "', resolution will be based on the argument");
+            PicketBoxLogger.LOGGER.traceSystemIDMismatch(systemId, publicId, registeredSystemId);
          }
       }
       
@@ -320,32 +314,32 @@ public class JBossEntityResolver implements EntityResolver
       if(resolvePublicIdFirst)
       {
          // Look for a registered publicID
-         inputSource = resolvePublicID(publicId, trace);
+         inputSource = resolvePublicID(publicId);
       }
       
       if( inputSource == null )
       {
          // Try to resolve the systemID from the registry
-         inputSource = resolveSystemID(systemId, trace);
+         inputSource = resolveSystemID(systemId);
       }
 
       if( inputSource == null )
       {
          // Try to resolve the systemID as a classpath reference under dtd or schema
-         inputSource = resolveClasspathName(systemId, trace);
+         inputSource = resolveClasspathName(systemId);
       }
 
       if( inputSource == null )
       {
          // Try to resolve the systemID as a absolute URL
-         inputSource = resolveSystemIDasURL(systemId, trace);
+         inputSource = resolveSystemIDasURL(systemId);
       }
 
       entityResolved = (inputSource != null);
       
       if (entityResolved == false)
-         log.debug("Cannot resolve [publicID=" + publicId + ",systemID=" + systemId + "]");
-      
+         PicketBoxLogger.LOGGER.debugFailureToResolveEntity(systemId, publicId);
+
       return inputSource;
    }
 
@@ -366,17 +360,15 @@ public class JBossEntityResolver implements EntityResolver
     @see #registerEntity(String, String)
 
     @param publicId - the public entity name of the schema
-    @param trace - trace level logging flag
     @return the InputSource for the schema file found on the classpath, null
       if the publicId is not registered or found.
     */
-   protected InputSource resolvePublicID(String publicId, boolean trace)
+   protected InputSource resolvePublicID(String publicId)
    {
       if( publicId == null )
          return null;
 
-      if (trace)
-         log.trace("resolvePublicID, publicId=" + publicId);
+      PicketBoxLogger.LOGGER.traceBeginResolvePublicID(publicId);
 
       InputSource inputSource = null;
 
@@ -388,10 +380,9 @@ public class JBossEntityResolver implements EntityResolver
 
       if( filename != null )
       {
-         if (trace)
-            log.trace("Found entity from publicId=" + publicId + " fileName=" + filename);
+         PicketBoxLogger.LOGGER.traceFoundEntityFromID("publicId", publicId, filename);
 
-         InputStream ins = loadClasspathResource(filename, trace);
+         InputStream ins = loadClasspathResource(filename);
          if( ins != null )
          {
             inputSource = new InputSource(ins);
@@ -399,13 +390,13 @@ public class JBossEntityResolver implements EntityResolver
          }
          else
          {
-            log.trace("Cannot load publicId from classpath resource: " + filename);
-            
+            PicketBoxLogger.LOGGER.warnFailureToLoadIDFromResource("publicId", "classpath", filename);
+
             // Try the file name as a URI
-            inputSource = resolveSystemIDasURL(filename, trace);
-            
+            inputSource = resolveSystemIDasURL(filename);
+
             if (inputSource == null)
-               log.warn("Cannot load publicId from resource: " + filename);
+               PicketBoxLogger.LOGGER.warnFailureToLoadIDFromResource("publicId", "URL", filename);
          }
       }
 
@@ -418,17 +409,15 @@ public class JBossEntityResolver implements EntityResolver
     entity map.
 
     @param systemId - the systemId
-    @param trace - trace level logging flag
     @return the URL InputSource if the URL input stream can be opened, null
       if the systemId is not a URL or could not be opened.
     */
-   protected InputSource resolveSystemID(String systemId, boolean trace)
+   protected InputSource resolveSystemID(String systemId)
    {
       if( systemId == null )
          return null;
 
-      if( trace )
-         log.trace("resolveSystemID, systemId="+systemId);
+      PicketBoxLogger.LOGGER.traceBeginResolveSystemID(systemId);
 
       InputSource inputSource = null;
 
@@ -441,10 +430,9 @@ public class JBossEntityResolver implements EntityResolver
 
       if ( filename != null )
       {
-         if( trace )
-            log.trace("Found entity systemId=" + systemId + " fileName=" + filename);
+         PicketBoxLogger.LOGGER.traceFoundEntityFromID("systemId", systemId, filename);
 
-         InputStream ins = loadClasspathResource(filename, trace);
+         InputStream ins = loadClasspathResource(filename);
          if( ins != null )
          {
             inputSource = new InputSource(ins);
@@ -452,7 +440,7 @@ public class JBossEntityResolver implements EntityResolver
          }
          else
          {
-            log.warn("Cannot load systemId from resource: " + filename);
+            PicketBoxLogger.LOGGER.warnFailureToLoadIDFromResource("systemId", "classpath", filename);
          }
       }
 
@@ -464,32 +452,28 @@ public class JBossEntityResolver implements EntityResolver
    uses the systemID as a URL.
 
    @param systemId - the systemId
-   @param trace - trace level logging flag
    @return the URL InputSource if the URL input stream can be opened, null
      if the systemId is not a URL or could not be opened.
    */
-  protected InputSource resolveSystemIDasURL(String systemId, boolean trace)
+  protected InputSource resolveSystemIDasURL(String systemId)
   {
      if( systemId == null )
         return null;
 
-     if( trace )
-        log.trace("resolveSystemIDasURL, systemId="+systemId);
+     PicketBoxLogger.LOGGER.traceBeginResolveSystemIDasURL(systemId);
 
      InputSource inputSource = null;
 
      // Try to use the systemId as a URL to the schema
       try
       {
-         if (trace)
-            log.trace("Trying to resolve systemId as a URL");
          // Replace any system property refs if isReplaceSystemProperties is true
          if(isReplaceSystemProperties())
             systemId = StringPropertyReplacer.replaceProperties(systemId);
          URL url = new URL(systemId);
          if (warnOnNonFileURLs && url.getProtocol().equalsIgnoreCase("file") == false)
          {
-            log.warn("Trying to resolve systemId as a non-file URL: " + systemId);
+            PicketBoxLogger.LOGGER.warnResolvingSystemIdAsNonFileURL(systemId);
          }
 
          InputStream ins = url.openStream();
@@ -500,21 +484,16 @@ public class JBossEntityResolver implements EntityResolver
          }         
          else
          {
-            log.warn("Cannot load systemId as URL: " + systemId);
+            PicketBoxLogger.LOGGER.warnFailureToLoadIDFromResource("systemId", "URL", systemId);
          }
-         
-         if (trace)
-            log.trace("Resolved systemId as a URL");
       }
       catch (MalformedURLException ignored)
       {
-         if (trace)
-            log.trace("SystemId is not a url: " + systemId, ignored);
+         PicketBoxLogger.LOGGER.debugIgnoredException(ignored);
       }
       catch (IOException e)
       {
-         if (trace)
-            log.trace("Failed to obtain URL.InputStream from systemId: " + systemId, e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       return inputSource;
   }
@@ -524,17 +503,15 @@ public class JBossEntityResolver implements EntityResolver
     systemId is simply used as a classpath resource name.
 
     @param systemId - the system ID of DTD or Schema
-    @param trace - trace level logging flag
     @return the InputSource for the schema file found on the classpath, null
       if the systemId is not registered or found.
     */
-   protected InputSource resolveClasspathName(String systemId, boolean trace)
+   protected InputSource resolveClasspathName(String systemId)
    {
       if( systemId == null )
          return null;
 
-      if( trace )
-         log.trace("resolveClasspathName, systemId="+systemId);
+      PicketBoxLogger.LOGGER.traceBeginResolveClasspathName(systemId);
       String filename = systemId;
       // Parse the systemId as a uri to get the final path component
       try
@@ -552,17 +529,15 @@ public class JBossEntityResolver implements EntityResolver
          if(filename.length() == 0)
             return null;
 
-         if (trace)
-            log.trace("Mapped systemId to filename: " + filename);
+         PicketBoxLogger.LOGGER.traceMappedSystemIdToFilename(filename);
       }
       catch (URISyntaxException e)
       {
-         if (trace)
-            log.trace("systemId: is not a URI, using systemId as resource", e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
 
       // Resolve the filename as a classpath resource
-      InputStream is = loadClasspathResource(filename, trace);
+      InputStream is = loadClasspathResource(filename);
       InputSource inputSource = null;
       if( is != null )
       {
@@ -579,10 +554,9 @@ public class JBossEntityResolver implements EntityResolver
     resource ends in ".dtd" or ".xsd".
 
     @param resource - the classpath resource name of the schema
-    @param trace - trace level logging flag
     @return the resource InputStream if found, null if not found.
     */
-   protected InputStream loadClasspathResource(String resource, boolean trace)
+   protected InputStream loadClasspathResource(String resource)
    {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       URL url = loader.getResource(resource);
@@ -601,15 +575,14 @@ public class JBossEntityResolver implements EntityResolver
       InputStream inputStream = null;
       if( url != null )
       {
-         if( trace )
-            log.trace(resource+" maps to URL: "+url);
+         PicketBoxLogger.LOGGER.traceMappedResourceToURL(resource, url);
          try
          {
             inputStream = url.openStream();
          }
          catch(IOException e)
          {
-            log.debug("Failed to open url stream", e);
+            PicketBoxLogger.LOGGER.debugIgnoredException(e);
          }
       }
       return inputStream;

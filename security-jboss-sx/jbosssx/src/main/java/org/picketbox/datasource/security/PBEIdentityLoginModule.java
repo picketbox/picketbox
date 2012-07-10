@@ -35,9 +35,9 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.Base64Utils;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.Util;
 
@@ -83,12 +83,6 @@ import org.jboss.security.Util;
 public class PBEIdentityLoginModule
    extends AbstractPasswordCredentialLoginModule
 {
-   /**
-    * Class logger
-    */
-   private static final Logger log = Logger.getLogger(SecureIdentityLoginModule.class);
-   private boolean trace = log.isTraceEnabled();
-
    private String username;
    private String password;
    /** The Blowfish key material */
@@ -125,13 +119,13 @@ public class PBEIdentityLoginModule
         username = (String) options.get("userName");      	
         if (username == null)
         {
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The user name is a required option");
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage("username"));
         }
      }
       password = (String) options.get("password");
       if (password == null)
       {
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The password is a required option");
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage("password"));
       }
       // Look for the cipher password and algo parameters
       String tmp = (String) options.get("pbepass");
@@ -160,8 +154,7 @@ public class PBEIdentityLoginModule
    @Override
    public boolean login() throws LoginException
    {
-      if (trace)
-         log.trace("login called");
+      PicketBoxLogger.LOGGER.traceBeginLogin();
       if (super.login())
          return true;
 
@@ -185,9 +178,9 @@ public class PBEIdentityLoginModule
       }
       catch(Exception e)
       {
-         if (trace)
-            log.trace("Failed to decode password", e);
-         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to decode password: " + e.getMessage());
+         LoginException le = new LoginException(e.getLocalizedMessage());
+         le.initCause(e);
+         throw le;
       }
       return true;
    }
@@ -202,8 +195,7 @@ public class PBEIdentityLoginModule
 
    protected Principal getIdentity()
    {
-      if (trace)
-         log.trace("getIdentity called, username=" + username);
+      PicketBoxLogger.LOGGER.traceBeginGetIdentity(username);
       Principal principal = new SimplePrincipal(username);
       return principal;
    }

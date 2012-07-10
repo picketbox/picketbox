@@ -24,7 +24,7 @@ package org.jboss.security.acl;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.identity.Identity;
 import org.jboss.security.identity.plugins.IdentityFactory;
@@ -96,7 +96,7 @@ public class Util
       {
          String[] identityParts = identityString.split(":");
          if (identityParts.length != 2)
-            throw new IllegalArgumentException(ErrorCodes.MISMATCH_SIZE + "Malformed identity String: " + identityString);
+            throw PicketBoxMessages.MESSAGES.malformedIdentityString(identityString);
          try
          {
             identity = IdentityFactory.createIdentity(identityParts[0], identityParts[1]);

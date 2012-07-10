@@ -27,8 +27,8 @@ import java.security.PermissionCollection;
 import javax.security.jacc.PolicyConfiguration;
 import javax.security.jacc.PolicyContextException;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.util.state.IllegalTransitionException;
 import org.jboss.security.util.state.State;
 import org.jboss.security.util.state.StateMachine;
@@ -40,21 +40,16 @@ import org.jboss.security.util.state.StateMachine;
  * @author Scott.Stark@jboss.org
  * @version $Revision$
  */
-public class JBossPolicyConfiguration
-   implements PolicyConfiguration
+public class JBossPolicyConfiguration implements PolicyConfiguration
 {
-   private static Logger log = Logger.getLogger(JBossPolicyConfiguration.class);
    /** The JACC context id associated with the policy */
    private String contextID;
    /** The Policy impl which handles the JACC permissions */
    private DelegatingPolicy policy;
    /** A state machine whihc enforces the state behavior of this config */
    private StateMachine configStateMachine;
-   /** A trace level logging flag set when the policy is created */
-   private boolean trace;
 
-   protected JBossPolicyConfiguration(String contextID, DelegatingPolicy policy,
-      StateMachine configStateMachine)
+   protected JBossPolicyConfiguration(String contextID, DelegatingPolicy policy, StateMachine configStateMachine)
       throws PolicyContextException
    {
       this.contextID = contextID;
@@ -62,16 +57,14 @@ public class JBossPolicyConfiguration
       this.configStateMachine = configStateMachine;
 
       if (contextID == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "contextID cannot be null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextID");
       if (policy == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "policy cannot be null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("policy");
       if (configStateMachine == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "configStateMachine cannot be null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("configStateMachine");
 
       validateState("getPolicyConfiguration");
-      trace = log.isTraceEnabled();
-      if( trace )
-         log.trace("ctor, contextID="+contextID);
+      PicketBoxLogger.LOGGER.debugJBossPolicyConfigurationConstruction(contextID);
    }
 
    void initPolicyConfiguration(boolean remove)
@@ -84,8 +77,7 @@ public class JBossPolicyConfiguration
    public void addToExcludedPolicy(Permission permission)
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("addToExcludedPolicy, p="+permission);
+      PicketBoxLogger.LOGGER.traceAddPermissionToExcludedPolicy(permission);
       validateState("addToExcludedPolicy");
       policy.addToExcludedPolicy(contextID, permission);
    }
@@ -93,8 +85,7 @@ public class JBossPolicyConfiguration
    public void addToExcludedPolicy(PermissionCollection permissions)
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("addToExcludedPolicy, pc="+permissions);
+      PicketBoxLogger.LOGGER.traceAddPermissionsToExcludedPolicy(permissions);
       validateState("addToExcludedPolicy");
       policy.addToExcludedPolicy(contextID, permissions);
    }
@@ -102,8 +93,7 @@ public class JBossPolicyConfiguration
    public void addToRole(String roleName, Permission permission)
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("addToRole, roleName="+roleName+", p="+permission);
+      PicketBoxLogger.LOGGER.traceAddPermissionToRole(permission);
       validateState("addToRole");
       policy.addToRole(contextID, roleName, permission);
    }
@@ -111,8 +101,7 @@ public class JBossPolicyConfiguration
    public void addToRole(String roleName, PermissionCollection permissions)
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("addToRole, roleName="+roleName+", pc="+permissions);
+      PicketBoxLogger.LOGGER.traceAddPermissionsToRole(permissions);
       validateState("addToRole");
       policy.addToRole(contextID, roleName, permissions);
    }
@@ -120,8 +109,7 @@ public class JBossPolicyConfiguration
    public void addToUncheckedPolicy(Permission permission)
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("addToUncheckedPolicy, p="+permission);
+      PicketBoxLogger.LOGGER.traceAddPermissionToUncheckedPolicy(permission);
       validateState("addToUncheckedPolicy");
       policy.addToUncheckedPolicy(contextID, permission);
    }
@@ -129,8 +117,7 @@ public class JBossPolicyConfiguration
    public void addToUncheckedPolicy(PermissionCollection permissions)
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("addToUncheckedPolicy, pc="+permissions);
+      PicketBoxLogger.LOGGER.traceAddPermissionsToUncheckedPolicy(permissions);
       validateState("addToUncheckedPolicy");
       policy.addToUncheckedPolicy(contextID, permissions);
    }
@@ -138,8 +125,7 @@ public class JBossPolicyConfiguration
    public void commit()
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("commit:" + contextID);
+      PicketBoxLogger.LOGGER.tracePolicyConfigurationCommit(contextID);
       validateState("commit");
       policy.commit(contextID);
    }
@@ -147,8 +133,7 @@ public class JBossPolicyConfiguration
    public void delete()
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("delete:" + contextID);
+      PicketBoxLogger.LOGGER.tracePolicyConfigurationDelete(contextID);
       validateState("delete");
       policy.delete(contextID);
    }
@@ -172,8 +157,7 @@ public class JBossPolicyConfiguration
    public void linkConfiguration(PolicyConfiguration link)
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("linkConfiguration, linkTo: "+link.getContextID());
+      PicketBoxLogger.LOGGER.traceLinkConfiguration(link.getContextID());
       validateState("linkConfiguration");
       policy.linkConfiguration(contextID, link);
    }
@@ -181,8 +165,7 @@ public class JBossPolicyConfiguration
    public void removeExcludedPolicy()
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("removeExcludedPolicy");
+      PicketBoxLogger.LOGGER.traceRemoveExcludedPolicy(contextID);
       validateState("removeExcludedPolicy");
       policy.removeExcludedPolicy(contextID);
    }
@@ -190,8 +173,7 @@ public class JBossPolicyConfiguration
    public void removeRole(String roleName)
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("removeRole: "+roleName);
+      PicketBoxLogger.LOGGER.traceRemoveRole(roleName, contextID);
       validateState("removeRole");
       policy.removeRole(contextID, roleName);
    }
@@ -199,8 +181,7 @@ public class JBossPolicyConfiguration
    public void removeUncheckedPolicy()
       throws PolicyContextException
    {
-      if( trace )
-         log.trace("removeUncheckedPolicy");
+      PicketBoxLogger.LOGGER.traceRemoveUncheckedPolicy(contextID);
       validateState("removeUncheckedPolicy");
       policy.removeUncheckedPolicy(contextID);
    }
@@ -214,8 +195,7 @@ public class JBossPolicyConfiguration
       }
       catch(IllegalTransitionException e)
       {
-         log.debug("validateState failure", e);
-         throw new PolicyContextException(ErrorCodes.PROCESSING_FAILED + "Operation not allowed", e);
+         throw new PolicyContextException(PicketBoxMessages.MESSAGES.operationNotAllowedMessage(), e);
       }
    }
 }

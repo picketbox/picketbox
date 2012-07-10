@@ -138,7 +138,7 @@ public final class Base64Encoder
       }
       else
       {
-         System.out.println("Usage: Base64Encoder <string> <optional hash algorithm>");
+         System.out.println(PicketBoxMessages.MESSAGES.base64EncoderMessage());
       }
    }
 

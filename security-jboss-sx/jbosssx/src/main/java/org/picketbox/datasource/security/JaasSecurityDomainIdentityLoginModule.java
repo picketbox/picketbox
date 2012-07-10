@@ -34,8 +34,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimplePrincipal;
 
 /** A login module for statically defining a data source username and password
@@ -83,9 +83,6 @@ import org.jboss.security.SimplePrincipal;
 public class JaasSecurityDomainIdentityLoginModule
    extends AbstractPasswordCredentialLoginModule
 {
-   private static final Logger log = Logger.getLogger(JaasSecurityDomainIdentityLoginModule.class);
-   private boolean trace = log.isTraceEnabled();
-   
    private String username;
    private String password;
    @SuppressWarnings("unused")
@@ -104,20 +101,20 @@ public class JaasSecurityDomainIdentityLoginModule
         username = (String) options.get("userName");      	
         if( username == null )
         {
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The user name is a required option");
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage("username"));
         }
      }
 
       password = (String) options.get("password");
       if( password == null )
       {
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The password is a required option");
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage("password"));
       }
 
       String name = (String) options.get("jaasSecurityDomain");
       if( name == null )
       {
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The jaasSecurityDomain is a required option");
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage("jaasSecurityDomain"));
       }
 
       try
@@ -126,14 +123,13 @@ public class JaasSecurityDomainIdentityLoginModule
       }
       catch(Exception e)
       {
-         throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "Invalid jaasSecurityDomain: " + e.getMessage());
+         throw new IllegalArgumentException(e);
       }
    }
 
    public boolean login() throws LoginException
    {
-      if(trace)
-         log.trace("login called");
+      PicketBoxLogger.LOGGER.traceBeginLogin();
       if( super.login() == true )
          return true;
 
@@ -147,20 +143,18 @@ public class JaasSecurityDomainIdentityLoginModule
       SubjectActions.addPrincipals(subject, principal);
       sharedState.put("javax.security.auth.login.name", username);
       // Decode the encrypted password
-      try
-      {
+//      try
+//      {
 //         char[] decodedPassword = DecodeAction.decode(password,
 //            jaasSecurityDomain, getServer());
 //         PasswordCredential cred = new PasswordCredential(username, decodedPassword);
 //         cred.setManagedConnectionFactory(getMcf());
 //         SubjectActions.addCredentials(subject, cred);
-      }
-      catch(Exception e)
-      {
-         if(trace)
-            log.trace("Failed to decode password", e);
-         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to decode password: " + e.getMessage());
-      }
+//      }
+//      catch(Exception e)
+//      {
+//         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to decode password: " + e.getMessage());
+//      }
       return true;
    }
 
@@ -173,8 +167,7 @@ public class JaasSecurityDomainIdentityLoginModule
 
    protected Principal getIdentity()
    {
-      if(trace)
-         log.trace("getIdentity called, username=" + username);
+      PicketBoxLogger.LOGGER.traceBeginGetIdentity(username);
       Principal principal = new SimplePrincipal(username);
       return principal;
    }

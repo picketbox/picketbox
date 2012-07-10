@@ -28,8 +28,8 @@ import javax.security.auth.Subject;
 import javax.security.jacc.PolicyContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -55,36 +55,26 @@ public class WebXACMLPolicyModuleDelegate extends AuthorizationModuleDelegate
 { 
    private String policyContextID = null;
    
-   public WebXACMLPolicyModuleDelegate()
-   {  
-      log = Logger.getLogger(getClass());
-      trace = log.isTraceEnabled();
-   }
- 
    /**
-    * @see AuthorizationModuleDelegate#authorize(Resource)
+    * @see AuthorizationModuleDelegate#authorize(org.jboss.security.authorization.Resource, javax.security.auth.Subject, org.jboss.security.identity.RoleGroup)
     */
    public int authorize(Resource resource, Subject subject, RoleGroup role)
    {
       if(resource instanceof WebResource == false)
-         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "resource is not a WebResource");
-      
+         throw PicketBoxMessages.MESSAGES.invalidType(WebResource.class.getName());
+
       WebResource webResource = (WebResource) resource;
       
       //Get the contextual map
       Map<String,Object> map = resource.getMap();
       if(map == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Map from the Resource is null");
-    
-      if(map.size() == 0)
-         throw new IllegalStateException(ErrorCodes.MISMATCH_SIZE + "Map from the Resource is size zero"); 
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("resourceMap");
+
       HttpServletRequest request = (HttpServletRequest)webResource.getServletRequest();
-      
       this.policyRegistration = (PolicyRegistration) map.get(ResourceKeys.POLICY_REGISTRATION);
       if(this.policyRegistration == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "PolicyRegistration passed is null");
-      this.policyContextID = webResource.getPolicyContextID();  
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("policyRegistration");
+      this.policyContextID = webResource.getPolicyContextID();
       
       Boolean userDataCheck = checkBooleanValue((Boolean)map.get(ResourceKeys.USERDATA_PERM_CHECK));
       Boolean roleRefCheck = checkBooleanValue((Boolean)map.get(ResourceKeys.ROLEREF_PERM_CHECK)); 
@@ -94,8 +84,8 @@ public class WebXACMLPolicyModuleDelegate extends AuthorizationModuleDelegate
          return AuthorizationContext.PERMIT; //Base class decision holds good
       
       if(request == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Request is null"); 
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("servletRequest");
+
       return process(request, role);
    } 
    
@@ -114,15 +104,15 @@ public class WebXACMLPolicyModuleDelegate extends AuthorizationModuleDelegate
    /**
     * Process the web request
     * @param request
-    * @param sc
+    * @param callerRoles
     * @return
     */ 
    private int process(HttpServletRequest request, RoleGroup callerRoles ) 
    { 
       Principal userP = request.getUserPrincipal();
       if(userP == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "User Principal is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("userPrincipal");
+
       int result = AuthorizationContext.DENY;
       WebXACMLUtil util = new WebXACMLUtil();
       try
@@ -138,8 +128,7 @@ public class WebXACMLPolicyModuleDelegate extends AuthorizationModuleDelegate
       }
       catch(Exception e)
       {
-         if(trace)
-            log.trace("Exception in processing:",e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
          result = AuthorizationContext.DENY;
       }  
       return result;

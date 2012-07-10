@@ -34,7 +34,7 @@ import java.util.Iterator;
 
 import javax.security.jacc.PolicyContextException;
 
-import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 
 /** The permissions for a JACC context id. This implementation is based on
  * the 3.2.x model of associating the declarative roles with the Subject of
@@ -47,19 +47,15 @@ import org.jboss.logging.Logger;
  */
 public class ContextPolicy
 {
-   private static Logger log = Logger.getLogger(ContextPolicy.class);
    private String contextID;
    private Permissions excludedPermissions = new Permissions();
    private Permissions uncheckedPermissions = new Permissions();
    /** HashMap<String, Permissions> role name to permissions mapping */
    private HashMap<String, Permissions> rolePermissions = new HashMap<String, Permissions>();
-   /** Flag indicating if our category is at trace level for logging */
-   private boolean trace;
 
    ContextPolicy(String contextID)
    {
       this.contextID = contextID;
-      this.trace = log.isTraceEnabled();
    }
 
    Permissions getPermissions()
@@ -74,11 +70,11 @@ public class ContextPolicy
       Iterator<Permissions> iter = rolePermissions.values().iterator();
       while( iter.hasNext() )
       {
-         Permissions rp = (Permissions) iter.next();
+         Permissions rp = iter.next();
          eter = rp.elements();
          while( eter.hasMoreElements() )
          {
-            Permission p = (Permission) eter.nextElement();
+            Permission p = eter.nextElement();
             perms.add(p);
          }
       }
@@ -91,17 +87,15 @@ public class ContextPolicy
       // First check the excluded permissions
       if( excludedPermissions.implies(permission) )
       {
-         if( trace )
-            log.trace("Denied: Matched excluded set, permission="+permission);
+         PicketBoxLogger.LOGGER.traceImpliesMatchesExcludedSet(permission);
          return false;
       }
 
       // Next see if this matches an unchecked permission
       if( uncheckedPermissions.implies(permission) )
       {
-         if( trace )
-            log.trace("Allowed: Matched unchecked set, permission="+permission);
-         return true;         
+         PicketBoxLogger.LOGGER.traceImpliesMatchesUncheckedSet(permission);
+         return true;
       }
 
       // Check principal to role permissions
@@ -117,7 +111,7 @@ public class ContextPolicy
             Enumeration<? extends Principal> iter = g.members();
             while( iter.hasMoreElements() )
             {
-               p = (Principal) iter.nextElement();
+               p = iter.nextElement();
                String name = p.getName();
                principalNames.add(name);
             }
@@ -129,26 +123,22 @@ public class ContextPolicy
          }
       }
       if( principalNames.size() > 0 )
-      { 
-         if(trace)
-            log.trace("ProtectionDomain principals="+principalNames);
+      {
+         PicketBoxLogger.LOGGER.traceProtectionDomainPrincipals(principalNames);
          for(int n = 0; implied == false && n < principalNames.size(); n ++)
          {
-            String name = (String) principalNames.get(n);
-            Permissions perms = (Permissions) rolePermissions.get(name);
-            if( trace )
-               log.trace("Checking role="+name+" perms="+perms);
+            String name = principalNames.get(n);
+            Permissions perms = rolePermissions.get(name);
+            PicketBoxLogger.LOGGER.debugImpliesParameters(name, perms);
             if( perms == null )
                continue;
             implied = perms.implies(permission);
-            if( trace )
-               log.trace((implied ? "Allowed: " : "Denied: ")+" permission="+permission);
+            PicketBoxLogger.LOGGER.debugImpliesResult(implied);
          }
       }
       else
       {
-         if( trace )
-            log.trace("No principals found in domain: "+domain);
+         PicketBoxLogger.LOGGER.traceNoPrincipalsInProtectionDomain(domain);
       }
 
       return implied;
@@ -173,7 +163,7 @@ public class ContextPolicy
       Enumeration<Permission> iter = permissions.elements();
       while( iter.hasMoreElements() )
       {
-         Permission p = (Permission) iter.nextElement();
+         Permission p = iter.nextElement();
          excludedPermissions.add(p);
       }
    }
@@ -181,7 +171,7 @@ public class ContextPolicy
    void addToRole(String roleName, Permission permission)
       throws PolicyContextException
    {
-      Permissions perms = (Permissions) rolePermissions.get(roleName);
+      Permissions perms = rolePermissions.get(roleName);
       if( perms == null )
       {
          perms = new Permissions();
@@ -193,7 +183,7 @@ public class ContextPolicy
    void addToRole(String roleName, PermissionCollection permissions)
       throws PolicyContextException
    {
-      Permissions perms = (Permissions) rolePermissions.get(roleName);
+      Permissions perms = rolePermissions.get(roleName);
       if( perms == null )
       {
          perms = new Permissions();
@@ -202,7 +192,7 @@ public class ContextPolicy
       Enumeration<Permission> iter = permissions.elements();
       while( iter.hasMoreElements() )
       {
-         Permission p = (Permission) iter.nextElement();
+         Permission p = iter.nextElement();
          perms.add(p);
       }
    }
@@ -219,7 +209,7 @@ public class ContextPolicy
       Enumeration<Permission> iter = permissions.elements();
       while( iter.hasMoreElements() )
       {
-         Permission p = (Permission) iter.nextElement();
+         Permission p = iter.nextElement();
          uncheckedPermissions.add(p);
       }
    }
@@ -270,7 +260,7 @@ public class ContextPolicy
    
    Permissions getPermissionsForRole(String role)
    { 
-      return (Permissions) this.rolePermissions.get(role);
+      return this.rolePermissions.get(role);
    }
 
    public String toString()
@@ -282,7 +272,7 @@ public class ContextPolicy
       Enumeration<Permission> iter = excludedPermissions.elements();
       while( iter.hasMoreElements() )
       {
-         Permission p = (Permission) iter.nextElement();
+         Permission p = iter.nextElement();
          tmp.append("<Permission type='");
          tmp.append(p.getClass());
          tmp.append("' name='");
@@ -297,7 +287,7 @@ public class ContextPolicy
       iter = uncheckedPermissions.elements();
       while( iter.hasMoreElements() )
       {
-         Permission p = (Permission) iter.nextElement();
+         Permission p = iter.nextElement();
          tmp.append("<Permission type='");
          tmp.append(p.getClass());
          tmp.append(" name='");
@@ -312,13 +302,13 @@ public class ContextPolicy
       Iterator<String> roles = rolePermissions.keySet().iterator();
       while( roles.hasNext() )
       {
-         String role = (String) roles.next();
-         Permissions perms = (Permissions) rolePermissions.get(role);
+         String role = roles.next();
+         Permissions perms = rolePermissions.get(role);
          iter = perms.elements();
          tmp.append("\t\t<Role name='"+role+"'>\n");
          while( iter.hasMoreElements() )
          {
-            Permission p = (Permission) iter.nextElement();
+            Permission p = iter.nextElement();
             tmp.append("<Permission type='");
             tmp.append(p.getClass());
             tmp.append(" name='");

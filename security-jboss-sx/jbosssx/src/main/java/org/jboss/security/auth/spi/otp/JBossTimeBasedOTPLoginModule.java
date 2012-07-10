@@ -43,7 +43,8 @@ import javax.security.jacc.PolicyContext;
 import javax.security.jacc.PolicyContextException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.otp.TimeBasedOTP;
@@ -122,13 +123,10 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
 	   PASSWORD_STACKING,USE_FIRST_PASSWORD,NUM_OF_DIGITS_OPT,ALGORITHM,ADDITIONAL_ROLES
    };
    
-   private static Logger log = Logger.getLogger( JBossTimeBasedOTPLoginModule.class );
-   private boolean trace = log.isTraceEnabled();
-
    public static final String TOTP = "totp";
 
    private Map<String,Object> lmSharedState = new HashMap<String,Object>();
-   private Map<String, Object> lmOptions = new HashMap<String,Object>(); 
+   private Map<String, Object> lmOptions = new HashMap<String,Object>();
    private CallbackHandler callbackHandler;
    private boolean useFirstPass;
 
@@ -150,12 +148,10 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
 	   * the code here has been intentionally kept identical
 	   */
       HashSet<String> validOptions = new HashSet<String>(Arrays.asList(ALL_VALID_OPTIONS));
-      for (Object key : options.keySet())
+      for (String key : options.keySet())
       {
-    	 if (!validOptions.contains((String)key))
-         {
-            log.warn("Invalid or misspelled option: " + key);
-         }
+    	 if (!validOptions.contains(key))
+             PicketBoxLogger.LOGGER.warnInvalidModuleOption(key);
       }
 	  
       this.subject = subject;
@@ -178,7 +174,7 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
       
       //Algorithm
       String algorithmStr = (String) options.get(ALGORITHM);
-      if( algorithmStr != null && algorithmStr != "" )
+      if( algorithmStr != null && !algorithmStr.isEmpty())
       {
          if( algorithmStr.equalsIgnoreCase( TimeBasedOTP.HMAC_SHA256) )
             algorithm = TimeBasedOTP.HMAC_SHA256;
@@ -194,16 +190,16 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
     */
    public boolean login() throws LoginException
    {
-      String username = null;
+      String username;
        
 
-      if( useFirstPass == true )
+      if(useFirstPass)
       {
          username = (String) lmSharedState.get("javax.security.auth.login.name");  
       }
       else
       { 
-         NameCallback nc = new NameCallback("User name: ", "guest"); 
+         NameCallback nc = new NameCallback(PicketBoxMessages.MESSAGES.enterUsernameMessage(), "guest");
          Callback[] callbacks = { nc };
          try
          {
@@ -212,7 +208,7 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
          catch ( Exception e )
          {
             LoginException le = new LoginException();
-            le.initCause( e );
+            le.initCause(e);
             throw le;
          } 
 
@@ -227,12 +223,12 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
       try
       {
     	 is = tcl.getResourceAsStream( "otp-users.properties" );
-         otp.load( is );
+         otp.load(is);
       }
-      catch (IOException e )
+      catch (IOException e)
       {
-         LoginException le = new LoginException( "Unable to load the otp users properties");
-         le.initCause( e );
+         LoginException le = new LoginException();
+         le.initCause(e);
          throw le;
       }
       finally
@@ -245,11 +241,7 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
       String submittedTOTP = this.getTimeBasedOTPFromRequest();
       if( submittedTOTP == null || submittedTOTP.length() == 0 )
       {
-         if( trace )
-         {
-            log.trace( "Either the TOTP in request was null or was of zero length::TOTP=" + submittedTOTP );
-         }
-         throw new LoginException(); 
+         throw new LoginException();
       }
   
       try
@@ -269,7 +261,7 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
             result =  TimeBasedOTPUtil.validate512( submittedTOTP, seed.getBytes() , NUMBER_OF_DIGITS ); 
          }
          
-         if( result == false )
+         if(!result)
             throw new LoginException();
          
          //add in roles if needed
@@ -284,7 +276,7 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
       catch (GeneralSecurityException e)
       {
          LoginException le = new LoginException();
-         le.initCause( e );
+         le.initCause(e);
          throw le;
       } 
    }
@@ -327,10 +319,7 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
       }
       catch (PolicyContextException e)
       {
-         if( log.isTraceEnabled() )
-         {
-            log.trace( "Error getting request::", e ); 
-         } 
+         PicketBoxLogger.LOGGER.debugErrorGettingRequestFromPolicyContext(e);
       }
       return totp; 
    }
@@ -340,10 +329,10 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
       if( ! group.getName().equals( SecurityConstants.ROLES_IDENTIFIER ) )
         return;
         
-      if( additionalRoles != null && additionalRoles != "" )
+      if(additionalRoles != null && !additionalRoles.isEmpty())
       {   
          StringTokenizer st = new StringTokenizer( additionalRoles , "," );
-         while( st != null && st.hasMoreTokens() )
+         while(st.hasMoreTokens())
          {
             group.addMember( new SimplePrincipal( st.nextToken().trim() ) ); 
          }
@@ -358,7 +347,7 @@ public class JBossTimeBasedOTPLoginModule implements LoginModule
             fis.close();
          }
       }
-      catch(Exception e)
+      catch(Exception ignored)
       {}
    }
 }

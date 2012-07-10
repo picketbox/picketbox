@@ -36,8 +36,8 @@ import javax.security.jacc.WebRoleRefPermission;
 import javax.security.jacc.WebUserDataPermission;
 import javax.servlet.http.HttpServletRequest;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -66,28 +66,22 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    
    private String canonicalRequestURI = null; 
 
-   public WebJACCPolicyModuleDelegate()
-   {  
-      log = Logger.getLogger(WebJACCPolicyModuleDelegate.class);
-      trace = log.isTraceEnabled();
-   }
-
    /**
-    * @see AuthorizationModuleDelegate#authorize(Resource)
+    * @see AuthorizationModuleDelegate#authorize(org.jboss.security.authorization.Resource, javax.security.auth.Subject, org.jboss.security.identity.RoleGroup)
     */
    @SuppressWarnings("unchecked")
    public int authorize(Resource resource, Subject callerSubject, RoleGroup role)
    {
       if(resource instanceof WebResource == false)
-         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "resource is not a WebResource");
-      
+         throw PicketBoxMessages.MESSAGES.invalidType(WebResource.class.getName());
+
       WebResource webResource = (WebResource) resource;
       
       //Get the context map
       Map<String,Object> map = resource.getMap();
       if(map == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Map from the Resource is null"); 
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("resourceMap");
+
       //Get the Request Object
       request = (HttpServletRequest) webResource.getServletRequest();
       
@@ -117,14 +111,12 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
          if(roleRefCheck)
             decision = this.hasRole(principal, roleName, roles, servletName);
          else
-            if(trace)
-              log.trace("Check is not for resourcePerm, userDataPerm or roleRefPerm.");
+            PicketBoxLogger.LOGGER.debugInvalidWebJaccCheck();
       }
       catch(IOException ioe)
       {
-         if(trace)
-            log.trace("IOException:",ioe);
-      } 
+         PicketBoxLogger.LOGGER.debugIgnoredException(ioe);
+      }
       return decision ? AuthorizationContext.PERMIT : AuthorizationContext.DENY;
    }
 
@@ -171,13 +163,7 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    private boolean checkPolicy(Permission perm, Principal[] principals)
    { 
       ProtectionDomain pd = new ProtectionDomain(webCS, null, null, principals);
-      boolean allowed = policy.implies(pd, perm);
-      if( trace )
-      {
-         String msg = (allowed ? "Allowed: " : "Denied: ") +perm;
-         log.trace(msg);
-      }
-      return allowed;
+      return policy.implies(pd, perm);
    } 
    
    /**
@@ -195,11 +181,8 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    
    /**
     * Perform hasResourcePermission Check
-    * @param request
-    * @param response
-    * @param securityConstraints
-    * @param context
     * @param caller
+    * @param role
     * @return
     * @throws IOException
     */
@@ -210,15 +193,14 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
       WebResourcePermission perm = new WebResourcePermission(this.canonicalRequestURI, 
                                                      request.getMethod());
       boolean allowed = checkPolicy(perm, requestPrincipal, caller, role );
-      if( trace )
-         log.trace("hasResourcePermission, perm="+perm+", allowed="+allowed); 
+      PicketBoxLogger.LOGGER.traceHasResourcePermission(perm.toString(), allowed);
       return allowed;
    }
 
    /**
     * Perform hasRole check 
     * @param principal
-    * @param role
+    * @param roleName
     * @param roles
     * @return
     */
@@ -226,8 +208,8 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
          Set<Principal> roles, String servletName)
    { 
       if(servletName == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "servletName is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("servletName");
+
       WebRoleRefPermission perm = new WebRoleRefPermission(servletName, roleName);
       Principal[] principals = {principal}; 
       if( roles != null )
@@ -236,8 +218,7 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
          roles.toArray(principals);
       }
       boolean allowed = checkPolicy(perm, principals);
-      if( trace )
-         log.trace("hasRole, perm="+perm+", allowed="+allowed);
+      PicketBoxLogger.LOGGER.traceHasRolePermission(perm.toString(), allowed);
       return allowed;
    }
 
@@ -246,9 +227,6 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
     * If this module returns false, the base class (Realm) will
     * make the decision as to whether a redirection to the ssl
     * port needs to be done
-    * @param request
-    * @param response
-    * @param constraints
     * @return
     * @throws IOException
     */
@@ -256,8 +234,6 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    { 
       WebUserDataPermission perm = new WebUserDataPermission(this.canonicalRequestURI,
                                                request.getMethod());
-      if( trace )
-         log.trace("hasUserDataPermission, p="+perm);
       boolean ok = false;
       try
       {
@@ -266,9 +242,9 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
       }
       catch(Exception e)
       {
-         if( trace )
-            log.trace("Failed to checkSecurityAssociation", e);
-      } 
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
+      }
+      PicketBoxLogger.LOGGER.traceHasUserDataPermission(perm.toString(), ok);
       return ok;
    }
 
@@ -282,12 +258,9 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    private void validatePermissionChecks(Boolean resourceCheck,
          Boolean userDataCheck, Boolean roleRefCheck)
    {
-      if(trace)
-         log.trace("resourceCheck="+resourceCheck + " : userDataCheck=" + userDataCheck
-               + " : roleRefCheck=" + roleRefCheck); 
-      if((resourceCheck == Boolean.TRUE && userDataCheck == Boolean.TRUE && roleRefCheck == Boolean.TRUE ) 
+      if((resourceCheck == Boolean.TRUE && userDataCheck == Boolean.TRUE && roleRefCheck == Boolean.TRUE )
            || (resourceCheck == Boolean.TRUE && userDataCheck == Boolean.TRUE) 
            || (userDataCheck == Boolean.TRUE && roleRefCheck == Boolean.TRUE))
-    	  throw new IllegalStateException(ErrorCodes.INVALID_OPERATION + "Permission checks must be different"); 
+          throw PicketBoxMessages.MESSAGES.invalidPermissionChecks();
    }
 }

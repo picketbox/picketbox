@@ -24,8 +24,8 @@ package org.jboss.security.auth.spi;
 import java.security.acl.Group;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -39,7 +39,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.Util;
 
 /**
@@ -137,7 +138,6 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
    {
       addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
-      trace = log.isTraceEnabled();
       bindDN = (String) options.get(BIND_DN);
       bindCredential = (String) options.get(BIND_CREDENTIAL);
       if ((bindCredential != null) && bindCredential.startsWith("{EXT}"))
@@ -148,7 +148,7 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
          }
          catch (Exception e)
          {
-            throw new IllegalArgumentException(ErrorCodes.PROCESSING_FAILED + "Unable to decode bindCredential", e);
+            throw PicketBoxMessages.MESSAGES.failedToDecodeBindCredential(e);
          }
       }
       baseDN = (String) options.get(BASE_CTX_DN);
@@ -162,8 +162,7 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
          }
          catch (NumberFormatException e)
          {
-            if (trace)
-               log.trace("Failed to parse: " + timeLimit + ", using searchTimeLimit=" + searchTimeLimit, e);
+            PicketBoxLogger.LOGGER.debugFailureToParseNumberProperty(SEARCH_TIME_LIMIT_OPT, searchTimeLimit);
          }
       }
       String scope = (String) options.get(SEARCH_SCOPE_OPT);
@@ -198,8 +197,7 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
          {
             if (allowEmptyPasswords == false)
             {
-               if(trace)
-                  log.trace("Rejecting empty password due to allowEmptyPasswords");
+               PicketBoxLogger.LOGGER.traceRejectingEmptyPassword();
                return false;
             }
          }
@@ -236,7 +234,6 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
       }
       catch(Exception e)
       {
-    	  log.warn(e);
     	  throw e;
       }
 	  finally
@@ -281,20 +278,8 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
          env.setProperty(Context.SECURITY_PRINCIPAL, dn);
       if (credential != null)
          env.put(Context.SECURITY_CREDENTIALS, credential);
-      traceLdapEnv(env);
+      PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(env);
       return new InitialLdapContext(env, null);
-   }
-   
-   private void traceLdapEnv(Properties env)
-   {
-      if (trace)
-      {
-         Properties tmp = new Properties();
-         tmp.putAll(env);
-         tmp.setProperty(Context.SECURITY_CREDENTIALS, "***");
-         tmp.setProperty(BIND_CREDENTIAL, "***");
-         log.trace("Logging into LDAP server, env=" + tmp.toString());
-      }
    }
    
    protected String bindDNAuthentication(InitialLdapContext ctx, String user, Object credential, String baseDN,
@@ -313,7 +298,7 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
       if (!results.hasMore())
       {
          results.close();
-         throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Search of baseDN(" + baseDN + ") found no matches");
+         throw PicketBoxMessages.MESSAGES.failedToFindBaseContextDN(baseDN);
       }
 
       SearchResult sr = results.next();
@@ -333,7 +318,7 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
          if (sr.isRelative())
             userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
          else
-            throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
+            throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);
       }
 
       results.close();

@@ -39,7 +39,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Cascade;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.identity.Identity;
 
@@ -260,7 +260,7 @@ public class ACLImpl implements ACL, Serializable
    public void setResource(Resource resource)
    {
       if (this.resource != null)
-         throw new IllegalStateException(ErrorCodes.PROCESSING_FAILED + "ACL resource has already been set");
+         throw PicketBoxMessages.MESSAGES.aclResourceAlreadySet();
       this.resource = resource;
    }
 

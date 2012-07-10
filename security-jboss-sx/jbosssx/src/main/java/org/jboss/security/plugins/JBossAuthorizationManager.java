@@ -39,11 +39,11 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.AnybodyPrincipal;
 import org.jboss.security.AuthorizationManager;
-import org.jboss.security.ErrorCodes;
 import org.jboss.security.NobodyPrincipal;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.RunAs;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
@@ -75,10 +75,6 @@ public class JBossAuthorizationManager
 implements AuthorizationManager 
 {  
    private final String securityDomain;  
-   
-   private static Logger log = Logger.getLogger(JBossAuthorizationManager.class);
-   
-   protected boolean trace = log.isTraceEnabled(); 
    
    private AuthorizationContext authorizationContext = null;
    
@@ -150,8 +146,7 @@ implements AuthorizationManager
    {
       boolean hasRole = false;
       RoleGroup roles = this.getCurrentRoles(principal);
-      if( trace )
-         log.trace("doesUserHaveRole(Set), roles: "+roles);
+      PicketBoxLogger.LOGGER.traceBeginDoesUserHaveRole(principal, roles != null ? roles.toString() : "");
       if(roles != null)
       {
          Iterator<Principal> iter = rolePrincipals.iterator();
@@ -159,12 +154,9 @@ implements AuthorizationManager
          {
             Principal role = iter.next();
             hasRole = doesRoleGroupHaveRole(role, roles);
-            if( trace )
-               log.trace("hasRole("+role+")="+hasRole);
          }
-         if( trace )
-            log.trace("hasRole="+hasRole);
-      } 
+         PicketBoxLogger.LOGGER.traceEndDoesUserHaveRole(hasRole);
+      }
       return hasRole;
    }
    
@@ -241,20 +233,19 @@ implements AuthorizationManager
    /**
     * Set the AuthorizationContext
     */
-   public void setAuthorizationContext(AuthorizationContext ac)
+   public void setAuthorizationContext(AuthorizationContext authorizationContext)
    {
-      if(ac == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "AuthorizationContext is null");
+      if(authorizationContext == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("authorizationContext");
 
-      String sc = ac.getSecurityDomain();
+      String sc = authorizationContext.getSecurityDomain();
       if(this.securityDomain.equals(sc) == false)
-         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "The Security Domain "+ sc 
-               + " does not match with " + this.securityDomain);
-      
+         throw PicketBoxMessages.MESSAGES.unexpectedSecurityDomainInContext(this.securityDomain);
+
       lock.lock();
       try
       { 
-         this.authorizationContext = ac;  
+         this.authorizationContext = authorizationContext;
       }
       finally
       {
@@ -273,7 +264,7 @@ implements AuthorizationManager
     */
    public Group getTargetRoles(Principal targetPrincipal, Map<String,Object> contextMap)
    {
-      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED + "NYI");
+      throw new UnsupportedOperationException();
    }
 
    //Private Methods
@@ -308,7 +299,6 @@ implements AuthorizationManager
       }
       catch (Exception e)
       {
-         log.trace("Exception in getSubjectRoles:",e); 
          throw new RuntimeException(e);
       } 
       SecurityContext sc = scb.getSecurityContext();
@@ -348,18 +338,18 @@ implements AuthorizationManager
       return getCurrentRoles(principal,subject,sc); 
    } 
    
-   private RoleGroup getCurrentRoles(Principal principal, Subject subject, SecurityContext sc)
+   private RoleGroup getCurrentRoles(Principal principal, Subject subject, SecurityContext securityContext)
    {
       if(subject == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Subject passed is null");
-      if(sc == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Sec Ctx sc passed is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("subject");
+      if(securityContext == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("securityContext");
+
       Group subjectRoles = getGroupFromSubject(subject);
       
       boolean emptyContextRoles = false;
       
-      RoleGroup userRoles = sc.getUtil().getRoles();
+      RoleGroup userRoles = securityContext.getUtil().getRoles();
       //Group userRoles = (Group)sc.getData().get(ROLES_IDENTIFIER);
       if(userRoles == null || "true".equalsIgnoreCase(SubjectActions.getRefreshSecurityContextRoles()))
          emptyContextRoles = true;
@@ -372,7 +362,7 @@ implements AuthorizationManager
        */
       if(subjectRoles != userRoles || emptyContextRoles)
       { 
-         MappingManager mm = sc.getMappingManager();
+         MappingManager mm = securityContext.getMappingManager();
          MappingContext<RoleGroup> mc = mm.getMappingContext(MappingType.ROLE.name());
         
          RoleGroup mappedUserRoles = userRoles;
@@ -388,23 +378,21 @@ implements AuthorizationManager
             
             //Append the principals also
             contextMap.put(SecurityConstants.PRINCIPALS_SET_IDENTIFIER, subject.getPrincipals());
-            if(trace)
-               log.trace("Roles before mapping:"+ userRoles);
-            
+            PicketBoxLogger.LOGGER.traceRolesBeforeMapping(userRoles != null ? userRoles.toString() : "");
+
             if(userRoles == null)
                userRoles = this.getEmptyRoleGroup();
             
             mc.performMapping(contextMap, userRoles);
             mappedUserRoles = mc.getMappingResult().getMappedObject();
-            if(trace)
-               log.trace("Roles after mapping:"+ userRoles);
-         } 
-         sc.getData().put(ROLES_IDENTIFIER, mappedUserRoles); 
+            PicketBoxLogger.LOGGER.traceRolesAfterMapping(userRoles.toString());
+         }
+         securityContext.getData().put(ROLES_IDENTIFIER, mappedUserRoles);
       } 
       
       //Ensure that the security context has the roles
-      if(sc.getUtil().getRoles() == null)
-         sc.getUtil().setRoles(userRoles);
+      if(securityContext.getUtil().getRoles() == null)
+         securityContext.getUtil().setRoles(userRoles);
 
       //Send the final processed (mapping applied) roles
       return userRoles;   
@@ -449,7 +437,7 @@ implements AuthorizationManager
    private Group getGroupFromSubject(Subject theSubject)
    {
       if(theSubject == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Subject is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("theSubject");
       Set<Group> subjectGroups = theSubject.getPrincipals(Group.class);
       Iterator<Group> iter = subjectGroups.iterator();
       Group roles = null;
@@ -466,7 +454,7 @@ implements AuthorizationManager
    private RoleGroup getRoleGroup(Group roleGroup)
    {
       if(roleGroup == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "roleGroup is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("roleGroup");
       SimpleRoleGroup srg = new SimpleRoleGroup(roleGroup.getName());
       Enumeration<? extends Principal> principals = roleGroup.members();
       while(principals.hasMoreElements())
@@ -480,9 +468,9 @@ implements AuthorizationManager
    private void validateResource(Resource resource)
    {
       if(resource == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "resource is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("resource");
       if(resource.getMap() == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "resource has null context map");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("resource.contextMap");
    }
    
    private RoleGroup getEmptyRoleGroup()

@@ -32,12 +32,10 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.ServerAuth;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.config.ControlFlag;
 
 //$Id$
@@ -51,11 +49,7 @@ import org.jboss.security.config.ControlFlag;
 @SuppressWarnings("rawtypes")
 public class JBossServerAuthContext implements ServerAuthContext
 {  
-   protected static Logger log = Logger.getLogger(JBossServerAuthContext.class);
-   
-   protected boolean trace = log.isTraceEnabled();
-   
-   private List<ServerAuthModule> modules = new ArrayList<ServerAuthModule>(); 
+   private List<ServerAuthModule> modules = new ArrayList<ServerAuthModule>();
      
    private Map<String,Map> moduleOptionsByName = new HashMap<String,Map>();
    
@@ -83,7 +77,7 @@ public class JBossServerAuthContext implements ServerAuthContext
    
    
    /**
-    * @see ServerAuth#cleanSubject(Subject, Map)
+    * @see ServerAuthContext#cleanSubject(javax.security.auth.message.MessageInfo, javax.security.auth.Subject)
     */
    public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException
    { 
@@ -94,7 +88,7 @@ public class JBossServerAuthContext implements ServerAuthContext
    }
    
    /**
-    * @see ServerAuth#secureResponse(AuthParam, Subject, Map)
+    * @see ServerAuthContext#secureResponse(javax.security.auth.message.MessageInfo, javax.security.auth.Subject)
     */
    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException
    { 
@@ -107,8 +101,8 @@ public class JBossServerAuthContext implements ServerAuthContext
    }
    
    /**
-    * @see ServerAuth#validateRequest(AuthParam, Subject, Subject, Map)
-    */ 
+    * @see ServerAuthContext#validateRequest(javax.security.auth.message.MessageInfo, javax.security.auth.Subject, javax.security.auth.Subject)
+    */
    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, 
          Subject serviceSubject) throws AuthException
    { 
@@ -136,8 +130,8 @@ public class JBossServerAuthContext implements ServerAuthContext
             supportingModules.add(sam); 
       }
       if(supportingModules.size() == 0)
-         throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "No ServerAuthModule configured to support type:"+requestType);
-      
+         throw PicketBoxMessages.MESSAGES.noServerAuthModuleForRequestType(requestType);
+
       AuthStatus authStatus = invokeModules(messageInfo, clientSubject, serviceSubject);
       return authStatus;
    } 
@@ -181,18 +175,14 @@ public class JBossServerAuthContext implements ServerAuthContext
          //REQUISITE case
          if(flag == ControlFlag.REQUISITE)
          {
-            if(trace)
-               log.trace("REQUISITE failed for " + module); 
             if(moduleException == null)
-               moduleException = new AuthException("Auth  failed");
+               moduleException = new AuthException(PicketBoxMessages.MESSAGES.authenticationFailedMessage());
             else
                throw moduleException;
          }
          //REQUIRED Case
          if(flag == ControlFlag.REQUIRED)
          {
-            if(trace)
-               log.trace("REQUIRED failed for " + module);
             if(encounteredRequiredError == false)
                encounteredRequiredError = true;
          }
@@ -203,11 +193,11 @@ public class JBossServerAuthContext implements ServerAuthContext
       //All the authorization modules have been visited.
       String msg = getAdditionalErrorMessage(moduleException);
       if(encounteredRequiredError)
-         throw new AuthException(ErrorCodes.PROCESSING_FAILED + "Auth Failed:"+ msg);
+         throw new AuthException(PicketBoxMessages.MESSAGES.authenticationFailedMessage() + msg);
       if(overallDecision == AuthStatus.FAILURE && encounteredOptionalError)
-         throw new AuthException(ErrorCodes.PROCESSING_FAILED + "Auth Failed:" + msg);
+         throw new AuthException(PicketBoxMessages.MESSAGES.authenticationFailedMessage() + msg);
       if(overallDecision == AuthStatus.FAILURE)
-         throw new AuthException(ErrorCodes.PROCESSING_FAILED + "Auth Failed:Denied.");
+         throw new AuthException(PicketBoxMessages.MESSAGES.authenticationFailedMessage());
       return AuthStatus.SUCCESS;
    }
    

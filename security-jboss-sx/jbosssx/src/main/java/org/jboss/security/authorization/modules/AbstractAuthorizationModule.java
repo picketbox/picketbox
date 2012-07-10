@@ -28,14 +28,12 @@ import java.util.StringTokenizer;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.AuthorizationException;
 import org.jboss.security.authorization.AuthorizationModule;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.authorization.ResourceType;
-import org.jboss.security.identity.Role;
 import org.jboss.security.identity.RoleGroup;
 
 //$Id$
@@ -54,8 +52,6 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
    protected Map<String,Object> options = null;
    
    protected RoleGroup role = null;
-   
-   protected Logger log = null;
    
    /** Map of delegates for the various layers */
    protected Map<ResourceType,String> delegateMap = new HashMap<ResourceType,String>();
@@ -97,7 +93,7 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
    } 
 
    /**
-    * @see AuthorizationModule#initialize(Subject, CallbackHandler, Map, Map, Role)
+    * @see AuthorizationModule#initialize(javax.security.auth.Subject, javax.security.auth.callback.CallbackHandler, java.util.Map, java.util.Map, org.jboss.security.identity.RoleGroup)
     */
    public void initialize(Subject subject, CallbackHandler handler, Map<String,Object> sharedState,
          Map<String,Object> options, RoleGroup subjectRole)
@@ -139,7 +135,7 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
       ResourceType layer = resource.getLayer();
       String delegateStr = (String)delegateMap.get(layer);
       if(delegateStr == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Delegate is missing for layer="+layer);
+         throw PicketBoxMessages.MESSAGES.missingDelegateForLayer(layer != null ? layer.toString() : null);
       AuthorizationModuleDelegate delegate = null;
       try
       {
@@ -148,7 +144,6 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
       }
       catch(Exception e)
       { 
-         log.debug("Error with delegate:",e);
          IllegalStateException ise = new IllegalStateException(e.getLocalizedMessage());
          ise.initCause(e);
          throw ise;
@@ -195,7 +190,7 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
          String keyPair = st.nextToken();
          StringTokenizer keyst = new StringTokenizer(keyPair,"=");
          if(keyst.countTokens() != 2)
-            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "DelegateMap entry invalid:"+keyPair);
+            throw PicketBoxMessages.MESSAGES.invalidDelegateMapEntry(keyPair);
          String key = keyst.nextToken();
          String value = keyst.nextToken();
          this.delegateMap.put(ResourceType.valueOf(key),value);

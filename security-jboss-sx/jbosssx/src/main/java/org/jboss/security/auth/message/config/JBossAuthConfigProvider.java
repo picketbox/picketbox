@@ -30,8 +30,7 @@ import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ServerAuthConfig;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 //$Id$
 
@@ -43,7 +42,6 @@ import org.jboss.security.ErrorCodes;
  */
 public class JBossAuthConfigProvider implements AuthConfigProvider
 {
-   private static Logger log = Logger.getLogger(JBossAuthConfigProvider.class);
    private Map<String,Object> contextProperties = null;
    private String cbhProperty = "authconfigprovider.client.callbackhandler";
 
@@ -75,8 +73,7 @@ public class JBossAuthConfigProvider implements AuthConfigProvider
          } 
          catch(Exception e)
          {
-            log.error("Exception in instantiating callback handler:",e);
-            throw new AuthException(e.getMessage());
+            throw new AuthException(e.getLocalizedMessage());
          }
       }
       
@@ -99,8 +96,7 @@ public class JBossAuthConfigProvider implements AuthConfigProvider
          } 
          catch(Exception e)
          {
-            log.error("Exception in instantiating callback handler:",e);
-            throw new AuthException(e.getMessage());
+            throw new AuthException(e.getLocalizedMessage());
          }
       }
       return new JBossServerAuthConfig(layer,appContext, handler, contextProperties);
@@ -118,8 +114,7 @@ public class JBossAuthConfigProvider implements AuthConfigProvider
    {
       String cbhClass = System.getProperty(cbhProperty);
       if(cbhClass == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "CallbackHandler not defined by system property "+
-               cbhProperty);
+         throw PicketBoxMessages.MESSAGES.callbackHandlerSysPropertyNotSet(cbhProperty);
       ClassLoader cl = SecurityActions.getContextClassLoader();
       Class<?> cls = cl.loadClass(cbhClass);
       

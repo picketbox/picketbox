@@ -37,7 +37,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
-import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxMessages;
 
 /** Read a password in opaque form to a file for use with the FilePassword
  accessor in conjunction with the JaasSecurityDomain
@@ -112,8 +112,6 @@ public class FilePassword
       }
       catch(Exception e)
       {
-         Logger log = Logger.getLogger(FilePassword.class);
-         log.error("Failed to decode password file: "+passwordFile, e);
          throw new IOException(e.getMessage());
       }
       finally
@@ -209,14 +207,7 @@ public class FilePassword
    {
       if( args.length != 4 )
       {
-         System.err.println(
-            "Write a password in opaque form to a file for use with the FilePassword accessor"
-           +"Usage: FilePassword salt count password password-file"
-           +"  salt  : an 8 char sequence for PBEKeySpec"
-           +"  count : iteration count for PBEKeySpec"
-           +"  password : the clear text password to write"
-           +"  password-file : the path to the file to write the password to"
-         );
+         System.err.println(PicketBoxMessages.MESSAGES.filePasswordUsageMessage());
       }
       byte[] salt = args[0].substring(0, 8).getBytes();
       int count = Integer.parseInt(args[1]);

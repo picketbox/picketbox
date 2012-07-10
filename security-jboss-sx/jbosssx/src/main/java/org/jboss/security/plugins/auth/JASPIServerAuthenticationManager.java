@@ -34,7 +34,8 @@ import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.jacc.PolicyContext;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.ServerAuthenticationManager;
 
 /**
@@ -77,7 +78,7 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
          AuthConfigFactory factory = AuthConfigFactory.getFactory();
          AuthConfigProvider provider = factory.getConfigProvider(layer,appContext,null); 
          if(provider == null)
-            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Provider is null for "+ layer + " for "+ appContext);
+            throw PicketBoxMessages.MESSAGES.invalidNullAuthConfigProviderForLayer(layer, appContext);
 
          ServerAuthConfig serverConfig = provider.getServerAuthConfig(layer,appContext,callbackHandler);
          String authContextId = serverConfig.getAuthContextID(messageInfo);
@@ -94,9 +95,8 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
       }
       catch(AuthException ae)
       {
-         if(trace)
-            log.trace("AuthException:",ae);
-      } 
+          PicketBoxLogger.LOGGER.debugIgnoredException(ae);
+      }
       return AuthStatus.SUCCESS == status ;
    }
    
@@ -112,7 +112,7 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
          AuthConfigFactory factory = AuthConfigFactory.getFactory();
          AuthConfigProvider provider = factory.getConfigProvider(layer, appContext, null); 
          if(provider == null)
-            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Provider is null for "+ layer + " for "+ appContext);
+            throw PicketBoxMessages.MESSAGES.invalidNullAuthConfigProviderForLayer(layer, appContext);
 
          ServerAuthConfig serverConfig = provider.getServerAuthConfig(layer, appContext, handler);
          String authContextId = serverConfig.getAuthContextID(messageInfo);
@@ -126,9 +126,8 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
       }
       catch(AuthException ae)
       {
-         if(trace)
-            log.trace("AuthException:",ae);
-      } 
+          PicketBoxLogger.LOGGER.debugIgnoredException(ae);
+      }
    }
    
 }

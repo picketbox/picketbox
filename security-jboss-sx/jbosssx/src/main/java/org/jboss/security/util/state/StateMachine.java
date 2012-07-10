@@ -22,9 +22,11 @@
 package org.jboss.security.util.state;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Iterator;
-import org.jboss.logging.Logger;
+import java.util.Set;
+
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 
 /** The representation of a finite state machine.
  * 
@@ -34,7 +36,6 @@ import org.jboss.logging.Logger;
 @SuppressWarnings("unchecked")
 public class StateMachine implements Cloneable
 {
-   private static Logger log = Logger.getLogger(StateMachine.class);
    /** A description of the state machine */
    private String description;
    /** The set of states making up the state machine */
@@ -120,14 +121,13 @@ public class StateMachine implements Cloneable
       throws IllegalTransitionException
    {
       Transition t = currentState.getTransition(actionName);
-      if( t == null )
+      if(t == null)
       {
-         String msg = "No transition for action: '" + actionName
-            + "' from state: '" + currentState.getName() + "'";
-         throw new IllegalTransitionException(msg);
+         throw new IllegalTransitionException(PicketBoxMessages.MESSAGES.invalidTransitionForActionMessage(actionName,
+                 currentState != null ? currentState.getName() : null));
       }
       State nextState = t.getTarget();
-      log.trace("nextState("+actionName+") = "+nextState);
+      PicketBoxLogger.LOGGER.traceStateMachineNextState(actionName, nextState != null ? nextState.getName() : null);
       currentState = nextState;
       return currentState;
    }

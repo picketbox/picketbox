@@ -38,8 +38,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SimplePrincipal;
 
 /** An example of how one could encrypt the database password for a jca
@@ -68,12 +68,6 @@ import org.jboss.security.SimplePrincipal;
 public class SecureIdentityLoginModule
    extends AbstractPasswordCredentialLoginModule
 {
-   /**
-    * Class logger
-    */
-   private static final Logger log = Logger.getLogger(SecureIdentityLoginModule.class);
-   private boolean trace = log.isTraceEnabled();
-
    private String username;
    private String password;
 
@@ -89,21 +83,20 @@ public class SecureIdentityLoginModule
         username = (String) options.get("userName");      	
         if (username == null)
         {
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The user name is a required option");
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage("username"));
         }
      }
       password = (String) options.get("password");
       if (password == null)
       {
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "The password is a required option");
+         throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.missingRequiredModuleOptionMessage("password"));
       }
    }
 
    @Override
    public boolean login() throws LoginException
    {
-      if (trace)
-         log.trace("login called");
+      PicketBoxLogger.LOGGER.traceBeginLogin();
       if (super.login())
          return true;
 
@@ -126,9 +119,9 @@ public class SecureIdentityLoginModule
       }
       catch(Exception e)
       {
-         if (trace)
-            log.trace("Failed to decode password", e);
-         throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to decode password: " + e.getMessage());
+         LoginException le = new LoginException(e.getLocalizedMessage());
+         le.initCause(e);
+         throw le;
       }
       return true;
    }
@@ -143,8 +136,7 @@ public class SecureIdentityLoginModule
 
    protected Principal getIdentity()
    {
-      if (trace)
-         log.trace("getIdentity called, username=" + username);
+      PicketBoxLogger.LOGGER.traceBeginGetIdentity(username);
       Principal principal = new SimplePrincipal(username);
       return principal;
    }
@@ -214,6 +206,6 @@ public class SecureIdentityLoginModule
    public static void main(String[] args) throws Exception
    {
       String encode = encode(args[0]);
-      System.out.println("Encoded password: "+encode);
+      System.out.println("Encoded password: " + encode);
    }
 }

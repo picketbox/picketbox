@@ -42,6 +42,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.vault.SecurityVaultUtil;
 
@@ -241,7 +242,6 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
     */
    protected boolean validatePassword(String inputPassword, String expectedPassword)
    {
-      boolean trace = log.isTraceEnabled();
       boolean isValid = false;
       if (inputPassword != null)
       {
@@ -255,8 +255,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
                allowEmptyPasswords = Boolean.valueOf(flag).booleanValue();
             if (allowEmptyPasswords == false)
             {
-               if (trace)
-                  log.trace("Rejecting empty password due to allowEmptyPasswords");
+               PicketBoxLogger.LOGGER.traceRejectingEmptyPassword();
                return false;
             }
          }
@@ -278,7 +277,6 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
    
    private void createLdapInitContext(String username, Object credential) throws Exception
    {
-      boolean trace = log.isTraceEnabled();
       Properties env = new Properties();
       // Map all option into the JNDI InitialLdapContext env
       Iterator iter = options.entrySet().iterator();
@@ -330,14 +328,8 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
       env.setProperty(Context.PROVIDER_URL, providerURL);
       env.setProperty(Context.SECURITY_PRINCIPAL, userDN);
       env.put(Context.SECURITY_CREDENTIALS, credential);
-      if (trace)
-      {
-         Properties tmp = new Properties();
-         tmp.putAll(env);
-         tmp.setProperty(Context.SECURITY_CREDENTIALS, "***");
-         if (trace)
-            log.trace("Logging into LDAP server, env=" + tmp.toString());
-      }
+
+      PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(env);
 
       InitialLdapContext ctx = null;
       ClassLoader currentTCCL = SecurityActions.getContextClassLoader();
@@ -346,14 +338,12 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
          if (currentTCCL != null)
             SecurityActions.setContextClassLoader(null);
          ctx = new InitialLdapContext(env, null);
-         if (trace)
-            log.trace("Logged into LDAP server, " + ctx);
+         PicketBoxLogger.LOGGER.traceSuccessfulLogInToLDAP(ctx.toString());
 
          if (bindDN != null)
          {
             // Rebind the ctx to the bind dn/credentials for the roles searches
-            if (trace)
-               log.trace("Rebind SECURITY_PRINCIPAL to: " + bindDN);
+            PicketBoxLogger.LOGGER.traceRebindWithConfiguredPrincipal(bindDN);
             env.setProperty(Context.SECURITY_PRINCIPAL, bindDN);
             env.put(Context.SECURITY_CREDENTIALS, bindCredential);
             ctx = new InitialLdapContext(env, null);
@@ -375,14 +365,12 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
                if (result.get(userRolesCtxDNAttributeName) != null)
                {
                   rolesCtxDN = result.get(userRolesCtxDNAttributeName).get().toString();
-                  if (trace)
-                     log.trace("Found user roles context DN: " + rolesCtxDN);
+                  PicketBoxLogger.LOGGER.traceFoundUserRolesContextDN(rolesCtxDN);
                }
             }
             catch (NamingException e)
             {
-               if (trace)
-                  log.debug("Failed to query userRolesCtxDNAttributeName", e);
+                PicketBoxLogger.LOGGER.debugFailureToQueryLDAPAttribute(userRolesCtxDNAttributeName, userDN, e);
             }
          }
 
@@ -424,8 +412,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
                }
                catch (NumberFormatException e)
                {
-                  if (trace)
-                     log.trace("Failed to parse: " + timeLimit + ", using searchTimeLimit=" + searchTimeLimit, e);
+                  PicketBoxLogger.LOGGER.debugFailureToParseNumberProperty(SEARCH_TIME_LIMIT_OPT, searchTimeLimit);
                }
             }
             String scope = (String) options.get(SEARCH_SCOPE_OPT);
@@ -444,20 +431,14 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
                controls.setReturningAttributes(roleAttr);
                controls.setTimeLimit(searchTimeLimit);
                Object[] filterArgs = {userToMatch};
-               if (trace)
-               {
-                  log.trace("searching rolesCtxDN=" + rolesCtxDN + ", roleFilter=" + roleFilter + ", filterArgs="
-                        + userToMatch + ", roleAttr=" + Arrays.toString(roleAttr) + ", searchScope=" + searchScope
-                        + ", searchTimeLimit=" + searchTimeLimit);
-               }
+               PicketBoxLogger.LOGGER.traceRolesDNSearch(rolesCtxDN, roleFilter.toString(), userToMatch,
+                       Arrays.toString(roleAttr), searchScope, searchTimeLimit);
                answer = ctx.search(rolesCtxDN, roleFilter.toString(), filterArgs, controls);
                while (answer.hasMore())
                {
                   SearchResult sr = (SearchResult) answer.next();
-                  if (trace)
-                  {
-                     log.trace("Checking answer: " + sr.getName());
-                  }
+                  PicketBoxLogger.LOGGER.traceCheckSearchResult(sr.getName());
+
                   Attributes attrs = sr.getAttributes();
                   Attribute roles = attrs.get(roleAttrName);
                   if (roles != null)
@@ -471,8 +452,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
                            // Query the roleDN location for the value of roleNameAttributeID
                            String roleDN = value.toString();
                            String[] returnAttribute = {roleNameAttributeID};
-                           if (trace)
-                              log.trace("Following roleDN: " + roleDN);
+                           PicketBoxLogger.LOGGER.traceFollowRoleDN(roleDN);
                            try
                            {
                               Attributes result2 = ctx.getAttributes(roleDN, returnAttribute);
@@ -488,8 +468,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
                            }
                            catch (NamingException e)
                            {
-                              if (trace)
-                                 log.trace("Failed to query roleNameAttrName", e);
+                              PicketBoxLogger.LOGGER.debugFailureToQueryLDAPAttribute(roleNameAttributeID, roleDN, e);
                            }
                         }
                         else
@@ -502,15 +481,13 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
                   }
                   else
                   {
-                     if (trace)
-                        log.trace("No attribute " + roleAttrName + " found in " + sr.getName());
+                     PicketBoxLogger.LOGGER.debugFailureToFindAttrInSearchResult(roleAttrName, sr.getName());
                   }
                }
             }
             catch (NamingException e)
             {
-               if (trace)
-                  log.trace("Failed to locate roles", e);
+               PicketBoxLogger.LOGGER.debugFailureToExecuteRolesDNSearch(e);
             }
             finally
             {
@@ -531,19 +508,17 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
 
    private void addRole(String roleName)
    {
-      boolean trace = log.isTraceEnabled();
       if (roleName != null)
       {
          try
          {
             Principal p = super.createIdentity(roleName);
-            if (trace)
-               log.trace("Assign user to role " + roleName);
+            PicketBoxLogger.LOGGER.traceAssignUserToRole(roleName);
             userRoles.addMember(p);
          }
          catch (Exception e)
          {
-            log.debug("Failed to create principal: " + roleName, e);
+            PicketBoxLogger.LOGGER.debugFailureToCreatePrincipal(roleName, e);
          }
       }
    }

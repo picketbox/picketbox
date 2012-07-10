@@ -22,7 +22,6 @@
 package org.jboss.security.auth.container.modules;
 
 import java.util.Arrays;
-import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -56,7 +55,7 @@ public class SimpleServerAuthModule extends AbstractServerAuthModule
  
 
    /**
-    * @see ServerAuthModule#secureResponse(AuthParam, Subject, Map)
+    * @see ServerAuthModule#secureResponse(javax.security.auth.message.MessageInfo, javax.security.auth.Subject)
     */
    public AuthStatus secureResponse(MessageInfo param, Subject source) throws AuthException
    {  

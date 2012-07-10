@@ -31,7 +31,7 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /** An implementation of CallbackHandler is assigned a Principal, and
  opaque Object credential as values passed to the constructor. This is suitable
@@ -127,7 +127,7 @@ public class SecurityAssociationHandler implements CallbackHandler
             catch (Exception e)
             {
             }
-            throw new UnsupportedCallbackException(c, ErrorCodes.UNRECOGNIZED_CALLBACK);
+            throw PicketBoxMessages.MESSAGES.unableToHandleCallback(c, this.getClass().getName(), c.getClass().getCanonicalName());
          }
       }
    }

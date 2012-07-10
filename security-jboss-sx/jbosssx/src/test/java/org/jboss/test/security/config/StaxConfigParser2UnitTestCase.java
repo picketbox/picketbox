@@ -29,7 +29,7 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 
 import junit.framework.Assert;
-
+import junit.framework.TestCase;
 import org.jboss.security.acl.config.ACLProviderEntry;
 import org.jboss.security.audit.config.AuditProviderEntry;
 import org.jboss.security.auth.container.config.AuthModuleEntry;
@@ -49,14 +49,13 @@ import org.jboss.security.config.parser.StaxBasedConfigParser;
 import org.jboss.security.identitytrust.config.IdentityTrustModuleEntry;
 import org.jboss.security.mapping.MappingType;
 import org.jboss.security.mapping.config.MappingModuleEntry;
-import org.jboss.test.AbstractJBossSXTest;
 
 /**
  * Unit test the stax based config parser
  * @author Anil.Saldhana@redhat.com
  * @since Jan 22, 2010
  */
-public class StaxConfigParser2UnitTestCase extends AbstractJBossSXTest
+public class StaxConfigParser2UnitTestCase extends TestCase
 {
    public StaxConfigParser2UnitTestCase(String name)
    {

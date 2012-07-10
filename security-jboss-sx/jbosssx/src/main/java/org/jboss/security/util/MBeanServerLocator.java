@@ -26,7 +26,7 @@ import java.util.Iterator;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  * A helper class to locate an MBeanServer.
@@ -122,6 +122,6 @@ public class MBeanServerLocator
             return server;
          }
       }
-      throw new IllegalStateException(ErrorCodes.PROCESSING_FAILED + "No 'jboss' MBeanServer found!");
+      throw PicketBoxMessages.MESSAGES.unableToLocateMBeanServer();
    }   
 }

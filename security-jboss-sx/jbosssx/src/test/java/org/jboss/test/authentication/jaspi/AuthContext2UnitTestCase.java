@@ -34,8 +34,8 @@ import javax.security.auth.login.Configuration;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.auth.login.XMLLoginConfigImpl;
@@ -43,8 +43,6 @@ import org.jboss.security.auth.message.GenericMessageInfo;
 import org.jboss.security.config.parser.StaxBasedConfigParser;
 import org.jboss.security.plugins.JBossSecurityContext;
 import org.jboss.security.plugins.auth.JASPIServerAuthenticationManager;
-import org.jboss.test.JBossTestCase;
-import org.jboss.test.JBossTestSetup;
 
 
 /**
@@ -54,7 +52,7 @@ import org.jboss.test.JBossTestSetup;
  * @since Jul 16, 2007
  * @version $Revision$
  */
-public class AuthContext2UnitTestCase extends JBossTestCase
+public class AuthContext2UnitTestCase extends TestCase
 { 
    public AuthContext2UnitTestCase(String name)
    {
@@ -66,7 +64,7 @@ public class AuthContext2UnitTestCase extends JBossTestCase
       TestSuite suite = new TestSuite();
       suite.addTest(new TestSuite(AuthContext2UnitTestCase.class));
       // Create an initializer for the test suite
-      TestSetup wrapper = new JBossTestSetup(suite)
+      TestSetup wrapper = new TestSetup(suite)
       { 
          protected void setUp() throws Exception
          {

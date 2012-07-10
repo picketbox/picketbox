@@ -33,8 +33,6 @@ import javax.security.auth.message.config.AuthConfig;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ClientAuthContext;
 
-import org.jboss.security.ErrorCodes;
-
 //$Id$
 
 /**
@@ -73,7 +71,7 @@ public class JBossClientAuthConfig implements ClientAuthConfig
    }
 
    /**
-    * @see ClientAuthConfig#getAuthContext(String, Map)
+    * @see ClientAuthConfig#getAuthContext(String, javax.security.auth.Subject, java.util.Map)
     */ 
    @SuppressWarnings("rawtypes")
    public ClientAuthContext getAuthContext(String authContextID,
@@ -89,14 +87,6 @@ public class JBossClientAuthConfig implements ClientAuthConfig
    public String getMessageLayer()
    { 
       return this.layer;
-   }
-
-   /**
-    * @see AuthConfig#getOperation(AuthParam)
-    */
-   public String getOperation(MessageInfo messageInfo)
-   { 
-      throw new IllegalStateException(ErrorCodes.NOT_YET_IMPLEMENTED);
    }
 
    /**
@@ -121,11 +111,11 @@ public class JBossClientAuthConfig implements ClientAuthConfig
 
    public String getAuthContextID(MessageInfo messageInfo)
    {
-      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED);
+      throw new UnsupportedOperationException();
    }
 
    public boolean isProtected()
    { 
-      throw new RuntimeException(ErrorCodes.NOT_YET_IMPLEMENTED);
+      throw new UnsupportedOperationException();
    } 
 }

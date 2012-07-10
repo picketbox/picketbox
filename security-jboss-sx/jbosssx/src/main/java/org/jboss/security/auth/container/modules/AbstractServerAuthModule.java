@@ -34,8 +34,6 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.security.auth.spi.LoginModule;
 
-import org.jboss.logging.Logger;
-
 //$Id$
 
 /**
@@ -65,11 +63,8 @@ public abstract class AbstractServerAuthModule implements ServerAuthModule
    
    protected ArrayList<Class> supportedTypes = new ArrayList<Class>();
    
-   protected Logger log;
-   protected boolean trace = false;
-
    /**
-    * @see ServerAuthModule#initialize(MessagePolicy, MessagePolicy, CallbackHandler, Map, boolean)
+    * @see ServerAuthModule#initialize(javax.security.auth.message.MessagePolicy, javax.security.auth.message.MessagePolicy, javax.security.auth.callback.CallbackHandler, java.util.Map)
     */ 
    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, 
          CallbackHandler handler, Map options )

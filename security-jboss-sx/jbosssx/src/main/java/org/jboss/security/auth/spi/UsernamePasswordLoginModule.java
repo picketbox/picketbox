@@ -23,8 +23,6 @@ package org.jboss.security.auth.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +37,8 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.crypto.digest.DigestCallback;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.vault.SecurityVaultException;
 import org.jboss.security.vault.SecurityVaultUtil;
 
@@ -153,15 +152,9 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          if( hashEncoding == null )
             hashEncoding = Util.BASE64_ENCODING;
          hashCharset = (String) options.get(HASH_CHARSET);
-         if( log.isTraceEnabled() )
-         {
-            log.trace("Password hashing activated: algorithm = " + hashAlgorithm
-               + ", encoding = " + hashEncoding
-               + ", charset = " + (hashCharset == null ? "{default}" : hashCharset)
-               + ", callback = " + options.get(DIGEST_CALLBACK)
-               + ", storeCallback = " + options.get(STORE_DIGEST_CALLBACK)
-            );
-         }
+
+         PicketBoxLogger.LOGGER.debugPasswordHashing(hashAlgorithm, hashEncoding, hashCharset,
+                 options.get(DIGEST_CALLBACK).toString(), options.get(STORE_DIGEST_CALLBACK).toString());
       }
       String flag = (String) options.get(IGNORE_PASSWORD_CASE);
       ignorePasswordCase = Boolean.valueOf(flag).booleanValue();
@@ -187,7 +180,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          }
          catch(Exception e)
          {
-            this.log.debug("Unable to instantiate input validator class: " + flag);
+            PicketBoxLogger.LOGGER.debugFailureToInstantiateClass(flag, e);
          }
       }
    }
@@ -214,8 +207,9 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
             }
             catch(Exception e)
             {
-               log.debug("Failed to create principal", e);
-               throw new LoginException(ErrorCodes.PROCESSING_FAILED  + "Failed to create principal: "+ e.getMessage());
+               LoginException le = PicketBoxMessages.MESSAGES.failedToCreatePrincipal(e.getLocalizedMessage());
+               le.initCause(e);
+               throw le;
             }
          }
          Object password = sharedState.get("javax.security.auth.login.password");
@@ -243,14 +237,14 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          }
          catch(InputValidationException ive)
          {
-            throw new FailedLoginException(ive.getMessage());
+            throw new FailedLoginException(ive.getLocalizedMessage());
          }
       }
 
       if( username == null && password == null )
       {
          identity = unauthenticatedIdentity;
-         super.log.trace("Authenticating as unauthenticatedIdentity="+identity);
+         PicketBoxLogger.LOGGER.traceUsingUnauthIdentity(identity != null ? identity.getName() : null);
       }
 
       if( identity == null )
@@ -261,8 +255,9 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          }
          catch(Exception e)
          {
-            log.debug("Failed to create principal", e);
-            throw new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to create principal: "+ e.getMessage());
+            LoginException le = PicketBoxMessages.MESSAGES.failedToCreatePrincipal(e.getLocalizedMessage());
+            le.initCause(e);
+            throw le;
          }
 
          // Hash the user entered password if password hashing is in use
@@ -279,7 +274,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
         	 } 
         	 catch (SecurityVaultException e) 
         	 {
-        		 LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Unable to get the password value from vault");
+        		 LoginException le = PicketBoxMessages.MESSAGES.unableToGetPasswordFromVault();
         		 le.initCause(e);
         		 throw le;
         	 }
@@ -290,16 +285,10 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          if( validatePassword(password, expectedPassword) == false )
          {
             Throwable ex = getValidateError();
-            FailedLoginException fle = new FailedLoginException("Password Incorrect/Password Required");
-            if( ex != null && this.throwValidateError == true)
-            {
-               log.debug("Bad password for username="+username, ex);
+            FailedLoginException fle = PicketBoxMessages.MESSAGES.invalidPassword();
+            PicketBoxLogger.LOGGER.debugBadPasswordForUsername(username);
+            if( ex != null && this.throwValidateError)
                fle.initCause(ex);
-            }
-            else
-            {
-               log.debug("Bad password for username="+username);
-            }
             throw fle;
          }
       }
@@ -310,7 +299,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          sharedState.put("javax.security.auth.login.password", credential);
       }
       super.loginOk = true;
-      super.log.trace("User '" + identity + "' authenticated, loginOk="+loginOk);
+      PicketBoxLogger.LOGGER.traceEndLogin(super.loginOk);
       return true;
    }
 
@@ -348,12 +337,11 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
       // prompt for a username and password
       if( callbackHandler == null )
       {
-         throw new LoginException(ErrorCodes.NULL_VALUE + "Error: no CallbackHandler available " +
-         "to collect authentication information");
+         throw PicketBoxMessages.MESSAGES.noCallbackHandlerAvailable();
       }
       
-      NameCallback nc = new NameCallback("User name: ", "guest");
-      PasswordCallback pc = new PasswordCallback("Password: ", false);
+      NameCallback nc = new NameCallback(PicketBoxMessages.MESSAGES.enterUsernameMessage(), "guest");
+      PasswordCallback pc = new PasswordCallback(PicketBoxMessages.MESSAGES.enterPasswordMessage(), false);
       Callback[] callbacks = {nc, pc};
       String username = null;
       String password = null;
@@ -372,13 +360,13 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
       }
       catch(IOException e)
       {
-         LoginException le = new LoginException(ErrorCodes.PROCESSING_FAILED + "Failed to get username/password");
+         LoginException le = PicketBoxMessages.MESSAGES.failedToInvokeCallbackHandler();
          le.initCause(e);
          throw le;
       }
       catch(UnsupportedCallbackException e)
       {
-         LoginException le = new LoginException(ErrorCodes.UNRECOGNIZED_CALLBACK + "CallbackHandler does not support: " + e.getCallback());
+         LoginException le = new LoginException();
          le.initCause(e);
          throw le;
       }
@@ -417,36 +405,8 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
    *  digestOption DigestCallback
    */
    @SuppressWarnings("unchecked")
-   protected String createPasswordHash(String username, String password,
-     String digestOption)
-     throws LoginException
+   protected String createPasswordHash(String username, String password, String digestOption) throws LoginException
    {
-      // Support for 4.0.2 createPasswordHash(String, String) override
-      if( legacyCreatePasswordHash )
-      {
-         try
-         {
-            // Try to invoke the subclass createPasswordHash(String, String)
-            Class<?>[] sig = {String.class, String.class};
-            Method createPasswordHash = getClass().getMethod("createPasswordHash", sig);
-            Object[] args = {username, password};
-            String passwordHash = (String) createPasswordHash.invoke(this, args);
-            return passwordHash;
-         }
-         catch (InvocationTargetException e)
-         {
-            LoginException le = new LoginException("Failed to delegate createPasswordHash");
-            le.initCause(e.getTargetException());
-            throw le;
-         }
-         catch(Exception e)
-         {
-            LoginException le = new LoginException("Failed to delegate createPasswordHash");
-            le.initCause(e);
-            throw le;            
-         }
-      }
-
       DigestCallback callback = null;
       String callbackClassName = (String) options.get(digestOption);
       if( callbackClassName != null )
@@ -455,16 +415,13 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          {
             Class<?> callbackClass = SecurityActions.loadClass(callbackClassName);
             callback = (DigestCallback) callbackClass.newInstance();
-            if( log.isTraceEnabled() )
-               log.trace("Created DigestCallback: "+callback);
+            PicketBoxLogger.LOGGER.traceCreateDigestCallback(callbackClassName);
          }
          catch (Exception e)
          {
-            if( log.isTraceEnabled() )
-               log.trace("Failed to load DigestCallback", e);
-            SecurityException ex = new SecurityException("Failed to load DigestCallback");
-            ex.initCause(e);
-            throw ex;
+            LoginException le = new LoginException(PicketBoxMessages.MESSAGES.failedToInstantiateClassMessage(Callback.class));
+            le.initCause(e);
+            throw le;
          }
          Map<String,Object> tmp = new HashMap<String,Object>();
          tmp.putAll(options);
@@ -482,14 +439,14 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
             }
             catch(IOException e)
             {
-               LoginException le = new LoginException(digestOption+" callback failed");
+               LoginException le = PicketBoxMessages.MESSAGES.failedToInvokeCallbackHandler();
                le.initCause(e);
                throw le;
             }
             catch(UnsupportedCallbackException e)
             {
-               LoginException le = new LoginException(digestOption+" callback failed");
-               le.initCause(e);
+                LoginException le = PicketBoxMessages.MESSAGES.failedToInvokeCallbackHandler();
+                le.initCause(e);
                throw le;
             }
          }
@@ -543,8 +500,8 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
     candidate password.
     @return the valid password String
     */
-   abstract protected String getUsersPassword() throws LoginException;
-   
+   protected abstract String getUsersPassword() throws LoginException;
+
    protected void safeClose(InputStream fis)
    {
       try

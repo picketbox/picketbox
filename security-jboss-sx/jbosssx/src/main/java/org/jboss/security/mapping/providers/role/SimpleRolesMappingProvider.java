@@ -25,9 +25,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
-
 /**
  * A simple {@code MappingProvider} that reads roles from the options map.
  * The option key is the username to assign roles to and the option value is
@@ -42,8 +39,6 @@ public class SimpleRolesMappingProvider extends PropertiesRolesMappingProvider
    @Override
    public void init(Map<String, Object> options)
    {
-      log = Logger.getLogger(getClass());
-      
       this.options = options;
 
       if (options != null)
@@ -54,7 +49,7 @@ public class SimpleRolesMappingProvider extends PropertiesRolesMappingProvider
          }
          catch (IOException ioe)
          {
-            throw new IllegalStateException(ErrorCodes.PROCESSING_FAILED + "Error loading roles from options", ioe);
+            throw new IllegalStateException(ioe);
          }
       }
    }

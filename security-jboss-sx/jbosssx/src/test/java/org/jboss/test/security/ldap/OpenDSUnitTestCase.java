@@ -31,7 +31,7 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.jboss.test.JBossTestCase;
+import junit.framework.TestCase;
 
 /**
  *  Test Basic OpenDS functionality
@@ -39,7 +39,7 @@ import org.jboss.test.JBossTestCase;
  *  @since  Aug 23, 2007 
  *  @version $Revision$
  */
-public class OpenDSUnitTestCase extends JBossTestCase
+public class OpenDSUnitTestCase extends TestCase
 {   
    protected String serverHost;
    protected String port = "10389";
@@ -84,7 +84,7 @@ public class OpenDSUnitTestCase extends JBossTestCase
          assertTrue("Creation of opendsDir DB success", dbDir.mkdirs());
       }   
       
-      serverHost = getServerHost(); 
+      serverHost = "localhost";
       
       opends = new OpenDS();
       opends.intialize(openDSDir);

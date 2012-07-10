@@ -27,8 +27,7 @@ import java.util.Map;
 import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.plugins.TransactionManagerLocator;
 
@@ -42,7 +41,6 @@ import org.jboss.security.plugins.TransactionManagerLocator;
  */
 public class DatabaseRolesMappingProvider extends AbstractRolesMappingProvider
 {
-
    protected String dsJndiName;
    
    protected String rolesQuery;
@@ -55,16 +53,14 @@ public class DatabaseRolesMappingProvider extends AbstractRolesMappingProvider
  
    public void init(Map<String, Object> options)
    {
-      log = Logger.getLogger(getClass());
-
       if (options != null)
       {
          dsJndiName = (String) options.get("dsJndiName");
          if (dsJndiName == null)
-            throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Datasource JNDI name can't be null");
+            throw PicketBoxMessages.MESSAGES.invalidNullProperty("dsJndiName");
          rolesQuery = (String) options.get("rolesQuery");
          if (rolesQuery == null)
-            throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "Prepared statement can't be null");
+            throw PicketBoxMessages.MESSAGES.invalidNullProperty("rolesQuery");
          String option = (String) options.get("suspendResume");
          if (option != null)
             suspendResume = Boolean.valueOf(option.toString()).booleanValue();
@@ -80,23 +76,23 @@ public class DatabaseRolesMappingProvider extends AbstractRolesMappingProvider
          }
          catch (NamingException e)
          {
-            throw new RuntimeException(ErrorCodes.PROCESSING_FAILED + "Unable to get Transaction Manager", e);
+            throw PicketBoxMessages.MESSAGES.failedToGetTransactionManager(e);
          }
       }
    }
  
-   public void performMapping(Map<String, Object> map, RoleGroup mappedObject)
+   public void performMapping(Map<String, Object> contextMap, RoleGroup mappedObject)
    {
-      if (map == null || map.isEmpty())
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Context Map is null or empty");
-      
+      if (contextMap == null || contextMap.isEmpty())
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextMap");
+
       //Obtain the principal to roles mapping
-      Principal principal = getCallerPrincipal(map);
+      Principal principal = getCallerPrincipal(contextMap);
 
       if (principal != null && rolesQuery != null)
       {
          String username = principal.getName();
-         Util.addRolesToGroup(username, mappedObject, dsJndiName, rolesQuery, log, suspendResume, tm);
+         Util.addRolesToGroup(username, mappedObject, dsJndiName, rolesQuery, suspendResume, tm);
          result.setMappedObject(mappedObject);
       }
 

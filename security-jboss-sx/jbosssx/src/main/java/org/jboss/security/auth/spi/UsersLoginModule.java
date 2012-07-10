@@ -34,7 +34,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  * A simple properties file based login module that consults a Java Properties
@@ -94,7 +95,7 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
       {
          // Note that although this exception isn't passed on, users or roles will be null
          // so that any call to login will throw a LoginException.
-         super.log.error("Failed to load users/passwords/role files", e);
+         PicketBoxLogger.LOGGER.errorLoadingUserRolesPropertiesFiles(e);
       }
    }
 
@@ -109,7 +110,7 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
    public boolean login() throws LoginException
    {
       if (users == null)
-         throw new LoginException(ErrorCodes.NULL_VALUE + "Missing users.properties file.");
+         throw PicketBoxMessages.MESSAGES.missingPropertiesFile(usersRsrcName);
 
       return super.login();
    }
@@ -149,9 +150,8 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
       ClassLoader loader = SecurityActions.getContextClassLoader();
       URL url = loader.getResource(propertiesName);
       if (url == null)
-         throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not found");
+         throw PicketBoxMessages.MESSAGES.unableToFindPropertiesFile(propertiesName);
 
-      super.log.trace("Properties file=" + url);
       InputStream is = null;
       try
       {
@@ -163,7 +163,7 @@ public class UsersLoginModule extends UsernamePasswordLoginModule
          }
          else
          {
-            throw new IOException(ErrorCodes.NULL_VALUE + "Properties file " + propertiesName + " not available");
+            throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
          }
          return bundle;
       }

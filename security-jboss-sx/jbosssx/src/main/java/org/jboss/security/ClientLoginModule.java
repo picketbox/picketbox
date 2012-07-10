@@ -68,7 +68,6 @@ import org.jboss.logging.Logger;
  */
 public class ClientLoginModule implements LoginModule
 {
-   private static Logger log = Logger.getLogger(ClientLoginModule.class);
    private Subject subject;
    private CallbackHandler callbackHandler;
    /** The principal set during login() */
@@ -83,8 +82,7 @@ public class ClientLoginModule implements LoginModule
     be restored on logout.
     */
    private boolean restoreLoginIdentity;
-   private boolean trace;
-   
+
    /** To restore prelogin identity **/
    private SecurityContext cachedSecurityContext;
 
@@ -96,15 +94,13 @@ public class ClientLoginModule implements LoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler,
                           Map<String,?> sharedState, Map<String,?> options)
    {
-      this.trace = log.isTraceEnabled();
       this.subject = subject;
       this.callbackHandler = callbackHandler;
       this.sharedState = sharedState;
 
       //log securityDomain, if set.
-      if(trace)
-	    log.trace("Security domain: " + 
-		   (String)options.get(SecurityConstants.SECURITY_DOMAIN_OPTION));
+      PicketBoxLogger.LOGGER.debugModuleOption(SecurityConstants.SECURITY_DOMAIN_OPTION,
+              options.get(SecurityConstants.SECURITY_DOMAIN_OPTION));
 
       // Check for multi-threaded option
       String flag = (String) options.get("multi-threaded");
@@ -113,8 +109,7 @@ public class ClientLoginModule implements LoginModule
          /* Turn on the server mode which uses thread local storage for
             the principal information.
          */
-         if(trace)
-            log.trace("Enabling multi-threaded mode");
+         PicketBoxLogger.LOGGER.debugModuleOption("multi-threaded", flag);
       }
       
       /**
@@ -128,8 +123,7 @@ public class ClientLoginModule implements LoginModule
 
       flag = (String) options.get("restore-login-identity");
       restoreLoginIdentity = Boolean.valueOf(flag).booleanValue();
-      if(trace)
-	    log.trace("Enabling restore-login-identity mode");
+      PicketBoxLogger.LOGGER.debugModuleOption("restory-login-identity", flag);
 
       /* Check for password sharing options. Any non-null value for
           password_stacking sets useFirstPass as this module has no way to
@@ -137,8 +131,7 @@ public class ClientLoginModule implements LoginModule
        */
       String passwordStacking = (String) options.get("password-stacking");
       useFirstPass = passwordStacking != null;
-      if(trace && useFirstPass)
-	    log.trace("Enabling useFirstPass mode");
+      PicketBoxLogger.LOGGER.debugModuleOption("password-stacking", passwordStacking);
 
       //Cache the existing security context
       this.cachedSecurityContext = SecurityAssociationActions.getSecurityContext();
@@ -149,8 +142,7 @@ public class ClientLoginModule implements LoginModule
     */
    public boolean login() throws LoginException
    {
-      if( trace )
-         log.trace("Begin login");
+      PicketBoxLogger.LOGGER.traceBeginLogin();
       // If useFirstPass is true, look for the shared password
       if (useFirstPass == true)
       {
@@ -170,7 +162,7 @@ public class ClientLoginModule implements LoginModule
          }
          catch (Exception e)
          {   // Dump the exception and continue
-            log.debug("Failed to obtain shared state", e);
+            PicketBoxLogger.LOGGER.debugIgnoredException(e);
          }
       }
 
@@ -178,11 +170,10 @@ public class ClientLoginModule implements LoginModule
           the username and password from the callback hander.
        */
       if (callbackHandler == null)
-         throw new LoginException(ErrorCodes.NULL_VALUE + "Error: no CallbackHandler available " +
-            "to garner authentication information from the user");
+         throw PicketBoxMessages.MESSAGES.noCallbackHandlerAvailable();
 
-      PasswordCallback pc = new PasswordCallback("Password: ", false);
-      NameCallback nc = new NameCallback("User name: ", "guest");
+      PasswordCallback pc = new PasswordCallback(PicketBoxMessages.MESSAGES.enterPasswordMessage(), false);
+      NameCallback nc = new NameCallback(PicketBoxMessages.MESSAGES.enterUsernameMessage(), "guest");
       Callback[] callbacks = {nc, pc};
       try
       {
@@ -201,30 +192,22 @@ public class ClientLoginModule implements LoginModule
             pc.clearPassword();
          }
          loginCredential = password;
-         if( trace )
-         {
-            String credType = "null";
-            if( loginCredential != null )
-               credType = loginCredential.getClass().getName();
-            log.trace("Obtained login: "+loginPrincipal
-               +", credential.class: " + credType);
-         }
+         PicketBoxLogger.LOGGER.traceObtainedAuthInfoFromHandler(loginPrincipal,
+                 loginCredential != null ? loginCredential.getClass() : null);
       }
       catch (IOException ioe)
       {
-         LoginException ex = new LoginException(ioe.toString());
+         LoginException ex = new LoginException(ioe.getLocalizedMessage());
          ex.initCause(ioe);
          throw ex;
       }
       catch (UnsupportedCallbackException uce)
       {
-         LoginException ex = new LoginException("Error: " + uce.getCallback().toString() +
-            ", not able to use this callback for username/password");
+         LoginException ex = new LoginException(uce.getLocalizedMessage());
          ex.initCause(uce);
          throw ex;
       }
-      if( trace )
-         log.trace("End login");
+      PicketBoxLogger.LOGGER.traceEndLogin(true);
       return true;
    }
 
@@ -233,9 +216,8 @@ public class ClientLoginModule implements LoginModule
     */
    public boolean commit() throws LoginException
    {
-      if( trace )
-         log.trace("commit, subject="+subject);
-      
+      PicketBoxLogger.LOGGER.traceBeginCommit(true);
+
       SecurityAssociationActions.setPrincipalInfo(loginPrincipal, loginCredential, subject);
 
       // Add the login principal to the subject if is not there
@@ -250,8 +232,7 @@ public class ClientLoginModule implements LoginModule
     */
    public boolean abort() throws LoginException
    {
-      if( trace )
-         log.trace("abort");
+      PicketBoxLogger.LOGGER.traceBeginAbort();
       if( restoreLoginIdentity == true )
       {
          SecurityAssociationActions.setSecurityContext(this.cachedSecurityContext);
@@ -267,8 +248,7 @@ public class ClientLoginModule implements LoginModule
 
    public boolean logout() throws LoginException
    {
-      if( trace )
-         log.trace("logout");
+      PicketBoxLogger.LOGGER.traceBeginLogout();
       if( restoreLoginIdentity == true )
       {
          SecurityAssociationActions.setSecurityContext(this.cachedSecurityContext);

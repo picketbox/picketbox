@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.Map.Entry;
 
 import javax.management.ObjectName;
 import javax.naming.Context;
@@ -39,8 +39,8 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.identity.Attribute;
 import org.jboss.security.identity.AttributeFactory;
@@ -95,9 +95,6 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
 {
    private Map<String, Object> options;
    
-   private static Logger log = Logger.getLogger(LdapAttributeMappingProvider.class);
-   private boolean trace = log.isTraceEnabled();
-   
    protected int searchTimeLimit = 10000;
    
    private static final String BIND_DN = "bindDN";
@@ -133,8 +130,7 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
          String bindDN = (String) options.get(BIND_DN);
          if(bindDN == null || bindDN.length() == 0)
          {
-            if(trace)
-               log.trace("bindDN is not found");
+            PicketBoxLogger.LOGGER.traceBindDNNotFound();
             return;
          }
          String bindCredential = (String) options.get(BIND_CREDENTIAL);
@@ -145,7 +141,7 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
             }
             catch (Exception e1)
             {
-               log.error("Exception in decrypting bindCredential:",e1);
+               PicketBoxLogger.LOGGER.errorDecryptingBindCredential(e1);
                return;
             }
          String securityDomain = (String) options.get(SECURITY_DOMAIN_OPT);
@@ -159,7 +155,7 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
             } 
             catch (Exception e)
             {
-               log.error("Exception in decrypting bindCredential:",e);
+               PicketBoxLogger.LOGGER.errorDecryptingBindCredential(e);
                return;
             }
          }
@@ -186,8 +182,7 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
             }
             catch (NumberFormatException e)
             {
-               if (trace)
-                  log.trace("Failed to parse: " + timeLimit + ", using searchTimeLimit=" + searchTimeLimit, e);
+               PicketBoxLogger.LOGGER.debugFailureToParseNumberProperty(SEARCH_TIME_LIMIT_OPT, searchTimeLimit);
             }
          }
          if(searchTimeLimit == 0)
@@ -214,20 +209,20 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
          try
          {
             if(baseDN == null)
-               throw new NamingException(ErrorCodes.NULL_VALUE + BASE_CTX_DN + " is null");
+               throw PicketBoxMessages.MESSAGES.invalidNullArgument(BASE_CTX_DN);
             results = ctx.search(baseDN, baseFilter, filterArgs, constraints);
             if (results.hasMore() == false)
             {
                results.close();
-               throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Search of baseDN(" + baseDN + ") found no matches");
-            } 
+               throw PicketBoxMessages.MESSAGES.failedToFindBaseContextDN(baseDN);
+            }
             SearchResult sr = results.next();
             String name = sr.getName();
             String userDN = null;
             if (sr.isRelative() == true)
                userDN = name + "," + baseDN;
             else
-               throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
+               throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);
 
             results.close();
             
@@ -266,7 +261,7 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
             }            
          }catch(NamingException ne)
          {
-            log.error(ne);
+            PicketBoxLogger.LOGGER.debugIgnoredException(ne);
             return;
          } 
          results = null;
@@ -321,19 +316,8 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
          env.setProperty(Context.SECURITY_PRINCIPAL, dn);
       if (credential != null)
          env.put(Context.SECURITY_CREDENTIALS, credential);
-      traceLdapEnv(env);
+      PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(env);
       return new InitialLdapContext(env, null);
-   }
-   
-   private void traceLdapEnv(Properties env)
-   {
-      if (trace)
-      {
-         Properties tmp = new Properties();
-         tmp.putAll(env);
-         tmp.setProperty(Context.SECURITY_CREDENTIALS, "***");
-         log.trace("Logging into LDAP server, env=" + tmp.toString());
-      }
    }
    
    private String[] getNeededAttributes(String commaSeparatedList)

@@ -27,7 +27,7 @@ import java.security.MessageDigestSpi;
 import java.security.NoSuchAlgorithmException;
 import java.security.ProviderException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /** An alternate SHA Interleave algorithm as implemented in the SRP
  distribution. This version reverses the even and odd byte streams before
@@ -61,7 +61,7 @@ public class SHAReverseInterleave extends MessageDigestSpi
       }
       catch(NoSuchAlgorithmException e)
       {
-         throw new ProviderException(ErrorCodes.FAILED_TO_OBTAIN_SHA);
+         throw PicketBoxMessages.MESSAGES.failedToObtainSHAMessageDigest(e);
       }
       evenBytes = new ByteArrayOutputStream();
       oddBytes = new ByteArrayOutputStream();

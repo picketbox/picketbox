@@ -30,7 +30,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.security.jacc.PolicyContext;
 
-import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.SecurityConstants;
 
 /** The SecurityService installs a java.security.Policy implementation that
@@ -46,7 +46,6 @@ public class SecurityService
 {
    /** The system property name for the Policy implementation class */
    private static final String JACC_POLICY_PROVIDER = "javax.security.jacc.policy.provider";
-   private static final Logger log = Logger.getLogger(SecurityService.class);
 
    /** The startup Policy.getPolicy() value */
    private Policy oldPolicy;
@@ -117,16 +116,14 @@ public class SecurityService
          }
          catch(Exception e)
          {
-            log.warn("Failed to get " + policyAttributeName
-               + " attribute from: " + policyName, e);
+            PicketBoxLogger.LOGGER.debugIgnoredException(e);
          }
       }
 
       // Use the provider system property if there is no policy
       if( jaccPolicy == null )
       {
-         String provider = getProperty(JACC_POLICY_PROVIDER,
-            "org.jboss.security.jacc.DelegatingPolicy");
+         String provider = getProperty(JACC_POLICY_PROVIDER, "org.jboss.security.jacc.DelegatingPolicy");
          ClassLoader loader = SecurityActions.getContextClassLoader();
          Class<?> providerClass = loader.loadClass(provider);
          try
@@ -139,7 +136,6 @@ public class SecurityService
          }
          catch(NoSuchMethodException e)
          {
-            log.debug("Provider does not support ctor(Policy)");
             jaccPolicy = (Policy) providerClass.newInstance();
          }
       }

@@ -32,7 +32,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.identity.Identity;
 
 /**
@@ -142,7 +142,7 @@ public class ACLEntryImpl implements ACLEntry, Serializable
    private void loadState()
    {
       if (this.permission != null)
-         throw new IllegalStateException(ErrorCodes.PROCESSING_FAILED + "ACLEntry permission has already been set");
+         throw PicketBoxMessages.MESSAGES.aclEntryPermissionAlreadySet();
       this.permission = new CompositeACLPermission(this.bitMask);
    }
 

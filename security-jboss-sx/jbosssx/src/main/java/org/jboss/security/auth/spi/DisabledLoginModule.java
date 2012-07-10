@@ -30,6 +30,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.SecurityConstants;
 
 /**
@@ -60,9 +61,9 @@ public class DisabledLoginModule implements LoginModule
       HashSet<String> validOptions = new HashSet<String>(Arrays.asList(ALL_VALID_OPTIONS));
       for (Object key : options.keySet())
       {
-    	 if (!validOptions.contains((String)key))
+    	 if (!validOptions.contains(key))
          {
-            log.warn("Invalid or misspelled option: " + key);
+             PicketBoxLogger.LOGGER.warnInvalidModuleOption((String)key);
          }
       }
 	  
@@ -71,18 +72,7 @@ public class DisabledLoginModule implements LoginModule
  
    public boolean login() throws LoginException
    {
-      StringBuffer sb = new StringBuffer();
-      if (securityDomain != null)
-      {
-         sb.append("The security domain ");
-         sb.append(securityDomain);
-      }
-      else
-      {
-         sb.append("This security domain");
-      }
-      sb.append(" has been disabled. All authentication will fail. Please check your configuration to make sure this is expected");
-      log.error(sb.toString());
+      PicketBoxLogger.LOGGER.errorUsingDisabledDomain(this.securityDomain != null ? this.securityDomain : "");
       return false;
    }
  

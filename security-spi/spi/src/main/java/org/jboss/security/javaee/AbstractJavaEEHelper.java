@@ -27,7 +27,7 @@ import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.audit.AuditEvent;
 import org.jboss.security.audit.AuditManager;
@@ -55,7 +55,7 @@ public abstract class AbstractJavaEEHelper
    public void setSecurityContext(SecurityContext sc)
    {
       if(sc == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "sc is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("security context");
       this.securityContext = sc;
    }
     

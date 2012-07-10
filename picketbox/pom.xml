@@ -16,6 +16,12 @@
 
     <dependencies>
       <dependency>
+         <groupId>org.jboss.logging</groupId>
+         <artifactId>jboss-logging</artifactId>
+         <version>3.1.0.GA</version>
+         <scope>provided</scope>
+      </dependency>
+      <dependency>
          <groupId>org.picketbox</groupId>
          <artifactId>identity-spi</artifactId>
          <version>${project.version}</version>
@@ -38,6 +44,12 @@
          <artifactId>jbosssx-bare</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>
+         <exclusions>
+             <exclusion>
+                 <groupId>org.jboss.logging</groupId>
+                 <artifactId>jboss-logging-spi</artifactId>
+             </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>org.picketbox</groupId>
@@ -46,8 +58,8 @@
          <scope>compile</scope>
          <exclusions>
          	<exclusion>
-         		<artifactId>jboss-common-core</artifactId>
-         		<groupId>jboss</groupId>
+         		<artifactId>jboss-logging-spi</artifactId>
+         		<groupId>org.jboss.logging</groupId>
          	</exclusion>
          </exclusions>
       </dependency>
@@ -58,15 +70,9 @@
          <scope>compile</scope>
       </dependency>
       <dependency>
-         <groupId>org.jboss.logging</groupId>
-         <artifactId>jboss-logging-spi</artifactId>
-         <version>2.1.1.GA</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
-         <version>4.8.1</version>
+         <version>4.8.2</version>
          <scope>test</scope>
       </dependency>
       <!-- these dependencies are needed because ACL impl classes are annotated - this must be fixed as we don't want to bring these deps in -->

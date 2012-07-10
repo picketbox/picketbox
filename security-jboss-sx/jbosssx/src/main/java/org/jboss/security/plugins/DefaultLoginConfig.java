@@ -39,8 +39,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.ReflectionException;
 import javax.security.auth.login.Configuration;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /** An mbean that uses the default JAAS login configuration file based
  implementation. 
@@ -48,9 +47,9 @@ import org.jboss.security.ErrorCodes;
 @author Scott.Stark@jboss.org
 @version $Revision$
  */
+@Deprecated
 public class DefaultLoginConfig implements DynamicMBean
 {
-   private static Logger log = Logger.getLogger(DefaultLoginConfig.class);
    private String authConfig = "auth.conf";
    private Configuration theConfig;
 
@@ -78,11 +77,6 @@ public class DefaultLoginConfig implements DynamicMBean
       if( loginConfig != null )
       {
          System.setProperty("java.security.auth.login.config", loginConfig.toExternalForm());
-         log.info("Using JAAS LoginConfig: " + loginConfig.toExternalForm());
-      }
-      else
-      {
-         log.warn("Resource: " + authConfig + " not found");
       }
    }
 
@@ -97,7 +91,6 @@ public class DefaultLoginConfig implements DynamicMBean
       if( theConfig == null )
       {
          theConfig = Configuration.getConfiguration();
-         log.debug("theConfig set to: "+theConfig);
       }
       return theConfig;
    }
@@ -108,7 +101,7 @@ public class DefaultLoginConfig implements DynamicMBean
    {
       if( name.equals("AuthConfig") )
          return getAuthConfig();
-      throw new AttributeNotFoundException(ErrorCodes.WRONG_TYPE + name+": is not an attribute");
+      throw PicketBoxMessages.MESSAGES.invalidMBeanAttribute(name);
    }
 
    public AttributeList getAttributes(String[] names)
@@ -134,8 +127,7 @@ public class DefaultLoginConfig implements DynamicMBean
    {
       Class<?> c = getClass();
       MBeanAttributeInfo[] attrInfo = {
-         new MBeanAttributeInfo("AuthConfig", "java.lang.String",
-             "", true, true, false)
+         new MBeanAttributeInfo("AuthConfig", "java.lang.String", "", true, true, false)
       };
       Constructor<?> ctor = null;
       try
@@ -195,7 +187,7 @@ public class DefaultLoginConfig implements DynamicMBean
          }
       }
       else
-         throw new AttributeNotFoundException(ErrorCodes.WRONG_TYPE + name+": is not an attribute");      
+          throw PicketBoxMessages.MESSAGES.invalidMBeanAttribute(name);
    }
 
    public AttributeList setAttributes(AttributeList attributeList)

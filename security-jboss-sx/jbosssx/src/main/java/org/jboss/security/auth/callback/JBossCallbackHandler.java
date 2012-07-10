@@ -32,7 +32,7 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  * Serializable Callback Handler
@@ -135,7 +135,7 @@ public class JBossCallbackHandler implements CallbackHandler, Serializable
          {
          } 
 
-         throw new UnsupportedCallbackException(c, ErrorCodes.UNRECOGNIZED_CALLBACK);
+         throw PicketBoxMessages.MESSAGES.unableToHandleCallback(c, this.getClass().getName(), c.getClass().getCanonicalName());
       }
       
    }

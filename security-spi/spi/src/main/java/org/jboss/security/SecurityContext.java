@@ -54,7 +54,7 @@ public interface SecurityContext extends SecurityManagerLocator, Serializable,Cl
     * Subject Info
     * 
     * @see SecurityContextUtil#getSubject()
-    * @see SecurityContextUtil#createSubjectInfo(Principal, Object, Subject)
+    * @see SecurityContextUtil#createSubjectInfo(java.security.Principal, Object, javax.security.auth.Subject)
     */
    SubjectInfo getSubjectInfo(); 
    
@@ -62,14 +62,14 @@ public interface SecurityContext extends SecurityManagerLocator, Serializable,Cl
     * Subject Info
     * 
     * @see SecurityContextUtil#getSubject()
-    * @see SecurityContextUtil#createSubjectInfo(Principal, Object, Subject)
+    * @see SecurityContextUtil#createSubjectInfo(java.security.Principal, Object, javax.security.auth.Subject)
     */
    void setSubjectInfo(SubjectInfo si); 
    
    /**
     * RunAs that is being propagated into this context
     * by an external context
-    * {@link #setIncomingRunAs()} 
+    * {@link #setIncomingRunAs(RunAs)}
     */
    public RunAs getIncomingRunAs();
    
@@ -93,9 +93,6 @@ public interface SecurityContext extends SecurityManagerLocator, Serializable,Cl
     * 
     * RunAs coming into this security context needs to be done
     * from SecurityContextUtil.getCallerRunAs/setCallerRunAs
-    * 
-    * @see SecurityContextUtil#getCallerRunAs()
-    * @see SecurityContextUtil#setCallerRunAs(RunAs)
     * 
     * @param runAs
     */

@@ -21,8 +21,8 @@
   */
 package org.jboss.security.plugins.identitytrust;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.identitytrust.IdentityTrustContext;
 import org.jboss.security.identitytrust.IdentityTrustException;
@@ -39,10 +39,7 @@ import org.jboss.security.identitytrust.JBossIdentityTrustContext;
  */
 public class JBossIdentityTrustManager implements IdentityTrustManager
 { 
-   protected static Logger log = Logger.getLogger(JBossIdentityTrustManager.class);
-   protected boolean trace = log.isTraceEnabled();
-   
-   private String securityDomain = null; 
+   private String securityDomain = null;
    private IdentityTrustContext identityTrustContext = null;
    
    public JBossIdentityTrustManager(String securityDomain)
@@ -50,35 +47,34 @@ public class JBossIdentityTrustManager implements IdentityTrustManager
       this.securityDomain = securityDomain; 
    }
    
-   public void setIdentityTrustContext(IdentityTrustContext itc)
+   public void setIdentityTrustContext(IdentityTrustContext identityTrustContext)
    {
-     if(itc == null)
-        throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "null Identity Trust Context");
-     this.identityTrustContext = itc;
+     if(identityTrustContext == null)
+        throw PicketBoxMessages.MESSAGES.invalidNullArgument("identityTrustContext");
+     this.identityTrustContext = identityTrustContext;
    }
    
    /**
-    * @see IdentityTrustManager#isTrusted()
+    * @see IdentityTrustManager#isTrusted(org.jboss.security.SecurityContext)
     */
    public TrustDecision isTrusted(SecurityContext securityContext)
    {  
       if(securityContext == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Security Context is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("securityContext");
       if(this.identityTrustContext == null)
          this.identityTrustContext = new JBossIdentityTrustContext(securityDomain, securityContext);
       TrustDecision td = TrustDecision.NotApplicable;
       if(this.identityTrustContext == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "IdentityTrustContext is null");
-       
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("identityTrustContext");
+
       try
       {
          td = this.identityTrustContext.isTrusted();
       }
       catch (IdentityTrustException e)
-      { 
-         if(trace)
-            log.trace("Trust Exception:",e);
-      } 
+      {
+          PicketBoxLogger.LOGGER.debugIgnoredException(e);
+      }
       return td;
    }
 

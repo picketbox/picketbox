@@ -26,7 +26,8 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.auth.certs.SubjectDNMapping;
 import org.jboss.security.mapping.MappingResult;
  
@@ -42,7 +43,6 @@ import org.jboss.security.mapping.MappingResult;
  */
 public class SubjectDNMapper extends AbstractPrincipalMappingProvider
 { 
-   private static final Logger log = Logger.getLogger(SubjectDNMapper.class); 
    private MappingResult<Principal> result;
 
    public void init(Map<String,Object> opt)
@@ -57,16 +57,15 @@ public class SubjectDNMapper extends AbstractPrincipalMappingProvider
    public void performMapping(Map<String,Object> contextMap, Principal principal)
    {
       if(contextMap == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "ContextMap is null");
-      
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("contextMap");
+
       X509Certificate[] certs = (X509Certificate[]) contextMap.get("X509");
       if(certs != null)
       {
         SubjectDNMapping sdn = new SubjectDNMapping();
         principal = sdn.toPrinicipal(certs);
-        if(log.isTraceEnabled())
-           log.trace("Mapped to Principal:"+principal);
-      } 
+        PicketBoxLogger.LOGGER.traceMappedX500Principal(principal);
+      }
 
       result.setMappedObject(principal);
    } 

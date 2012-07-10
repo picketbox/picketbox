@@ -31,8 +31,8 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBElement;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.xacml.core.JBossPDP;
 import org.jboss.security.xacml.factories.PolicyFactory;
@@ -49,10 +49,6 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
 {
    private static final long serialVersionUID = 1L;
 
-   private static Logger log = Logger.getLogger(JBossPolicyRegistration.class);
-
-   protected boolean trace = log.isTraceEnabled();
-
    private final Map<String, Set<XACMLPolicy>> contextIdToXACMLPolicy = new HashMap<String, Set<XACMLPolicy>>();
 
    /**
@@ -66,8 +62,7 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
       if (PolicyRegistration.XACML.equalsIgnoreCase(type))
       {
          this.contextIdToXACMLPolicy.remove(contextID);
-         if (trace)
-            log.trace("DeRegistered policy for contextId:" + contextID + ":type=" + type);
+         PicketBoxLogger.LOGGER.traceDeregisterPolicy(contextID, type);
       }
    }
 
@@ -84,7 +79,7 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
          }
          return (T) this.contextIdToXACMLPolicy.get(contextID);
       }
-      throw new RuntimeException(ErrorCodes.UNSUPPORTED_TYPE + "Unsupported type:" + type);
+      throw PicketBoxMessages.MESSAGES.invalidPolicyRegistrationType(type);
    }
 
    /**
@@ -95,15 +90,13 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
       InputStream is = null;
       try
       {
-         if (trace)
-            log.trace("Registering policy for contextId:" + contextID + " type: " + type + "and location:"
-                  + location.getPath());
+         PicketBoxLogger.LOGGER.traceRegisterPolicy(contextID, type, location != null ? location.getPath() : null);
          is = location.openStream();
          registerPolicy(contextID, type, is);
       }
       catch (Exception e)
       {
-         log.debug("Error in registering policy:", e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       finally
       {
@@ -132,8 +125,7 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
          }
          catch (Exception e)
          {
-            if(trace)
-               log.debug("Error in registering xacml policy:", e);
+            PicketBoxLogger.LOGGER.debugIgnoredException(e);
          }
       }
    }
@@ -146,8 +138,8 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
       if (PolicyRegistration.XACML.equalsIgnoreCase(type))
       {
          if(objectModel instanceof JAXBElement == false)
-            throw new IllegalArgumentException(ErrorCodes.UNSUPPORTED_TYPE + "Unsupported model:" + objectModel);
-         
+            throw PicketBoxMessages.MESSAGES.invalidType(JAXBElement.class.getName());
+
          try
          {
             JAXBElement<?> jaxbModel = (JAXBElement<?>) objectModel;

@@ -33,8 +33,8 @@ import javax.security.auth.Subject;
 import javax.security.jacc.EJBMethodPermission;
 import javax.security.jacc.EJBRoleRefPermission;
 
-import org.jboss.logging.Logger;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -64,26 +64,20 @@ public class EJBJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    private String roleName = null;  
    private Boolean roleRefCheck = Boolean.FALSE;  
    
-   public EJBJACCPolicyModuleDelegate()
-   {
-      log = Logger.getLogger(getClass());
-      trace = log.isTraceEnabled();
-   }
-   
    /**
-    * @see AuthorizationModuleDelegate#authorize(Resource)
+    * @see AuthorizationModuleDelegate#authorize(org.jboss.security.authorization.Resource, javax.security.auth.Subject, org.jboss.security.identity.RoleGroup)
     */
    public int authorize(Resource resource, Subject callerSubject, RoleGroup role)
    {
       if(resource instanceof EJBResource == false)
-         throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "resource is not an EJBResource");
-      
+         throw PicketBoxMessages.MESSAGES.invalidType(EJBResource.class.getName());
+
       EJBResource ejbResource = (EJBResource) resource;
       
       //Get the context map
       Map<String,Object> map = resource.getMap();
       if(map == null)
-         throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Map from the Resource is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullProperty("resourceMap");
 
       this.policyRegistration = (PolicyRegistration) map.get(ResourceKeys.POLICY_REGISTRATION);
       
@@ -102,11 +96,10 @@ public class EJBJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
          return process(callerSubject, role);
    } 
    
-   //Private Methods
    /**
     * Process the request
-    * @param request
-    * @param sc
+    * @param callerSubject
+    * @param role
     * @return
     */
    private int process(Subject callerSubject, Role role) 
@@ -116,10 +109,9 @@ public class EJBJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
       boolean policyDecision = checkWithPolicy(methodPerm, callerSubject, role); 
       if( policyDecision == false )
       {
-         String msg = "Denied: "+methodPerm+", caller=" + callerSubject+", role="+role;
-         if(trace)
-            log.trace("EJB Jacc Delegate:"+msg);  
-      }  
+          PicketBoxLogger.LOGGER.debugJACCDeniedAccess(methodPerm.toString(), callerSubject,
+                  role != null ? role.toString() : null);
+      }
       return policyDecision ? AuthorizationContext.PERMIT : AuthorizationContext.DENY;
    }
    
@@ -130,10 +122,9 @@ public class EJBJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
       boolean policyDecision = checkWithPolicy(ejbRoleRefPerm, callerSubject, callerRoles); 
       if( policyDecision == false )
       {
-         String msg = "Denied: "+ejbRoleRefPerm+", caller=" + callerSubject;
-         if(trace)
-            log.trace("EJB Jacc Delegate:"+msg);  
-      }  
+         PicketBoxLogger.LOGGER.debugJACCDeniedAccess(ejbRoleRefPerm.toString(), callerSubject,
+                 callerRoles != null ? callerRoles.toString() : null);
+      }
       return policyDecision ? AuthorizationContext.PERMIT : AuthorizationContext.DENY; 
    }
    

@@ -27,9 +27,6 @@ import java.security.PrivilegedAction;
 
 import javax.security.auth.Subject;
 
-import org.jboss.security.SecurityContext;
-import org.jboss.security.RunAs;
-
 
 /**
  *  Security Context association in a threadlocal
@@ -233,7 +230,7 @@ public class SecurityContextAssociation
          sm.checkPermission(GetContextInfo);
 
       if (key == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "key is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("key");
       //SECURITY-459 get it from the current security context
       SecurityContext sc = getSecurityContext();
       if (sc != null)

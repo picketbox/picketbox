@@ -35,8 +35,6 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
-import org.jboss.logging.Logger;
-
 /** A simple implementation of LoginModule for use by JBoss clients for
  the establishment of the caller identity and credentials. This simply sets
  the SecurityAssociation principal to the value of the NameCallback
@@ -64,7 +62,6 @@ import org.jboss.logging.Logger;
  */
 public class AltClientLoginModule implements LoginModule
 {
-   private static Logger log = Logger.getLogger(AltClientLoginModule.class);
    private Subject subject;
    private CallbackHandler callbackHandler;
    /** Shared state between login modules */
@@ -73,7 +70,6 @@ public class AltClientLoginModule implements LoginModule
    private boolean useFirstPass;
    private String username;
    private char[] password = null;
-   private boolean trace;
 
    /**
     * Initialize this LoginModule.
@@ -81,15 +77,13 @@ public class AltClientLoginModule implements LoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map<String,?> sharedState, Map<String,?> options)
    {
-      this.trace = log.isTraceEnabled();
       this.subject = subject;
       this.callbackHandler = callbackHandler;
       this.sharedState = sharedState;
 
       //log securityDomain, if set.
-      if(trace)
-	    log.trace("Security domain: " + 
-		   (String)options.get(SecurityConstants.SECURITY_DOMAIN_OPTION));
+      PicketBoxLogger.LOGGER.debugModuleOption(SecurityConstants.SECURITY_DOMAIN_OPTION,
+              options.get(SecurityConstants.SECURITY_DOMAIN_OPTION));
 
       // Check for multi-threaded option
       String mt = (String) options.get("multi-threaded");
@@ -98,8 +92,7 @@ public class AltClientLoginModule implements LoginModule
 	 /* Turn on the server mode which uses thread local storage for
 	    the principal information.
          */
-         if(trace)
-            log.trace("Enabling multi-threaded mode");
+         PicketBoxLogger.LOGGER.debugModuleOption("multi-threaded", mt);
       }
       
         /* Check for password sharing options. Any non-null value for
@@ -108,8 +101,7 @@ public class AltClientLoginModule implements LoginModule
          */
       String passwordStacking = (String) options.get("password-stacking");
       useFirstPass = passwordStacking != null;
-      if(trace && useFirstPass)
-	    log.trace("Enabling useFirstPass mode");
+      PicketBoxLogger.LOGGER.debugModuleOption("password-stacking", passwordStacking);
    }
 
    /**
@@ -127,11 +119,10 @@ public class AltClientLoginModule implements LoginModule
          the username and password from the callback hander.
       */
       if (callbackHandler == null)
-         throw new LoginException(ErrorCodes.NULL_VALUE + "Error: no CallbackHandler available " +
-            "to garner authentication information from the user");
-      
-      PasswordCallback pc = new PasswordCallback("Password: ", false);
-      NameCallback nc = new NameCallback("User name: ", "guest");
+         throw PicketBoxMessages.MESSAGES.noCallbackHandlerAvailable();
+
+      PasswordCallback pc = new PasswordCallback(PicketBoxMessages.MESSAGES.enterPasswordMessage(), false);
+      NameCallback nc = new NameCallback(PicketBoxMessages.MESSAGES.enterUsernameMessage(), "guest");
       Callback[] callbacks = {nc, pc};
       try
       {
@@ -153,9 +144,9 @@ public class AltClientLoginModule implements LoginModule
       }
       catch (UnsupportedCallbackException uce)
       {
-         throw new LoginException(ErrorCodes.WRONG_TYPE + "Error: " + uce.getCallback().toString() +
-         " not available to garner authentication information " +
-         "from the user");
+         LoginException le = new LoginException(uce.getLocalizedMessage());
+         le.initCause(uce);
+         throw le;
       }
       return true;
    }
@@ -195,7 +186,7 @@ public class AltClientLoginModule implements LoginModule
       }
 
       if( principals.isEmpty() == false )
-         p = (Principal) principals.iterator().next();
+         p = principals.iterator().next();
       SecurityAssociationActions.setPrincipalInfo(p, credential, subject);
       return true;
    }

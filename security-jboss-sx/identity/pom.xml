@@ -48,16 +48,22 @@
       </properties>
     </profile>
    </profiles>
-   <dependencies> 
-      <dependency>
+   <dependencies>
+       <dependency>
+           <groupId>org.picketbox</groupId>
+           <artifactId>common-spi</artifactId>
+           <version>${project.version}</version>
+           <scope>compile</scope>
+       </dependency>
+       <dependency>
+           <groupId>org.picketbox</groupId>
+           <artifactId>identity-spi</artifactId>
+           <version>${project.version}</version>
+           <scope>compile</scope>
+       </dependency>
+       <dependency>
          <groupId>org.picketbox</groupId>
          <artifactId>picketbox-spi-bare</artifactId>
-         <version>${project.version}</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.picketbox</groupId>
-         <artifactId>identity-spi</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>
       </dependency>

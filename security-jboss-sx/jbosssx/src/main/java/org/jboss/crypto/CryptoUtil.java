@@ -39,10 +39,10 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.jboss.crypto.digest.DigestCallback;
-import org.jboss.logging.Logger;
 import org.jboss.security.Base64Encoder;
 import org.jboss.security.Base64Utils;
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxLogger;
+import org.jboss.security.PicketBoxMessages;
 
 /** Various security related utilities like MessageDigest
  factories, SecureRandom access, password hashing.
@@ -55,7 +55,6 @@ import org.jboss.security.ErrorCodes;
  */
 public class CryptoUtil
 {
-   private static Logger log = Logger.getLogger(CryptoUtil.class);
    private static final int HASH_LEN = 20;
    public static final String BASE64_ENCODING = "BASE64";
    public static final String BASE16_ENCODING = "HEX";
@@ -171,7 +170,7 @@ public class CryptoUtil
       }
       catch(UnsupportedEncodingException e)
       {
-         log.error("Failed to convert username to byte[] using UTF-8", e);
+         PicketBoxLogger.LOGGER.errorConvertingUsernameUTF8(e);
          // Use the default platform encoding
          user = username.getBytes();
          colon = ":".getBytes();
@@ -415,7 +414,7 @@ public class CryptoUtil
       }
       catch(UnsupportedEncodingException uee)
       {
-         log.error("charset " + hashCharset + " not found. Using platform default.", uee);
+         PicketBoxLogger.LOGGER.errorFindingCharset(hashCharset, uee);
          passBytes = password.getBytes();
       }
 
@@ -443,12 +442,12 @@ public class CryptoUtil
          }
          else
          {
-            log.error("Unsupported hash encoding format " + hashEncoding);
+            PicketBoxLogger.LOGGER.unsupportedHashEncodingFormat(hashEncoding);
          }
       }
       catch(Exception e)
       {
-         log.error("Password hash calculation failed ", e);
+         PicketBoxLogger.LOGGER.errorCalculatingPasswordHash(e);;
       }
       return passwordHash;
    }
@@ -491,7 +490,7 @@ public class CryptoUtil
       }
       catch(Throwable e)
       {
-         log.debug("hasUnlimitedCrypto error", e);
+         PicketBoxLogger.LOGGER.errorCheckingStrongJurisdictionPolicyFiles(e);
       }
       return hasUnlimitedCrypto;
    }
@@ -514,11 +513,11 @@ public class CryptoUtil
       }
       catch(Exception e)
       {
-          throw new KeyException(ErrorCodes.FAILED_TO_CREATE_SECRET_KEY_SPEC + e.getMessage());
+          throw PicketBoxMessages.MESSAGES.failedToCreateSecretKeySpec(e);
       }
       catch(Throwable e)
       {
-         throw new KeyException(ErrorCodes.UNEXPECTED_EXCEPTION_CREATE_SECRET_KEY_SPEC + e.getMessage());
+         throw PicketBoxMessages.MESSAGES.unexpectedExceptionDuringSecretKeyCreation(e);
       }
       return secretKey;
    }
@@ -560,7 +559,7 @@ public class CryptoUtil
       }
       catch(Throwable e)
       {
-         throw new GeneralSecurityException(ErrorCodes.FAILED_TO_CREATE_SEALEDOBJECT + e.getMessage());
+         throw PicketBoxMessages.MESSAGES.failedToCreateSealedObject(e);
       }
       return sealedObject;
    }
@@ -592,7 +591,7 @@ public class CryptoUtil
       }
       catch(Throwable e)
       {
-         throw new GeneralSecurityException(ErrorCodes.FAILED_TO_CREATE_SEALEDOBJECT + e.getMessage());
+         throw PicketBoxMessages.MESSAGES.failedToCreateSealedObject(e);
       }
       return data;
    }

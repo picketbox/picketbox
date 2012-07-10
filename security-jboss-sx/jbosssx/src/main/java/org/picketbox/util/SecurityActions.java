@@ -72,7 +72,7 @@ class SecurityActions
    /**
     * Set the system property
     * @param key
-    * @param defaultValue
+    * @param value
     * @return
     */
    static void setSystemProperty(final String key, final String value)

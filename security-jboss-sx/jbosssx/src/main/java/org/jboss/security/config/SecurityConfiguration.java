@@ -10,7 +10,7 @@ import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.HashMap;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  *  Class that provides the Configuration for authentication,
@@ -42,13 +42,13 @@ public class SecurityConfiguration
    
    /**
     * Add an application policy
-    * @param aP Application Policy
+    * @param applicationPolicy Application Policy
     */
-   public static void addApplicationPolicy(ApplicationPolicy aP)
+   public static void addApplicationPolicy(ApplicationPolicy applicationPolicy)
    { 
-      if(aP == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "application policy is null");
-      appPolicies.put(aP.getName(), aP);
+      if(applicationPolicy == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("applicationPolicy");
+      appPolicies.put(applicationPolicy.getName(), applicationPolicy);
    }
    
    /**
@@ -119,7 +119,7 @@ public class SecurityConfiguration
       return salt;
    }
    /** Set the salt used with PBE based on the keystore password.
-    * @param salt - an 8 char randomization string
+    * @param s - an 8 char randomization string
     */ 
    public static void setSalt(String s)
    {

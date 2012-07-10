@@ -48,15 +48,17 @@
       </properties>
     </profile>
    </profiles>
-   <dependencies> 
+   <dependencies>
       <dependency>
          <groupId>org.jboss.logging</groupId>
-         <artifactId>jboss-logging-spi</artifactId>
+         <artifactId>jboss-logging</artifactId>
+         <version>3.1.0.GA</version>
+         <scope>provided</scope>
       </dependency>
       <dependency>
          <groupId>org.hibernate</groupId>
-         <artifactId>hibernate</artifactId>
-         <version>3.2.4.sp1</version>
+         <artifactId>hibernate-core</artifactId>
+         <version>3.6.6.Final</version>
          <scope>compile</scope>
       </dependency>
       <dependency>
@@ -68,27 +70,33 @@
       <dependency>
          <groupId>org.hibernate</groupId>
          <artifactId>hibernate-entitymanager</artifactId>
-         <version>3.3.1.ga</version>
+         <version>3.6.6.Final</version>
          <scope>compile</scope>
       </dependency>
-      <dependency>
+       <dependency>
+           <groupId>org.picketbox</groupId>
+           <artifactId>acl-spi</artifactId>
+           <version>${project.version}</version>
+           <scope>compile</scope>
+       </dependency>
+       <dependency>
          <groupId>org.picketbox</groupId>
          <artifactId>authorization-spi</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>
-      </dependency>    
-      <dependency>
+      </dependency>
+       <dependency>
+           <groupId>org.picketbox</groupId>
+           <artifactId>common-spi</artifactId>
+           <version>${project.version}</version>
+           <scope>compile</scope>
+       </dependency>
+       <dependency>
          <groupId>org.picketbox</groupId>
          <artifactId>identity-spi</artifactId>
          <version>${project.version}</version>
          <scope>compile</scope>
-      </dependency>    
-      <dependency>
-         <groupId>org.picketbox</groupId>
-         <artifactId>acl-spi</artifactId>
-         <version>${project.version}</version>
-         <scope>compile</scope>
-      </dependency>    
+      </dependency>
       <dependency>
          <groupId>org.picketbox</groupId>
          <artifactId>picketbox-identity-impl</artifactId>

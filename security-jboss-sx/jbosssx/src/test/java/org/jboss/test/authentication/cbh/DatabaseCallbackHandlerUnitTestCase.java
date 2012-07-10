@@ -38,7 +38,7 @@ import java.util.Map;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.login.CredentialException;
+import javax.security.auth.login.LoginException;
 
 import org.jboss.security.auth.callback.DatabaseCallbackHandler;
 import org.jboss.security.auth.callback.VerifyPasswordCallback;
@@ -181,7 +181,7 @@ public class DatabaseCallbackHandlerUnitTestCase
 		catch(IOException ie)
 		{
 			Throwable cause = ie.getCause();
-			assertTrue( cause instanceof CredentialException);
+			assertTrue( cause instanceof LoginException);
 		}
 	}
 	

@@ -42,8 +42,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.apache.log4j.Logger;
+import org.jboss.logging.Logger;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.jacc.DelegatingPolicy;
@@ -52,10 +51,8 @@ import org.jboss.security.jacc.SubjectPolicyContextHandler;
 public class DelegatingPolicyTestCase extends TestCase
 {
    private static Logger log = Logger.getLogger(DelegatingPolicyTestCase.class);
-   private static Policy oldPolicy;
-   private static Policy jaccPolicy;
 
-   public DelegatingPolicyTestCase(String name)
+    public DelegatingPolicyTestCase(String name)
    {
       super(name);
    }
@@ -63,12 +60,13 @@ public class DelegatingPolicyTestCase extends TestCase
    static void setUpPolicy() throws Exception
    {
       // Get the current Policy impl
-      oldPolicy = Policy.getPolicy();
+       Policy oldPolicy = Policy.getPolicy();
 
       String provider = "org.jboss.security.jacc.DelegatingPolicy";
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       Class<?> providerClass = loader.loadClass(provider);
-      try
+       Policy jaccPolicy;
+       try
       {
          // Look for a ctor(Policy) signature
          Class<?>[] ctorSig = {Policy.class};
@@ -115,13 +113,13 @@ public class DelegatingPolicyTestCase extends TestCase
       // Act like the ejb container and check a permission
       PolicyContext.setContextID("context-a");
       EJBMethodPermission methodX = new EJBMethodPermission("someEJB", "methodX,,int");
-      assertTrue("methodX denied", sysPolicy.implies(null, methodX) == false);
+      assertTrue("methodX denied", !sysPolicy.implies(null, methodX));
 
       pc = pcf.getPolicyConfiguration("context-a", true);
       pc.addToUncheckedPolicy(someEJB);
       pc.commit();
       sysPolicy.refresh();
-      assertTrue("methodX allowed", sysPolicy.implies(null, methodX) == true);
+      assertTrue("methodX allowed", sysPolicy.implies(null, methodX));
 
       pc.delete();
       pc = pcf.getPolicyConfiguration("context-a", false);
@@ -130,11 +128,11 @@ public class DelegatingPolicyTestCase extends TestCase
       sysPolicy.refresh();
       SimplePrincipal[] callers = {new SimplePrincipal("callerX")};
       ProtectionDomain pd = new ProtectionDomain(null, null, null, callers);
-      assertTrue("methodX allowed", sysPolicy.implies(pd, methodX) == true);
+      assertTrue("methodX allowed", sysPolicy.implies(pd, methodX));
 
       callers = new SimplePrincipal[]{new SimplePrincipal("callerY")};
       pd = new ProtectionDomain(null, null, null, callers);
-      assertTrue("methodX denied", sysPolicy.implies(pd, methodX) == false);
+      assertTrue("methodX denied", !sysPolicy.implies(pd, methodX));
 
    }
 
@@ -158,13 +156,13 @@ public class DelegatingPolicyTestCase extends TestCase
       EJBMethodPermission methodX = new EJBMethodPermission("someEJB", "methodX,,int");
       // This perm should be denied since the policy config has not been comitted
       boolean implied = sysPolicy.implies(null, methodX);
-      assertFalse("methodX allowed",implied == true);
+      assertFalse("methodX allowed",implied);
 
       pc.commit();
       sysPolicy.refresh();
       // Now it should be allowed since the policy config has been comitted
       implied = sysPolicy.implies(null, methodX);
-      assertTrue("methodX allowed", implied  == true);
+      assertTrue("methodX allowed", implied);
    }
 
    public void testSubjectDoAs() throws Exception
@@ -190,7 +188,7 @@ public class DelegatingPolicyTestCase extends TestCase
                new SubjectDomainCombiner(caller));
       */
 
-      Boolean allowed = (Boolean) Subject.doAsPrivileged(caller, new PrivilegedAction<Boolean>()
+      Boolean allowed = Subject.doAsPrivileged(caller, new PrivilegedAction<Boolean>()
          {
             public Boolean run()
             {
@@ -201,9 +199,8 @@ public class DelegatingPolicyTestCase extends TestCase
                   acc.checkPermission(methodX);
                   ok = Boolean.TRUE;
                }
-               catch(AccessControlException e)
+               catch(AccessControlException ignored)
                {
-                  
                }
                return ok;
             }
@@ -218,16 +215,15 @@ public class DelegatingPolicyTestCase extends TestCase
       TestSuite suite = new TestSuite(DelegatingPolicyTestCase.class);
 
       // Create an initializer for the test suite
-      TestSetup wrapper = new TestSetup(suite)
-      {
-         protected void setUp() throws Exception
-         {
-            setUpPolicy();
-         }
-         protected void tearDown() throws Exception
-         {
-         }
-      };
-      return wrapper;
+       return new TestSetup(suite)
+       {
+          protected void setUp() throws Exception
+          {
+             setUpPolicy();
+          }
+          protected void tearDown() throws Exception
+          {
+          }
+       };
    }
 }

@@ -21,7 +21,6 @@
   */
 package org.jboss.security.authorization.modules;
   
-import org.jboss.logging.Logger;
 import org.jboss.security.authorization.Resource;
 import org.jboss.security.authorization.ResourceType;
 import org.jboss.security.authorization.modules.ejb.EJBJACCPolicyModuleDelegate;
@@ -39,7 +38,6 @@ public class JACCAuthorizationModule extends AbstractAuthorizationModule
 {   
    public JACCAuthorizationModule()
    { 
-      log = Logger.getLogger(getClass());
       delegateMap.put(ResourceType.WEB, WebJACCPolicyModuleDelegate.class.getName());
       delegateMap.put(ResourceType.EJB, EJBJACCPolicyModuleDelegate.class.getName());
    }

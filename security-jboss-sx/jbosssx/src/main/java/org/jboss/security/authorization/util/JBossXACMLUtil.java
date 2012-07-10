@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.xacml.core.JBossPDP;
 import org.jboss.security.xacml.interfaces.PolicyDecisionPoint;
@@ -64,7 +64,8 @@ public class JBossXACMLUtil
          Set<XACMLPolicy> policies = (Set<XACMLPolicy>)policyRegistration.getPolicy(contextID,
                PolicyRegistration.XACML, null);
          if(policies == null)
-            throw new IllegalStateException(ErrorCodes.NULL_VALUE + "Missing xacml policy for contextid:" + contextID);
+            throw PicketBoxMessages.MESSAGES.missingXACMLPolicyForContextId(contextID);
+
          JBossPolicyLocator jpl = new JBossPolicyLocator(policies);
          JBossPolicySetLocator jpsl = new JBossPolicySetLocator(policies);
          HashSet<PolicyLocator> plset = new HashSet<PolicyLocator>();

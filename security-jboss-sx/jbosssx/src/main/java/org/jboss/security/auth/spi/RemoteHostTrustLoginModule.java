@@ -30,6 +30,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.plugins.HostThreadLocal;
@@ -75,19 +76,9 @@ public class RemoteHostTrustLoginModule extends UsernamePasswordLoginModule
    {
       addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
-      boolean trace = log.isTraceEnabled();
       String tmp = (String)options.get(OPTION_TRUSTED_HOSTS);
       trustedHosts = Arrays.asList(parseHosts(tmp));
       roleNames = (String) options.get(OPTION_ROLES);
-      if(trace) 
-      {
-          String msg = "roleNames: "+roleNames+"\ntrusted hosts {";
-          for(String host:trustedHosts) {
-              msg += "\n"+host;
-          }
-          msg += "\n}";
-          log.trace(msg);
-      }
    }
 
    private String[] parseHosts(String commaDel) {
@@ -97,17 +88,9 @@ public class RemoteHostTrustLoginModule extends UsernamePasswordLoginModule
    protected boolean validatePassword(String inputPassword, String expectedPassword)
    {
       String host = getRealHost();
-      if (log.isTraceEnabled()) {
-        log.trace("real host for trust is "+host);
-      }
-      if (trustedHosts.contains(host)) {
-      	return true;
-      } else {
-        if (log.isTraceEnabled()) {
-          log.trace("real host for trust is "+host);
-        }
-      }
-      return false;
+      PicketBoxLogger.LOGGER.debugRealHostForTrust(host);
+
+      return trustedHosts.contains(host);
    }
 
 

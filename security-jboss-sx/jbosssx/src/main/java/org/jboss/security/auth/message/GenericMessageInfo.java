@@ -56,7 +56,7 @@ public class GenericMessageInfo implements MessageInfo
 
 
    /**
-    * @see AuthParam#getRequestMessage()
+    * @see MessageInfo#getRequestMessage()
     */
    public Object getRequestMessage()
    { 
@@ -64,7 +64,7 @@ public class GenericMessageInfo implements MessageInfo
    }
 
    /**
-    * @see AuthParam#getResponseMessage()
+    * @see MessageInfo#getResponseMessage()
     */
    public Object getResponseMessage()
    { 
@@ -72,7 +72,7 @@ public class GenericMessageInfo implements MessageInfo
    }
    
    /**
-    * @see AuthParam#setRequestMessage(Object)
+    * @see MessageInfo#setRequestMessage(Object)
     */
    public void setRequestMessage(Object request)
    { 
@@ -80,7 +80,7 @@ public class GenericMessageInfo implements MessageInfo
    }
 
    /**
-    * @see AuthParam#setResponseMessage(Object)
+    * @see MessageInfo#setResponseMessage(Object)
     */
    public void setResponseMessage(Object response)
    { 

@@ -21,7 +21,7 @@
  */
 package org.jboss.security.acl;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.Resource;
 
 /**
@@ -51,8 +51,10 @@ public class EntitlementEntry
     */
    public EntitlementEntry(Resource resource, ACLPermission permission, String identityOrRole)
    {
-      if(resource == null || permission == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Illegal null value for resource or permission");
+      if(resource == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("resource");
+      if (permission == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("permission");
       this.resource = resource;
       this.permission = permission;
       this.identityOrRole = identityOrRole;

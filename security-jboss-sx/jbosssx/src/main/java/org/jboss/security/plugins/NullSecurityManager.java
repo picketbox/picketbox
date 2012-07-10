@@ -95,17 +95,11 @@ public class NullSecurityManager
        return true;
     }
     
-    /**
-     * @see AuthenticationManager#isValid(MessageInfo, Subject, String)
-     */
     public boolean isValid(MessageInfo requestMessage, Subject clientSubject, String layer)
     { 
        return true;
     }
     
-    /**
-     * @see AuthenticationManager#isValid(MessageInfo, Subject, String, CallbackHandler)
-     */
     public boolean isValid(MessageInfo requestMessage, Subject clientSubject, String layer,
           CallbackHandler handler)
     { 

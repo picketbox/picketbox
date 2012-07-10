@@ -28,7 +28,6 @@ import java.util.Set;
 import javax.naming.InitialContext;
 import javax.security.auth.Subject;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.audit.AuditManager;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.config.ApplicationPolicy;
@@ -45,8 +44,6 @@ import org.jboss.security.mapping.MappingManager;
  */
 public class SecurityUtil
 {
-   private static Logger log = Logger.getLogger(SecurityUtil.class);
-   
    private static String LEGACY_JAAS_CONTEXT_ROOT = "java:/jaas/";
 
    /**
@@ -82,7 +79,7 @@ public class SecurityUtil
    public static Group getSubjectRoles(Subject theSubject)
    {
       if (theSubject == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Subject is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("theSubject");
       Set<Group> subjectGroups = theSubject.getPrincipals(Group.class);
       Iterator<Group> iter = subjectGroups.iterator();
       Group roles = null;
@@ -130,8 +127,7 @@ public class SecurityUtil
       }
       catch (Exception e)
       {
-         if (log.isTraceEnabled())
-            log.trace("Error in obtaining AuthenticationManager", e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       return am;
    }
@@ -159,8 +155,7 @@ public class SecurityUtil
       }
       catch (Exception e)
       {
-         if (log.isTraceEnabled())
-            log.trace("Error in obtaining AuthorizationMgr", e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       return am;
    }
@@ -188,8 +183,7 @@ public class SecurityUtil
       }
       catch (Exception e)
       {
-         if (log.isTraceEnabled())
-            log.trace("Error in obtaining AuditMgr", e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       return am;
    }
@@ -217,8 +211,7 @@ public class SecurityUtil
       }
       catch (Exception e)
       {
-         if (log.isTraceEnabled())
-            log.trace("Error in obtaining IdentityTrustMgr", e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       return am;
    }
@@ -246,8 +239,7 @@ public class SecurityUtil
       }
       catch (Exception e)
       {
-         if (log.isTraceEnabled())
-            log.trace("Error in obtaining IdentityTrustMgr", e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       return am;
    }
@@ -271,8 +263,7 @@ public class SecurityUtil
       }
       catch (Exception e)
       {
-         if (log.isTraceEnabled())
-            log.trace("Error in obtaining IdentityTrustMgr", e);
+         PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       return registration;
    }

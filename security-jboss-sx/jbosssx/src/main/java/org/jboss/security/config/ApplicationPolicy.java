@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.auth.login.AuthenticationInfo;
 import org.jboss.security.auth.login.BaseAuthenticationInfo;
 import org.jboss.security.auth.login.JASPIAuthenticationInfo;
@@ -70,7 +70,7 @@ public class ApplicationPolicy
    public ApplicationPolicy(String theName)
    {
       if (theName == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "name is null");
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("theName");
       this.name = theName;
    }
 
@@ -156,7 +156,7 @@ public class ApplicationPolicy
     * </p>
     * 
     * @return the {@code MappingInfo} that must be used when mapping roles.
-    * @deprecated use {@link ApplicationPolicy#getMappingInfo("role")} instead.
+    * @deprecated use {@link ApplicationPolicy#getMappingInfo(String)} instead.
     */
    @Deprecated
    public MappingInfo getRoleMappingInfo()
@@ -170,7 +170,7 @@ public class ApplicationPolicy
     * </p>
     * 
     * @param roleMappingInfo the {@code MappingInfo} instance to be set.
-    * @deprecated use {@link ApplicationPolicy#setMappingInfo("role", MappingInfo)} instead.
+    * @deprecated use {@link ApplicationPolicy#setMappingInfo(String, MappingInfo)} instead.
     */
    @Deprecated
    public void setRoleMappingInfo(MappingInfo roleMappingInfo)
@@ -184,7 +184,7 @@ public class ApplicationPolicy
     * </p>
     * 
     * @return the {@code MappingInfo} that must be used when mapping principals.
-    * @deprecated use {@link ApplicationPolicy#getMappingInfo("principal")} instead.
+    * @deprecated use {@link ApplicationPolicy#getMappingInfo(String)} instead.
     */
    @Deprecated
    public MappingInfo getPrincipalMappingInfo()
@@ -197,8 +197,8 @@ public class ApplicationPolicy
     * Sets the {@code MappingInfo} object that must be used when mapping principals.
     * </p>
     * 
-    * @param roleMappingInfo the {@code MappingInfo} instance to be set.
-    * @deprecated use {@link ApplicationPolicy#setMappingInfo("principal", MappingInfo)} instead.
+    * @param principalMappingInfo the {@code MappingInfo} instance to be set.
+    * @deprecated use {@link ApplicationPolicy#setMappingInfo(String, MappingInfo)} instead.
     */
    @Deprecated
    public void setPrincipalMappingInfo(MappingInfo principalMappingInfo)
@@ -222,7 +222,8 @@ public class ApplicationPolicy
          return this.getRoleMappingInfo();
       if (t == Principal.class)
          return this.getPrincipalMappingInfo();
-      throw new IllegalStateException(ErrorCodes.PROCESSING_FAILED + "No mapping information available for type:" + t);
+
+      throw PicketBoxMessages.MESSAGES.invalidType(RoleGroup.class.getName() + "/" + Principal.class.getName());
    }
 
    /**

@@ -43,6 +43,10 @@
       </dependency>
       <dependency>
          <groupId>org.picketbox</groupId>
+         <artifactId>common-spi</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.picketbox</groupId>
          <artifactId>identity-spi</artifactId>
       </dependency>
       <dependency>

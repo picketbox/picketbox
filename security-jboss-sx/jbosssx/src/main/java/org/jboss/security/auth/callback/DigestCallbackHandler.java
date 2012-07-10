@@ -28,7 +28,7 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.jboss.security.ErrorCodes;
+import org.jboss.security.PicketBoxMessages;
 
 /**
  * A CallbackHandler that is used to pass the RFC2617 parameters to the login module DigestCallback.
@@ -75,6 +75,7 @@ public class DigestCallbackHandler implements CallbackHandler {
             }
         }
         if (foundCallback == false)
-            throw new UnsupportedCallbackException(firstUnknown, ErrorCodes.UNRECOGNIZED_CALLBACK);
+            throw PicketBoxMessages.MESSAGES.unableToHandleCallback(firstUnknown, this.getClass().getName(),
+                    firstUnknown.getClass().getCanonicalName());
     }
 }

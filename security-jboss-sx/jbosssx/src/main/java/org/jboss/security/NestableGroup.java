@@ -90,7 +90,7 @@ public class NestableGroup extends SimplePrincipal implements Group, Cloneable
     public boolean addMember(Principal group) throws IllegalArgumentException
     {
         if( (group instanceof Group) == false )
-            throw new IllegalArgumentException(ErrorCodes.WRONG_TYPE + "The addMember argument must be a Group");
+            throw PicketBoxMessages.MESSAGES.invalidType(Group.class.getName());
 
         rolesStack.addFirst(group);
         return true;

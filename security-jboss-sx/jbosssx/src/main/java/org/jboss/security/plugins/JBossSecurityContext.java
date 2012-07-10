@@ -19,8 +19,8 @@ import javax.security.auth.callback.CallbackHandler;
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.AuthorizationManager;
-import org.jboss.security.ErrorCodes;
 import org.jboss.security.ISecurityManagement;
+import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.RunAs;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
@@ -120,15 +120,15 @@ public class JBossSecurityContext implements SecurityContext, SecurityManagerLoc
     * @throws SecurityException  Under a security manager, caller does not have
     *  RuntimePermission("org.jboss.security.plugins.JBossSecurityContext.setSecurityManagement")
     */
-   public void setSecurityManagement(ISecurityManagement ism)
+   public void setSecurityManagement(ISecurityManagement securityManagement)
    {
       SecurityManager sm = System.getSecurityManager();
       if (sm != null)
          sm.checkPermission(setSecurityManagementPermission);
       
-      if(ism == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_VALUE + "ism is null");
-      this.iSecurityManagement = ism;  
+      if(securityManagement == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("securityManagement");
+      this.iSecurityManagement = securityManagement;
    }
   
    /**
@@ -158,15 +158,15 @@ public class JBossSecurityContext implements SecurityContext, SecurityManagerLoc
     * (non-Javadoc)
     * @see org.jboss.security.SecurityContext#setSecurityDomain(java.lang.String)
     */
-   public void setSecurityDomain(String domain)
+   public void setSecurityDomain(String securityDomain)
    {
       SecurityManager manager = System.getSecurityManager();
       if(manager != null)
          manager.checkPermission(setSecurityDomainPermission);
       
-      if (domain == null)
-         throw new IllegalArgumentException(ErrorCodes.NULL_ARGUMENT + "Security domain cannot be null");
-      this.securityDomain = domain;
+      if (securityDomain == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("securityDomain");
+      this.securityDomain = securityDomain;
    }
 
    /**

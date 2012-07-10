@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 
-import org.jboss.logging.Logger;
+import org.jboss.security.PicketBoxLogger;
 
 /** Read a password from a file specified via the ctor and then overwrite
  the file contents with garbage, and then remove it. This may be used as a
@@ -45,7 +45,6 @@ import org.jboss.logging.Logger;
  */
 public class TmpFilePassword
 {
-   private static Logger log = Logger.getLogger(TmpFilePassword.class);
    private File passwordFile;
 
    public TmpFilePassword(String file)
@@ -58,14 +57,12 @@ public class TmpFilePassword
    {
       while( passwordFile.exists() == false )
       {
-         log.info("Waiting for password file: "+passwordFile.getAbsolutePath());
          try
          {
             Thread.sleep(10*1000);
          }
          catch(InterruptedException e)
          {
-            log.info("Exiting wait on InterruptedException");
             break;
          }
       }
@@ -121,12 +118,10 @@ public class TmpFilePassword
                raf.write(j);
          }
          raf.close();
-         if( passwordFile.delete() == false )
-            log.warn("Was not able to delete the password file");
       }
       catch(Exception e)
       {
-         log.warn("Failed to zero the password file", e);
+          PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
       finally
       {
