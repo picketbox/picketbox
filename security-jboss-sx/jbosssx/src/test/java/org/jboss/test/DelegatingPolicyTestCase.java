@@ -21,23 +21,6 @@
 */
 package org.jboss.test;
 
-import java.lang.reflect.Constructor;
-import java.security.AccessControlContext;
-import java.security.AccessControlException;
-import java.security.AccessController;
-import java.security.CodeSource;
-import java.security.Policy;
-import java.security.Principal;
-import java.security.PrivilegedAction;
-import java.security.ProtectionDomain;
-import java.util.Set;
-
-import javax.security.auth.Subject;
-import javax.security.jacc.EJBMethodPermission;
-import javax.security.jacc.PolicyConfiguration;
-import javax.security.jacc.PolicyConfigurationFactory;
-import javax.security.jacc.PolicyContext;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -47,6 +30,15 @@ import org.jboss.security.SecurityConstants;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.jacc.DelegatingPolicy;
 import org.jboss.security.jacc.SubjectPolicyContextHandler;
+
+import javax.security.auth.Subject;
+import javax.security.jacc.EJBMethodPermission;
+import javax.security.jacc.PolicyConfiguration;
+import javax.security.jacc.PolicyConfigurationFactory;
+import javax.security.jacc.PolicyContext;
+import java.lang.reflect.Constructor;
+import java.security.*;
+import java.util.Set;
 
 public class DelegatingPolicyTestCase extends TestCase
 {
@@ -153,6 +145,8 @@ public class DelegatingPolicyTestCase extends TestCase
       pc = pcf.getPolicyConfiguration("context-a", true);
       pc.addToUncheckedPolicy(someEJB);
       sysPolicy.refresh();
+
+      PolicyContext.setContextID("context-a");
       EJBMethodPermission methodX = new EJBMethodPermission("someEJB", "methodX,,int");
       // This perm should be denied since the policy config has not been comitted
       boolean implied = sysPolicy.implies(null, methodX);
@@ -187,7 +181,7 @@ public class DelegatingPolicyTestCase extends TestCase
       AccessControlContext acc = new AccessControlContext(new AccessControlContext(pds),
                new SubjectDomainCombiner(caller));
       */
-
+      PolicyContext.setContextID("context-a");
       Boolean allowed = Subject.doAsPrivileged(caller, new PrivilegedAction<Boolean>()
          {
             public Boolean run()

@@ -22,26 +22,16 @@
 package org.jboss.security.auth.spi;
 
 
-import java.lang.reflect.Constructor;
-import java.security.Principal;
-import java.security.acl.Group;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import org.jboss.security.*;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
-
-import org.jboss.security.NestableGroup;
-import org.jboss.security.PicketBoxLogger;
-import org.jboss.security.SecurityConstants;
-import org.jboss.security.SimpleGroup;
-import org.jboss.security.SimplePrincipal;
+import java.lang.reflect.Constructor;
+import java.security.Principal;
+import java.security.acl.Group;
+import java.util.*;
 
 /**
  * This class implements the common functionality required for a JAAS
@@ -228,15 +218,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
       Set<Principal> principals = subject.getPrincipals();
       Principal identity = getIdentity();
       principals.add(identity);
-      // add the CallerPrincipal group
-      Group callerGroup = getCallerPrincipalGroup(principals);
-      if (callerGroup == null)
-      {
-         callerGroup = new SimpleGroup(SecurityConstants.CALLER_PRINCIPAL_GROUP);
-         callerGroup.addMember(identity);
-         principals.add(callerGroup);
-      }
-      // add other role groups
+      // add role groups returned by getRoleSets.
       Group[] roleSets = getRoleSets();
       for(int g = 0; g < roleSets.length; g ++)
       {
@@ -260,7 +242,15 @@ public abstract class AbstractServerLoginModule implements LoginModule
             subjectGroup.addMember(role);
          }
       }
-      return true;
+       // add the CallerPrincipal group if none has been added in getRoleSets
+       Group callerGroup = getCallerPrincipalGroup(principals);
+       if (callerGroup == null)
+       {
+           callerGroup = new SimpleGroup(SecurityConstants.CALLER_PRINCIPAL_GROUP);
+           callerGroup.addMember(identity);
+           principals.add(callerGroup);
+       }
+       return true;
    }
 
    /** Method to abort the authentication process (phase 2).
