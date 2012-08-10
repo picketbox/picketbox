@@ -21,25 +21,14 @@
 */
 package org.jboss.security.jacc;
 
-import java.security.CodeSource;
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.security.Policy;
-import java.security.ProtectionDomain;
-import java.util.Enumeration;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.security.jacc.EJBMethodPermission;
-import javax.security.jacc.EJBRoleRefPermission;
-import javax.security.jacc.PolicyConfiguration;
-import javax.security.jacc.PolicyContext;
-import javax.security.jacc.PolicyContextException;
-import javax.security.jacc.WebResourcePermission;
-import javax.security.jacc.WebRoleRefPermission;
-import javax.security.jacc.WebUserDataPermission;
-
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
+
+import javax.security.jacc.*;
+import java.security.*;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A JAAC Policy provider implementation that delegates any non-JACC permissions
@@ -233,7 +222,38 @@ public class DelegatingPolicy extends Policy
       
    }
 
-   /**
+    /**
+     * Access the current ContextPolicy instances
+     * @return Map<String, ContextPolicy> of the contextID to policy mappings
+     */
+    public String listContextPolicies()
+    {
+        StringBuffer tmp = new StringBuffer("<ActiveContextPolicies>");
+        Iterator<String> iter = activePolicies.keySet().iterator();
+        while (iter.hasNext())
+        {
+            String contextID = iter.next();
+            ContextPolicy cp = activePolicies.get(contextID);
+            tmp.append(cp);
+            tmp.append('\n');
+        }
+        tmp.append("</ActiveContextPolicies>");
+
+        tmp.append("<OpenContextPolicies>");
+        iter = openPolicies.keySet().iterator();
+        while (iter.hasNext())
+        {
+            String contextID = iter.next();
+            ContextPolicy cp = openPolicies.get(contextID);
+            tmp.append(cp);
+            tmp.append('\n');
+        }
+        tmp.append("</OpenContextPolicies>");
+
+        return tmp.toString();
+    }
+
+    /**
     * @return A proxy for our Policy interface
     */
    public Policy getPolicyProxy()
