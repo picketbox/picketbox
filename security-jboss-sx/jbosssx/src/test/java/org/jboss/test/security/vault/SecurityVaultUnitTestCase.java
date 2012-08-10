@@ -21,29 +21,25 @@
  */
 package org.jboss.test.security.vault;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
-
 import org.jboss.security.plugins.PBEUtils;
 import org.jboss.security.vault.SecurityVault;
 import org.jboss.security.vault.SecurityVaultFactory;
 import org.jboss.security.vault.SecurityVaultUtil;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.picketbox.plugins.vault.PicketBoxSecurityVault;
 import org.picketbox.util.StringUtil;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit Test the {@link SecurityVault} Implementation
@@ -76,6 +72,7 @@ public class SecurityVaultUnitTestCase
    }
    
    @Test
+   @Ignore
    public void testDefaultVault() throws Exception
    {
       SecurityVault vault = SecurityVaultFactory.get();
@@ -85,6 +82,7 @@ public class SecurityVaultUnitTestCase
    }
    
    @Test
+   @Ignore
    public void testInitialization() throws Exception
    {
       SecurityVault vault = SecurityVaultFactory.get();
