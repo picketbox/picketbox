@@ -1,24 +1,14 @@
 package org.jboss.security;
 
+import org.jboss.logging.*;
+
+import javax.security.auth.Subject;
 import java.net.URL;
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.security.Permissions;
-import java.security.Principal;
-import java.security.ProtectionDomain;
+import java.security.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import javax.security.auth.Subject;
-
-import org.jboss.logging.BasicLogger;
-import org.jboss.logging.Cause;
-import org.jboss.logging.LogMessage;
-import org.jboss.logging.Logger;
-import org.jboss.logging.Message;
-import org.jboss.logging.MessageLogger;
 
 @MessageLogger(projectCode = "PBOX")
 public interface PicketBoxLogger extends BasicLogger {
@@ -54,7 +44,7 @@ public interface PicketBoxLogger extends BasicLogger {
     void traceEndValidteCache(boolean isValid);
 
     @LogMessage(level = Logger.Level.ERROR)
-    @Message(id = 206, value = "Loggin failure")
+    @Message(id = 206, value = "Login failure")
     void errorDuringLogin(@Cause Throwable t);
 
     @LogMessage(level = Logger.Level.TRACE)

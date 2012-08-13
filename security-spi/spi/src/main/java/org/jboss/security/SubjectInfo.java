@@ -21,18 +21,17 @@
   */
 package org.jboss.security;
 
+import org.jboss.security.identity.Identity;
+import org.jboss.security.identity.IdentityFactory;
+import org.jboss.security.identity.RoleGroup;
+import org.jboss.security.identity.extensions.CredentialIdentityFactory;
+
+import javax.security.auth.Subject;
 import java.io.Serializable;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.security.auth.Subject;
-
-import org.jboss.security.identity.Identity;
-import org.jboss.security.identity.IdentityFactory;
-import org.jboss.security.identity.RoleGroup;
-import org.jboss.security.identity.extensions.CredentialIdentityFactory;
 
 
 /**
@@ -126,7 +125,7 @@ public class SubjectInfo implements Serializable
    {
       return Collections.unmodifiableSet(identities);
    }
-   
+
    public synchronized void setIdentities(Set<Identity> ids)
    {
       if(identities == null)

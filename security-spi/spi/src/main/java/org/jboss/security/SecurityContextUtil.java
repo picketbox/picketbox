@@ -21,15 +21,14 @@
   */
 package org.jboss.security;
 
+import org.jboss.security.identity.Identity;
+import org.jboss.security.identity.RoleGroup;
+
+import javax.security.auth.Subject;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import javax.security.auth.Subject;
-
-import org.jboss.security.identity.Identity;
-import org.jboss.security.identity.RoleGroup;
 
 
 /**
@@ -135,8 +134,6 @@ public abstract class SecurityContextUtil
     */
    public void clearIdentities(Class<?> clazz)
    {
-      Set<Identity> resultSet = new HashSet<Identity>();
-      
       Set<Identity> ids  = this.securityContext.getSubjectInfo().getIdentities();
       if(ids != null)
       {
@@ -145,10 +142,9 @@ public abstract class SecurityContextUtil
          {
             Identity id = iter.next();
             if(clazz.isAssignableFrom(id.getClass()))
-               resultSet.add(id);
+               this.securityContext.getSubjectInfo().removeIdentity(id);
          }
-         ids.removeAll(resultSet);
-      }  
+      }
    }
    
    /**
