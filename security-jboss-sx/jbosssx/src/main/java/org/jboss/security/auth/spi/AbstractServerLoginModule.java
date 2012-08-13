@@ -22,6 +22,7 @@
 package org.jboss.security.auth.spi;
 
 
+import org.jboss.logging.Logger;
 import org.jboss.security.*;
 
 import javax.security.auth.Subject;
@@ -97,6 +98,8 @@ public abstract class AbstractServerLoginModule implements LoginModule
    protected String principalClassName;
    /** the principal to use when a null username and password are seen */
    protected Principal unauthenticatedIdentity;
+
+   protected Logger log = Logger.getLogger(AbstractServerLoginModule.class);
 
 //--- Begin LoginModule interface methods
    /** Initialize the login module. This stores the subject, callbackHandler

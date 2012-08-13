@@ -21,26 +21,21 @@
 */
 package org.jboss.security.auth.spi;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.FailedLoginException;
-import javax.security.auth.login.LoginException;
-
 import org.jboss.crypto.digest.DigestCallback;
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.vault.SecurityVaultException;
 import org.jboss.security.vault.SecurityVaultUtil;
+
+import javax.security.auth.Subject;
+import javax.security.auth.callback.*;
+import javax.security.auth.login.FailedLoginException;
+import javax.security.auth.login.LoginException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /** An abstract subclass of AbstractServerLoginModule that imposes
@@ -154,7 +149,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
          hashCharset = (String) options.get(HASH_CHARSET);
 
          PicketBoxLogger.LOGGER.debugPasswordHashing(hashAlgorithm, hashEncoding, hashCharset,
-                 options.get(DIGEST_CALLBACK).toString(), options.get(STORE_DIGEST_CALLBACK).toString());
+                 (String) options.get(DIGEST_CALLBACK), (String) options.get(STORE_DIGEST_CALLBACK));
       }
       String flag = (String) options.get(IGNORE_PASSWORD_CASE);
       ignorePasswordCase = Boolean.valueOf(flag).booleanValue();
