@@ -21,32 +21,6 @@
  */
 package org.picketbox.plugins.vault;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.plugins.PBEUtils;
@@ -56,6 +30,20 @@ import org.picketbox.commons.cipher.Base64;
 import org.picketbox.util.EncryptionUtil;
 import org.picketbox.util.KeyStoreUtil;
 import org.picketbox.util.StringUtil;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An instance of {@link SecurityVault} that uses
@@ -131,8 +119,12 @@ public class PicketBoxSecurityVault implements SecurityVault
       String keystoreURL = (String) options.get(KEYSTORE_URL);
       if(keystoreURL == null)
          throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidNullOrEmptyOptionMessage(KEYSTORE_URL));
-      keystoreURL = StringUtil.getSystemPropertyAsString(keystoreURL.replaceAll(":", StringUtil.PROPERTY_DEFAULT_SEPARATOR));  // replace single ":" with PL default
-      
+
+      if (keystoreURL.contains("${")){
+          keystoreURL = keystoreURL.replaceAll(":", StringUtil.PROPERTY_DEFAULT_SEPARATOR);  // replace single ":" with PL default
+      }
+      keystoreURL = StringUtil.getSystemPropertyAsString(keystoreURL);
+
       String maskedPassword = (String) options.get(KEYSTORE_PASSWORD);
       if(maskedPassword == null)
          throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidNullOrEmptyOptionMessage(KEYSTORE_PASSWORD));
@@ -167,8 +159,11 @@ public class PicketBoxSecurityVault implements SecurityVault
       ObjectInputStream mapIS = null;
       try
       {
-         decodedEncFileDir = StringUtil.getSystemPropertyAsString(encFileDir.replaceAll(":", 
-       		  StringUtil.PROPERTY_DEFAULT_SEPARATOR));  // replace single ":" with PL default 
+         if (encFileDir.contains("${)")){
+             encFileDir = encFileDir.replaceAll(":",StringUtil.PROPERTY_DEFAULT_SEPARATOR);
+         }
+         decodedEncFileDir = StringUtil.getSystemPropertyAsString(encFileDir);  // replace single ":" with PL default
+
          if(directoryExists(decodedEncFileDir) == false)
             throw new SecurityVaultException(PicketBoxMessages.MESSAGES.fileOrDirectoryDoesNotExistMessage(decodedEncFileDir));
          
