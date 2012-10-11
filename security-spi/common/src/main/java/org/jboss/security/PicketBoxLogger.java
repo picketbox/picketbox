@@ -20,7 +20,7 @@ public interface PicketBoxLogger extends BasicLogger {
             PicketBoxLogger.class.getPackage().getName() + ".audit");
 
     @LogMessage(level = Logger.Level.TRACE)
-    @Message(id = 200, value = "Being isValid, principal: %s, cache entry: %s")
+    @Message(id = 200, value = "Begin isValid, principal: %s, cache entry: %s")
     void traceBeginIsValid(Principal principal, String cacheEntry);
 
     @LogMessage(level = Logger.Level.TRACE)
@@ -104,7 +104,7 @@ public interface PicketBoxLogger extends BasicLogger {
     void traceLDAPConnectionEnv(Properties env);
 
     @LogMessage(level = Logger.Level.TRACE)
-    @Message(id = 221, value = "Being getAppConfigurationEntry(%s), size: %s")
+    @Message(id = 221, value = "Begin getAppConfigurationEntry(%s), size: %s")
     void traceBeginGetAppConfigEntry(String appName, int size);
 
     @LogMessage(level = Logger.Level.TRACE)

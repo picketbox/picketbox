@@ -470,7 +470,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 
       // If the user already exists another login is active. Currently
       // only one is allowed so remove the old and insert the new
-      domainCache.put(info.callerPrincipal, info);
+      domainCache.put(principal, info);
       PicketBoxLogger.LOGGER.traceInsertedCacheInfo(info.toString());
       return info.subject;
    }
