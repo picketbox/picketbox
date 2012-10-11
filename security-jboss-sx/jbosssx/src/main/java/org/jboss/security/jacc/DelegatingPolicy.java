@@ -21,7 +21,6 @@
 */
 package org.jboss.security.jacc;
 
-import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
 
 import javax.security.jacc.*;
@@ -166,10 +165,10 @@ public class DelegatingPolicy extends Policy
          ContextPolicy contextPolicy = activePolicies.get(contextID);
          if (contextPolicy != null)
             implied = contextPolicy.implies(domain, permission);
-         else
-            PicketBoxLogger.LOGGER.traceNoPolicyContextForId(contextID);
+         //else
+         //   PicketBoxLogger.LOGGER.traceNoPolicyContextForId(contextID);
       }
-      PicketBoxLogger.LOGGER.debugImpliesResult(implied);
+      // PicketBoxLogger.LOGGER.debugImpliesResult(implied);
       return implied;
    }
 
