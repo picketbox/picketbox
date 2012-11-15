@@ -80,7 +80,7 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
 
    private static final String[] ALL_VALID_OPTIONS =
    {
-	   DS_JNDI_NAME,ROLES_QUERY,SUSPEND_RESUME,PRINCIPALS_QUERY
+      DS_JNDI_NAME,ROLES_QUERY,SUSPEND_RESUME,PRINCIPALS_QUERY,TRANSACTION_MANAGER_JNDI_NAME
    };
    
    /** The JNDI name of the DataSource to use */

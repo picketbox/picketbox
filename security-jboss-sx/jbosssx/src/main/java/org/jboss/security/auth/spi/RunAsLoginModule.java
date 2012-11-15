@@ -32,6 +32,7 @@ import javax.security.auth.spi.LoginModule;
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.RunAsIdentity;
 import org.jboss.security.SecurityContextAssociation;
+import org.jboss.security.SecurityConstants;
 
 /** A login module that establishes a run-as role for the duration of the login
  * phase of authentication. It can be used to allow another login module
@@ -44,10 +45,13 @@ public class RunAsLoginModule implements LoginModule
 {
    private static final String ROLE_NAME = "roleName";
    private static final String PRINCIPLE_NAME = "principalName";
+   private static final String PRINCIPAL_CLASS = "principalClass";
 
    private static final String[] ALL_VALID_OPTIONS =
    {
-	   ROLE_NAME,PRINCIPLE_NAME
+      ROLE_NAME,PRINCIPLE_NAME,PRINCIPAL_CLASS,
+
+      SecurityConstants.SECURITY_DOMAIN_OPTION
    };
    
    private String roleName;

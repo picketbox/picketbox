@@ -23,6 +23,8 @@ package org.jboss.security;
 
 
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,6 +64,17 @@ import javax.security.auth.spi.LoginModule;
  */
 public class AltClientLoginModule implements LoginModule
 {
+   private static final String MULTI_TREADED = "multi-threaded";
+   private static final String PASSWORD_STACKING = "password-stacking";
+   private static final String PRINCIPAL_CLASS = "principalClass";
+
+   private static final String[] ALL_VALID_OPTIONS =
+   {
+      MULTI_TREADED,PASSWORD_STACKING,PRINCIPAL_CLASS,
+      
+      SecurityConstants.SECURITY_DOMAIN_OPTION
+   };
+
    private Subject subject;
    private CallbackHandler callbackHandler;
    /** Shared state between login modules */
@@ -77,7 +90,19 @@ public class AltClientLoginModule implements LoginModule
    public void initialize(Subject subject, CallbackHandler callbackHandler,
       Map<String,?> sharedState, Map<String,?> options)
    {
-      this.subject = subject;
+      /* TODO: this module should really extend AbstractServerLoginModule where the options check is integrated.
+       * the code here has been intentionally kept identical
+       */
+      HashSet<String> validOptions = new HashSet<String>(Arrays.asList(ALL_VALID_OPTIONS));
+      for (Object key : options.keySet())
+      {
+         if (!validOptions.contains((String)key))
+         {
+            PicketBoxLogger.LOGGER.warnInvalidModuleOption((String)key);
+         }
+      }
+
+     this.subject = subject;
       this.callbackHandler = callbackHandler;
       this.sharedState = sharedState;
 
@@ -86,22 +111,22 @@ public class AltClientLoginModule implements LoginModule
               options.get(SecurityConstants.SECURITY_DOMAIN_OPTION));
 
       // Check for multi-threaded option
-      String mt = (String) options.get("multi-threaded");
+      String mt = (String) options.get(MULTI_TREADED);
       if( Boolean.valueOf(mt).booleanValue() == true )
       { 
 	 /* Turn on the server mode which uses thread local storage for
 	    the principal information.
          */
-         PicketBoxLogger.LOGGER.debugModuleOption("multi-threaded", mt);
+         PicketBoxLogger.LOGGER.debugModuleOption(MULTI_TREADED, mt);
       }
       
         /* Check for password sharing options. Any non-null value for
             password_stacking sets useFirstPass as this module has no way to
             validate any shared password.
          */
-      String passwordStacking = (String) options.get("password-stacking");
+      String passwordStacking = (String) options.get(PASSWORD_STACKING);
       useFirstPass = passwordStacking != null;
-      PicketBoxLogger.LOGGER.debugModuleOption("password-stacking", passwordStacking);
+      PicketBoxLogger.LOGGER.debugModuleOption(PASSWORD_STACKING, passwordStacking);
    }
 
    /**

@@ -33,6 +33,7 @@ import javax.security.auth.spi.LoginModule;
 import org.jboss.logging.Logger;
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
+import org.jboss.security.SecurityConstants;
 
 /** A proxy LoginModule that loads a delegate LoginModule using
 the current thread context class loader. The purpose of this
@@ -50,10 +51,12 @@ public class ProxyLoginModule implements LoginModule
 {
     // see AbstractServerLoginModule
     private static final String MODULE_NAME = "moduleName";
+    private static final String PRINCIPAL_CLASS = "principalClass";
 
     private static final String[] ALL_VALID_OPTIONS =
     {
-	    MODULE_NAME
+       MODULE_NAME,PRINCIPAL_CLASS,
+       SecurityConstants.SECURITY_DOMAIN_OPTION
     };
 
     protected Logger log;
