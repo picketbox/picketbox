@@ -91,15 +91,18 @@ public class EJBAuthenticationHelper extends AbstractJavaEEHelper
          // Check for the security association exception
          String EX_KEY = "org.jboss.security.exception"; 
          Exception ex = (Exception) securityContext.getData().get(EX_KEY); 
-         audit(AuditLevel.ERROR, cMap ,ex);  
          if(ex == null)
          { 
-            audit(AuditLevel.FAILURE,cMap,null);  
+            authenticationAudit(AuditLevel.FAILURE,cMap,null);  
+         }
+         else
+         {
+            authenticationAudit(AuditLevel.ERROR, cMap ,ex);  
          }
       } 
       else
       {
-         audit(AuditLevel.SUCCESS,cMap,null);          
+         authenticationAudit(AuditLevel.SUCCESS,cMap,null);          
       }
       return auth;
    }

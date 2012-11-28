@@ -30,7 +30,9 @@ import java.util.Map;
 import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.audit.AuditEvent;
+import org.jboss.security.audit.AuditLevel;
 import org.jboss.security.audit.AuditManager;
+import org.jboss.security.authorization.AuthorizationException;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
 
@@ -93,15 +95,32 @@ public abstract class AbstractJavaEEHelper
    {
       if(securityContext.getAuditManager() == null)
          return;
-      //Authorization Exception stacktrace is huge. Scale it down
-      //as the original stack trace can be seen in server.log (if needed)
-      String exceptionMessage = e != null ? e.getLocalizedMessage() : "";  
       Map<String,Object> auditContextMap = new HashMap<String,Object>();
       auditContextMap.putAll(resource.getMap());
       auditContextMap.put("Resource:", resource.toString());
-      auditContextMap.put("Exception:", exceptionMessage);
-      audit(level,auditContextMap,null);
+      auditContextMap.put("Action", "authorization");
+      if (e != null) {
+         //Authorization Exception stacktrace is huge. Scale it down
+         //as the original stack trace can be seen in server.log (if needed)
+         String exceptionMessage = e != null ? e.getLocalizedMessage() : "";  
+         auditContextMap.put("Exception:", exceptionMessage);
+      }
+      if (e instanceof AuthorizationException) {
+         // changing level of audit, since in case of AuthorizationException it is FAILURE
+         audit(AuditLevel.FAILURE, auditContextMap, null);
+      }
+      else {
+         audit(level, auditContextMap, null);
+      }
    }  
+   
+   protected void authenticationAudit(String level, Map<String,Object> contextMap, Exception e)
+   {
+      if (contextMap != null) {
+         contextMap.put("Action", "authentication");
+      }
+      audit(level, contextMap, e);
+   }
    
    protected void audit(String level,
          Map<String,Object> contextMap, Exception e)
