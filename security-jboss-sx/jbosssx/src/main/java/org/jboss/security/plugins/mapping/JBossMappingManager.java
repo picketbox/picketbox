@@ -22,8 +22,6 @@
 package org.jboss.security.plugins.mapping;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
@@ -50,55 +48,53 @@ public class JBossMappingManager implements MappingManager
 {   
    private String securityDomain;
 
-   private static Map<String, Class<?> > clazzMap = new WeakHashMap<String, Class<?>>();
-
    public JBossMappingManager(String domain)
    {
-      this.securityDomain = SecurityUtil.unprefixSecurityDomain(domain);  
-   } 
-   
+      this.securityDomain = SecurityUtil.unprefixSecurityDomain(domain);
+   }
+
    public <T> MappingContext<T> getMappingContext(String mappingType)
    {
-      //Apply Mapping Logic  
+      //Apply Mapping Logic
       ApplicationPolicy aPolicy = SecurityConfiguration.getApplicationPolicy(securityDomain);
-      
+
       if(aPolicy == null)
       {
          String defaultDomain = SecurityConstants.DEFAULT_APPLICATION_POLICY;
          aPolicy = SecurityConfiguration.getApplicationPolicy(defaultDomain);
-      } 
+      }
       if(aPolicy == null )
          throw PicketBoxMessages.MESSAGES.failedToObtainApplicationPolicy(securityDomain);
 
       MappingContext<T> mc = null;
-      MappingInfo rmi = aPolicy.getMappingInfo(mappingType);  
+      MappingInfo rmi = aPolicy.getMappingInfo(mappingType);
 
       if( rmi != null)
          mc = generateMappingContext(mc, rmi);
-      
-      return mc; 
+
+      return mc;
    }
-   
+
    @SuppressWarnings("deprecation")
    public <T> MappingContext<T> getMappingContext(Class<T> mappingType)
-   { 
-      //Apply Mapping Logic  
+   {
+      //Apply Mapping Logic
       ApplicationPolicy aPolicy = SecurityConfiguration.getApplicationPolicy(securityDomain);
-      
+
       if(aPolicy == null)
       {
          String defaultDomain = SecurityConstants.DEFAULT_APPLICATION_POLICY;
          aPolicy = SecurityConfiguration.getApplicationPolicy(defaultDomain);
-      } 
+      }
       if(aPolicy == null )
          throw PicketBoxMessages.MESSAGES.failedToObtainApplicationPolicy(securityDomain);
 
       MappingContext<T> mc = null;
-      MappingInfo rmi = aPolicy.getMappingInfo(mappingType); 
+      MappingInfo rmi = aPolicy.getMappingInfo(mappingType);
       if( rmi != null)
         mc = generateMappingContext(mc, rmi);
-      
-      return mc; 
+
+      return mc;
    }
 
 
@@ -118,18 +114,18 @@ public class JBossMappingManager implements MappingManager
 	   ArrayList<MappingProvider<T>> al = new ArrayList<MappingProvider<T>>();
 
 	   for(int i = 0 ; i < mpe.length; i++)
-	   { 
+	   {
 		   MappingProvider<T> mp = getMappingProvider(moduleCL, mpe[i]);
 		   if(mp != null)
 		   {
-			   al.add(mp);   
-		   } 
+			   al.add(mp);
+		   }
 	   }
-	   return new MappingContext<T>(al); 
+	   return new MappingContext<T>(al);
    }
 
    public String getSecurityDomain()
-   { 
+   {
       return this.securityDomain;
    }
 
@@ -140,12 +136,7 @@ public class JBossMappingManager implements MappingManager
       try
       {
          String fqn = mme.getMappingModuleName();
-         Class<?> clazz = clazzMap.get(fqn);
-         if( clazz == null )
-         {
-        	clazz = SecurityActions.loadClass(cl, fqn);
-            clazzMap.put(fqn, clazz); 
-         } 
+         Class<?> clazz = SecurityActions.loadClass(cl, fqn);
          mp = (MappingProvider<T>) clazz.newInstance();
          mp.init(mme.getOptions());
       }

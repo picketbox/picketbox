@@ -27,7 +27,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -79,9 +78,6 @@ public class JBossAuthorizationContext extends AuthorizationContext
    //Application Policy can be injected
    private ApplicationPolicy applicationPolicy = null;
    
-   //Clazz instance cache map to minimize load class synchronization
-   private static Map< String,Class<?> > clazzMap = new WeakHashMap<String, Class<?>>();
-
    public JBossAuthorizationContext(String name)
    {
       this.securityDomainName = name; 
@@ -309,25 +305,21 @@ public class JBossAuthorizationContext extends AuthorizationContext
       AuthorizationModule am = null;
       try
       {
-         Class<?> clazz = clazzMap.get(name);
-         if(clazz == null)
+         Class<?> clazz;
+         try
          {
-            try
+            if(cl == null)
             {
-               if(cl == null)
-               {
-            	   cl = getClass().getClassLoader();
-               }
-               clazz = cl.loadClass(name);
+               cl = getClass().getClassLoader();
             }
-            catch (Exception ignore)
-            {
-               ClassLoader tcl = SecurityActions.getContextClassLoader();
-               clazz = tcl.loadClass(name);
-            }
-            clazzMap.put(name, clazz);
-         }   
-            
+            clazz = cl.loadClass(name);
+         }
+         catch (Exception ignore)
+         {
+            ClassLoader tcl = SecurityActions.getContextClassLoader();
+            clazz = tcl.loadClass(name);
+         }
+
          am = (AuthorizationModule) clazz.newInstance();
       }
       catch (Exception e)

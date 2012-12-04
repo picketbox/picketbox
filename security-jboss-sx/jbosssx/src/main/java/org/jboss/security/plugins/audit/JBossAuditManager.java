@@ -9,11 +9,8 @@ package org.jboss.security.plugins.audit;
 import java.security.PrivilegedActionException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.logging.Logger;
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.SecurityUtil;
 import org.jboss.security.audit.AuditContext;
@@ -39,8 +36,6 @@ public class JBossAuditManager implements AuditManager
    private static ConcurrentHashMap<String,AuditContext> contexts = new ConcurrentHashMap<String,AuditContext>();
    
    private static AuditContext defaultContext = null;
-   
-   private static Map<String, Class<?> > clazzMap = new WeakHashMap<String, Class<?>>();
    
    static
    {
@@ -136,13 +131,7 @@ public class JBossAuditManager implements AuditManager
           String pname = ape.getName();
           try
           {
-             Class<?> clazz = clazzMap.get(pname);
-             if( clazz == null )
-             {
-                clazz = SecurityActions.loadClass(cl, pname);
-                clazzMap.put(pname, clazz); 
-             }
-             
+             Class<?> clazz = SecurityActions.loadClass(cl, pname);
              ac.addProvider((AuditProvider) clazz.newInstance());
           }
           catch (Exception e)
