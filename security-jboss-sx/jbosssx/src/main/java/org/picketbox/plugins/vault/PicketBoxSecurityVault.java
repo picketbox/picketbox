@@ -249,7 +249,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       uuid.append("LINE_BREAK");
       uuid.append(publicCert);
       
-      return Base64.encodeBytes(uuid.toString().getBytes()).getBytes();
+      return Base64.encodeBytes(uuid.toString().getBytes(), Base64.DONT_BREAK_LINES).getBytes();
    }
    
    /*
