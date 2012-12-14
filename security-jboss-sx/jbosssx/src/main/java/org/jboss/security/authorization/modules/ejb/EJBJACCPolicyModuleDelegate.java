@@ -28,6 +28,7 @@ import java.security.Policy;
 import java.security.Principal;
 import java.security.ProtectionDomain;
 import java.util.Map;
+import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.jacc.EJBMethodPermission;
@@ -35,6 +36,8 @@ import javax.security.jacc.EJBRoleRefPermission;
 
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
+import org.jboss.security.RunAs;
+import org.jboss.security.RunAsIdentity;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -63,7 +66,8 @@ public class EJBJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    private CodeSource ejbCS = null;
    private String roleName = null;  
    private Boolean roleRefCheck = Boolean.FALSE;  
-   
+   private RunAsIdentity callerRunAs;
+
    /**
     * @see AuthorizationModuleDelegate#authorize(org.jboss.security.authorization.Resource, javax.security.auth.Subject, org.jboss.security.identity.RoleGroup)
     */
@@ -85,6 +89,9 @@ public class EJBJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
       this.ejbMethod = ejbResource.getEjbMethod();
       this.ejbName = ejbResource.getEjbName();
       this.methodInterface = ejbResource.getEjbMethodInterface();
+      RunAs runAs = ejbResource.getCallerRunAsIdentity();
+      if (runAs instanceof RunAsIdentity)
+        this.callerRunAs = RunAsIdentity.class.cast(runAs);
       
       //isCallerInRole checks
       this.roleName = (String)map.get(ResourceKeys.ROLENAME); 
@@ -130,8 +137,18 @@ public class EJBJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    
    private boolean checkWithPolicy(Permission ejbPerm, Subject subject, Role role)
    {
-      Principal[] principals = this.getPrincipals(subject, role);  
-      ProtectionDomain pd = new ProtectionDomain (ejbCS, null, null, principals);
-      return Policy.getPolicy().implies(pd, ejbPerm); 
+      // caller is using the caller identity
+      if (this.callerRunAs == null)
+      {
+         Principal[] principals = this.getPrincipals(subject, role);
+         ProtectionDomain pd = new ProtectionDomain (ejbCS, null, null, principals);
+         return Policy.getPolicy().implies(pd, ejbPerm);
+      }
+      // caller is using a run-as identity
+      else {
+         Set<Principal> principals = this.callerRunAs.getRunAsRoles();
+         ProtectionDomain pd = new ProtectionDomain (ejbCS, null, null, principals.toArray(new Principal[principals.size()]));
+         return Policy.getPolicy().implies(pd, ejbPerm);
+      }
    }
 }
