@@ -68,14 +68,15 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
    private static final String LEGACY_CREATE_PASSWORD_HASH = "legacyCreatePasswordHash";
    private static final String THROW_VALIDATE_ERROR = "throwValidateError";
    private static final String INPUT_VALIDATOR = "inputValidator";
-		
+   private static final String PASS_IS_A1_HASH = "passwordIsA1Hash";
+
    private static final String[] ALL_VALID_OPTIONS =
    {
      HASH_ALGORITHM,HASH_ENCODING,HASH_CHARSET,
      HASH_STORE_PASSWORD,HASH_USER_PASSWORD,
      DIGEST_CALLBACK,STORE_DIGEST_CALLBACK,
      IGNORE_PASSWORD_CASE,LEGACY_CREATE_PASSWORD_HASH,
-     THROW_VALIDATE_ERROR,INPUT_VALIDATOR
+     THROW_VALIDATE_ERROR,INPUT_VALIDATOR, PASS_IS_A1_HASH
    };
    
    /** The login identity */
