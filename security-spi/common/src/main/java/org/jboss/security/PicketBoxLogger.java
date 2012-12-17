@@ -43,9 +43,9 @@ public interface PicketBoxLogger extends BasicLogger {
     @Message(id = 205, value = "End validateCache, result = %s")
     void traceEndValidteCache(boolean isValid);
 
-    @LogMessage(level = Logger.Level.ERROR)
+    @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 206, value = "Login failure")
-    void errorDuringLogin(@Cause Throwable t);
+    void debugFailedLogin(@Cause Throwable t);
 
     @LogMessage(level = Logger.Level.TRACE)
     @Message(id = 207, value = "updateCache, input subject: %s, cached subject: %s")

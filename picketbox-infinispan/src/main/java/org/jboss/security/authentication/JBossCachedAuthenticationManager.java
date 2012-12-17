@@ -367,7 +367,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 	   {
 		   // Don't log anonymous user failures unless trace level logging is on
 		   if (principal != null && principal.getName() != null)
-               PicketBoxLogger.LOGGER.errorDuringLogin(e);
+               PicketBoxLogger.LOGGER.debugFailedLogin(e);
 		   authException = e;
 	   }
 	   // Set the security association thread context info exception

@@ -196,7 +196,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
          }
          catch(Exception e)
          {   // Dump the exception and continue
-            PicketBoxLogger.LOGGER.errorDuringLogin(e);
+            PicketBoxLogger.LOGGER.debugFailedLogin(e);
          }
       }
       return false;
