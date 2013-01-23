@@ -42,6 +42,8 @@ import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.Util;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.plugins.SimpleRole;
+import org.jboss.security.vault.SecurityVaultException;
+import org.jboss.security.vault.SecurityVaultUtil;
 
 /**
  * A mapping provider that assigns roles to an user using a LDAP server to search for the roles. 
@@ -116,6 +118,19 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
                throw PicketBoxMessages.MESSAGES.failedToDecodeBindCredential(e);
             }
          }
+         
+         //Check if the credential is vaultified
+         if(bindCredential != null && SecurityVaultUtil.isVaultFormat(bindCredential))
+         {
+            try {
+               bindCredential = SecurityVaultUtil.getValueAsString(bindCredential);
+            }
+            catch (SecurityVaultException ve) 
+            {
+               throw new IllegalArgumentException(PicketBoxMessages.MESSAGES.unableToGetPasswordFromVault());
+            }
+         }
+         
          roleFilter = (String) options.get(ROLE_FILTER_OPT);
          roleAttributeID = (String) options.get(ROLE_ATTRIBUTE_ID_OPT);
          if (roleAttributeID == null)
