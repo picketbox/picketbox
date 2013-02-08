@@ -322,7 +322,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          if (inputPassword.length() == 0)
          {
             // Check for an allowEmptyPasswords option
-            boolean allowEmptyPasswords = true;
+            boolean allowEmptyPasswords = false;
             String flag = (String) options.get(ALLOW_EMPTY_PASSWORDS);
             if (flag != null)
                allowEmptyPasswords = Boolean.valueOf(flag).booleanValue();
