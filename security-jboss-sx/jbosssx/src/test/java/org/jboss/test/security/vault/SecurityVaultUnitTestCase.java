@@ -60,7 +60,12 @@ public class SecurityVaultUnitTestCase
    @Before
    public void setup() throws Exception
    {
-      String dir = StringUtil.getSystemPropertyAsString(dataDir);
+      setupEncryptionFilesDir(dataDir);
+   }
+
+   private void setupEncryptionFilesDir(String directoryName) {
+
+      String dir = StringUtil.getSystemPropertyAsString(directoryName);
       File encDir = new File(dir);
       
       if(encDir.exists() == false)
@@ -124,6 +129,42 @@ public class SecurityVaultUnitTestCase
       
       byte[] sharedKey = vault.handshake(handshakeOptions);
       assertNotNull(sharedKey);
+   }
+
+   @Test
+   public void testHandshakeForLongAlias() throws Exception
+   {
+
+      SecurityVault vault = SecurityVaultFactory.get();
+      String maskedPassword = getMaskedPassword("password1234", "87654321", 23);
+      String encDir = "${java.io.tmpdir}/long_alias_keystore/";
+      setupEncryptionFilesDir(encDir);
+
+      Map<String,Object> options = new HashMap<String,Object>();
+      options.put(PicketBoxSecurityVault.KEYSTORE_URL, "src/test/resources/long_alias_keystore/vault.jks");
+      options.put(PicketBoxSecurityVault.KEYSTORE_PASSWORD, maskedPassword);
+      options.put(PicketBoxSecurityVault.KEYSTORE_ALIAS, "superverylongvaultname");
+      options.put(PicketBoxSecurityVault.SALT, "87654321");
+      options.put(PicketBoxSecurityVault.ITERATION_COUNT, String.valueOf(23));
+      options.put(PicketBoxSecurityVault.ENC_FILE_DIR, encDir);
+
+      vault.init(options);
+      assertTrue("Vault is supposed to be initialized", vault.isInitialized());
+
+      Map<String,Object> handshakeOptions = new HashMap<String,Object>();
+      handshakeOptions.put(PicketBoxSecurityVault.PUBLIC_CERT, "superverylongvaultname");
+
+      byte[] sharedKey = vault.handshake(handshakeOptions);
+      assertNotNull(sharedKey);
+
+      boolean containsLineBreaks = false;
+      for (byte b: sharedKey) {
+         if (b == '\n') {
+            containsLineBreaks = true;
+            break;
+         }
+      }
+      assertFalse("Shared key returned from hadshake cannot contain line break character", containsLineBreaks);
    }
    
    @Test
