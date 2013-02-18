@@ -116,11 +116,6 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>oswego-concurrent</groupId>
-            <artifactId>concurrent</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.spec.javax.security.auth.message</groupId>
             <artifactId>jboss-jaspi-api_1.0_spec</artifactId>
             <scope>compile</scope>
