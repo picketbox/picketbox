@@ -33,11 +33,13 @@ import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.ReferralException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
+import javax.naming.ldap.LdapContext;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
@@ -166,6 +168,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    private static final String USERNAME_BEGIN_STRING = "usernameBeginString";
    private static final String USERNAME_END_STRING = "usernameEndString";
    private static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
+   private static final String ALLOW_REFERRALS_FOR_AUTH = "allowReferralsForAuth";
    private static final String[] ALL_VALID_OPTIONS =
    {
 	   ROLES_CTX_DN_OPT,ROLE_ATTRIBUTE_ID_OPT,
@@ -175,6 +178,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
 	   SEARCH_TIME_LIMIT_OPT,SEARCH_SCOPE_OPT,SECURITY_DOMAIN_OPT,
 	   DISTINGUISHED_NAME_ATTRIBUTE_OPT,PARSE_USERNAME,USERNAME_BEGIN_STRING,USERNAME_END_STRING,
 	   ALLOW_EMPTY_PASSWORDS,
+     ALLOW_REFERRALS_FOR_AUTH,
 	   
 	   Context.INITIAL_CONTEXT_FACTORY,Context.SECURITY_AUTHENTICATION,Context.SECURITY_PROTOCOL,
 	   Context.PROVIDER_URL,Context.SECURITY_PRINCIPAL,Context.SECURITY_CREDENTIALS
@@ -213,6 +217,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    protected String usernameBeginString;
    
    protected String usernameEndString;
+   
+   protected boolean allowReferralsForAuth = false;
 
    // simple flag to indicate is the validatePassword method was called
    protected boolean isPasswordValidated = false;
@@ -369,6 +375,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     	  bindCredential = SecurityVaultUtil.getValueAsString(bindCredential);
       }
 
+      allowReferralsForAuth = Boolean.valueOf((String)options.get(ALLOW_REFERRALS_FOR_AUTH)).booleanValue();
       baseDN = (String) options.get(BASE_CTX_DN);
       baseFilter = (String) options.get(BASE_FILTER_OPT);
       roleFilter = (String) options.get(ROLE_FILTER_OPT);
@@ -478,14 +485,34 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       NamingEnumeration results = null;
 
       Object[] filterArgs = {user};
-      results = ctx.search(baseDN, filter, filterArgs, constraints);
-      if (results.hasMore() == false)
+
+      LdapContext ldapCtx = ctx;
+      
+      boolean referralsLeft = true;
+      SearchResult sr = null;
+      while (referralsLeft) {
+         try {
+            results = ldapCtx.search(baseDN, filter, filterArgs, constraints);
+            while (results.hasMore()) {
+               sr = (SearchResult) results.next();
+               break;
+            }
+            referralsLeft = false;
+         }
+         catch (ReferralException e) {
+            ldapCtx = (LdapContext) e.getReferralContext();
+            if (results != null) {
+               results.close();
+            }
+         }
+      }
+      
+      if (sr == null)
       {
          results.close();
          throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Search of baseDN(" + baseDN + ") found no matches");
       }
 
-      SearchResult sr = (SearchResult) results.next();
       String name = sr.getName();
       String userDN = null;
       Attributes attrs = sr.getAttributes();
@@ -499,10 +526,17 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       }
       if (userDN == null)
       {
-          if (sr.isRelative() == true)
+          if (sr.isRelative() == true) {
                   userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
-          else
-                  throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
+          }
+          else {
+             if (allowReferralsForAuth) {
+                userDN = sr.getNameInNamespace();
+             }
+             else {
+                throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
+             }
+          }
       }
 
       results.close();
@@ -527,99 +561,114 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     @param nesting
     @throws NamingException
     */ 
-   protected void rolesSearch(InitialLdapContext ctx, SearchControls constraints, String user, String userDN,
+   protected void rolesSearch(LdapContext ctx, SearchControls constraints, String user, String userDN,
          int recursionMax, int nesting) throws NamingException
    {
+      LdapContext ldapCtx = ctx;
+      
       Object[] filterArgs = {user, userDN};
-      NamingEnumeration results = ctx.search(rolesCtxDN, roleFilter, filterArgs, constraints);
-      try
-      {
-         while (results.hasMore())
+      boolean referralsExist = true;
+      while (referralsExist) {
+         NamingEnumeration results = ldapCtx.search(rolesCtxDN, roleFilter, filterArgs, constraints);
+         try
          {
-            SearchResult sr = (SearchResult) results.next();
-            String dn = canonicalize(sr.getName());
-            if (nesting == 0 && roleAttributeIsDN && roleNameAttributeID != null)
+            while (results.hasMore())
             {
-               if(parseRoleNameFromDN)
-               {
-                  parseRole(dn);
+               SearchResult sr = (SearchResult) results.next();
+               
+               String dn;
+               if (sr.isRelative()) {
+                  dn = canonicalize(sr.getName());
                }
-               else
-               {
-                  // Check the top context for role names
-                  String[] attrNames = {roleNameAttributeID};
-                  Attributes result2 = ctx.getAttributes(dn, attrNames);
-                  Attribute roles2 = result2.get(roleNameAttributeID);
-                  if( roles2 != null )
-                  {
-                     for(int m = 0; m < roles2.size(); m ++)
-                     {
-                        String roleName = (String) roles2.get(m);
-                        addRole(roleName);
-                     }
-                  }
+               else {
+                  dn = sr.getNameInNamespace();
                }
-            }
-
-            // Query the context for the roleDN values
-            String[] attrNames = {roleAttributeID};
-            Attributes result = ctx.getAttributes(dn, attrNames);
-            if (result != null && result.size() > 0)
-            {
-               Attribute roles = result.get(roleAttributeID);
-               for (int n = 0; n < roles.size(); n++)
+               if (nesting == 0 && roleAttributeIsDN && roleNameAttributeID != null)
                {
-                  String roleName = (String) roles.get(n);
-                  if(roleAttributeIsDN && parseRoleNameFromDN)
+                  if(parseRoleNameFromDN)
                   {
-                      parseRole(roleName);
+                     parseRole(dn);
                   }
                   else
-                  if (roleAttributeIsDN)
                   {
-                     // Query the roleDN location for the value of roleNameAttributeID
-                     String roleDN = roleName;
-                     String[] returnAttribute = {roleNameAttributeID};
-                     if(trace)
-                        log.trace("Using roleDN: " + roleDN);
-                     try
+                     // Check the top context for role names
+                     String[] attrNames = {roleNameAttributeID};
+                     Attributes result2 = ldapCtx.getAttributes(dn, attrNames);
+                     Attribute roles2 = result2.get(roleNameAttributeID);
+                     if( roles2 != null )
                      {
-                        Attributes result2 = ctx.getAttributes(roleDN, returnAttribute);
-                        Attribute roles2 = result2.get(roleNameAttributeID);
-                        if (roles2 != null)
+                        for(int m = 0; m < roles2.size(); m ++)
                         {
-                           for (int m = 0; m < roles2.size(); m++)
-                           {
-                              roleName = (String) roles2.get(m);
-                              addRole(roleName);
-                           }
+                           String roleName = (String) roles2.get(m);
+                           addRole(roleName);
                         }
                      }
-                     catch (NamingException e)
-                     {
-                        if(trace)
-                           log.trace("Failed to query roleNameAttrName", e);
-                     }
-                  }
-                  else
-                  {
-                     // The role attribute value is the role name
-                     addRole(roleName);
                   }
                }
-            }
+   
+               // Query the context for the roleDN values
+               String[] attrNames = {roleAttributeID};
+               Attributes result = ldapCtx.getAttributes(dn, attrNames);
+               if (result != null && result.size() > 0)
+               {
+                  Attribute roles = result.get(roleAttributeID);
+                  for (int n = 0; n < roles.size(); n++)
+                  {
+                     String roleName = (String) roles.get(n);
+                     if(roleAttributeIsDN && parseRoleNameFromDN)
+                     {
+                         parseRole(roleName);
+                     }
+                     else if (roleAttributeIsDN)
+                     {
+                        // Query the roleDN location for the value of roleNameAttributeID
+                        String roleDN = roleName;
+                        String[] returnAttribute = {roleNameAttributeID};
+                        try
+                         {
+                           Attributes result2 = ldapCtx.getAttributes(roleDN, returnAttribute);
+                           Attribute roles2 = result2.get(roleNameAttributeID);
+                           if (roles2 != null)
+                           {
+                              for (int m = 0; m < roles2.size(); m++)
+                              {
+                                 roleName = (String) roles2.get(m);
+                                 addRole(roleName);
+                              }
+                           }
+                        }
+                        catch (NamingException e)
+                        {
+                          if(trace)
+                             log.trace("Failed to query roleNameAttrbuteID", e);
+                        }
+                     }
+                    else
+                    {
+                       // The role attribute value is the role name
+                       addRole(roleName);
+                    }
+                  }
+               }
 
-            if (nesting < recursionMax)
-            {
-               rolesSearch(ctx, constraints, user, dn, recursionMax, nesting + 1);
+               if (nesting < recursionMax)
+               {
+                  rolesSearch(ldapCtx, constraints, user, dn, recursionMax, nesting + 1);
+               }
+            }
+            referralsExist = false;
+         }
+         catch (ReferralException e) {
+            if (allowReferralsForAuth) {
+               ldapCtx = (LdapContext) e.getReferralContext();
             }
          }
-      }
-      finally
-      {
-         if (results != null)
-            results.close();
-      }
+         finally
+         {
+            if (results != null)
+               results.close();
+         }
+      } // while (referralsExist)
 
    }
  
