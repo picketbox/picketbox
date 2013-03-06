@@ -33,8 +33,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import org.jboss.logging.Logger;
-
 /**
  * Util.
  * 
@@ -44,15 +42,20 @@ import org.jboss.logging.Logger;
  */
 public class Util
 {
+   private static PasswordCache externalPasswordCache;
+   
    /**
     * Execute a password load command to obtain the char[] contents of a
     * password.
     * @param  passwordCmd  - A command to execute to obtain the plaintext
     * password. The format is one of:
     * '{EXT}...' where the '...' is the exact command
+    * '{EXTC[:expiration_in_millis]}...' where the '...' is the exact command
     * line that will be passed to the Runtime.exec(String) method to execute a
     * platform command. The first line of the command output is used as the
     * password.
+    * EXTC variant will cache the passwords for expiration_in_millis milliseconds. 
+    * Default cache expiration is 0 = infinity. 
     * '{CLASS}classname[:ctorargs]' where the '[:ctorargs]' is an optional
     * string delimited by the ':' from the classname that will be passed to the
     * classname ctor. The ctorargs itself is a comma delimited list of strings.
@@ -84,12 +87,36 @@ public class Util
       if( password == null )
       {
          // Load the password
-         if( passwordCmdType.equals("EXT") )
+         if (passwordCmdType.startsWith("EXTC")) {
+            long timeOut = 0;
+            if (passwordCmdType.indexOf(':') > -1) {
+               try {
+                  String[] token = passwordCmdType.split(":");
+                  timeOut = Long.parseLong(token[1]);
+               } catch (Throwable e) {
+                  // ignore
+               }
+            }
+            if (externalPasswordCache == null) {
+               externalPasswordCache = ExternalPasswordCache
+                     .getExternalPasswordCacheInstance();
+            }
+            if (externalPasswordCache.contains(passwordCmd, timeOut)) {
+               password = externalPasswordCache.getPassword(passwordCmd);
+            } else {
+               password = execPasswordCmd(passwordCmd);
+               if (password != null) {
+                  externalPasswordCache.storePassword(passwordCmd, password);
+               }
+            }
+         } else if (passwordCmdType.startsWith("EXT")) {
+            // non-cached EXT variant
             password = execPasswordCmd(passwordCmd);
-         else if( passwordCmdType.equals("CLASS") )
+         } else if (passwordCmdType.equals("CLASS")) {
             password = invokePasswordClass(passwordCmd);
-         else
+         } else {
             throw PicketBoxMessages.MESSAGES.invalidPasswordCommandType(passwordCmdType);
+         }   
       }
       return password;
    }

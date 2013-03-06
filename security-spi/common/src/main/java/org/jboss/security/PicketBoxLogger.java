@@ -667,4 +667,21 @@ public interface PicketBoxLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.INFO)
     @Message(id = 361, value = "Default Security Vault Implementation Initialized and Ready")
     void infoVaultInitialized();
+    
+    @LogMessage(level = Logger.Level.ERROR)
+    @Message(id = 362, value = "Cannot get MD5 algorithm instance for hashing password commands. Using NULL.")
+    void errorCannotGetMD5AlgorithmInstance();
+
+    @LogMessage(level = Logger.Level.TRACE)
+    @Message(id = 363, value = "Retrieving password from the cache for key: %s")
+    void traceRetrievingPasswordFromCache(String newKey);
+
+    @LogMessage(level = Logger.Level.TRACE)
+    @Message(id = 364, value = "Storing password to the cache for key: %s")
+    void traceStoringPasswordToCache(String newKey);
+
+    @LogMessage(level = Logger.Level.TRACE)
+    @Message(id = 365, value = "Resetting cache")
+    void traceResettingCache();
+
 }
