@@ -684,4 +684,8 @@ public interface PicketBoxLogger extends BasicLogger {
     @Message(id = 365, value = "Resetting cache")
     void traceResettingCache();
 
+    @LogMessage(level = Logger.Level.ERROR)
+    @Message(id = 366, value = "Error parsing time out number.")
+    void errorParsingTimeoutNumber();
+
 }

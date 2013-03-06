@@ -95,6 +95,7 @@ public class Util
                   timeOut = Long.parseLong(token[1]);
                } catch (Throwable e) {
                   // ignore
+                  PicketBoxLogger.LOGGER.errorParsingTimeoutNumber();
                }
             }
             if (externalPasswordCache == null) {
