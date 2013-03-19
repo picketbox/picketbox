@@ -168,7 +168,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    private static final String USERNAME_BEGIN_STRING = "usernameBeginString";
    private static final String USERNAME_END_STRING = "usernameEndString";
    private static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
-   private static final String ALLOW_REFERRALS_FOR_AUTH = "allowReferralsForAuth";
    private static final String[] ALL_VALID_OPTIONS =
    {
 	   ROLES_CTX_DN_OPT,ROLE_ATTRIBUTE_ID_OPT,
@@ -178,7 +177,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
 	   SEARCH_TIME_LIMIT_OPT,SEARCH_SCOPE_OPT,SECURITY_DOMAIN_OPT,
 	   DISTINGUISHED_NAME_ATTRIBUTE_OPT,PARSE_USERNAME,USERNAME_BEGIN_STRING,USERNAME_END_STRING,
 	   ALLOW_EMPTY_PASSWORDS,
-     ALLOW_REFERRALS_FOR_AUTH,
 	   
 	   Context.INITIAL_CONTEXT_FACTORY,Context.SECURITY_AUTHENTICATION,Context.SECURITY_PROTOCOL,
 	   Context.PROVIDER_URL,Context.SECURITY_PRINCIPAL,Context.SECURITY_CREDENTIALS
@@ -218,8 +216,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    
    protected String usernameEndString;
    
-   protected boolean allowReferralsForAuth = false;
-
    // simple flag to indicate is the validatePassword method was called
    protected boolean isPasswordValidated = false;
 
@@ -375,7 +371,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     	  bindCredential = SecurityVaultUtil.getValueAsString(bindCredential);
       }
 
-      allowReferralsForAuth = Boolean.valueOf((String)options.get(ALLOW_REFERRALS_FOR_AUTH)).booleanValue();
       baseDN = (String) options.get(BASE_CTX_DN);
       baseFilter = (String) options.get(BASE_FILTER_OPT);
       roleFilter = (String) options.get(ROLE_FILTER_OPT);
@@ -530,12 +525,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                   userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
           }
           else {
-             if (allowReferralsForAuth) {
-                userDN = sr.getNameInNamespace();
-             }
-             else {
-                throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
-             }
+             throw new NamingException(ErrorCodes.PROCESSING_FAILED + "Can't follow referal for authentication: " + name);
           }
       }
 
@@ -659,9 +649,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
             referralsExist = false;
          }
          catch (ReferralException e) {
-            if (allowReferralsForAuth) {
-               ldapCtx = (LdapContext) e.getReferralContext();
-            }
+            ldapCtx = (LdapContext) e.getReferralContext();
          }
          finally
          {
