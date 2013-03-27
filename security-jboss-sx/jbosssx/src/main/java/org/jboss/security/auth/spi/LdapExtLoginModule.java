@@ -597,8 +597,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                }
    
                // Query the context for the roleDN values
-               String[] attrNames = {roleAttributeID};
-               Attributes result = ldapCtx.getAttributes(dn, attrNames);
+               Attributes result = sr.getAttributes();
                if (result != null && result.size() > 0)
                {
                   Attribute roles = result.get(roleAttributeID);
