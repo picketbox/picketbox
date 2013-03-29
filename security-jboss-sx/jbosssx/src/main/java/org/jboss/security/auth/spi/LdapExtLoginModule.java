@@ -440,7 +440,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          // Query for roles matching the role filter
          SearchControls constraints = new SearchControls();
          constraints.setSearchScope(searchScope);
-         constraints.setReturningAttributes(new String[0]);
+         //constraints.setReturningAttributes(new String[0]);
          constraints.setTimeLimit(searchTimeLimit);
          rolesSearch(ctx, constraints, username, userDN, recursion, 0);
       }
@@ -582,8 +582,9 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                   else
                   {
                      // Check the top context for role names
-                     String[] attrNames = {roleNameAttributeID};
-                     Attributes result2 = ldapCtx.getAttributes(dn, attrNames);
+                     //String[] attrNames = {roleNameAttributeID};
+                     //Attributes result2 = ldapCtx.getAttributes(dn, attrNames);
+                     Attributes result2 = sr.getAttributes();
                      Attribute roles2 = result2.get(roleNameAttributeID);
                      if( roles2 != null )
                      {
