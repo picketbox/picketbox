@@ -602,41 +602,44 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                if (result != null && result.size() > 0)
                {
                   Attribute roles = result.get(roleAttributeID);
-                  for (int n = 0; n < roles.size(); n++)
+                  if (roles != null) 
                   {
-                     String roleName = (String) roles.get(n);
-                     if(roleAttributeIsDN && parseRoleNameFromDN)
-                     {
-                         parseRole(roleName);
-                     }
-                     else if (roleAttributeIsDN)
-                     {
+                    for (int n = 0; n < roles.size(); n++)
+                    {
+                      String roleName = (String) roles.get(n);
+                      if(roleAttributeIsDN && parseRoleNameFromDN)
+                      {
+                        parseRole(roleName);
+                      }
+                      else if (roleAttributeIsDN)
+                      {
                         // Query the roleDN location for the value of roleNameAttributeID
                         String roleDN = roleName;
                         String[] returnAttribute = {roleNameAttributeID};
                         try
-                         {
-                           Attributes result2 = ldapCtx.getAttributes(roleDN, returnAttribute);
-                           Attribute roles2 = result2.get(roleNameAttributeID);
-                           if (roles2 != null)
-                           {
-                              for (int m = 0; m < roles2.size(); m++)
-                              {
-                                 roleName = (String) roles2.get(m);
-                                 addRole(roleName);
-                              }
-                           }
+                        {
+                          Attributes result2 = ldapCtx.getAttributes(roleDN, returnAttribute);
+                          Attribute roles2 = result2.get(roleNameAttributeID);
+                          if (roles2 != null)
+                          {
+                            for (int m = 0; m < roles2.size(); m++)
+                            {
+                              roleName = (String) roles2.get(m);
+                              addRole(roleName);
+                            }
+                          }
                         }
                         catch (NamingException e)
                         {
                           if(trace)
-                             log.trace("Failed to query roleNameAttrbuteID", e);
+                            log.trace("Failed to query roleNameAttrbuteID", e);
                         }
-                     }
-                    else
-                    {
-                       // The role attribute value is the role name
-                       addRole(roleName);
+                      }
+                      else
+                      {
+                        // The role attribute value is the role name
+                        addRole(roleName);
+                      }
                     }
                   }
                }
