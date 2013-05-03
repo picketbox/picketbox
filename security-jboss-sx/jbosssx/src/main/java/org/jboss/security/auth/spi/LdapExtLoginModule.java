@@ -169,6 +169,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    private static final String USERNAME_BEGIN_STRING = "usernameBeginString";
    private static final String USERNAME_END_STRING = "usernameEndString";
    private static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
+   private static final String REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK = "referralUserAttributeIDToCheck";
    private static final String[] ALL_VALID_OPTIONS =
    {
       ROLES_CTX_DN_OPT,
@@ -191,6 +192,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       USERNAME_BEGIN_STRING,
       USERNAME_END_STRING,
       ALLOW_EMPTY_PASSWORDS,
+      REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK,
 
       Context.INITIAL_CONTEXT_FACTORY,
       Context.OBJECT_FACTORIES,
@@ -246,6 +248,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    // simple flag to indicate is the validatePassword method was called
    protected boolean isPasswordValidated = false;
 
+   protected String referralUserAttributeIDToCheck = null;
+   
    public LdapExtLoginModule()
    {
    }
@@ -406,6 +410,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       roleNameAttributeID = (String) options.get(ROLE_NAME_ATTRIBUTE_ID_OPT);
       if (roleNameAttributeID == null)
          roleNameAttributeID = "name";
+
+      referralUserAttributeIDToCheck = (String) options.get(REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK);
       
       //JBAS-4619:Parse Role Name from DN
       String parseRoleNameFromDNOption = (String) options.get(PARSE_ROLE_NAME_FROM_DN_OPT);
@@ -461,7 +467,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          // Query for roles matching the role filter
          SearchControls constraints = new SearchControls();
          constraints.setSearchScope(searchScope);
-         constraints.setReturningAttributes(new String[0]);
          constraints.setTimeLimit(searchTimeLimit);
          rolesSearch(ctx, constraints, username, userDN, recursion, 0);
       }
@@ -603,8 +608,14 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                   {
                      // Check the top context for role names
                      String[] attrNames = {roleNameAttributeID};
-                     Attributes result2 = ldapCtx.getAttributes(dn, attrNames);
-                     Attribute roles2 = result2.get(roleNameAttributeID);
+                     Attributes result2 = null;
+                     if (sr.isRelative()) {
+                        result2 = ldapCtx.getAttributes(dn, attrNames);
+                     }
+                     else {
+                        result2 = getAttributesFromReferralEntity(sr, user, userDN);
+                     }
+                     Attribute roles2 = (result2 != null ? result2.get(roleNameAttributeID) : null);
                      if( roles2 != null )
                      {
                         for(int m = 0; m < roles2.size(); m ++)
@@ -618,7 +629,13 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    
                // Query the context for the roleDN values
                String[] attrNames = {roleAttributeID};
-               Attributes result = ldapCtx.getAttributes(dn, attrNames);
+               Attributes result = null;
+               if (sr.isRelative()) {
+                  result = ldapCtx.getAttributes(dn, attrNames);
+               }
+               else {
+                  result = getAttributesFromReferralEntity(sr, user, userDN); 
+               }
                if (result != null && result.size() > 0)
                {
                   Attribute roles = result.get(roleAttributeID);
@@ -636,8 +653,15 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                         String[] returnAttribute = {roleNameAttributeID};
                         try
                         {
-                           Attributes result2 = ldapCtx.getAttributes(roleDN, returnAttribute);
-                           Attribute roles2 = result2.get(roleNameAttributeID);
+                           Attributes result2 = null;
+                           if (sr.isRelative()) {
+                              result2 = ldapCtx.getAttributes(roleDN, returnAttribute);
+                           }
+                           else {
+                              result2 = getAttributesFromReferralEntity(sr, user, userDN);
+                           }
+                                                      
+                           Attribute roles2 = (result2 != null ? result2.get(roleNameAttributeID) : null);
                            if (roles2 != null)
                            {
                               for (int m = 0; m < roles2.size(); m++)
@@ -678,6 +702,36 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       } // while (referralsExist)
    }
  
+
+   /**
+    * Returns Attributes from referral entity and check them if they belong to user or userDN currently in evaluation.
+    * Returns null in case of user is not validated.
+    * 
+    * @param sr SearchResult
+    * @param users to check
+    * @return
+    * @throws NamingException
+    */
+   private Attributes getAttributesFromReferralEntity(SearchResult sr, String... users) throws NamingException {
+
+      Attributes result = sr.getAttributes();
+      boolean chkSuccessful = false;
+      if (referralUserAttributeIDToCheck != null) {
+         Attribute usersToCheck = result.get(referralUserAttributeIDToCheck);
+         check:
+         for (int i = 0; usersToCheck != null && i < usersToCheck.size(); i++) {
+            String userDNToCheck = (String) usersToCheck.get(i);
+            for (String u: users) {
+               if (u.equals(userDNToCheck)) {
+                  chkSuccessful = true;
+                  break check;
+               }
+            }
+         }
+      }
+      return (chkSuccessful ? result : null);
+   }
+   
    private InitialLdapContext constructInitialLdapContext(String dn, Object credential) throws NamingException
    {
       Properties env = new Properties();
@@ -750,11 +804,16 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    
    private void parseRole(String dn)
    {
+      parseRole(dn, roleNameAttributeID);
+   }
+
+   private void parseRole(String dn, String roleNameAttributeIdentifier)
+   {
       StringTokenizer st = new StringTokenizer(dn, ",");
       while(st != null && st.hasMoreTokens())
       {
          String keyVal = st.nextToken();
-         if(keyVal.indexOf(roleNameAttributeID) > -1)
+         if(keyVal.indexOf(roleNameAttributeIdentifier) > -1)
          {
             StringTokenizer kst = new StringTokenizer(keyVal,"=");
             kst.nextToken();
