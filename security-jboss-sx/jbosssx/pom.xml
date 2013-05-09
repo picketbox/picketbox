@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.picketbox</groupId>
         <artifactId>jbosssx-parent</artifactId>
-        <version>4.0.18-SNAPSHOT</version>
+        <version>4.0.18.Final</version>
         <relativePath>../parent</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
