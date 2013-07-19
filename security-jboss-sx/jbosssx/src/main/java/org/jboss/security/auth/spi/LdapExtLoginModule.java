@@ -383,7 +383,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    {
       bindDN = (String) options.get(BIND_DN);
       bindCredential = (String) options.get(BIND_CREDENTIAL);
-      if ((bindCredential != null) && bindCredential.startsWith("{EXT}"))
+      if ((bindCredential != null) && bindCredential.startsWith("{EXT"))
          bindCredential = new String(Util.loadPassword(bindCredential));
       String securityDomain = (String) options.get(SECURITY_DOMAIN_OPT);
       if (securityDomain != null)
