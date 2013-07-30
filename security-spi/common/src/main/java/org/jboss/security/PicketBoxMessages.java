@@ -424,8 +424,8 @@ public interface PicketBoxMessages {
     @Message(id = 129, value = "Unable to write shared key file")
     String unableToWriteShareKeyFileMessage();
 
-    @Message(id = 130, value = "Unable to write encoded file")
-    String unableToWriteEncodedFileMessage();
+    @Message(id = 130, value = "Unable to write vault data file (%s)")
+    String unableToWriteVaultDataFileMessage(String fileName);
 
     @Message(id = 131, value = "Vault mismatch: shared key does not match for vault block %s and attribute name %s")
     String sharedKeyMismatchMessage(String vaultBlock, String attributeName);
@@ -435,4 +435,25 @@ public interface PicketBoxMessages {
 
     @Message(id = 133, value = "Failed to match %s and %s")
     RuntimeException failedToMatchStrings(String one, String two);
+
+    @Message(id = 134, value = "Unrecognized security vault content version (%s), expecting (from %s to %s)")
+    RuntimeException unrecognizedVaultContentVersion(String readVersion, String fromVersion, String toVersion);
+
+    @Message(id = 135, value = "Security Vault contains both covnerted (%s) and pre-conversion data (%s), failed to load vault")
+    RuntimeException mixedVaultDataFound(String vaultDatFile, String encDatFile);
+
+    @Message(id = 136, value = "Security Vault conversion unsuccessful missing admin key in original vault data")
+    RuntimeException missingAdminKeyInOriginalVaultData();
+
+    @Message(id = 137, value = "Security Vault does not contain SecretKey entry under alias (%s)")
+    RuntimeException vaultDoesnotContainSecretKey(String alias);
+    
+    @Message(id = 138, value = "There is no SecretKey under the alias (%s) and the alias is already used to denote diffrent crypto object in the keystore.")
+    RuntimeException noSecretKeyandAliasAlreadyUsed(String alias);
+
+    @Message(id = 139, value = "Unable to store keystore to file (%s)")
+    RuntimeException unableToStoreKeyStoreToFile(@Cause Throwable throwable, String file);
+
+    @Message(id = 140, value = "Unable to get keystore (%s)")
+    RuntimeException unableToGetKeyStore(@Cause Throwable throwable, String file);
 }
