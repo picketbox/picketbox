@@ -62,7 +62,17 @@
       <id>repository.jboss.org</id>
       <name>JBoss Repository</name>
       <layout>default</layout>
-      <url>http://repository.jboss.org/maven2/</url>
+      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+    <repository>
+      <id>release.jboss.org</id>
+      <name>JBoss Releases Repository</name>
+      <layout>default</layout>
+      <url>http://repository.jboss.org/nexus/content/repositories/releases/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
