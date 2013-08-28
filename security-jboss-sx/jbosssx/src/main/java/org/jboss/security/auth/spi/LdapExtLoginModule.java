@@ -581,7 +581,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    {
       LdapContext ldapCtx = ctx;
       
-      Object[] filterArgs = {user, userDN};
+      Object[] filterArgs = {user, sanitizeDN(userDN)};
       boolean referralsExist = true;
       while (referralsExist) {
          NamingEnumeration results = ldapCtx.search(rolesCtxDN, roleFilter, filterArgs, constraints);
@@ -610,7 +610,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                      String[] attrNames = {roleNameAttributeID};
                      Attributes result2 = null;
                      if (sr.isRelative()) {
-                        result2 = ldapCtx.getAttributes(dn, attrNames);
+                        result2 = ldapCtx.getAttributes(quoteDN(dn), attrNames);
                      }
                      else {
                         result2 = getAttributesFromReferralEntity(sr, user, userDN);
@@ -631,7 +631,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                String[] attrNames = {roleAttributeID};
                Attributes result = null;
                if (sr.isRelative()) {
-                  result = ldapCtx.getAttributes(dn, attrNames);
+                  result = ldapCtx.getAttributes(quoteDN(dn), attrNames);
                }
                else {
                   result = getAttributesFromReferralEntity(sr, user, userDN); 
@@ -649,7 +649,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                      else if (roleAttributeIsDN)
                      {
                         // Query the roleDN location for the value of roleNameAttributeID
-                        String roleDN = roleName;
+                        String roleDN = quoteDN(roleName);
                         String[] returnAttribute = {roleNameAttributeID};
                         try
                         {
@@ -702,6 +702,35 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       } // while (referralsExist)
    }
  
+   /**
+    * Remove enclosing quotes, if any, from dn. 
+    * This has to be done, because some LDAPs choke on quotes in ldap search parameter.
+    *   
+    * @param dn
+    * @return
+    */
+   private String sanitizeDN(final String dn) {
+      if (dn != null && dn.startsWith("\"") && dn.endsWith("\"")) {
+         return dn.substring(1, dn.length() - 1);
+      } else {
+         return dn;
+      }
+   }
+
+   /**
+    * In case dn contains slash character, it should be enclosed in quotes.
+    * If it is already quoted, nothing is done.
+    * 
+    * @param dn
+    * @return
+    */
+   private String quoteDN(final String dn) {
+      if (dn != null && !dn.startsWith("\"") && !dn.endsWith("\"") && dn.indexOf("/") > -1) {
+         return "\"" + dn + "\"";
+      } else {
+         return dn;
+      }
+   }
 
    /**
     * Returns Attributes from referral entity and check them if they belong to user or userDN currently in evaluation.
