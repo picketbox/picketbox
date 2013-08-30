@@ -91,9 +91,9 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
    protected String rolesQuery;
    /** Whether to suspend resume transactions during database operations */
    protected boolean suspendResume = true;
-   
-   protected String TX_MGR_JNDI_NAME = "java:/TransactionManager";
-   
+   /** The JNDI name of the transaction manager */
+   protected String txManagerJndiName = "java:/TransactionManager";
+   /** The TransactionManagaer instance to be used */
    protected TransactionManager tm = null;
 
    /**
@@ -128,7 +128,7 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
       //Get the Transaction Manager JNDI Name
       String jname = (String) options.get(TRANSACTION_MANAGER_JNDI_NAME);
       if(jname != null)
-         this.TX_MGR_JNDI_NAME = jname;
+         this.txManagerJndiName = jname;
 
       PicketBoxLogger.LOGGER.traceDBCertLoginModuleOptions(dsJndiName, principalsQuery, rolesQuery, suspendResume);
 
@@ -259,7 +259,7 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
       {
          String username = getUsername();
          PicketBoxLogger.LOGGER.traceExecuteQuery(rolesQuery, username);
-         Group[] roleSets = Util.getRoleSets(username, dsJndiName, rolesQuery, this,
+         Group[] roleSets = Util.getRoleSets(username, dsJndiName, txManagerJndiName, rolesQuery, this,
                suspendResume);
          return roleSets;
       }
@@ -280,6 +280,6 @@ public class DatabaseServerLoginModule extends UsernamePasswordLoginModule
    protected TransactionManager getTransactionManager() throws NamingException
    {
       TransactionManagerLocator tml = new TransactionManagerLocator();
-      return tml.getTM(this.TX_MGR_JNDI_NAME);
+      return tml.getTM(this.txManagerJndiName);
    } 
 }

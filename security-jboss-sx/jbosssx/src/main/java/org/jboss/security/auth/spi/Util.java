@@ -130,11 +130,11 @@ public class Util
      
     @return Group[] containing the sets of roles
     */
-   static Group[] getRoleSets(String username, String dsJndiName,
+   static Group[] getRoleSets(String username, String dsJndiName, String txManagerJndiName,
       String rolesQuery, AbstractServerLoginModule aslm)
       throws LoginException
    {
-      return getRoleSets(username, dsJndiName, rolesQuery, aslm, false);
+      return getRoleSets(username, dsJndiName, txManagerJndiName, rolesQuery, aslm, false);
    }
 
    /** Execute the rolesQuery against the dsJndiName to obtain the roles for
@@ -142,11 +142,11 @@ public class Util
      
     @return Group[] containing the sets of roles
     */
-   static Group[] getRoleSets(String username, String dsJndiName,
+   static Group[] getRoleSets(String username, String dsJndiName, String txManagerJndiName,
       String rolesQuery, AbstractServerLoginModule aslm, boolean suspendResume)
       throws LoginException
    {
-      return DbUtil.getRoleSets(username, dsJndiName, rolesQuery, aslm, suspendResume); 
+      return DbUtil.getRoleSets(username, dsJndiName, txManagerJndiName, rolesQuery, aslm, suspendResume);
    }
 
    /** Utility method which loads the given properties file and returns a
