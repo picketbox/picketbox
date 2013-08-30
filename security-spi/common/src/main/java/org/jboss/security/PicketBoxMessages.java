@@ -385,8 +385,8 @@ public interface PicketBoxMessages {
     @Message(id = 116, value = "Service authentication token verification failed")
     SecurityException failedToVerifyServiceAuthToken();
 
-    @Message(id = 117, value = "Invalid KeyStore type: %s")
-    RuntimeException invalidKeyStoreType(String keystoreType);
+    @Message(id = 117, value = "Cannot load KeyStore of type %s: required keyStoreURL is null")
+    RuntimeException invalidNullKeyStoreURL(String keystoreType);
 
     @Message(id = 118, value = "Invalid password command type: %s")
     IllegalArgumentException invalidPasswordCommandType(String type);

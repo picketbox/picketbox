@@ -460,13 +460,14 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
          is = null;
          try
          {
-        	 if ((!"PKCS11".equalsIgnoreCase(keyStoreType) || !"PKCS11IMPLKS".equalsIgnoreCase(keyStoreType))
-        			 && keyStoreURL != null)
-        	 {
-        		 is = keyStoreURL.openStream();
+        	 if ((!"PKCS11".equalsIgnoreCase(keyStoreType) && !"PKCS11IMPLKS".equalsIgnoreCase(keyStoreType)))
+             {
+                 // not a PKCS11 keystore: we need a URL
+                 if (keyStoreURL != null)
+        		    is = keyStoreURL.openStream();
+                 else
+                     throw PicketBoxMessages.MESSAGES.invalidNullKeyStoreURL(keyStoreType);
         	 }
-        	 else
-                 throw PicketBoxMessages.MESSAGES.invalidKeyStoreType(keyStoreType);
 
         	 keyStore.load(is, keyStorePassword);
          }
@@ -513,13 +514,14 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
          is = null;
          try
          {
-        	 if ((!"PKCS11".equalsIgnoreCase(trustStoreType) || !"PKCS11IMPLKS".equalsIgnoreCase(trustStoreType))
-        			 && trustStoreURL != null)
+        	 if ((!"PKCS11".equalsIgnoreCase(trustStoreType) && !"PKCS11IMPLKS".equalsIgnoreCase(trustStoreType)))
         	 {
-        		 is = trustStoreURL.openStream();
+                 // not a PKCS11 truststore: we need a URL
+                 if (trustStoreURL != null)
+        		    is = trustStoreURL.openStream();
+                 else
+                    throw PicketBoxMessages.MESSAGES.invalidNullKeyStoreURL(trustStoreType);
         	 }
-        	 else
-                 throw PicketBoxMessages.MESSAGES.invalidKeyStoreType(trustStoreType);
 
         	 trustStore.load(is, trustStorePassword);
          }
