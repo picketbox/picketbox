@@ -35,12 +35,15 @@ import javax.security.auth.Subject;
  */
 @SuppressWarnings("unchecked")
 public class SecurityContextFactory
-{      
+{
+   private static final Class[] CONSTRUCTOR_TYPES = new Class[]{String.class};
+
    private static String defaultFQN = "org.jboss.security.plugins.JBossSecurityContext";
    
    private static String defaultUtilClassFQN = "org.jboss.security.plugins.JBossSecurityContextUtil";
    
    private static Class<? extends SecurityContext> defaultSecurityContextClass = null;
+   private static Constructor<SecurityContext> defaultSecurityContextConstructor = null;
    private static Class<? extends SecurityContextUtil> defaultUtilClass = null;
    
    /**
@@ -77,6 +80,15 @@ public class SecurityContextFactory
          {
          }
       }
+      if (defaultSecurityContextClass != null) {
+         try
+         {
+            defaultSecurityContextConstructor = (Constructor<SecurityContext>) defaultSecurityContextClass.getConstructor(CONSTRUCTOR_TYPES);
+         }
+         catch(Exception e)
+         {
+         }
+      }
    }
 
    /**
@@ -87,6 +99,8 @@ public class SecurityContextFactory
     */
    public static SecurityContext createSecurityContext(String securityDomain) throws Exception
    {
+      if (defaultSecurityContextConstructor != null)
+          return createSecurityContext(securityDomain, defaultSecurityContextConstructor);
       if(defaultSecurityContextClass != null)
          return createSecurityContext(securityDomain, defaultSecurityContextClass);
       return createSecurityContext(securityDomain, defaultFQN, SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class));
@@ -101,6 +115,8 @@ public class SecurityContextFactory
     */
    public static SecurityContext createSecurityContext(String securityDomain, ClassLoader classLoader) throws Exception
    {
+      if (defaultSecurityContextConstructor != null)
+         return createSecurityContext(securityDomain, defaultSecurityContextConstructor);
       if(defaultSecurityContextClass != null)
          return createSecurityContext(securityDomain, defaultSecurityContextClass);
       return createSecurityContext(securityDomain, defaultFQN, classLoader);
@@ -135,7 +151,8 @@ public class SecurityContextFactory
       if(fqnClass == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("fqnClass");
       defaultSecurityContextClass = getContextClass(fqnClass, classLoader);
-      return createSecurityContext(securityDomain, defaultSecurityContextClass);
+      defaultSecurityContextConstructor = (Constructor<SecurityContext>) defaultSecurityContextClass.getConstructor(CONSTRUCTOR_TYPES);
+      return createSecurityContext(securityDomain, defaultSecurityContextConstructor);
    }
    
    
@@ -156,10 +173,19 @@ public class SecurityContextFactory
        if(clazz == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("clazz");
       //Get the CTR
-      Constructor<? extends SecurityContext> ctr = clazz.getConstructor(new Class[]{String.class});
-      return (SecurityContext) ctr.newInstance(new Object[]{securityDomain}); 
+      Constructor<? extends SecurityContext> ctr = clazz.getConstructor(CONSTRUCTOR_TYPES);
+      return ctr.newInstance(securityDomain);
    }
-   
+
+   private static SecurityContext createSecurityContext(String securityDomain, Constructor<SecurityContext> constructor) throws Exception
+   {
+      if (securityDomain == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("security domain");
+      if (constructor == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("constructor");
+      return constructor.newInstance(securityDomain);
+   }
+
    /**
     * Create a security context
     * @param p Principal
