@@ -155,7 +155,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
             key = allContext;
          if (i == 3)
             key = general;
-         acp = (AuthConfigProvider) keyProviderMap.get(key);
+         acp = keyProviderMap.get(key);
       }
       
       if (acp != null && listener != null)
@@ -241,23 +241,22 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
    public String registerConfigProvider(String className, Map properties, String layer, String appContext,
          String description)
    {
-      if (className == null || className.length() == 0)
-         throw PicketBoxMessages.MESSAGES.invalidNullArgument("className");
-
       // Instantiate the provider
       AuthConfigProvider acp = null;
-      try
-      {
-         // An AuthConfigProvider must have a two-argument constructor (Map properties, AuthConfigFactory factory). 
-         Class<?> provClass = SecurityActions.getContextClassLoader().loadClass(className);
-         Constructor<?> ctr = provClass.getConstructor(new Class[] {Map.class, AuthConfigFactory.class});
-         acp = (AuthConfigProvider) ctr.newInstance(new Object[] {properties, null});
-      }
-      catch (Exception e)
-      {
-         throw PicketBoxMessages.MESSAGES.failedToRegisterAuthConfigProvider(className, e);
-      }
 
+      if (className != null) {
+         try
+         {
+            // An AuthConfigProvider must have a two-argument constructor (Map properties, AuthConfigFactory factory).
+            Class<?> provClass = SecurityActions.getContextClassLoader().loadClass(className);
+            Constructor<?> ctr = provClass.getConstructor(new Class[] {Map.class, AuthConfigFactory.class});
+            acp = (AuthConfigProvider) ctr.newInstance(new Object[] {properties, null});
+         }
+         catch (Exception e)
+         {
+            throw PicketBoxMessages.MESSAGES.failedToRegisterAuthConfigProvider(className, e);
+         }
+      }
       return this.registerConfigProvider(acp, layer, appContext, description);
    }
 
@@ -267,9 +266,6 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
     */
    public String registerConfigProvider(AuthConfigProvider provider, String layer, String appContext, String description)
    {
-      if (provider == null)
-         throw PicketBoxMessages.MESSAGES.invalidNullArgument("provider");
-
       StringBuilder key = new StringBuilder();
       key.append(layer == null ? "null" : layer);
       key.append("^");
