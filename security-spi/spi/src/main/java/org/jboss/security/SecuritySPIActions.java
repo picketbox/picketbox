@@ -34,13 +34,18 @@ class SecuritySPIActions
 {  
    static ClassLoader getContextClassLoader()
    {
-      return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() 
+      if (System.getSecurityManager() != null)
       {
-         public ClassLoader run()
+         return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>()
          {
-           return Thread.currentThread().getContextClassLoader();
-         }
-      });
+            public ClassLoader run()
+            {
+              return Thread.currentThread().getContextClassLoader();
+            }
+         });
+      }
+      else
+         return Thread.currentThread().getContextClassLoader();
    }
    
    static ClassLoader getCurrentClassLoader(final Class clazz)
@@ -56,6 +61,6 @@ class SecuritySPIActions
          });
       }
       else
-         return Thread.currentThread().getContextClassLoader();
+         return clazz.getClassLoader();
    }
 }
