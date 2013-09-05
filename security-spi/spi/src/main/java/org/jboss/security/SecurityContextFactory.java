@@ -36,15 +36,21 @@ import javax.security.auth.Subject;
 @SuppressWarnings("unchecked")
 public class SecurityContextFactory
 {
-   private static final Class[] CONSTRUCTOR_TYPES = new Class[]{String.class};
+   private static final Class[] CONTEXT_CONSTRUCTOR_TYPES = new Class[]{String.class};
+
+   private static final Class[] CONTEXT_UTIL_CONSTRUCTOR_TYPES = new Class[]{SecurityContext.class};
 
    private static String defaultFQN = "org.jboss.security.plugins.JBossSecurityContext";
    
    private static String defaultUtilClassFQN = "org.jboss.security.plugins.JBossSecurityContextUtil";
    
    private static Class<? extends SecurityContext> defaultSecurityContextClass = null;
+
    private static Constructor<SecurityContext> defaultSecurityContextConstructor = null;
+
    private static Class<? extends SecurityContextUtil> defaultUtilClass = null;
+
+   private static Constructor<SecurityContextUtil> defaultUtilConstructor =  null;
    
    /**
     * Classloader.loadClass is a synchronized method in the JDK. Under heavy concurrent requests,
@@ -83,7 +89,7 @@ public class SecurityContextFactory
       if (defaultSecurityContextClass != null) {
          try
          {
-            defaultSecurityContextConstructor = (Constructor<SecurityContext>) defaultSecurityContextClass.getConstructor(CONSTRUCTOR_TYPES);
+            defaultSecurityContextConstructor = (Constructor<SecurityContext>) defaultSecurityContextClass.getConstructor(CONTEXT_CONSTRUCTOR_TYPES);
          }
          catch(Exception e)
          {
@@ -151,7 +157,7 @@ public class SecurityContextFactory
       if(fqnClass == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("fqnClass");
       defaultSecurityContextClass = getContextClass(fqnClass, classLoader);
-      defaultSecurityContextConstructor = (Constructor<SecurityContext>) defaultSecurityContextClass.getConstructor(CONSTRUCTOR_TYPES);
+      defaultSecurityContextConstructor = (Constructor<SecurityContext>) defaultSecurityContextClass.getConstructor(CONTEXT_CONSTRUCTOR_TYPES);
       return createSecurityContext(securityDomain, defaultSecurityContextConstructor);
    }
    
@@ -173,7 +179,7 @@ public class SecurityContextFactory
        if(clazz == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("clazz");
       //Get the CTR
-      Constructor<? extends SecurityContext> ctr = clazz.getConstructor(CONSTRUCTOR_TYPES);
+      Constructor<? extends SecurityContext> ctr = clazz.getConstructor(CONTEXT_CONSTRUCTOR_TYPES);
       return ctr.newInstance(securityDomain);
    }
 
@@ -260,18 +266,16 @@ public class SecurityContextFactory
     */
    public static SecurityContextUtil createUtil(SecurityContext sc, ClassLoader classLoader) throws Exception
    {
-      Class<? extends SecurityContextUtil> clazz = defaultUtilClass;
+      Constructor<SecurityContextUtil> ctr = defaultUtilConstructor;
       
-      if(clazz  == null)
+      if(ctr == null)
       {
-         clazz = (Class<? extends SecurityContextUtil>) loadClass(defaultUtilClassFQN, classLoader);
-         defaultUtilClass = clazz; 
+         Class<? extends SecurityContextUtil> clazz = (Class<? extends SecurityContextUtil>) loadClass(defaultUtilClassFQN, classLoader);
+         defaultUtilClass = clazz;
+         ctr = defaultUtilConstructor = (Constructor<SecurityContextUtil>) clazz.getConstructor(CONTEXT_UTIL_CONSTRUCTOR_TYPES);
       }
       
-      //Get the CTR
-      Constructor<?> ctr = clazz.getConstructor(new Class[]{SecurityContext.class});
-      Object obj = ctr.newInstance(new Object[]{sc});
-      return SecurityContextUtil.class.cast(obj);
+      return ctr.newInstance(sc);
    }
    
    /**
@@ -294,20 +298,11 @@ public class SecurityContextFactory
     */ 
    public static SecurityContextUtil createUtil(SecurityContext sc, String utilFQN, ClassLoader classLoader) throws Exception
    {
-      Class<?> clazz = null;
-      try
-      {
-         clazz = classLoader.loadClass(utilFQN);
-      }
-      catch (Exception e)
-      {
-         ClassLoader tcl = SecuritySPIActions.getContextClassLoader();
-         clazz = tcl.loadClass(utilFQN);
-      }
+      Class<?> clazz = loadClass(utilFQN, classLoader);
       //Get the CTR
       Constructor<? extends SecurityContextUtil> ctr = 
-         (Constructor<? extends SecurityContextUtil>) clazz.getConstructor(new Class[]{SecurityContext.class});
-      return ctr.newInstance(new Object[]{sc});
+         (Constructor<? extends SecurityContextUtil>) clazz.getConstructor(CONTEXT_UTIL_CONSTRUCTOR_TYPES);
+      return ctr.newInstance(sc);
    }
    
    /**
@@ -330,7 +325,8 @@ public class SecurityContextFactory
    public static void setDefaultSecurityContextFQN(String fqn)
    {
       defaultFQN = fqn;
-      defaultSecurityContextClass = null; 
+      defaultSecurityContextClass = null;
+      defaultSecurityContextConstructor = null;
    }
    
    
@@ -342,6 +338,7 @@ public class SecurityContextFactory
    {
       defaultUtilClassFQN = fqn;
       defaultUtilClass = null; //reset
+      defaultUtilConstructor = null;
    }
    
    /**
