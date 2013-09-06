@@ -109,4 +109,30 @@ public class EncryptionUtil
       byte[] original = cipher.doFinal(encryptedData); 
       return original;
    }
+   
+   public byte[] encrypt(byte[] data, SecretKey key) throws Exception
+   {
+      SecretKeySpec skeySpec = new SecretKeySpec(key.getEncoded(), encryptionAlgorithm);
+
+      // Instantiate the cipher 
+      Cipher cipher = Cipher.getInstance(encryptionAlgorithm);
+
+      cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+
+      byte[] encrypted =
+        cipher.doFinal( data);
+      return encrypted;
+   }
+
+   public byte[] decrypt(byte[] encryptedData, SecretKeySpec keySpec ) throws Exception
+   {
+
+      // Instantiate the cipher 
+      Cipher cipher = Cipher.getInstance(encryptionAlgorithm);
+
+      cipher.init(Cipher.DECRYPT_MODE, keySpec);
+      byte[] original = cipher.doFinal(encryptedData);
+      return original;
+   }
+
 }

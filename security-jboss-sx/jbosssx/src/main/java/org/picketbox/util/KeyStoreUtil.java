@@ -44,7 +44,9 @@ import org.jboss.security.PicketBoxMessages;
 
 /**
  * Utility to handle Java Keystore
+ * 
  * @author Anil.Saldhana@redhat.com
+ * @author Peter Skopek (pskopek_at_redhat_dot_com)
  * @since Jan 12, 2009
  */
 public class KeyStoreUtil
@@ -59,16 +61,7 @@ public class KeyStoreUtil
     */
    public static KeyStore getKeyStore(File keyStoreFile, char[] storePass) throws GeneralSecurityException, IOException
    {
-      FileInputStream fis = null;
-      try
-      {
-         fis = new FileInputStream(keyStoreFile);
-         return getKeyStore(fis, storePass);  
-      }
-      finally
-      {
-         safeClose(fis);
-      }
+      return getKeyStore(KeyStore.getDefaultType(), keyStoreFile, storePass);
    }
 
    /**
@@ -81,20 +74,7 @@ public class KeyStoreUtil
     */
    public static KeyStore getKeyStore(String fileURL, char[] storePass) throws GeneralSecurityException, IOException
    {
-      if (fileURL == null)
-         throw PicketBoxMessages.MESSAGES.invalidNullArgument("fileURL");
-
-      File file = new File(fileURL);
-      FileInputStream fis = null;
-      try
-      {
-         fis = new FileInputStream(file);
-         return getKeyStore(fis, storePass);
-      }
-      finally
-      {
-         safeClose(fis);
-      }
+      return getKeyStore(KeyStore.getDefaultType(), fileURL, storePass);
    }
 
    /**
@@ -107,19 +87,7 @@ public class KeyStoreUtil
     */
    public static KeyStore getKeyStore(URL url, char[] storePass) throws GeneralSecurityException, IOException
    {
-      if (url == null)
-         throw PicketBoxMessages.MESSAGES.invalidNullArgument("url");
-
-      InputStream is = null;
-      try
-      {
-         is = url.openStream();
-         return getKeyStore(is, storePass);
-      }
-      finally
-      {
-         safeClose(is);
-      }      
+      return getKeyStore(KeyStore.getDefaultType(), url, storePass);
    }
 
    /**
@@ -135,9 +103,101 @@ public class KeyStoreUtil
    public static KeyStore getKeyStore(InputStream ksStream, char[] storePass) throws GeneralSecurityException,
          IOException
    {
+      return getKeyStore(KeyStore.getDefaultType(), ksStream, storePass);
+   }
+
+   /**
+    * Get the KeyStore
+    * @param keyStoreType or null for default
+    * @param keyStoreFile
+    * @param storePass
+    * @return
+    * @throws GeneralSecurityException
+    * @throws IOException
+    */
+   public static KeyStore getKeyStore(String keyStoreType, File keyStoreFile, char[] storePass) throws GeneralSecurityException, IOException
+   {
+      FileInputStream fis = null;
+      try
+      {
+         fis = new FileInputStream(keyStoreFile);
+         return getKeyStore(keyStoreType, fis, storePass);  
+      }
+      finally
+      {
+         safeClose(fis);
+      }
+   }
+
+   /**
+    * Get the Keystore given the url to the keystore file as a string
+    * @param keyStoreType or null for default
+    * @param fileURL
+    * @param storePass 
+    * @return
+    * @throws GeneralSecurityException
+    * @throws IOException
+    */
+   public static KeyStore getKeyStore(String keyStoreType, String fileURL, char[] storePass) throws GeneralSecurityException, IOException
+   {
+      if (fileURL == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("fileURL");
+
+      File file = new File(fileURL);
+      FileInputStream fis = null;
+      try
+      {
+         fis = new FileInputStream(file);
+         return getKeyStore(keyStoreType, fis, storePass);
+      }
+      finally
+      {
+         safeClose(fis);
+      }
+   }
+
+   /**
+    * Get the Keystore given the URL to the keystore
+    * @param keyStoreType or null for default
+    * @param url
+    * @param storePass
+    * @return
+    * @throws GeneralSecurityException
+    * @throws IOException
+    */
+   public static KeyStore getKeyStore(String keyStoreType, URL url, char[] storePass) throws GeneralSecurityException, IOException
+   {
+      if (url == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("url");
+
+      InputStream is = null;
+      try
+      {
+         is = url.openStream();
+         return getKeyStore(keyStoreType, is, storePass);
+      }
+      finally
+      {
+         safeClose(is);
+      }      
+   }
+
+   /**
+    * Get the Key Store
+    * <b>Note:</b> This method wants the InputStream to be not null. 
+    * @param keyStoreType or null for default
+    * @param ksStream
+    * @param storePass
+    * @return
+    * @throws GeneralSecurityException
+    * @throws IOException
+    * @throws IllegalArgumentException if ksStream is null
+    */
+   public static KeyStore getKeyStore(String keyStoreType, InputStream ksStream, char[] storePass) throws GeneralSecurityException, IOException
+   {
       if (ksStream == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("ksStream");
-      KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+      KeyStore ks = KeyStore.getInstance((keyStoreType == null ? KeyStore.getDefaultType() : keyStoreType));
       ks.load(ksStream, storePass);
       return ks;
    }
@@ -199,7 +259,22 @@ public class KeyStoreUtil
    public static void addCertificate(File keystoreFile, char[] storePass, String alias, Certificate cert)
          throws GeneralSecurityException, IOException
    {
-      KeyStore keystore = getKeyStore(keystoreFile, storePass);
+      addCertificate(KeyStore.getDefaultType(), keystoreFile, storePass, alias, cert);
+   }
+
+   /**
+    * Add a certificate to the KeyStore
+    * @param keystoreFile
+    * @param storePass
+    * @param alias
+    * @param cert
+    * @throws GeneralSecurityException
+    * @throws IOException
+    */
+   public static void addCertificate(String keyStoreType, File keystoreFile, char[] storePass, String alias, Certificate cert)
+         throws GeneralSecurityException, IOException
+   {
+      KeyStore keystore = getKeyStore(keyStoreType, keystoreFile, storePass);
 
       // Add the certificate
       keystore.setCertificateEntry(alias, cert);
@@ -243,6 +318,20 @@ public class KeyStoreUtil
       }
       return null;
    }
+
+   /**
+    * Create new empty keystore with specified keyStoreType and keyStorePWD
+    * @param keyStoreType - key store type
+    * @param keyStorePWD - key store password
+    * @return
+    * @throws Exception
+    */
+   public static KeyStore createKeyStore(String keyStoreType, char[] keyStorePWD) throws Exception {
+      KeyStore ks = KeyStore.getInstance(keyStoreType);
+      ks.load(null, keyStorePWD);
+      return ks;
+   }
+
    
    private static void safeClose(InputStream fis)
    {
@@ -256,6 +345,7 @@ public class KeyStoreUtil
       catch(Exception e)
       {}
    }
+
    private static void safeClose(OutputStream os)
    {
       try
@@ -268,4 +358,5 @@ public class KeyStoreUtil
       catch(Exception e)
       {}
    }
+  
 }

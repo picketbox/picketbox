@@ -26,7 +26,7 @@ import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.plugins.PBEUtils;
 import org.jboss.security.vault.SecurityVault;
 import org.jboss.security.vault.SecurityVaultException;
-import org.picketbox.commons.cipher.Base64;
+import org.picketbox.plugins.vault.SecurityVaultData;
 import org.picketbox.util.EncryptionUtil;
 import org.picketbox.util.KeyStoreUtil;
 import org.picketbox.util.StringUtil;
@@ -36,14 +36,22 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.security.*;
-import java.security.cert.Certificate;
-import java.util.Arrays;
+import java.security.KeyStore.Entry;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.StringTokenizer;
 
 /**
  * An instance of {@link SecurityVault} that uses
@@ -59,8 +67,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * SALT: salt of the masked password. Ensured it is 8 characters in length
  * ITERATION_COUNT: Iteration Count of the masked password.
  * KEY_SIZE: Key size of encryption. Default is 128 bytes.
+ * CREATE_KEYSTORE: Whether PicketBox Security Vault has to create missing key store in time of initialization. Default is "FALSE". Implies KEYSTORE_TYPE "JCEKS".  
+ * KEYSTORE_TYPE: Key store type. Default is JCEKS. 
  * 
  * @author Anil.Saldhana@redhat.com
+ * @author Peter Skopek (pskopek_at_redhat_dot_com)
  * @since Aug 12, 2011
  */
 public class PicketBoxSecurityVault implements SecurityVault
@@ -69,18 +80,25 @@ public class PicketBoxSecurityVault implements SecurityVault
 
    protected KeyStore keystore = null;
    
-   private KeyPair keypair = null;
-   
    protected String encryptionAlgorithm = "AES";
    
    protected int keySize = 128;
    
    private char[] keyStorePWD = null;
    
-   protected Map<String,byte[]> theContent= new ConcurrentHashMap<String,byte[]>();
+   private String alias = null;
    
-   protected Map<String,byte[]> sharedKeyMap = new ConcurrentHashMap<String,byte[]>();
+   private SecurityVaultData vaultContent = null;
    
+   private SecretKey adminKey;
+
+   private String decodedEncFileDir;
+   
+   private boolean createKeyStore = false;
+   
+   private String keyStoreType = defaultKeyStoreType;
+   
+   // options
    public static final String ENC_FILE_DIR = "ENC_FILE_DIR";
    
    public static final String KEYSTORE_URL = "KEYSTORE_URL";
@@ -99,18 +117,22 @@ public class PicketBoxSecurityVault implements SecurityVault
    
    public static final String KEY_SIZE = "KEY_SIZE"; 
 
-   protected static final String ENCODED_FILE = "ENC.dat";
-   protected static final String SHARED_KEY_FILE = "Shared.dat";
-   protected static final String ADMIN_KEY = "ADMIN_KEY";
+   public static final String CREATE_KEYSTORE = "CREATE_KEYSTORE";
    
-   protected String decodedEncFileDir;
+   public static final String KEYSTORE_TYPE = "KEYSTORE_TYPE";
+
+   // backward compatibility constants 
+   private static final String ENCODED_FILE = "ENC.dat";
+   private static final String SHARED_KEY_FILE = "Shared.dat";
+   private static final String ADMIN_KEY = "ADMIN_KEY";
    
-   protected String LINE_BREAK = "LINE_BREAK";
+   protected static final String VAULT_CONTENT_FILE = "VAULT.dat"; // versioned vault data file
+   protected static final String defaultKeyStoreType = "JCEKS";
+   
    
    /*
     * @see org.jboss.security.vault.SecurityVault#init(java.util.Map)
     */
-   @SuppressWarnings("unchecked")
    public void init(Map<String, Object> options) throws SecurityVaultException
    {
       if(options == null || options.isEmpty())
@@ -140,7 +162,7 @@ public class PicketBoxSecurityVault implements SecurityVault
          throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidNullOrEmptyOptionMessage(ITERATION_COUNT));
       int iterationCount = Integer.parseInt(iterationCountStr);
       
-      String alias = (String) options.get(KEYSTORE_ALIAS);
+      this.alias = (String) options.get(KEYSTORE_ALIAS);
       if(alias == null)
          throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidNullOrEmptyOptionMessage(KEYSTORE_ALIAS));
       
@@ -154,62 +176,29 @@ public class PicketBoxSecurityVault implements SecurityVault
       if(encFileDir == null)
          throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidNullOrEmptyOptionMessage(ENC_FILE_DIR));
 
-      FileInputStream fis = null, mapFile = null;
-      ObjectInputStream ois = null;
-      ObjectInputStream mapIS = null;
-      try
-      {
-         if (encFileDir.contains("${)")){
-             encFileDir = encFileDir.replaceAll(":",StringUtil.PROPERTY_DEFAULT_SEPARATOR);
-         }
-         decodedEncFileDir = StringUtil.getSystemPropertyAsString(encFileDir);  // replace single ":" with PL default
+      
+      createKeyStore = (options.get(CREATE_KEYSTORE) != null ? Boolean.parseBoolean((String) options.get(CREATE_KEYSTORE))
+            : createKeyStore);
+      keyStoreType = (options.get(KEYSTORE_TYPE) != null ? (String) options.get(KEYSTORE_TYPE) : defaultKeyStoreType);
 
-         if(directoryExists(decodedEncFileDir) == false)
-            throw new SecurityVaultException(PicketBoxMessages.MESSAGES.fileOrDirectoryDoesNotExistMessage(decodedEncFileDir));
-         
-         if(!(decodedEncFileDir.endsWith("/") || decodedEncFileDir.endsWith("\\")))
-         {
-            throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidDirectoryFormatMessage(decodedEncFileDir));
-         }
-         if(encodedFileExists(decodedEncFileDir) ==false)
-         {
-            setUpVault(decodedEncFileDir);
-         }
-         
-         fis = new FileInputStream(decodedEncFileDir + ENCODED_FILE);
-         ois = new ObjectInputStream(fis);
-         theContent = (Map<String, byte[]>) ois.readObject();
-
-         mapFile = new FileInputStream(decodedEncFileDir + SHARED_KEY_FILE );
-         mapIS = new ObjectInputStream(mapFile);
-         
-         sharedKeyMap = (Map<String, byte[]>) mapIS.readObject();
-      }
-      catch (Exception e)
-      { 
-         throw new SecurityVaultException(e); 
-      }
-      finally
-      {
-    	  safeClose(fis);
-    	  safeClose(mapFile);
-    	  safeClose(ois);
-    	  safeClose(mapIS);
-      }
-
-      try
-      {
+      try {
          String keystorePass = decode(maskedPassword, salt, iterationCount);
          keyStorePWD = keystorePass.toCharArray();
-         keystore = KeyStoreUtil.getKeyStore(keystoreURL, keystorePass.toCharArray()); 
-         keypair = KeyStoreUtil.getPrivateKey(keystore, alias, keystorePass.toCharArray());
-      }
-      catch (Exception e)
-      { 
+         keystore = getKeyStore(keystoreURL);
+         
+         checkAndConvertKeyStoreToJCEKS(keystoreURL);
+         
+      } catch (Exception e) {
          throw new SecurityVaultException(e);
       }
+
+      // read and possibly convert vault content
+      readVaultContent(keystoreURL, encFileDir);
+
       PicketBoxLogger.LOGGER.infoVaultInitialized();
-      finishedInit = true;
+      finishedInit = true;     
+
+      
    }
 
    /*
@@ -223,44 +212,16 @@ public class PicketBoxSecurityVault implements SecurityVault
    /*
     * @see org.jboss.security.vault.SecurityVault#handshake(java.util.Map)
     */
-   public byte[] handshake(Map<String, Object> handshakeOptions) throws SecurityVaultException
-   {
-      if(handshakeOptions == null || handshakeOptions.isEmpty())
-         throw PicketBoxMessages.MESSAGES.invalidNullOrEmptyOptionMap("handshakeOptions");
-
-      String publicCert = (String) handshakeOptions.get(PUBLIC_CERT);
-      if(publicCert == null)
-         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidNullOrEmptyOptionMessage(PUBLIC_CERT));
-      
-      try
-      {
-         PublicKey publicKey = KeyStoreUtil.getPublicKey(keystore, publicCert, keyStorePWD);
-         if(publicKey == null)
-            throw new SecurityVaultException(PicketBoxMessages.MESSAGES.failedToRetrievePublicKeyMessage(publicCert));
-          
-      }
-      catch (Exception e)
-      {
-         throw new SecurityVaultException(e);
-      } 
-       
-      
-      StringBuilder uuid = new StringBuilder(UUID.randomUUID().toString());
-      uuid.append("LINE_BREAK");
-      uuid.append(publicCert);
-      
-      return Base64.encodeBytes(uuid.toString().getBytes(), Base64.DONT_BREAK_LINES).getBytes();
+   public byte[] handshake(Map<String, Object> handshakeOptions) throws SecurityVaultException {
+       return new byte[keySize];
    }
    
    /*
     * @see org.jboss.security.vault.SecurityVault#keyList()
     */
-   public Set<String> keyList() throws SecurityVaultException
-   {
-      Set<String> keys = theContent.keySet();
-      keys.remove(ADMIN_KEY);
-      return keys;
-   }
+    public Set<String> keyList() throws SecurityVaultException {
+        return vaultContent.getVaultDataKeys();
+    }
 
    /*
     * @see org.jboss.security.vault.SecurityVault#store(java.lang.String, java.lang.String, char[], byte[])
@@ -273,59 +234,25 @@ public class PicketBoxSecurityVault implements SecurityVault
       if(StringUtil.isNullOrEmpty(attributeName))
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("attributeName");
 
-      String mapKey = vaultBlock + "_" + attributeName;
-      
-      sharedKeyMap.put(mapKey, sharedKey);
-      
       String av = new String(attributeValue);
       
-      //Get Public Key from shared key
-      String decodedSharedKey = new String(Base64.decode(new String(sharedKey)));
-      int index = decodedSharedKey.indexOf(LINE_BREAK);
-      
-      if(index < 0)
-         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidSharedKeyMessage());
-      
-      String alias = decodedSharedKey.substring(index + LINE_BREAK.length());
-      
-      Certificate cert;
+      EncryptionUtil util = new EncryptionUtil(encryptionAlgorithm, keySize);
       try
       {
-         cert = keystore.getCertificate(alias);
-      }
-      catch (KeyStoreException e1)
-      { 
-         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.failedToRetrieveCertificateMessage(alias), e1);
-      }
-      
-      EncryptionUtil util = new EncryptionUtil(encryptionAlgorithm,keySize);
-      try
-      {
-         byte[] secretKey = theContent.get(ADMIN_KEY);
-         
-         SecretKeySpec sKeySpec = new SecretKeySpec(secretKey,encryptionAlgorithm);
-         byte[] encryptedData = util.encrypt(av.getBytes(), cert.getPublicKey(), sKeySpec);
-         theContent.put(mapKey, encryptedData);
+         SecretKeySpec sKeySpec = new SecretKeySpec(adminKey.getEncoded(), encryptionAlgorithm);
+         byte[] encryptedData = util.encrypt(av.getBytes(), sKeySpec);
+         vaultContent.addVaultData(alias, vaultBlock, attributeName, encryptedData);
       }
       catch (Exception e1)
       { 
          throw new SecurityVaultException(PicketBoxMessages.MESSAGES.unableToEncryptDataMessage(),e1);
       }
-      try
-      {
-         writeSharedKeyFile(this.decodedEncFileDir);
+      
+      try {
+         writeVaultData();
       }
-      catch (IOException e)
-      { 
-         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.unableToWriteShareKeyFileMessage(), e);
-      }
-      try
-      {
-         writeEncodedFile(this.decodedEncFileDir);
-      }
-      catch (IOException e)
-      { 
-         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.unableToWriteEncodedFileMessage(), e);
+      catch (IOException e) { 
+         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.unableToWriteVaultDataFileMessage(VAULT_CONTENT_FILE), e);
       }
    }
 
@@ -339,36 +266,25 @@ public class PicketBoxSecurityVault implements SecurityVault
       if(StringUtil.isNullOrEmpty(attributeName))
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("attributeName");
 
-      String mapKey = vaultBlock + "_" + attributeName;
-      byte[] encryptedValue = theContent.get(mapKey);
+      byte[] encryptedValue = vaultContent.getVaultData(alias, vaultBlock, attributeName);
        
-      
-      byte[] fromMap = sharedKeyMap.get(mapKey);
-      
-      boolean matches = Arrays.equals(sharedKey, fromMap);
-      if(matches == false)
-         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.sharedKeyMismatchMessage(vaultBlock, attributeName));
-
-      byte[] secretKey = theContent.get(ADMIN_KEY);
-       
-      SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, encryptionAlgorithm);
+      SecretKeySpec secretKeySpec = new SecretKeySpec(adminKey.getEncoded(), encryptionAlgorithm);
       EncryptionUtil encUtil = new EncryptionUtil(encryptionAlgorithm, keySize);
       try
       {
-         return (new String(encUtil.decrypt(encryptedValue, keypair, secretKeySpec))).toCharArray();
+         return (new String(encUtil.decrypt(encryptedValue, secretKeySpec))).toCharArray();
       }
       catch (Exception e)
       { 
          throw new SecurityVaultException(e);
       } 
    }
+
    /**
     * @see org.jboss.security.vault.SecurityVault#exists(String, String)
     */
-   public boolean exists(String vaultBlock, String attributeName) throws SecurityVaultException
-   { 
-      String mapKey = vaultBlock + "_" + attributeName;
-      return theContent.get(mapKey) != null;
+   public boolean exists(String vaultBlock, String attributeName) throws SecurityVaultException { 
+      return vaultContent.getVaultData(alias, vaultBlock, attributeName) != null;
    }
    
    /*
@@ -377,13 +293,10 @@ public class PicketBoxSecurityVault implements SecurityVault
    public boolean remove(String vaultBlock, String attributeName, byte[] sharedKey)
 		   throws SecurityVaultException 
    {
-	   String mapKey = vaultBlock + "_" + attributeName;
-	   try
-	   {
-		   theContent.remove(mapKey);
+	   try {
+		   vaultContent.deleteVaultData(alias, vaultBlock, attributeName);
 	   }
-	   catch(Exception e)
-	   {
+	   catch(Exception e) {
 		   return false;
 	   }
 	   return true;
@@ -410,26 +323,43 @@ public class PicketBoxSecurityVault implements SecurityVault
       return maskedString;
    }
    
-   private void setUpVault(String decodedEncFileDir) throws NoSuchAlgorithmException,IOException
+   private void setUpVault(String keystoreURL, String decodedEncFileDir) throws NoSuchAlgorithmException, IOException
    { 
-      theContent = new ConcurrentHashMap<String, byte[]>();
-      EncryptionUtil util = new EncryptionUtil(encryptionAlgorithm,keySize);
-      SecretKey secretKey = util.generateKey();
-      theContent.put(ADMIN_KEY, secretKey.getEncoded()); 
+      vaultContent = new SecurityVaultData();
+      writeVaultData();
       
-      writeEncodedFile(decodedEncFileDir);
-      writeSharedKeyFile(decodedEncFileDir);
+      SecretKey sk = getAdminKey();
+      if (sk != null) {
+          adminKey = sk; 
+      }
+      else {
+          // try to generate new admin key and store it under specified alias
+          EncryptionUtil util = new EncryptionUtil(encryptionAlgorithm, keySize);
+          sk = util.generateKey();
+          KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(sk);
+          try {
+              keystore.setEntry(alias, skEntry, new KeyStore.PasswordProtection(keyStorePWD));
+              adminKey = sk;
+              saveKeyStoreToFile(keystoreURL);
+          }
+          catch (KeyStoreException e) {
+             throw PicketBoxMessages.MESSAGES.noSecretKeyandAliasAlreadyUsed(alias);
+          }
+          catch (Exception e) {
+             throw PicketBoxMessages.MESSAGES.unableToStoreKeyStoreToFile(e, keystoreURL); 
+          }
+      }
    }
    
-   private void writeEncodedFile(String decodedEncFileDir) throws IOException
+   private void writeVaultData() throws IOException
    {
 	  FileOutputStream fos = null;
 	  ObjectOutputStream oos = null;
 	  try
 	  {
-	      fos = new FileOutputStream(decodedEncFileDir + ENCODED_FILE);
+	      fos = new FileOutputStream(decodedEncFileDir + VAULT_CONTENT_FILE);
 	      oos = new ObjectOutputStream(fos);
-	      oos.writeObject(theContent);
+	      oos.writeObject(vaultContent);
 	  }
 	  finally
 	  {
@@ -438,26 +368,9 @@ public class PicketBoxSecurityVault implements SecurityVault
 	  }
    }
    
-   private void writeSharedKeyFile(String decodedEncFileDir) throws IOException
+   private boolean vaultFileExists(String fileName)
    {
-	   FileOutputStream fos = null;
-	   ObjectOutputStream oos = null;
-	   try
-	   {
-		   fos = new FileOutputStream(decodedEncFileDir + SHARED_KEY_FILE);
-		   oos = new ObjectOutputStream(fos);
-		   oos.writeObject(sharedKeyMap);
-	   }
-      finally
-      {
-    	  safeClose(oos);
-    	  safeClose(fos);
-      } 
-   }
-   
-   private boolean encodedFileExists(String decodedEncFileDir)
-   {
-      File file = new File(decodedEncFileDir + ENCODED_FILE);
+      File file = new File(this.decodedEncFileDir + fileName);
       return file != null && file.exists();
    }
    
@@ -492,4 +405,251 @@ public class PicketBoxSecurityVault implements SecurityVault
       catch(Exception e)
       {}
    }
+
+    private void readVaultContent(String keystoreURL, String encFileDir) throws SecurityVaultException {
+
+        try {
+            if (encFileDir.contains("${)")) {
+                encFileDir = encFileDir.replaceAll(":", StringUtil.PROPERTY_DEFAULT_SEPARATOR);
+            }
+            decodedEncFileDir = StringUtil.getSystemPropertyAsString(encFileDir); // replace single ":" with PL default
+
+            if (directoryExists(decodedEncFileDir) == false)
+                throw new SecurityVaultException(
+                        PicketBoxMessages.MESSAGES.fileOrDirectoryDoesNotExistMessage(decodedEncFileDir));
+
+            if (!(decodedEncFileDir.endsWith("/") || decodedEncFileDir.endsWith("\\"))) {
+                decodedEncFileDir = decodedEncFileDir + File.separator;
+            }
+
+            if (vaultFileExists(ENCODED_FILE)) {
+                if (vaultFileExists(VAULT_CONTENT_FILE)) {
+                    PicketBoxLogger.LOGGER.mixedVaultDataFound(VAULT_CONTENT_FILE, ENCODED_FILE, decodedEncFileDir
+                            + ENCODED_FILE);
+                    throw PicketBoxMessages.MESSAGES.mixedVaultDataFound(VAULT_CONTENT_FILE, ENCODED_FILE);
+                } else {
+                    convertVaultContent(keystoreURL, alias);
+                }
+            } else {
+                if (vaultFileExists(VAULT_CONTENT_FILE)) {
+                    readVersionedVaultContent();
+                } else {
+                    setUpVault(keystoreURL, decodedEncFileDir);
+                }
+            }
+
+        } catch (Exception e) {
+            throw new SecurityVaultException(e);
+        }
+
+    }
+
+   @SuppressWarnings("unchecked")
+   private void convertVaultContent(String keystoreURL, String alias) throws Exception {
+       FileInputStream fis = null;
+       ObjectInputStream ois = null;
+       Map<String, byte[]> theContent;
+       
+       try {
+           fis = new FileInputStream(decodedEncFileDir + ENCODED_FILE);
+           ois = new ObjectInputStream(fis);
+           theContent = (Map<String, byte[]>) ois.readObject();
+       } finally {
+           safeClose(fis);
+           safeClose(ois);
+       }
+        
+       // create new SecurityVaultData object for transformed vault data
+       vaultContent = new SecurityVaultData();
+       
+       adminKey = null;
+       for (String key: theContent.keySet()) {
+           if (key.equals(ADMIN_KEY)) {
+               byte[] admin_key = theContent.get(key);
+               adminKey = new SecretKeySpec(admin_key, encryptionAlgorithm);
+           }
+           else {
+               if (key.contains("_")) {
+                   StringTokenizer tokenizer = new StringTokenizer(key, "_");
+                   String vaultBlock = tokenizer.nextToken();
+                   String attributeName = tokenizer.nextToken();
+                   if (tokenizer.hasMoreTokens()) {
+                       attributeName = key.substring(vaultBlock.length() + 1);
+                       PicketBoxLogger.LOGGER.ambiguosKeyForSecurityVaultTransformation("_", vaultBlock, attributeName);
+                   }
+                   byte[] encodedAttributeValue = theContent.get(key);
+                   vaultContent.addVaultData(alias, vaultBlock, attributeName, encodedAttributeValue);
+               }
+           }
+       }
+       if (adminKey == null) {
+           throw PicketBoxMessages.MESSAGES.missingAdminKeyInOriginalVaultData();
+       }
+       
+       // add secret key (admin_key) to keystore 
+       KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(adminKey);
+       KeyStore.PasswordProtection p = new KeyStore.PasswordProtection(keyStorePWD);
+       Entry e = keystore.getEntry(alias, p);
+       if (e != null) {
+          // rename the old entry
+          String originalAlias = alias + "-original";
+          keystore.setEntry(originalAlias, e, p);
+          keystore.deleteEntry(alias);
+       }
+       keystore.setEntry(alias, skEntry, new KeyStore.PasswordProtection(keyStorePWD));
+
+       // save the current keystore
+       saveKeyStoreToFile(keystoreURL);
+    
+       // backup original vault file (shared key file cannot be saved for obvious reasons
+       copyFile(new File(decodedEncFileDir + ENCODED_FILE), new File(decodedEncFileDir + ENCODED_FILE + ".original"));
+
+       // save vault data file
+       writeVaultData();
+       
+       // delete original vault files
+       File f = new File(decodedEncFileDir + ENCODED_FILE);
+       if (!f.delete()) {
+           PicketBoxLogger.LOGGER.cannotDeleteOriginalVaultFile(f.getCanonicalPath());
+       }
+       f = new File(decodedEncFileDir + SHARED_KEY_FILE);
+       if (!f.delete()) {
+           PicketBoxLogger.LOGGER.cannotDeleteOriginalVaultFile(f.getCanonicalPath());
+       }
+       
+   }
+
+   private void saveKeyStoreToFile(String keystoreURL) throws Exception {
+       keystore.store(new FileOutputStream(new File(keystoreURL)), keyStorePWD);
+   }
+   
+   private void checkAndConvertKeyStoreToJCEKS(String keystoreURL) throws Exception {
+      if (keystore.getType().equalsIgnoreCase("JKS")) {
+
+         // backup original keystore file
+         copyFile(new File(keystoreURL), new File(keystoreURL + ".original"));
+
+         KeyStore jceks = KeyStoreUtil.createKeyStore("JCEKS", keyStorePWD);
+         
+         Enumeration<String> aliases = keystore.aliases();
+         while (aliases.hasMoreElements()) {
+            String entryAlias = aliases.nextElement();
+            KeyStore.PasswordProtection p = new KeyStore.PasswordProtection(keyStorePWD);
+            KeyStore.Entry e = keystore.getEntry(entryAlias, p);
+            jceks.setEntry(entryAlias, e, p);
+         }
+         keystore = jceks;
+         keyStoreType = "JCEKS"; // after conversion we have to change keyStoreType to the one we really have
+         saveKeyStoreToFile(keystoreURL);
+         PicketBoxLogger.LOGGER.keyStoreConvertedToJCEKS(KEYSTORE_URL);
+      }
+   }
+   
+
+   
+    private void readVersionedVaultContent() throws Exception {
+        FileInputStream fis = null;
+        ObjectInputStream ois = null;
+        try {
+            fis = new FileInputStream(decodedEncFileDir + VAULT_CONTENT_FILE);
+            ois = new ObjectInputStream(fis);
+            vaultContent = (SecurityVaultData) ois.readObject();
+        } finally {
+            safeClose(fis);
+            safeClose(ois);
+        }
+        
+        adminKey = getAdminKey();
+        if (adminKey == null) {
+            throw PicketBoxMessages.MESSAGES.vaultDoesnotContainSecretKey(alias);
+        }    
+    }
+   
+    /**
+     * Returns SecretKey stored in defined keystore under defined alias.
+     * If no such SecretKey exists returns null.
+     * @return
+     */
+    private SecretKey getAdminKey() {
+        try {
+            Entry e = keystore.getEntry(alias, new KeyStore.PasswordProtection(keyStorePWD));
+            if (e instanceof KeyStore.SecretKeyEntry) {
+                return ((KeyStore.SecretKeyEntry)e).getSecretKey();
+            }
+        }
+        catch (Exception e) {
+            PicketBoxLogger.LOGGER.vaultDoesnotContainSecretKey(alias);
+            return null;
+        }
+        return null;
+    }
+    
+   /**
+    * Copy file method.
+    * 
+    * @param sourceFile
+    * @param destFile
+    * @throws IOException
+    */
+    public static void copyFile(File sourceFile, File destFile) throws IOException {
+        if (!destFile.exists()) {
+            destFile.createNewFile();
+        }
+        FileInputStream fIn = null;
+        FileOutputStream fOut = null;
+        FileChannel source = null;
+        FileChannel destination = null;
+        try {
+            fIn = new FileInputStream(sourceFile);
+            source = fIn.getChannel();
+            fOut = new FileOutputStream(destFile);
+            destination = fOut.getChannel();
+            long transfered = 0;
+            long bytes = source.size();
+            while (transfered < bytes) {
+                transfered += destination.transferFrom(source, 0, source.size());
+                destination.position(transfered);
+            }
+        } finally {
+            if (source != null) {
+                source.close();
+            } else if (fIn != null) {
+                fIn.close();
+            }
+            if (destination != null) {
+                destination.close();
+            } else if (fOut != null) {
+                fOut.close();
+            }
+        }
+    }
+    
+    /**
+     * Get key store based on options passed to PicketBoxSecurityVault.
+     * @return
+     */
+    private KeyStore getKeyStore(String keystoreURL) {
+        
+        try {
+            return KeyStoreUtil.getKeyStore(keyStoreType, keystoreURL, keyStorePWD);
+        }
+        catch (IOException e) {
+            // deliberately empty
+        }
+        catch (GeneralSecurityException e) {
+            throw PicketBoxMessages.MESSAGES.unableToGetKeyStore(e, keystoreURL);
+        }
+        
+        try {
+            if (createKeyStore) {
+                return KeyStoreUtil.createKeyStore(keyStoreType, keyStorePWD);
+            }
+        }
+        catch (Throwable e) {
+            throw PicketBoxMessages.MESSAGES.unableToGetKeyStore(e, keystoreURL);
+        }
+        
+        return null;
+    }
+    
 }

@@ -41,13 +41,18 @@ import org.picketbox.util.KeyStoreUtil;
  */
 public class EncryptionUtilUnitTestCase
 {
-   String keyStoreURL = "src/test/resources/keystore/vault.keystore";
+   String keyStoreURL = "target/vaults/vault-enc/vault.jks";
    String keyStorePass = "vault22";
    String alias = "vault";
    
    @Test
    public void testEncryptDecrypt() throws Exception
    {
+      SecurityVaultUnitTestCase.setInitialVaulConditions(
+            "src/test/resources/keystore/vault.jks", "target/vaults/vault-enc/vault.jks", 
+            "src/test/resources/keystore/vault_data", "target/vaults/vault-enc/vault_data");
+      
+      
       KeyStore ks = KeyStoreUtil.getKeyStore(keyStoreURL, keyStorePass.toCharArray());
       assertNotNull(ks);
       EncryptionUtil encUtil = new EncryptionUtil("AES", 128);
