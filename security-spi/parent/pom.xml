@@ -85,8 +85,8 @@
    <dependencies>
       <dependency>
          <groupId>org.jboss.spec.javax.security.auth.message</groupId>
-         <artifactId>jboss-jaspi-api_1.0_spec</artifactId>
-         <version>1.0.0.Final</version>
+         <artifactId>jboss-jaspi-api_1.1_spec</artifactId>
+         <version>1.0.0.Alpha1</version>
          <scope>compile</scope>
       </dependency>
       <dependency>

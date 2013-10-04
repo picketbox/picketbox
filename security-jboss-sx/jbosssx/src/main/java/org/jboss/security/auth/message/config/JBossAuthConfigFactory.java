@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.UUID;
 
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
@@ -47,30 +45,20 @@ import org.jboss.security.PicketBoxMessages;
 public class JBossAuthConfigFactory extends AuthConfigFactory
 {
    /**
-    * Map of String key to provider
+    * Map of String key to provider.
     */
-   private Map<String, AuthConfigProvider> keyProviderMap = new HashMap<String, AuthConfigProvider>();
+   private Map<String, AuthConfigProvider> keyToAuthConfigProviderMap = new HashMap<String, AuthConfigProvider>();
 
    /**
-    * Map of key to listener
+    * Map of key to listener.
     */
-   private Map<String, RegistrationListener> keyListenerMap = new HashMap<String, RegistrationListener>();
+   private Map<String, RegistrationListener> keyToRegistrationListenerMap = new HashMap<String, RegistrationListener>();
 
    /**
-    * Map of registration id to description
+    * Map of key to registration context.
     */
-   private Map<String, String> idToDescriptionMap = new HashMap<String, String>();
-
-   /**
-    * Map of registration id to key
-    */
-   private Map<String, String> idKeyMap = new HashMap<String, String>();
-
-   /**
-    * Map of provider to a list of registration ids
-    */
-   private Map<AuthConfigProvider, List<String>> providerToIDListMap = new HashMap<AuthConfigProvider, List<String>>();
-
+   private Map<String, RegistrationContext> keyToRegistrationContextMap = new HashMap<String, RegistrationContext>();
+    
    /**
     * <p>
     * Creates an instance of {@code JBossAuthConfigFactory}.
@@ -95,10 +83,10 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("listener");
 
       String[] arr = new String[0];
-      String input = layer + "^" + appContext;
-      String allLayer = "null" + "^" + appContext;
-      String allContext = layer + "^" + "null";
-      String general = "null" + "^" + "null";
+      String input = layer + appContext;
+      String allLayer = "null" + appContext;
+      String allContext = layer + "null";
+      String general = "nullnull";
 
       RegistrationListener origListener = null;
       String key = null;
@@ -112,20 +100,13 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
             key = allContext;
          if (i == 3)
             key = general;
-         origListener = (RegistrationListener) keyListenerMap.get(key);
+         origListener = keyToRegistrationListenerMap.get(key);
       }
 
       if (origListener == listener)
       {
-         keyListenerMap.remove(key);
+          keyToRegistrationListenerMap.remove(key);
          // Get the ID List
-         AuthConfigProvider provider = (AuthConfigProvider) keyProviderMap.get(key);
-         if (provider != null)
-         {
-            List<String> list = providerToIDListMap.get(provider);
-            arr = new String[list.size()];
-            list.toArray(arr);
-         }
       }
       return arr;
    }
@@ -136,16 +117,14 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
     */
    public AuthConfigProvider getConfigProvider(String layer, String appContext, RegistrationListener listener)
    {
-      if (appContext == null)
-         appContext = " ";
-      String input = layer + "^" + appContext;
-      String allLayer = "null" + "^" + appContext;
-      String allContext = layer + "^" + "null";
-      String general = "null" + "^" + "null";
+      String input = new StringBuilder().append(layer).append(appContext).toString();
+      String allLayer = "null" + appContext;
+      String allContext = layer + "null";
+      String general = "nullnull";
 
       AuthConfigProvider acp = null;
       String key = null;
-      for (int i = 0; i < 4 && acp == null; i++)
+      for (int i = 0; i < 4; i++)
       {
          if (i == 0)
             key = input;
@@ -155,11 +134,17 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
             key = allContext;
          if (i == 3)
             key = general;
-         acp = keyProviderMap.get(key);
+
+         if (this.keyToAuthConfigProviderMap.containsKey(key))
+         {
+            acp = this.keyToAuthConfigProviderMap.get(key);
+            break;
+         }
       }
-      
-      if (acp != null && listener != null)
-         this.keyListenerMap.put(key, listener);
+
+      //
+      if (listener != null)
+         this.keyToRegistrationListenerMap.put(input, listener);
 
       return acp;
    }
@@ -170,37 +155,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
     */
    public RegistrationContext getRegistrationContext(String registrationID)
    {
-      String key = idKeyMap.get(registrationID);
-      StringTokenizer st = new StringTokenizer(key, "^");
-      if (st.countTokens() < 2)
-         throw PicketBoxMessages.MESSAGES.invalidKeyFormat(key);
-
-      final String layer = st.nextToken();
-      final String appCtx = st.nextToken();
-      final String description = (String) idToDescriptionMap.get(registrationID);
-
-      return new RegistrationContext()
-      {
-         public String getAppContext()
-         {
-            return appCtx.equals("null") ? null : appCtx;
-         }
-
-         public String getDescription()
-         {
-            return description;
-         }
-
-         public String getMessageLayer()
-         {
-            return layer.equals("null") ? null : layer;
-         }
-
-         public boolean isPersistent()
-         {
-            return false;
-         }
-      };
+      return this.keyToRegistrationContextMap.get(registrationID);
    }
 
    /*
@@ -212,13 +167,16 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       List<String> al = new ArrayList<String>();
       if (provider == null)
       {
-         al.addAll(idKeyMap.keySet());
+         al.addAll(keyToAuthConfigProviderMap.keySet());
       }
       else
       {
-         List<String> list = this.providerToIDListMap.get(provider);
-         if (list != null)
-            al.addAll(list);
+         // get all entries that have the supplied provider as value and store their keys.
+         for (Map.Entry<String, AuthConfigProvider> entry : this.keyToAuthConfigProviderMap.entrySet())
+         {
+            if (entry.getValue().equals(provider))
+               al.add(entry.getKey());
+         }
       }
       String[] sarr = new String[al.size()];
       al.toArray(sarr);
@@ -237,13 +195,11 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
     * (non-Javadoc)
     * @see javax.security.auth.message.config.AuthConfigFactory#registerConfigProvider(java.lang.String, java.util.Map, java.lang.String, java.lang.String, java.lang.String)
     */
-   @SuppressWarnings("rawtypes")
    public String registerConfigProvider(String className, Map properties, String layer, String appContext,
          String description)
    {
       // Instantiate the provider
       AuthConfigProvider acp = null;
-
       if (className != null) {
          try
          {
@@ -257,7 +213,31 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
             throw PicketBoxMessages.MESSAGES.failedToRegisterAuthConfigProvider(className, e);
          }
       }
-      return this.registerConfigProvider(acp, layer, appContext, description);
+
+      // build the provider registration id using layer + appContext, which is a unique pair.
+      String registrationID = new StringBuilder().append(layer).append(appContext).toString();
+      
+      // check if we already have a registration for the layer/appContext key.
+      AuthConfigProvider oldProvider = this.keyToAuthConfigProviderMap.put(registrationID, acp);
+      if (oldProvider != null)
+      {
+         // registration already exists and provider has been replaced. Update the registration context.
+         JBossRegistrationContext context = (JBossRegistrationContext) this.keyToRegistrationContextMap.get(registrationID);
+         context.setDescription(description);
+         context.setIsPersistent(true);
+         // if there is a listener attached to the registration, notify it that the registration has been replaced.
+         RegistrationListener listener = this.keyToRegistrationListenerMap.get(registrationID);
+         if (listener != null)
+            listener.notify(layer, appContext);
+      }
+      else
+      {
+         // create a registration context for the new registration.
+         RegistrationContext context = new JBossRegistrationContext(layer, appContext, description, true);
+         this.keyToRegistrationContextMap.put(registrationID, context);
+      }
+
+      return registrationID;
    }
 
    /*
@@ -266,34 +246,29 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
     */
    public String registerConfigProvider(AuthConfigProvider provider, String layer, String appContext, String description)
    {
-      StringBuilder key = new StringBuilder();
-      key.append(layer == null ? "null" : layer);
-      key.append("^");
-      key.append(appContext == null ? "null" : appContext);
+      String registrationID = new StringBuilder().append(layer).append(appContext).toString();
 
-      String keystr = key.toString();
-      keyProviderMap.put(keystr, provider);
+       // check if we already have a registration for the layer/appContext key.
+      AuthConfigProvider oldProvider = this.keyToAuthConfigProviderMap.put(registrationID, provider);
+      if (oldProvider != null)
+      {
+          // registration already exists and provider has been replaced. Update the registration context.
+          JBossRegistrationContext context = (JBossRegistrationContext) this.keyToRegistrationContextMap.get(registrationID);
+          context.setDescription(description);
+          context.setIsPersistent(false);
+          // if there is a listener attached to the registration, notify it that the registration has been replaced.
+          RegistrationListener listener = this.keyToRegistrationListenerMap.get(registrationID);
+          if (listener != null)
+              listener.notify(layer, appContext);
+      }
+      else
+      {
+         // create a registration context for the new registration.
+          RegistrationContext context = new JBossRegistrationContext(layer, appContext, description, false);
+          this.keyToRegistrationContextMap.put(registrationID, context);
+      }
 
-      // Generate a GUID
-      UUID guid = UUID.randomUUID();
-      String providerID = guid.toString();
-      this.idKeyMap.put(providerID, keystr);
-
-      List<String> list = this.providerToIDListMap.get(provider);
-      if (list == null)
-         list = new ArrayList<String>();
-      list.add(providerID);
-
-      this.providerToIDListMap.put(provider, list);
-      if (description != null)
-         this.idToDescriptionMap.put(providerID, description);
-
-      // Check if their is a pre-existing listener
-      RegistrationListener listener = keyListenerMap.get(keystr);
-      if (listener != null)
-         listener.notify(layer, appContext);
-
-      return providerID;
+      return registrationID;
    }
 
    /*
@@ -305,18 +280,75 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       if (registrationID == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("registrationID");
 
-      String key = idKeyMap.get(registrationID);
-      if (key != null)
-      {
-         RegistrationListener listener = this.keyListenerMap.get(key);
-         RegistrationContext rc = this.getRegistrationContext(registrationID);
+      RegistrationListener listener = this.keyToRegistrationListenerMap.get(registrationID);
+      RegistrationContext rc = this.keyToRegistrationContextMap.get(registrationID);
 
-         this.keyProviderMap.remove(key);
-         // Notify the listener of the change
-         if (listener != null)
-            listener.notify(rc.getMessageLayer(), rc.getAppContext());
-         return true;
-      }
-      return false;
+      // remove the provider and notify listener of the change.
+      boolean removed = this.keyToAuthConfigProviderMap.containsKey(registrationID);
+      this.keyToAuthConfigProviderMap.remove(registrationID);
+      if (removed && listener != null)
+         listener.notify(rc.getMessageLayer(), rc.getAppContext());
+      this.keyToRegistrationContextMap.remove(registrationID);
+
+      return removed;
    }
+
+   static class JBossRegistrationContext implements RegistrationContext {
+
+       private String messageLayer;
+
+       private String appContext;
+
+       private String description;
+
+       private boolean isPersistent;
+
+       JBossRegistrationContext(String layer, String appContext, String description, boolean isPersistent)
+       {
+          this.messageLayer = layer;
+          this.appContext = appContext;
+          this.description = description;
+          this.isPersistent = isPersistent;
+       }
+
+       public String getAppContext()
+       {
+          return this.appContext;
+       }
+       
+       public void setAppContext(String appContext)
+       {
+          this.appContext = appContext;
+       }
+
+       public String getDescription()
+       {
+          return this.description;
+       }
+       
+       public void setDescription(String description)
+       {
+          this.description = description;
+       }
+
+       public String getMessageLayer()
+       {
+          return this.messageLayer;
+       }
+
+       public void setMessageLayer(String messageLayer)
+       {
+          this.messageLayer = messageLayer;
+       }
+
+       public boolean isPersistent()
+       {
+          return this.isPersistent;
+       }
+
+       public void setIsPersistent(boolean isPersistent)
+       {
+          this.isPersistent = isPersistent;
+       }
+   }       
 }

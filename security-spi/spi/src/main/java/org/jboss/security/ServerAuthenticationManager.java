@@ -33,7 +33,11 @@ import javax.security.auth.message.MessageInfo;
 public interface ServerAuthenticationManager extends AuthenticationManager
 {  
    /**
-    * Authenticate a Subject given the request response JSR-196(JASPI) messages
+    * <p>Authenticate a Subject given the request response JSR-196(JASPI) messages.</p>
+    *
+    * <p>If any {@link javax.security.auth.message.AuthException} is thrown during the processing it will be available
+    * through {@link SecurityContext} context data with a key <code>javax.security.auth.message.AuthException</code>.</p>
+    *
     * @param requestMessage 
     * @param clientSubject Pre-created or null subject
     * @param layer Message Layer for the JASPI (Optional):  Default: HTTP
@@ -44,7 +48,10 @@ public interface ServerAuthenticationManager extends AuthenticationManager
          CallbackHandler callbackHandler);
    
    /**
-    * Authenticate a Subject given the request response JSR-196(JASPI) messages
+    * <p>Authenticate a Subject given the request response JSR-196(JASPI) messages.</p>
+    *
+    * <p>If any {@link javax.security.auth.message.AuthException} is thrown during the processing it will be available
+    * through {@link SecurityContext} context data with a key <code>javax.security.auth.message.AuthException</code>.</p>
     * 
     * @param messageInfo the object that contains the request and response messages.
     * @param clientSubject the client subject.
@@ -60,7 +67,10 @@ public interface ServerAuthenticationManager extends AuthenticationManager
     * <p>
     * Secures the response encapsulated in the specified {@code MessageInfo} object.
     * </p>
-    * 
+    *
+    * <p>If any {@link javax.security.auth.message.AuthException} is thrown during the processing it will be available
+    * through {@link SecurityContext} context data with a key <code>javax.security.auth.message.AuthException</code>.</p>
+    *
     * @param messageInfo the object that contains the request and response messages.
     * @param serviceSubject an optional server {@code Subject} instance.
     * @param layer  the JASPI message layer. 
