@@ -53,6 +53,8 @@ public class ContextPolicy
    /** HashMap<String, Permissions> role name to permissions mapping */
    private HashMap<String, Permissions> rolePermissions = new HashMap<String, Permissions>();
 
+   private static final String ANY_AUTHENTICATED_USER_ROLE = "**";
+
    ContextPolicy(String contextID)
    {
       this.contextID = contextID;
@@ -122,23 +124,20 @@ public class ContextPolicy
             principalNames.add(name);
          }
       }
-      if( principalNames.size() > 0 )
-      {
-         PicketBoxLogger.LOGGER.traceProtectionDomainPrincipals(principalNames);
-         for(int n = 0; implied == false && n < principalNames.size(); n ++)
-         {
-            String name = principalNames.get(n);
-            Permissions perms = rolePermissions.get(name);
-            PicketBoxLogger.LOGGER.debugImpliesParameters(name, perms);
-            if( perms == null )
-               continue;
-            implied = perms.implies(permission);
-            PicketBoxLogger.LOGGER.debugImpliesResult(implied);
-         }
-      }
-      else
-      {
+      if (principalNames.size() == 0)
          PicketBoxLogger.LOGGER.traceNoPrincipalsInProtectionDomain(domain);
+
+      principalNames.add(ANY_AUTHENTICATED_USER_ROLE);
+      PicketBoxLogger.LOGGER.traceProtectionDomainPrincipals(principalNames);
+      for(int n = 0; implied == false && n < principalNames.size(); n ++)
+      {
+         String name = principalNames.get(n);
+         Permissions perms = rolePermissions.get(name);
+         PicketBoxLogger.LOGGER.debugImpliesParameters(name, perms);
+         if( perms == null )
+            continue;
+         implied = perms.implies(permission);
+         PicketBoxLogger.LOGGER.debugImpliesResult(implied);
       }
 
       return implied;
