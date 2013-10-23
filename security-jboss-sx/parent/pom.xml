@@ -8,7 +8,7 @@
    <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-parent</artifactId>
    <packaging>pom</packaging>
-   <version>4.0.19.Final</version>
+   <version>4.0.17.SP2</version>
    <name>JBossSX - Parent</name>
    <url>http://jboss.org/picketbox</url>
    <description>PicketBox is a security project for Java Applications.</description>
@@ -23,8 +23,8 @@
       <url>http://www.jboss.org</url>
    </organization>
    <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/security-jboss-sx/tags/4.0.19.Final</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/security-jboss-sx/tags/4.0.19.Final</developerConnection>
+      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/security-jboss-sx/tags/4.0.17.SP2</connection>
+      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/security-jboss-sx/tags/4.0.17.SP2</developerConnection>
    </scm>
   
    <build>
@@ -89,9 +89,9 @@
    <repositories>
     <repository>
       <id>repository.jboss.org</id>
-      <name>Developer Group Repository</name>
+      <name>JBoss Repository</name>
       <layout>default</layout>
-      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+      <url>http://repository.jboss.org/maven2/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -148,6 +148,6 @@
 
   <properties>
     <org.jboss.javaee.version>GA</org.jboss.javaee.version>
-    <org.jboss.security.spi.version>4.0.19.Final</org.jboss.security.spi.version>
+    <org.jboss.security.spi.version>4.0.17.SP2</org.jboss.security.spi.version>
   </properties>
 </project>

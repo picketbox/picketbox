@@ -48,18 +48,15 @@ public class DatabaseCertLoginModule extends BaseCertLoginModule
    private static final String DS_JNDI_NAME = "dsJndiName";
    private static final String ROLES_QUERY = "rolesQuery";
    private static final String SUSPEND_RESUME = "suspendResume";
-   private static final String TRANSACTION_MANAGER_JNDI_NAME = "transactionManagerJndiName";
 
-    private static final String[] ALL_VALID_OPTIONS =
+   private static final String[] ALL_VALID_OPTIONS =
    {
 	   DS_JNDI_NAME,ROLES_QUERY,SUSPEND_RESUME
    };
    
    /** The JNDI name of the DataSource to use */
    private String dsJndiName;
-    /** The JNDI name of the transaction manager */
-   protected String txManagerJndiName = "java:/TransactionManager";
-    /** The sql query to obtain the user roles */
+   /** The sql query to obtain the user roles */
    private String rolesQuery = "select Role, RoleGroup from Roles where PrincipalID=?";
    /** Whether to suspend resume transactions during database operations */
    protected boolean suspendResume = true;
@@ -88,10 +85,6 @@ public class DatabaseCertLoginModule extends BaseCertLoginModule
       if( tmp != null )
          suspendResume = Boolean.valueOf(tmp.toString()).booleanValue();
 
-      tmp = options.get(TRANSACTION_MANAGER_JNDI_NAME);
-      if (tmp != null)
-         txManagerJndiName = tmp.toString();
-
       PicketBoxLogger.LOGGER.traceDBCertLoginModuleOptions(dsJndiName, "", rolesQuery, suspendResume);
    }
 
@@ -101,7 +94,7 @@ public class DatabaseCertLoginModule extends BaseCertLoginModule
    protected Group[] getRoleSets() throws LoginException
    {
       String username = getUsername();
-      Group[] roleSets = Util.getRoleSets(username, dsJndiName, txManagerJndiName, rolesQuery, this, suspendResume);
+      Group[] roleSets = Util.getRoleSets(username, dsJndiName, rolesQuery, this, suspendResume);
       return roleSets;
    }
    

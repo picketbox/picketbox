@@ -34,13 +34,15 @@ import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.security.auth.message.callback.PasswordValidationCallback;
 
-import org.jboss.security.*;
+import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityContextAssociation;
+import org.jboss.security.SecurityContextFactory;
+import org.jboss.security.SimplePrincipal;
 import org.jboss.security.auth.callback.JASPICallbackHandler;
 import org.jboss.security.identity.Identity;
 import org.jboss.security.identity.RoleGroup;
 import org.jboss.security.identity.extensions.CredentialIdentity;
 import org.jboss.security.identity.plugins.SimpleRole;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -70,15 +72,7 @@ public class JASPICallbackHandlerUnitTestCase
    {
       SecurityContextAssociation.setSecurityContext(null);
    }
-
-   @After
-   public void clearSubjectInfo()
-   {
-      SecurityContext context = SecurityContextAssociation.getSecurityContext();
-      context.getUtil().createSubjectInfo(null, null, null);
-   }
-
-
+   
    @Test
    public void testGroupPrincipalCallback() throws Exception
    {   
@@ -97,7 +91,7 @@ public class JASPICallbackHandlerUnitTestCase
       
       assertEquals( 2, roles.getRoles().size() );
       assertTrue( roles.containsRole( new SimpleRole( "role1" )));
-      assertTrue( roles.containsRole( new SimpleRole( "role2" )));
+      assertTrue( roles.containsRole( new SimpleRole( "role2" ))); 
    } 
    
    @Test

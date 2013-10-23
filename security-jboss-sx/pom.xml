@@ -7,7 +7,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-pom</artifactId>
-   <version>4.0.19.Final</version>
+   <version>4.0.17.SP2</version>
    <packaging>pom</packaging>
    <name>PicketBox Implementation - Parent</name>
    <url>http://jboss.org/picketbox</url>
@@ -27,7 +27,7 @@
       <id>repository.jboss.org</id>
       <name>JBoss Repository</name>
       <layout>default</layout>
-      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+      <url>http://repository.jboss.org/maven2/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
