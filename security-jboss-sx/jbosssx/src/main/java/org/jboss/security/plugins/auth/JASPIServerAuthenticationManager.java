@@ -72,26 +72,47 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
    public boolean isValid(MessageInfo messageInfo, Subject clientSubject, String layer, String appContext, 
          CallbackHandler callbackHandler) 
    {
-      AuthStatus status = AuthStatus.FAILURE;
-      
+
+      AuthConfigFactory factory = AuthConfigFactory.getFactory();
+      AuthConfigProvider provider = factory.getConfigProvider(layer,appContext,null);
+      if(provider == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullAuthConfigProviderForLayer(layer, appContext);
+
+      ServerAuthConfig serverConfig = null;
       try
       {
-         AuthConfigFactory factory = AuthConfigFactory.getFactory();
-         AuthConfigProvider provider = factory.getConfigProvider(layer,appContext,null); 
-         if(provider == null)
-            throw PicketBoxMessages.MESSAGES.invalidNullAuthConfigProviderForLayer(layer, appContext);
+         serverConfig = provider.getServerAuthConfig(layer,appContext,callbackHandler);
+      }
+      catch (AuthException ae)
+      {
+         SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
+         PicketBoxLogger.LOGGER.errorGettingServerAuthConfig(layer, appContext, ae);
+         return false;
+      }
+      String authContextId = serverConfig.getAuthContextID(messageInfo);
+      Properties properties = new Properties();
+      properties.setProperty("security-domain", super.getSecurityDomain());
 
-         ServerAuthConfig serverConfig = provider.getServerAuthConfig(layer,appContext,callbackHandler);
-         String authContextId = serverConfig.getAuthContextID(messageInfo);
+      ServerAuthContext sctx = null;
+      try
+      {
+         sctx = serverConfig.getAuthContext(authContextId, new Subject(), properties);
+      }
+      catch (AuthException ae)
+      {
+         SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
+         PicketBoxLogger.LOGGER.errorGettingServerAuthContext(authContextId, super.getSecurityDomain(), ae);
+         return false;
+      }
          
-         Properties properties = new Properties();
-         properties.setProperty("security-domain", super.getSecurityDomain());
-         ServerAuthContext sctx = serverConfig.getAuthContext(authContextId, new Subject(), properties);
-         
-         if(clientSubject == null)
-            clientSubject = new Subject();
-         Subject serviceSubject = new Subject();
-         status = sctx.validateRequest(messageInfo, clientSubject, serviceSubject); 
+      if(clientSubject == null)
+         clientSubject = new Subject();
+      Subject serviceSubject = new Subject();
+
+      AuthStatus status = AuthStatus.FAILURE;
+      try
+      {
+           status = sctx.validateRequest(messageInfo, clientSubject, serviceSubject);
          //TODO: Add caching
       }
       catch(AuthException ae)
@@ -109,22 +130,43 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
    public void secureResponse(MessageInfo messageInfo, Subject serviceSubject, String layer, String appContext, 
          CallbackHandler handler)
    {
+      AuthConfigFactory factory = AuthConfigFactory.getFactory();
+      AuthConfigProvider provider = factory.getConfigProvider(layer, appContext, null);
+      if(provider == null)
+         throw PicketBoxMessages.MESSAGES.invalidNullAuthConfigProviderForLayer(layer, appContext);
+
+      ServerAuthConfig serverConfig = null;
       try
       {
-         AuthConfigFactory factory = AuthConfigFactory.getFactory();
-         AuthConfigProvider provider = factory.getConfigProvider(layer, appContext, null); 
-         if(provider == null)
-            throw PicketBoxMessages.MESSAGES.invalidNullAuthConfigProviderForLayer(layer, appContext);
+         serverConfig = provider.getServerAuthConfig(layer, appContext, handler);
+      }
+      catch (AuthException ae)
+      {
+         SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
+         PicketBoxLogger.LOGGER.errorGettingServerAuthConfig(layer, appContext, ae);
+         return;
+      }
 
-         ServerAuthConfig serverConfig = provider.getServerAuthConfig(layer, appContext, handler);
-         String authContextId = serverConfig.getAuthContextID(messageInfo);
-         
-         Properties properties = new Properties();
-         properties.setProperty("security-domain", super.getSecurityDomain());
-         if (serviceSubject == null)
-            serviceSubject = new Subject();
-         ServerAuthContext sctx = serverConfig.getAuthContext(authContextId, serviceSubject, properties);
-         sctx.secureResponse(messageInfo, serviceSubject); 
+      String authContextId = serverConfig.getAuthContextID(messageInfo);
+      Properties properties = new Properties();
+      properties.setProperty("security-domain", super.getSecurityDomain());
+      if (serviceSubject == null)
+         serviceSubject = new Subject();
+      ServerAuthContext sctx = null;
+      try
+      {
+         sctx = serverConfig.getAuthContext(authContextId, serviceSubject, properties);
+      }
+      catch (AuthException ae)
+      {
+          SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
+          PicketBoxLogger.LOGGER.errorGettingServerAuthContext(authContextId, super.getSecurityDomain(), ae);
+          return;
+      }
+
+      try
+      {
+           sctx.secureResponse(messageInfo, serviceSubject);
       }
       catch(AuthException ae)
       {
