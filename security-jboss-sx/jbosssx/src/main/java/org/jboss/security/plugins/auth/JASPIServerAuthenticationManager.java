@@ -36,6 +36,7 @@ import javax.security.jacc.PolicyContext;
 
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
+import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.ServerAuthenticationManager;
 
 /**
@@ -95,6 +96,7 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
       }
       catch(AuthException ae)
       {
+          SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
           PicketBoxLogger.LOGGER.debugIgnoredException(ae);
       }
       return AuthStatus.SUCCESS == status ;
@@ -126,6 +128,7 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
       }
       catch(AuthException ae)
       {
+          SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
           PicketBoxLogger.LOGGER.debugIgnoredException(ae);
       }
    }

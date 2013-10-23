@@ -387,7 +387,8 @@ public class SecurityVaultUnitTestCase
       cleanDirectory(targetVaultContent);
       File originVault = new File(originalVaultContentDir);
       for (File f : originVault.listFiles()) {
-         SecurityVaultUnitTestCase.copyFile(f, new File(targetVaultContent.getAbsolutePath() + File.separator + f.getName()));
+         if (f.isFile()) // some version control systems add a hidden directory, we must make sure we won't copy those.
+           SecurityVaultUnitTestCase.copyFile(f, new File(targetVaultContent.getAbsolutePath() + File.separator + f.getName()));
       }
    }
 

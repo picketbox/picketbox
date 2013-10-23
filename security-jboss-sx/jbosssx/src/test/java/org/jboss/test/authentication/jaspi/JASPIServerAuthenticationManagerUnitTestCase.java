@@ -67,8 +67,8 @@ public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
             "Test Config Provider");
 
       jaspiManager = new JASPIServerAuthenticationManager("conf-jaspi", new JBossCallbackHandler());
-//      SecurityContext jsc = new JBossSecurityContext("conf-jaspi");
-//      SecurityContextAssociation.setSecurityContext(jsc);
+      SecurityContext jsc = new JBossSecurityContext("conf-jaspi");
+      SecurityContextAssociation.setSecurityContext(jsc);
 
       XMLLoginConfigImpl xli = XMLLoginConfigImpl.getInstance();
       SecurityActions.setJAASConfiguration(xli);
