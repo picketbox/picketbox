@@ -712,4 +712,11 @@ public interface PicketBoxLogger extends BasicLogger {
     @Message(id = 372, value = "Security Vault key store successfuly converted to JCEKS type (%s). From now on use JCEKS as KEYSTORE_TYPE in Security Vault configuration.")
     void keyStoreConvertedToJCEKS(String keyStoreFile);
 
+    @LogMessage(level = Logger.Level.ERROR)
+    @Message(id = 373, value = "Error getting ServerAuthConfig for layer %s and appContext %s")
+    void errorGettingServerAuthConfig(String layer, String appContext, @Cause Throwable cause);
+
+    @LogMessage(level = Logger.Level.ERROR)
+    @Message(id = 374, value = "Error getting ServerAuthContext for authContextId %s and security domain %s")
+    void errorGettingServerAuthContext(String authContextId, String securityDomain, @Cause Throwable cause);
 }
