@@ -54,7 +54,7 @@ class DbUtil
     
    @return Group[] containing the sets of roles
    */
-  static Group[] getRoleSets(String username, String dsJndiName,
+  static Group[] getRoleSets(String username, String dsJndiName, String txManagerJndiName,
      String rolesQuery, AbstractServerLoginModule aslm, boolean suspendResume)
      throws LoginException
   {
@@ -70,7 +70,7 @@ class DbUtil
         TransactionManagerLocator tml = new TransactionManagerLocator();
         try
         {
-           tm = tml.getTM("java:/TransactionManager");
+           tm = tml.getTM(txManagerJndiName);
         }
         catch (NamingException e1)
         {

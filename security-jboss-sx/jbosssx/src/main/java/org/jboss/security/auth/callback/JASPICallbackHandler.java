@@ -87,16 +87,30 @@ public class JASPICallbackHandler extends JBossCallbackHandler
               Role role = new SimpleRole( rolesArray[ i ] );
               rolesList.add( role );
            }
-           RoleGroup roles = new SimpleRoleGroup( SecurityConstants.ROLES_IDENTIFIER, rolesList ); 
-           currentSC.getUtil().setRoles( roles );   
+           RoleGroup roles = new SimpleRoleGroup( SecurityConstants.ROLES_IDENTIFIER, rolesList );
+
+           // if the current security context already has roles, we merge them with the incoming roles.
+           RoleGroup currentRoles = currentSC.getUtil().getRoles();
+           if (currentRoles != null) {
+               currentRoles.addAll(roles.getRoles());
+           }
+           else {
+               currentSC.getUtil().setRoles( roles );
+           }
          } 
          
          Subject subject = groupPrincipalCallback.getSubject();
-
          if( subject != null )
          {
-            currentSC.getSubjectInfo().setAuthenticatedSubject( subject );
-         } 
+            // if the current security context already has an associated subject, we merge it with the incoming subject.
+            Subject currentSubject = currentSC.getSubjectInfo().getAuthenticatedSubject();
+            if (currentSubject != null) {
+                subject.getPrincipals().addAll(currentSubject.getPrincipals());
+                subject.getPublicCredentials().addAll(currentSubject.getPublicCredentials());
+                subject.getPrivateCredentials().addAll(currentSubject.getPrivateCredentials());
+            }
+            currentSC.getSubjectInfo().setAuthenticatedSubject(subject);
+         }
       }
       else if( callback instanceof CallerPrincipalCallback )
       {
@@ -110,8 +124,15 @@ public class JASPICallbackHandler extends JBossCallbackHandler
          
          if( subject != null )
          {
-            currentSC.getSubjectInfo().setAuthenticatedSubject( subject );
-         } 
+             // if the current security context already has an associated subject, we merge it with the incoming subject.
+             Subject currentSubject = currentSC.getSubjectInfo().getAuthenticatedSubject();
+             if (currentSubject != null) {
+                 subject.getPrincipals().addAll(currentSubject.getPrincipals());
+                 subject.getPublicCredentials().addAll(currentSubject.getPublicCredentials());
+                 subject.getPrivateCredentials().addAll(currentSubject.getPrivateCredentials());
+             }
+             currentSC.getSubjectInfo().setAuthenticatedSubject(subject);
+         }
          
          Principal callerPrincipal = callerPrincipalCallback.getPrincipal();
          if (callerPrincipal == null && callerPrincipalCallback.getName() != null)
@@ -119,8 +140,9 @@ public class JASPICallbackHandler extends JBossCallbackHandler
          
          if( callerPrincipal != null )
          {
-            if (subject != null)
-               subject.getPrincipals().add(callerPrincipal);
+            Subject currentSubject = currentSC.getSubjectInfo().getAuthenticatedSubject();
+            if (currentSubject != null)
+                currentSubject.getPrincipals().add(callerPrincipal);
             Identity principalBasedIdentity = IdentityFactory.getIdentity( callerPrincipal, null );
             currentSC.getSubjectInfo().addIdentity( principalBasedIdentity ); 
          }
@@ -136,10 +158,22 @@ public class JASPICallbackHandler extends JBossCallbackHandler
          char[] password = passwordValidationCallback.getPassword();
          Subject subject = passwordValidationCallback.getSubject();
          
-         SecurityContextUtil util = currentSC.getUtil();
+//         SecurityContextUtil util = currentSC.getUtil();
          if( subject != null )
          {
-            util.createSubjectInfo( new SimplePrincipal( userName ), password, subject); 
+             // if the current security context already has an associated subject, we merge it with the incoming subject.
+             Subject currentSubject = currentSC.getSubjectInfo().getAuthenticatedSubject();
+             if (currentSubject != null) {
+                 subject.getPrincipals().addAll(currentSubject.getPrincipals());
+                 subject.getPublicCredentials().addAll(currentSubject.getPublicCredentials());
+                 subject.getPrivateCredentials().addAll(currentSubject.getPrivateCredentials());
+             }
+             currentSC.getSubjectInfo().setAuthenticatedSubject(subject);
+
+             // add the identity formed by username/pw to the security context.
+             Identity identity = IdentityFactory.getIdentity(new SimplePrincipal(userName), password);
+             currentSC.getSubjectInfo().addIdentity(identity);
+//             util.createSubjectInfo( new SimplePrincipal( userName ), password, subject);
          }  
       }
       else super.handleCallBack(callback);

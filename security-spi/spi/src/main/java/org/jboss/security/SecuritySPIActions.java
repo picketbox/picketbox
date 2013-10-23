@@ -31,26 +31,37 @@ import java.security.PrivilegedAction;
  *  @version $Revision$
  */
 class SecuritySPIActions
-{  
+{
+   static final PrivilegedAction<ClassLoader> GET_CONTEXT_CLASSLOADER = new PrivilegedAction<ClassLoader>() {
+
+       public ClassLoader run() {
+           return Thread.currentThread().getContextClassLoader();
+       }
+   };
+
    static ClassLoader getContextClassLoader()
    {
-      return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() 
+      if (System.getSecurityManager() != null)
       {
-         public ClassLoader run()
-         {
-           return Thread.currentThread().getContextClassLoader();
-         }
-      });
+         return AccessController.doPrivileged(GET_CONTEXT_CLASSLOADER);
+      }
+      else
+         return Thread.currentThread().getContextClassLoader();
    }
    
    static ClassLoader getCurrentClassLoader(final Class clazz)
    {
-      return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>()
+      if (System.getSecurityManager() != null)
       {
-         public ClassLoader run()
+         return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>()
          {
-            return clazz.getClassLoader();
-         }
-      });
+            public ClassLoader run()
+            {
+               return clazz.getClassLoader();
+            }
+         });
+      }
+      else
+         return clazz.getClassLoader();
    }
 }
