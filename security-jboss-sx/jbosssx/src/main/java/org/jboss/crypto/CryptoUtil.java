@@ -476,17 +476,7 @@ public class CryptoUtil
       boolean hasUnlimitedCrypto = false;
       try
       { 
-         Class<?> keyGenClass = KeyGenerator.class;
-         Class<?>[] sig = {String.class};
-         Object[] args = {"Blowfish"};
-         Method kgenInstance = keyGenClass.getDeclaredMethod("getInstance", sig);
-         Object kgen = kgenInstance.invoke(null, args);
-
-         Class<?>[] sig2 = {int.class};
-         Object[] args2 = {Integer.valueOf(256)};
-         Method init = keyGenClass.getDeclaredMethod("init", sig2);         
-         init.invoke(kgen, args2);
-         hasUnlimitedCrypto = true;
+         hasUnlimitedCrypto = javax.crypto.Cipher.getMaxAllowedKeyLength("Blowfish") > 128;
       }
       catch(Throwable e)
       {
