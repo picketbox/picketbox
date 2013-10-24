@@ -260,7 +260,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
          env.setProperty(Context.SECURITY_PRINCIPAL, dn);
       if (credential != null)
          env.put(Context.SECURITY_CREDENTIALS, credential);
-      PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(env);
+      this.traceLDAPEnv(env);
       return new InitialLdapContext(env, null);
    }
    
@@ -382,6 +382,24 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
             addRole(kst.nextToken(), roleGroup);
          }
       }
+   }
+
+   /**
+    * <p>
+    * Logs the specified LDAP env, masking security-sensitive information (passwords).
+    * </p>
+    *
+    * @param env the LDAP env to be logged.
+    */
+   private void traceLDAPEnv(Properties env)
+   {
+      Properties tmp = new Properties();
+      tmp.putAll(env);
+      if (tmp.containsKey(Context.SECURITY_CREDENTIALS))
+         tmp.setProperty(Context.SECURITY_CREDENTIALS, "******");
+      if (tmp.containsKey(BIND_CREDENTIAL))
+         tmp.setProperty(BIND_CREDENTIAL, "******");
+      PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(tmp);
    }
 
 }

@@ -185,7 +185,8 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
    private static final String SEARCH_SCOPE_OPT = "searchScope";
    private static final String SECURITY_DOMAIN_OPT = "jaasSecurityDomain";
    private static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
-   
+   private static final String BIND_CREDENTIAL = "bindCredential";
+
    private static final String[] ALL_VALID_OPTIONS =
    {
       PRINCIPAL_DN_PREFIX_OPT,
@@ -351,7 +352,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
       env.setProperty(Context.SECURITY_PRINCIPAL, userDN);
       env.put(Context.SECURITY_CREDENTIALS, credential);
 
-      PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(env);
+      this.traceLDAPEnv(env);
 
       InitialLdapContext ctx = null;
       ClassLoader currentTCCL = SecurityActions.getContextClassLoader();
@@ -544,4 +545,23 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
          }
       }
    }
+
+   /**
+    * <p>
+    * Logs the specified LDAP env, masking security-sensitive information (passwords).
+    * </p>
+    *
+    * @param env the LDAP env to be logged.
+    */
+   private void traceLDAPEnv(Properties env)
+   {
+      Properties tmp = new Properties();
+      tmp.putAll(env);
+      if (tmp.containsKey(Context.SECURITY_CREDENTIALS))
+         tmp.setProperty(Context.SECURITY_CREDENTIALS, "******");
+      if (tmp.containsKey(BIND_CREDENTIAL))
+         tmp.setProperty(BIND_CREDENTIAL, "******");
+      PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(tmp);
+   }
+
 }
