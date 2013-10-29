@@ -535,7 +535,7 @@ public class JBossJSSESecurityDomain implements JSSESecurityDomain
          else
             algorithm = TrustManagerFactory.getDefaultAlgorithm();
          if (trustManagerFactoryProvider != null)
-            trustManagerFactory = TrustManagerFactory.getInstance(algorithm, trustStoreProvider);
+            trustManagerFactory = TrustManagerFactory.getInstance(algorithm, trustManagerFactoryProvider);
          else
             trustManagerFactory = TrustManagerFactory.getInstance(algorithm);
          trustManagerFactory.init(trustStore);
