@@ -461,4 +461,6 @@ public interface PicketBoxMessages {
     @Message(id = 141, value = "Unable to parse referral absolute name: %s")
     RuntimeException unableToParseReferralAbsoluteName(@Cause URISyntaxException cause, String absoluteName);
 
+    @Message(id = 142, value = "Keystore password should be either masked or prefixed with {EXT} or {CLASS}")
+    String invalidKeystorePasswordFormatMessage();
 }

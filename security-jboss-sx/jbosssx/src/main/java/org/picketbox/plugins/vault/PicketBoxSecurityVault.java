@@ -23,6 +23,7 @@ package org.picketbox.plugins.vault;
 
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
+import org.jboss.security.Util;
 import org.jboss.security.plugins.PBEUtils;
 import org.jboss.security.vault.SecurityVault;
 import org.jboss.security.vault.SecurityVaultException;
@@ -62,7 +63,20 @@ import java.util.StringTokenizer;
  * The following options are expected in the {@link SecurityVault#init(Map)} call:
  * ENC_FILE_DIR: the location where the encoded files will be kept. End with "/" or "\" based on your platform
  * KEYSTORE_URL: location where your keystore is located
- * KEYSTORE_PASSWORD: Masked keystore password.  Has to be prepended with MASK-
+ * KEYSTORE_PASSWORD: keystore password.
+ * 'plain text' masked password (has to be prepended with MASK-)
+ * '{EXT}...' where the '...' is the exact command
+ * '{EXTC[:expiration_in_millis]}...' where the '...' is the exact command
+ * line that will be passed to the Runtime.exec(String) method to execute a
+ * platform command. The first line of the command output is used as the
+ * password.
+ * EXTC variant will cache the passwords for expiration_in_millis milliseconds.
+ * Default cache expiration is 0 = infinity.
+ * '{CLASS}classname[:ctorargs]' where the '[:ctorargs]' is an optional
+ * string delimited by the ':' from the classname that will be passed to the
+ * classname ctor. The ctorargs itself is a comma delimited list of strings.
+ * The password is obtained from classname by invoking a
+ * 'char[] toCharArray()' method if found, otherwise, the 'String toString()'
  * KEYSTORE_ALIAS: Alias where the keypair is located
  * SALT: salt of the masked password. Ensured it is 8 characters in length
  * ITERATION_COUNT: Iteration Count of the masked password.
@@ -113,6 +127,10 @@ public class PicketBoxSecurityVault implements SecurityVault
    
    public static final String PASS_MASK_PREFIX = "MASK-";
    
+   public static final String PASS_CLASS_PREFIX = "{CLASS}";
+
+   public static final String PASS_EXT_PREFIX = "{EXT";
+
    public static final String PUBLIC_CERT = "PUBLIC_CERT";
    
    public static final String KEY_SIZE = "KEY_SIZE"; 
@@ -147,11 +165,13 @@ public class PicketBoxSecurityVault implements SecurityVault
       }
       keystoreURL = StringUtil.getSystemPropertyAsString(keystoreURL);
 
-      String maskedPassword = (String) options.get(KEYSTORE_PASSWORD);
-      if(maskedPassword == null)
+      String password = (String) options.get(KEYSTORE_PASSWORD);
+      if(password == null)
          throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidNullOrEmptyOptionMessage(KEYSTORE_PASSWORD));
-      if(maskedPassword.startsWith(PASS_MASK_PREFIX) == false)
-         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidUnmaskedKeystorePasswordMessage());
+      if(password.startsWith(PASS_MASK_PREFIX) == false
+              && password.startsWith(PASS_EXT_PREFIX) == false
+              && password.startsWith(PASS_CLASS_PREFIX) == false)
+         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidKeystorePasswordFormatMessage());
 
       String salt = (String) options.get(SALT);
       if(salt == null)
@@ -182,8 +202,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       keyStoreType = (options.get(KEYSTORE_TYPE) != null ? (String) options.get(KEYSTORE_TYPE) : defaultKeyStoreType);
 
       try {
-         String keystorePass = decode(maskedPassword, salt, iterationCount);
-         keyStorePWD = keystorePass.toCharArray();
+         keyStorePWD = loadKeystorePassword(password, salt, iterationCount);
          keystore = getKeyStore(keystoreURL);
          
          checkAndConvertKeyStoreToJCEKS(keystoreURL);
@@ -301,7 +320,21 @@ public class PicketBoxSecurityVault implements SecurityVault
 	   }
 	   return true;
 	}
-   
+
+   private char[] loadKeystorePassword(String passwordDef, String salt, int iterationCount) throws Exception
+   {
+      final char[] password;
+
+      if( passwordDef.startsWith(PASS_MASK_PREFIX) ){
+         String keystorePass = decode(passwordDef, salt, iterationCount);
+         password = keystorePass.toCharArray();
+      }
+      else
+         password = Util.loadPassword(passwordDef);
+
+      return password;
+   }
+
    private String decode(String maskedString, String salt, int iterationCount) throws Exception
    {
       String pbeAlgo = "PBEwithMD5andDES";
