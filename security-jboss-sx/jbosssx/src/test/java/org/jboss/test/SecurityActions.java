@@ -74,4 +74,49 @@ public class SecurityActions
          }
       });
    }
+
+   interface SystemPropertyAction
+   {
+      SystemPropertyAction PRIVILEGED = new SystemPropertyAction()
+      {
+         public String getProperty(final String name, final String defaultValue)
+         {
+            String prop = AccessController.doPrivileged(
+               new PrivilegedAction<String>()
+               {
+                  public String run()
+                  {
+                     return NON_PRIVILEGED.getProperty(name, defaultValue);
+                  }
+               }
+            );
+            return prop;
+         }
+      };
+      SystemPropertyAction NON_PRIVILEGED = new SystemPropertyAction()
+      {
+         public String getProperty(final String name, final String defaultValue)
+         {
+            final String prop = System.getProperty(name, defaultValue);
+            return prop;
+         }
+      };
+      String getProperty(final String name, final String defaultValue);
+   }
+
+   public static String getProperty(final String name, final String defaultValue)
+   {
+      SecurityManager sm = System.getSecurityManager();
+      final String prop;
+      if( sm != null )
+      {
+         prop = SystemPropertyAction.PRIVILEGED.getProperty(name, defaultValue);
+      }
+      else
+      {
+         prop = SystemPropertyAction.NON_PRIVILEGED.getProperty(name, defaultValue);
+      }
+      return prop;
+   }
+
 }

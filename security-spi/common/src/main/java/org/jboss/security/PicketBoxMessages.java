@@ -456,4 +456,7 @@ public interface PicketBoxMessages {
 
     @Message(id = 140, value = "Unable to get keystore (%s)")
     RuntimeException unableToGetKeyStore(@Cause Throwable throwable, String file);
+
+    @Message(id = 141, value = "Keystore password should be either masked or prefixed with {EXT} or {CLASS}")
+    String invalidKeystorePasswordFormatMessage();
 }
