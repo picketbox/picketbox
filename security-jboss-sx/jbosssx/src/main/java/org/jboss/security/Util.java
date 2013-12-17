@@ -36,7 +36,7 @@ import java.util.StringTokenizer;
 
 /**
  * Util.
- * 
+ *
  * @author Scott.Stark@jboss.org
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
@@ -44,7 +44,7 @@ import java.util.StringTokenizer;
 public class Util
 {
    private static PasswordCache externalPasswordCache;
-   
+
    /**
     * Execute a password load command to obtain the char[] contents of a
     * password.
@@ -56,7 +56,11 @@ public class Util
     * platform command. The first line of the command output is used as the
     * password.
     * EXTC variant will cache the passwords for expiration_in_millis milliseconds. 
-    * Default cache expiration is 0 = infinity. 
+    * Default cache expiration is 0 = infinity.
+    * '{CMD}...' or '{CMDC}...' for a general command to execute. The general
+    * command is a string delimited by ',' where the first part is the actual
+    * command and further parts represents its parameters. The comma can be
+    * backslashed in order to keep it as a part of the parameter.
     * '{CLASS}classname[:ctorargs]' where the '[:ctorargs]' is an optional
     * string delimited by the ':' from the classname that will be passed to the
     * classname ctor. The ctorargs itself is a comma delimited list of strings.
@@ -65,9 +69,9 @@ public class Util
     * method is used.
     * @return the password characters
     * @throws Exception
-    */ 
+    */
    public static char[] loadPassword(String passwordCmd)
-      throws Exception
+         throws Exception
    {
       SecurityManager sm = System.getSecurityManager();
       if (sm != null) {
@@ -75,7 +79,7 @@ public class Util
       }
       char[] password = null;
       String passwordCmdType = null;
-      
+
       // Look for a {...} prefix indicating a password command
       if( passwordCmd.charAt(0) == '{' )
       {
@@ -92,7 +96,7 @@ public class Util
       if( password == null )
       {
          // Load the password
-         if (passwordCmdType.startsWith("EXTC")) {
+         if (passwordCmdType.startsWith("EXTC") || passwordCmdType.startsWith("CMDC")) {
             long timeOut = 0;
             if (passwordCmdType.indexOf(':') > -1) {
                try {
@@ -110,21 +114,32 @@ public class Util
             if (externalPasswordCache.contains(passwordCmd, timeOut)) {
                password = externalPasswordCache.getPassword(passwordCmd);
             } else {
-               password = execPasswordCmd(passwordCmd);
+               password = switchCommandExecution(passwordCmdType, passwordCmd);
                if (password != null) {
                   externalPasswordCache.storePassword(passwordCmd, password);
                }
             }
-         } else if (passwordCmdType.startsWith("EXT")) {
-            // non-cached EXT variant
-            password = execPasswordCmd(passwordCmd);
+         } else if (passwordCmdType.startsWith("EXT") || passwordCmdType.startsWith("CMD")) {
+            // non-cached variant
+            password = switchCommandExecution(passwordCmdType, passwordCmd);
          } else if (passwordCmdType.equals("CLASS")) {
             password = invokePasswordClass(passwordCmd);
          } else {
             throw PicketBoxMessages.MESSAGES.invalidPasswordCommandType(passwordCmdType);
-         }   
+         }
       }
       return password;
+   }
+
+   private static char[] switchCommandExecution(String passwordCmdType, String passwordCmd)
+         throws Exception
+   {
+      if (passwordCmdType.startsWith("EXT"))
+         return execPasswordCmd(passwordCmd);
+      else if (passwordCmdType.startsWith("CMD"))
+         return execPBBasedPasswordCommand(passwordCmd);
+      else
+         throw PicketBoxMessages.MESSAGES.invalidPasswordCommandType(passwordCmdType);
    }
 
    /**
@@ -134,7 +149,7 @@ public class Util
     * @throws Exception
     */
    private static char[] execPasswordCmd(String passwordCmd)
-      throws Exception
+         throws Exception
    {
       PicketBoxLogger.LOGGER.traceBeginExecPasswordCmd(passwordCmd);
       String password = execCmd(passwordCmd);
@@ -142,7 +157,7 @@ public class Util
    }
 
    private static char[] invokePasswordClass(String passwordCmd)
-      throws Exception
+         throws Exception
    {
       char[] password = null;
 
@@ -217,24 +232,47 @@ public class Util
       return line;
    }
 
-   
+   /**
+    * Execute a Runtime command to load a password.
+    * It uses ProcessBuilder to execute the command.
+    * @param passwordCmd
+    * @return the loaded password
+    * @throws Exception
+    */
+   private static char[] execPBBasedPasswordCommand(String passwordCmd) throws Exception
+   {
+      PicketBoxLogger.LOGGER.traceBeginExecPasswordCmd(passwordCmd);
+      SecurityManager sm = System.getSecurityManager();
+      String password;
+      if( sm != null )
+      {
+         password = RuntimeActions.PB_BASED_PRIVILEGED.execCmd(passwordCmd);
+      }
+      else
+      {
+         password = RuntimeActions.PB_BASED_NON_PRIVILEGED.execCmd(passwordCmd);
+      }
+      return password.toCharArray();
+   }
+
+
    interface RuntimeActions
    {
       RuntimeActions PRIVILEGED = new RuntimeActions()
       {
          public String execCmd(final String cmd)
-            throws Exception
+               throws Exception
          {
             try
             {
                String line = AccessController.doPrivileged(
-               new PrivilegedExceptionAction<String>()
-                  {
-                     public String run() throws Exception
+                     new PrivilegedExceptionAction<String>()
                      {
-                        return NON_PRIVILEGED.execCmd(cmd);
+                        public String run() throws Exception
+                        {
+                           return NON_PRIVILEGED.execCmd(cmd);
+                        }
                      }
-                  }
                );
                return line;
             }
@@ -247,7 +285,7 @@ public class Util
       RuntimeActions NON_PRIVILEGED = new RuntimeActions()
       {
          public String execCmd(final String cmd)
-            throws Exception
+               throws Exception
          {
             Runtime rt = Runtime.getRuntime();
             Process p = rt.exec(cmd);
@@ -258,21 +296,108 @@ public class Util
             {
                stdin = p.getInputStream();
                reader = new BufferedReader(new InputStreamReader(stdin));
-               line = reader.readLine();   
+               line = reader.readLine();
             }
             finally
             {
                if(reader != null)
                   reader.close();
                if(stdin != null)
-                 stdin.close();   
+                  stdin.close();
             }
-            
+
             int exitCode = p.waitFor();
             PicketBoxLogger.LOGGER.traceEndExecPasswordCmd(exitCode);
             return line;
          }
       };
+      RuntimeActions PB_BASED_PRIVILEGED = new RuntimeActions()
+      {
+         public String execCmd(final String command)
+               throws Exception
+         {
+            try
+            {
+               String password = AccessController.doPrivileged(
+                     new PrivilegedExceptionAction<String>()
+                     {
+                        public String run() throws Exception
+                        {
+                           return PB_BASED_NON_PRIVILEGED.execCmd(command);
+                        }
+                     }
+               );
+               return password;
+            }
+            catch(PrivilegedActionException e)
+            {
+               throw e.getException();
+            }
+         }
+      };
+      RuntimeActions PB_BASED_NON_PRIVILEGED = new RuntimeActions()
+      {
+         public String execCmd(final String command) throws Exception
+         {
+            final String[] parsedCommand = parseCommand(command);
+            final ProcessBuilder builder = new ProcessBuilder(parsedCommand);
+            final Process process = builder.start();
+            final String line;
+            BufferedReader reader = null;
+            try
+            {
+               reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+               line = reader.readLine();
+            }
+            finally
+            {
+               if (reader != null)
+                  reader.close();
+            }
+
+            int exitCode = process.waitFor();
+            PicketBoxLogger.LOGGER.traceEndExecPasswordCmd(exitCode);
+            return line;
+         }
+
+         protected String[] parseCommand(String command)
+         {
+            // comma can be backslashed
+            final String[] parsedCommand = command.split("(?<!\\\\),");
+            for (int k=0; k < parsedCommand.length; k++)
+            {
+               if (parsedCommand[k].indexOf('\\') != -1)
+                  parsedCommand[k] = parsedCommand[k].replaceAll("\\\\,", ",");
+            }
+            return parsedCommand;
+         }
+      };
       String execCmd(String cmd) throws Exception;
    }
+
+   /**
+    * Checks whether password can be loaded by {@link #loadPassword(String)}.
+    * @param passwordCmd a potential password command
+    * @return true if password can be loaded by {@link #loadPassword(String)}, false otherwise.
+    */
+   public static boolean isPasswordCommand(String passwordCmd)
+   {
+      return (passwordCmd != null)
+            && (passwordCmd.startsWith("{EXT}")
+                  || passwordCmd.startsWith("{EXTC}")
+                  || passwordCmd.startsWith("{CMD}")
+                  || passwordCmd.startsWith("{CMDC}")
+                  || passwordCmd.startsWith("{CLASS}"));
+   }
+
+   /**
+    * Checks whether password can be loaded by {@link #loadPassword(String)}.
+    * @param passwordCmd a potential password command
+    * @return true if password can be loaded by {@link #loadPassword(String)}, false otherwise.
+    */
+   public static boolean isPasswordCommand(char[] passwordCmd)
+   {
+      return (passwordCmd != null) && isPasswordCommand(new String(passwordCmd));
+   }
+
 }

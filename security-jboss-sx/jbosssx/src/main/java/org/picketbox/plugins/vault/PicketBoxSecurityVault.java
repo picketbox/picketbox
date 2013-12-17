@@ -72,6 +72,10 @@ import java.util.StringTokenizer;
  * password.
  * EXTC variant will cache the passwords for expiration_in_millis milliseconds.
  * Default cache expiration is 0 = infinity.
+ * '{CMD}...' or '{CMDC}...' for a general command to execute. The general
+ * command is a string delimited by ',' where the first part is the actual
+ * command and further parts represents its parameters. The comma can be
+ * backslashed in order to keep it as the part of a parameter.
  * '{CLASS}classname[:ctorargs]' where the '[:ctorargs]' is an optional
  * string delimited by the ':' from the classname that will be passed to the
  * classname ctor. The ctorargs itself is a comma delimited list of strings.
@@ -127,10 +131,6 @@ public class PicketBoxSecurityVault implements SecurityVault
    
    public static final String PASS_MASK_PREFIX = "MASK-";
    
-   public static final String PASS_CLASS_PREFIX = "{CLASS}";
-
-   public static final String PASS_EXT_PREFIX = "{EXT";
-
    public static final String PUBLIC_CERT = "PUBLIC_CERT";
    
    public static final String KEY_SIZE = "KEY_SIZE"; 
@@ -169,8 +169,7 @@ public class PicketBoxSecurityVault implements SecurityVault
       if(password == null)
          throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidNullOrEmptyOptionMessage(KEYSTORE_PASSWORD));
       if(password.startsWith(PASS_MASK_PREFIX) == false
-              && password.startsWith(PASS_EXT_PREFIX) == false
-              && password.startsWith(PASS_CLASS_PREFIX) == false)
+            && Util.isPasswordCommand(password) == false)
          throw new SecurityVaultException(PicketBoxMessages.MESSAGES.invalidKeystorePasswordFormatMessage());
 
       String salt = (String) options.get(SALT);

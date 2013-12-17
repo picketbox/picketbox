@@ -21,6 +21,7 @@
  */
 package org.jboss.test.security.vault;
 
+import org.jboss.security.Util;
 import org.jboss.security.plugins.PBEUtils;
 import org.jboss.security.vault.SecurityVault;
 import org.jboss.security.vault.SecurityVaultException;
@@ -223,7 +224,7 @@ public class SecurityVaultUnitTestCase
       Map<String,Object> options = getVaultOptionsMap(
             "target/vaults/vault2/vault.jks",
             "target/vaults/vault2/vault_data",
-            "vault", "12438567", 50, "{EXT}/bin/sh " + absolutePathToAskPass + " Enter passphrase for askpass test");
+            "vault", "12438567", 50, "{CMD}/bin/sh," + absolutePathToAskPass + ",Enter passphrase for askpass test");
 
       String vaultBlock = "aBlock";
       String attributeName = "anAttribute";
@@ -435,8 +436,7 @@ public class SecurityVaultUnitTestCase
    
    private String getMaskedPassword(String pwd, String salt, int iterationCount) throws Exception
    {
-      if (pwd.startsWith(PicketBoxSecurityVault.PASS_EXT_PREFIX)
-            || pwd.startsWith(PicketBoxSecurityVault.PASS_CLASS_PREFIX))
+      if (Util.isPasswordCommand(pwd))
          return pwd;
 
       String algo = "PBEwithMD5andDES";
