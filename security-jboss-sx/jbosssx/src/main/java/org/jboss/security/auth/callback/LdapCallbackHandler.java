@@ -322,7 +322,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 	protected String getBindCredential()
 	{
 		String bindCredential = options.get(BIND_CREDENTIAL);
-		if (bindCredential.startsWith("{EXT}"))
+		if (org.jboss.security.Util.isPasswordCommand(bindCredential))
 		{
 			try
 			{

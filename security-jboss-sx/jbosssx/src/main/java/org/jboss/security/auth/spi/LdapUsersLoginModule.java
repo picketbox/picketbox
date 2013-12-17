@@ -140,7 +140,7 @@ public class LdapUsersLoginModule extends UsernamePasswordLoginModule
       super.initialize(subject, callbackHandler, sharedState, options);
       bindDN = (String) options.get(BIND_DN);
       bindCredential = (String) options.get(BIND_CREDENTIAL);
-      if ((bindCredential != null) && bindCredential.startsWith("{EXT}"))
+      if ((bindCredential != null) && Util.isPasswordCommand(bindCredential))
       {
          try
          {
