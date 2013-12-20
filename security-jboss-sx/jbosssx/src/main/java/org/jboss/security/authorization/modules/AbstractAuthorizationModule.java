@@ -24,6 +24,7 @@ package org.jboss.security.authorization.modules;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -55,10 +56,10 @@ public abstract class AbstractAuthorizationModule implements AuthorizationModule
    
    /** Map of delegates for the various layers */
    protected Map<ResourceType,String> delegateMap = new HashMap<ResourceType,String>();
-   
+
    /** A map that is available to reduce the loadClass synchronization */
-   protected static Map<String, Class<?> > clazzMap = new HashMap<String, Class<?> >();
-   
+   protected static Map<String, Class<?>> clazzMap = new ConcurrentHashMap<String, Class<?>>();
+
    /**
     * @see AuthorizationModule#authorize(Resource)
     */

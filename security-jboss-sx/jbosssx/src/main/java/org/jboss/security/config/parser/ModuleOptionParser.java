@@ -47,9 +47,9 @@ import org.jboss.security.config.Element;
  */
 public class ModuleOptionParser implements XMLStreamConstants
 {
-   private static transient Map<String, ParserNamespaceSupport> parsers = new HashMap<String,ParserNamespaceSupport>();
+   private static final Map<String, ParserNamespaceSupport> parsers = Collections.synchronizedMap(new HashMap<String, ParserNamespaceSupport>());
    
-   public ModuleOptionParser()
+   static
    { 
       parsers.put("urn:jboss:user-roles", new UsersConfigParser());
       parsers.put("urn:jboss:java-properties", new JavaPropertiesConfigParser()); 

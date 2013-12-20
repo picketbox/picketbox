@@ -21,12 +21,7 @@
  */
 package org.jboss.security.config.parser;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
@@ -69,27 +64,29 @@ import org.picketbox.datasource.security.SecureIdentityLoginModule;
 public class AuthenticationConfigParser implements XMLStreamConstants
 {
 
-   public static Map<String, String> loginModulesMap = new HashMap<String, String>();
+   public static final Map<String, String> loginModulesMap;
 
    static
    {
-      loginModulesMap.put("Client", ClientLoginModule.class.getName());
-      loginModulesMap.put("Certificate", BaseCertLoginModule.class.getName());
-      loginModulesMap.put("CertificateRoles", CertRolesLoginModule.class.getName());
-      loginModulesMap.put("DatabaseCertificate", DatabaseCertLoginModule.class.getName());
-      loginModulesMap.put("Database", DatabaseServerLoginModule.class.getName());
-      loginModulesMap.put("Identity", IdentityLoginModule.class.getName());
-      loginModulesMap.put("Ldap", LdapLoginModule.class.getName());
-      loginModulesMap.put("LdapExtended", LdapExtLoginModule.class.getName());
-      loginModulesMap.put("RoleMapping", RoleMappingLoginModule.class.getName());
-      loginModulesMap.put("RunAs", RunAsLoginModule.class.getName());
-      loginModulesMap.put("Simple", SimpleServerLoginModule.class.getName());
-      loginModulesMap.put("UsersRoles", UsersRolesLoginModule.class.getName());
-      loginModulesMap.put("CallerIdentity", CallerIdentityLoginModule.class.getName());
-      loginModulesMap.put("ConfiguredIdentity", ConfiguredIdentityLoginModule.class.getName());
-      loginModulesMap.put("JaasSecurityDomainIdentity", JaasSecurityDomainIdentityLoginModule.class.getName());
-      loginModulesMap.put("PBEIdentity", PBEIdentityLoginModule.class.getName());
-      loginModulesMap.put("SecureIdentity", SecureIdentityLoginModule.class.getName());
+      final Map<String, String> loginModules = new HashMap<String,String>();
+      loginModules.put("Client", ClientLoginModule.class.getName());
+      loginModules.put("Certificate", BaseCertLoginModule.class.getName());
+      loginModules.put("CertificateRoles", CertRolesLoginModule.class.getName());
+      loginModules.put("DatabaseCertificate", DatabaseCertLoginModule.class.getName());
+      loginModules.put("Database", DatabaseServerLoginModule.class.getName());
+      loginModules.put("Identity", IdentityLoginModule.class.getName());
+      loginModules.put("Ldap", LdapLoginModule.class.getName());
+      loginModules.put("LdapExtended", LdapExtLoginModule.class.getName());
+      loginModules.put("RoleMapping", RoleMappingLoginModule.class.getName());
+      loginModules.put("RunAs", RunAsLoginModule.class.getName());
+      loginModules.put("Simple", SimpleServerLoginModule.class.getName());
+      loginModules.put("UsersRoles", UsersRolesLoginModule.class.getName());
+      loginModules.put("CallerIdentity", CallerIdentityLoginModule.class.getName());
+      loginModules.put("ConfiguredIdentity", ConfiguredIdentityLoginModule.class.getName());
+      loginModules.put("JaasSecurityDomainIdentity", JaasSecurityDomainIdentityLoginModule.class.getName());
+      loginModules.put("PBEIdentity", PBEIdentityLoginModule.class.getName());
+      loginModules.put("SecureIdentity", SecureIdentityLoginModule.class.getName());
+      loginModulesMap = Collections.unmodifiableMap(loginModules);
    }
 
    /**

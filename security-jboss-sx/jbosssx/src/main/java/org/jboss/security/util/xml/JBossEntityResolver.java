@@ -56,7 +56,7 @@ import org.xml.sax.SAXException;
 public class JBossEntityResolver implements EntityResolver
 {
    /** A class wide Map<String, String> of publicId/systemId to dtd/xsd file */
-   private static Map entities = new ConcurrentHashMap ();
+   private static final Map entities = new ConcurrentHashMap ();
    /** A class flag indicating whether an attempt to resolve a systemID as a
     non-file URL should produce a warning rather than a trace level log msg.
     */

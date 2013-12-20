@@ -9,6 +9,8 @@ package org.jboss.security.config;
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.security.PicketBoxMessages;
 
@@ -26,7 +28,7 @@ public class SecurityConfiguration
    /**
     * Map of Application Policies keyed in by name
     */
-   private static HashMap<String,ApplicationPolicy> appPolicies = new HashMap<String,ApplicationPolicy>();
+   private static final Map<String,ApplicationPolicy> appPolicies = new ConcurrentHashMap<String, ApplicationPolicy>();
    private static String cipherAlgorithm;
    private static int iterationCount;
    private static String salt;
