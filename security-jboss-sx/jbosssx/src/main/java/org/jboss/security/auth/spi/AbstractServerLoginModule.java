@@ -392,11 +392,11 @@ public abstract class AbstractServerLoginModule implements LoginModule
     */
    protected void addValidOptions(final String[] moduleValidOptions)
    {
-	   if (validOptions==null)
-	   {
-          validOptions = new HashSet<String>();
-	   }
-	   validOptions.addAll(Arrays.asList(moduleValidOptions));
+      if (validOptions == null)
+      {
+         validOptions = new HashSet<String>(moduleValidOptions.length);
+      }
+     validOptions.addAll(Arrays.asList(moduleValidOptions));
    }
    
    /**
