@@ -384,7 +384,7 @@ public class Util
    {
       return (passwordCmd != null)
             && (passwordCmd.startsWith("{EXT}")
-                  || passwordCmd.startsWith("{EXTC}")
+                  || passwordCmd.startsWith("{EXTC")  // it has to be without closing brace to cover :<time in millis>
                   || passwordCmd.startsWith("{CMD}")
                   || passwordCmd.startsWith("{CMDC}")
                   || passwordCmd.startsWith("{CLASS}"));
