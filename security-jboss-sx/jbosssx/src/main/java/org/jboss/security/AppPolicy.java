@@ -83,6 +83,10 @@ public class AppPolicy
 
     public static void setDefaultAppPolicy(AppPolicy policy)
     {
+       SecurityManager sm = System.getSecurityManager();
+       if (sm != null) {
+          sm.checkPermission(new RuntimePermission(AppPolicy.class.getName() + ".setDefaultAppPolicy"));
+       }
         if( policy == null )
             throw PicketBoxMessages.MESSAGES.invalidNullArgument("policy");
         defaultAppPolicy = policy;

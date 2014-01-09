@@ -86,6 +86,10 @@ public class JBossAuditManager implements AuditManager
    
    public static AuditContext getAuditContext(String securityDomain)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(JBossAuditManager.class.getName() + ".getAuditContext"));
+      }
       AuditContext ac = (AuditContext)contexts.get(securityDomain);
       if(ac == null)
          ac = defaultContext;
@@ -94,6 +98,10 @@ public class JBossAuditManager implements AuditManager
    
    public static void addAuditContext(String securityDomain, AuditContext ac)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(JBossAuditManager.class.getName() + ".addAuditContext"));
+      }
       contexts.put(securityDomain, ac);
    }
 

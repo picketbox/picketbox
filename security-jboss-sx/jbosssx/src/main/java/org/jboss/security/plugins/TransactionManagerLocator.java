@@ -90,6 +90,10 @@ public class TransactionManagerLocator
    
    public static void setTransactionManager(TransactionManager transactionManager)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(TransactionManagerLocator.class.getName() + ".setTransactionManager"));
+      }
       TransactionManagerLocator.transactionManager = transactionManager;
    }
 }

@@ -86,6 +86,10 @@ public class IdentityFactory
 
    private static Object loadClass(String className, String ctorArg) throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(IdentityFactory.class.getName() + ".loadClass"));
+      }
       Class<?> clazz = SecurityActions.getClass(className);
       Constructor<?> ctr = clazz.getConstructor(new Class[]
       {String.class});
@@ -95,6 +99,10 @@ public class IdentityFactory
 
    private static Object loadClass(String className, String ctorArg1, String ctorArg2) throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(IdentityFactory.class.getName() + ".loadClass"));
+      }
       Class<?> clazz = SecurityActions.getClass(className);
       Constructor<?> ctr = clazz.getConstructor(new Class[]
       {String.class, String.class});
@@ -104,6 +112,10 @@ public class IdentityFactory
 
    private static Object loadClass(String className, String ctorArg1, Role ctorArg2) throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(IdentityFactory.class.getName() + ".loadClass"));
+      }
       Class<?> clazz = SecurityActions.getClass(className);
       Constructor<?> ctr = clazz.getConstructor(new Class[]
       {String.class, Role.class});

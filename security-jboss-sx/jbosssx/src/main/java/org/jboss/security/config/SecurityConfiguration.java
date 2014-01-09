@@ -46,6 +46,10 @@ public class SecurityConfiguration
     */
    public static void addApplicationPolicy(ApplicationPolicy applicationPolicy)
    { 
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".addApplicationPolicy"));
+      }
       if(applicationPolicy == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("applicationPolicy");
       appPolicies.put(applicationPolicy.getName(), applicationPolicy);
@@ -57,6 +61,10 @@ public class SecurityConfiguration
     */
    public static void removeApplicationPolicy(String name)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".removeApplicationPolicy"));
+      }
       appPolicies.remove(name);
    }
    
@@ -67,41 +75,73 @@ public class SecurityConfiguration
     */
    public static ApplicationPolicy getApplicationPolicy(String policyName)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getApplicationPolicy"));
+      }
       return (ApplicationPolicy)appPolicies.get(policyName);
    } 
    
    public static String getCipherAlgorithm()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getCipherAlgorithm"));
+      }
       return cipherAlgorithm;
    }
    
    public static void setCipherAlgorithm(String ca)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setCipherAlgorithm"));
+      }
       cipherAlgorithm = ca;
    }
    
    public static Key getCipherKey()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getCipherKey"));
+      }
       return cipherKey;
    }
    
    public static void setCipherKey(Key ca)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setCipherKey"));
+      }
       cipherKey = ca;
    }
    
    public static AlgorithmParameterSpec getCipherSpec()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getCipherSpec"));
+      }
       return cipherSpec;
    }
    
    public static void setCipherSpec(AlgorithmParameterSpec aps)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setCipherSpec"));
+      }
       cipherSpec = aps;
    }
    
    public static int getIterationCount()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getIterationCount"));
+      }
       return iterationCount;
    }
 
@@ -110,12 +150,20 @@ public class SecurityConfiguration
     */ 
    public static void setIterationCount(int count)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setIterationCount"));
+      }
       iterationCount = count;
    }
    
    
    public static String getSalt()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getSalt"));
+      }
       return salt;
    }
    /** Set the salt used with PBE based on the keystore password.
@@ -123,6 +171,10 @@ public class SecurityConfiguration
     */ 
    public static void setSalt(String s)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setSalt"));
+      }
       salt = s;
    }
 
@@ -132,6 +184,10 @@ public class SecurityConfiguration
    */
    public static String getKeyStoreType()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getKeyStoreType"));
+      }
       return keyStoreType;
    }
    /** Set the type of KeyStore implementation to use. This is
@@ -139,12 +195,20 @@ public class SecurityConfiguration
    */
    public static void setKeyStoreType(String type)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setKeyStoreType"));
+      }
       keyStoreType = type;
    } 
    /** Get the KeyStore database URL string.
    */
    public static String getKeyStoreURL()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getKeyStoreURL"));
+      }
       return keyStoreURL;
    }
    /** Set the KeyStore database URL string. This is used to obtain
@@ -152,6 +216,10 @@ public class SecurityConfiguration
    */
    public static void setKeyStoreURL(String storeURL)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setKeyStoreURL"));
+      }
       keyStoreURL = storeURL;
    }
    
@@ -159,6 +227,10 @@ public class SecurityConfiguration
     */
     public static String getKeyStorePass()
     {
+       SecurityManager sm = System.getSecurityManager();
+       if (sm != null) {
+          sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getKeyStorePass"));
+       }
        return keyStorePass ;
     }
    
@@ -166,6 +238,10 @@ public class SecurityConfiguration
    */
    public static void setKeyStorePass(String password)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setKeyStorePass"));
+      }
       keyStorePass = password;
    }
 
@@ -174,6 +250,10 @@ public class SecurityConfiguration
    */ 
   public static String getTrustStoreType()
   {
+     SecurityManager sm = System.getSecurityManager();
+     if (sm != null) {
+        sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getTrustStoreType"));
+     }
      return trustStoreType;
   }
   
@@ -182,6 +262,10 @@ public class SecurityConfiguration
    */ 
   public static void setTrustStoreType(String type)
   {
+     SecurityManager sm = System.getSecurityManager();
+     if (sm != null) {
+        sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setTrustStoreType"));
+     }
      trustStoreType = type;
   }
   
@@ -189,6 +273,10 @@ public class SecurityConfiguration
    */
    public static String getTrustStorePass()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getTrustStorePass"));
+      }
       return trustStorePass;
    }
   
@@ -196,6 +284,10 @@ public class SecurityConfiguration
   */
   public static void setTrustStorePass(String password)
   {
+     SecurityManager sm = System.getSecurityManager();
+     if (sm != null) {
+        sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setTrustStorePass"));
+     }
      trustStorePass = password;
   }
   
@@ -203,6 +295,10 @@ public class SecurityConfiguration
    */
   public static String getTrustStoreURL()
   {
+     SecurityManager sm = System.getSecurityManager();
+     if (sm != null) {
+        sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".getTrustStoreURL"));
+     }
      return trustStoreURL;
   }
   
@@ -211,16 +307,28 @@ public class SecurityConfiguration
    */
   public static void setTrustStoreURL(String storeURL)
   {
+     SecurityManager sm = System.getSecurityManager();
+     if (sm != null) {
+        sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setTrustStoreURL"));
+     }
      trustStoreURL = storeURL;
   }
 
   public static boolean isDeepCopySubjectMode()
   {
+     SecurityManager sm = System.getSecurityManager();
+     if (sm != null) {
+        sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".isDeepCopySubjectMode"));
+     }
      return deepCopySubjectMode;
   }
 
   public static void setDeepCopySubjectMode(boolean dcsm)
   {
+     SecurityManager sm = System.getSecurityManager();
+     if (sm != null) {
+        sm.checkPermission(new RuntimePermission(SecurityConfiguration.class.getName() + ".setDeepCopySubjectMode"));
+     }
      deepCopySubjectMode = dcsm;
   }
 }
