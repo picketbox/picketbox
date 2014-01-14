@@ -174,5 +174,52 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
           PicketBoxLogger.LOGGER.debugIgnoredException(ae);
       }
    }
+
+   public void cleanSubject(final MessageInfo messageInfo, final Subject subject, final String layer, final String appContext,
+                            final CallbackHandler handler)
+   {
+       AuthConfigFactory factory = AuthConfigFactory.getFactory();
+       AuthConfigProvider provider = factory.getConfigProvider(layer, appContext, null);
+       if(provider == null)
+           throw PicketBoxMessages.MESSAGES.invalidNullAuthConfigProviderForLayer(layer, appContext);
+
+       ServerAuthConfig serverConfig = null;
+       try
+       {
+           serverConfig = provider.getServerAuthConfig(layer, appContext, handler);
+       }
+       catch (AuthException ae)
+       {
+           SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
+           PicketBoxLogger.LOGGER.errorGettingServerAuthConfig(layer, appContext, ae);
+           return;
+       }
+
+       String authContextId = serverConfig.getAuthContextID(messageInfo);
+       Properties properties = new Properties();
+       properties.setProperty("security-domain", super.getSecurityDomain());
+       Subject serviceSubject = new Subject();
+       ServerAuthContext sctx = null;
+       try
+       {
+           sctx = serverConfig.getAuthContext(authContextId, serviceSubject, properties);
+       }
+       catch (AuthException ae)
+       {
+           SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
+           PicketBoxLogger.LOGGER.errorGettingServerAuthContext(authContextId, super.getSecurityDomain(), ae);
+           return;
+       }
+
+       try
+       {
+           sctx.cleanSubject(messageInfo, subject);
+       }
+       catch (AuthException ae)
+       {
+           SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
+           PicketBoxLogger.LOGGER.debugIgnoredException(ae);
+       }
+   }
    
 }

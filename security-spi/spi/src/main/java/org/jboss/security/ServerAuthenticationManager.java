@@ -80,4 +80,19 @@ public interface ServerAuthenticationManager extends AuthenticationManager
     */
    void secureResponse(MessageInfo messageInfo, Subject serviceSubject, String layer, String appContext, 
          CallbackHandler callbackHandler);
+
+    /**
+     * <p>
+     * Remove method specific principals and credentials from the subject.
+     * </p>
+     *
+     * @param messageInfo the object that contains the request and response messages.
+     * @param subject the subject to be cleaned.
+     * @param layer the message layer for JASPI.
+     * @param appContext the JASPI application context.
+     * @param handler the callback handler instance.
+     */
+   void cleanSubject(final MessageInfo messageInfo, final Subject subject, final String layer, final String appContext,
+                             final CallbackHandler handler);
+
 }
