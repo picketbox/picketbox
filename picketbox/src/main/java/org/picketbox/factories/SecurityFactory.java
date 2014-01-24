@@ -87,6 +87,10 @@ public class SecurityFactory
     */
    public static AuthenticationManager getAuthenticationManager(String securityDomain)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName() + ".getAuthenticationManager"));
+      }
       validate();
       return securityManagement.getAuthenticationManager(securityDomain);
    }
@@ -98,6 +102,10 @@ public class SecurityFactory
     */
    public static AuthorizationManager getAuthorizationManager(String securityDomain)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName()+ ".getAuthorizationManager"));
+      }
       validate();
       return securityManagement.getAuthorizationManager(securityDomain);
    }
@@ -109,6 +117,10 @@ public class SecurityFactory
     */
    public static AuditManager getAuditManager(String securityDomain)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName() + ".getAuditManager"));
+      }
       validate();
       return securityManagement.getAuditManager(securityDomain);
    }
@@ -120,6 +132,10 @@ public class SecurityFactory
     */
    public static MappingManager getMappingManager(String securityDomain)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName() + ".getMappingManager"));
+      }
       validate();
       return securityManagement.getMappingManager(securityDomain);
    }
@@ -130,6 +146,10 @@ public class SecurityFactory
     */
    public static ISecurityManagement getSecurityManagement()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName() + ".getSecurityManagement"));
+      }
       return securityManagement;
    }
    
@@ -139,6 +159,10 @@ public class SecurityFactory
     */
    public static void setSecurityManagement(ISecurityManagement iSecurityManagement)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName() + ".setSecurityManagement"));
+      }
       securityManagement = iSecurityManagement;
    }
  
@@ -150,6 +174,10 @@ public class SecurityFactory
     */
    public static void prepare()
    { 
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName() +  ".prepare"));
+      }
       if(Configuration.getConfiguration() instanceof ApplicationPolicyRegistration == false)
       {
          standaloneConfiguration.setParentConfig(parentConfiguration);
@@ -163,6 +191,10 @@ public class SecurityFactory
     */
    public static SecurityContext establishSecurityContext(String securityDomainName)
    { 
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName() + ".establishSecurityContext"));
+      }
       SecurityContext securityContext = null;
       try
       {
@@ -181,6 +213,10 @@ public class SecurityFactory
     */
    public static void release()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName() + ".release"));
+      }
       Configuration config = Configuration.getConfiguration();
       if(config == standaloneConfiguration)
       {
@@ -190,6 +226,10 @@ public class SecurityFactory
    
    private static void validate()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityFactory.class.getName() + ".validate"));
+      }
       assert(securityManagement != null);
    }
 }

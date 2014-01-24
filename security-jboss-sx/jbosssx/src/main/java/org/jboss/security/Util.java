@@ -33,6 +33,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+
 /**
  * Util.
  *
@@ -72,6 +73,10 @@ public class Util
    public static char[] loadPassword(String passwordCmd)
          throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(Util.class.getName() + ".loadPassword"));
+      }
       char[] password = null;
       String passwordCmdType = null;
 

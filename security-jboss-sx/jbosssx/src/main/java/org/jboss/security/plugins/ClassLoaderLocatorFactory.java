@@ -21,6 +21,7 @@
  */
 package org.jboss.security.plugins;
 
+
 /**
  * Simple factory for {@code ClassLoaderLocator}
  * @author Anil Saldhana
@@ -36,11 +37,19 @@ public class ClassLoaderLocatorFactory
 	 */
 	public static void set(ClassLoaderLocator cl)
 	{
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(ClassLoaderLocatorFactory.class.getName() + ".set"));
+      }
 		theLocator = cl;
 	}
 	
 	public static ClassLoaderLocator get()
 	{
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(ClassLoaderLocatorFactory.class.getName() + ".get"));
+      }
 		return theLocator;
 	}
 }

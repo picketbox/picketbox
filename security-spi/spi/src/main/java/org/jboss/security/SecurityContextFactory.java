@@ -23,7 +23,6 @@ package org.jboss.security;
 
 import java.lang.reflect.Constructor;
 import java.security.Principal;
-
 import javax.security.auth.Subject;
  
 
@@ -174,6 +173,10 @@ public class SecurityContextFactory
    public static SecurityContext createSecurityContext(String securityDomain,
          Class<? extends SecurityContext> clazz) throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".createSecurityContext"));
+      }
       if(securityDomain == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("security domain");
        if(clazz == null)
@@ -185,6 +188,10 @@ public class SecurityContextFactory
 
    private static SecurityContext createSecurityContext(String securityDomain, Constructor<SecurityContext> constructor) throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".createSecurityContext"));
+      }
       if (securityDomain == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("security domain");
       if (constructor == null)
@@ -222,6 +229,10 @@ public class SecurityContextFactory
    public static SecurityContext createSecurityContext(Principal p, 
          Object cred, Subject s, String securityDomain, ClassLoader classLoader) throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".createSecurityContext"));
+      }
       SecurityContext jsc = createSecurityContext(securityDomain, classLoader);
       jsc.getUtil().createSubjectInfo(p,cred,s);
       return jsc;
@@ -266,6 +277,10 @@ public class SecurityContextFactory
     */
    public static SecurityContextUtil createUtil(SecurityContext sc, ClassLoader classLoader) throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".createUtil"));
+      }
       Constructor<SecurityContextUtil> ctr = defaultUtilConstructor;
       
       if(ctr == null)
@@ -298,6 +313,10 @@ public class SecurityContextFactory
     */ 
    public static SecurityContextUtil createUtil(SecurityContext sc, String utilFQN, ClassLoader classLoader) throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".createUtil"));
+      }
       Class<?> clazz = loadClass(utilFQN, classLoader);
       //Get the CTR
       Constructor<? extends SecurityContextUtil> ctr = 
@@ -313,6 +332,10 @@ public class SecurityContextFactory
    public static SecurityContextUtil createUtil(SecurityContext sc, 
          Class<? extends SecurityContextUtil> utilClazz) throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".createUtil"));
+      }
       //Get the CTR
       Constructor<? extends SecurityContextUtil> ctr = utilClazz.getConstructor(new Class[]{SecurityContext.class});
       return ctr.newInstance(new Object[]{sc}); 
@@ -324,6 +347,10 @@ public class SecurityContextFactory
     */
    public static void setDefaultSecurityContextFQN(String fqn)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".setDefaultSecurityContextFQN"));
+      }
       defaultFQN = fqn;
       defaultSecurityContextClass = null;
       defaultSecurityContextConstructor = null;
@@ -336,6 +363,10 @@ public class SecurityContextFactory
     */
    public static void setDefaultSecurityContextUtilFQN(String fqn)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".setDefaultSecurityContextUtilFQN"));
+      }
       defaultUtilClassFQN = fqn;
       defaultUtilClass = null; //reset
       defaultUtilConstructor = null;

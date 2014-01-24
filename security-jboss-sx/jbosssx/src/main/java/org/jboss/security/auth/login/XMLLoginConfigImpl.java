@@ -99,6 +99,10 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
     */
    public static XMLLoginConfigImpl getInstance()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(XMLLoginConfigImpl.class.getName() + ".getInstance"));
+      }
       return instance;
    }
 

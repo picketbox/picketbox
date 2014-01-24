@@ -53,6 +53,10 @@ public class SecurityVaultFactory
     */
    public static SecurityVault get(String fqn) throws SecurityVaultException
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityVaultFactory.class.getName() + ".get"));
+      }
       if(fqn == null)
          return get();
       

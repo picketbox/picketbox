@@ -24,7 +24,6 @@ package org.jboss.security;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.logging.Logger;
 
 /**
  * The SecurityRolesAssociation uses a ThreadLocal to associate the SecurityRoleMetaData
@@ -49,6 +48,10 @@ public final class SecurityRolesAssociation
     */
    public static Map<String,Set<String>> getSecurityRoles()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityRolesAssociation.class.getName() + ".getSecurityRoles"));
+      }
       return (Map<String,Set<String>>) threadSecurityRoleMapping.get();
    }
 
@@ -57,6 +60,10 @@ public final class SecurityRolesAssociation
     */
    public static void setSecurityRoles(Map<String,Set<String>> securityRoles)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityRolesAssociation.class.getName() + ".setSecurityRoles"));
+      }
       PicketBoxLogger.LOGGER.traceSecRolesAssociationSetSecurityRoles(securityRoles);
       if(securityRoles == null)
          threadSecurityRoleMapping.remove();

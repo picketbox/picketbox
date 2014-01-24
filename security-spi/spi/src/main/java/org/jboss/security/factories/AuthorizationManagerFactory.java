@@ -41,6 +41,10 @@ public class AuthorizationManagerFactory
    public static AuthorizationManager getAuthorizationManager(String securityDomain)
    throws Exception
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(AuthorizationManagerFactory.class.getName() + ".getAuthorizationManager"));
+      }
       Class clazz = SecurityActions.loadClass(fqn);
       Constructor ctr = clazz.getConstructor(new Class[] { String.class} );
       return (AuthorizationManager) ctr.newInstance(new Object[] {securityDomain}); 
@@ -48,6 +52,10 @@ public class AuthorizationManagerFactory
 
    public static void setFQN(String name)
    { 
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(AuthorizationManagerFactory.class.getName() + ".setFQN"));
+      }
       fqn = name;
    }
 }
