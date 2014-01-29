@@ -311,13 +311,24 @@ public class PicketBoxSecurityVault implements SecurityVault
    public boolean remove(String vaultBlock, String attributeName, byte[] sharedKey)
 		   throws SecurityVaultException 
    {
-	   try {
-		   vaultContent.deleteVaultData(alias, vaultBlock, attributeName);
-	   }
+      if(StringUtil.isNullOrEmpty(vaultBlock))
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("vaultBlock");
+      if(StringUtil.isNullOrEmpty(attributeName))
+         throw PicketBoxMessages.MESSAGES.invalidNullArgument("attributeName");
+      
+      try {
+         if (vaultContent.deleteVaultData(alias, vaultBlock, attributeName)) {
+            writeVaultData();
+            return true;
+         }
+         return false;
+      }
+      catch (IOException e) { 
+         throw new SecurityVaultException(PicketBoxMessages.MESSAGES.unableToWriteVaultDataFileMessage(VAULT_CONTENT_FILE), e);
+      }
 	   catch(Exception e) {
-		   return false;
+		   throw new SecurityVaultException(e);
 	   }
-	   return true;
 	}
 
    private char[] loadKeystorePassword(String passwordDef, String salt, int iterationCount) throws Exception

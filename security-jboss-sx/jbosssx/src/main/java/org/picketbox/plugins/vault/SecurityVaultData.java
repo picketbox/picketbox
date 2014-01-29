@@ -120,13 +120,17 @@ public class SecurityVaultData implements Serializable {
     }
     
     /**
-     * 
+     * Removes data stored in vault storage.
      * @param keyAlias
      * @param vaultBlock
      * @param attributeName
+     * @return true when vault data has been removed successfully, otherwise false
      */
-    void deleteVaultData(String keyAlias, String vaultBlock, String attributeName) {
-       vaultData.remove(dataKey(keyAlias, vaultBlock, attributeName));
+    boolean deleteVaultData(String keyAlias, String vaultBlock, String attributeName) {
+       if (vaultData.remove(dataKey(keyAlias, vaultBlock, attributeName)) == null) {
+          return false;
+       }
+       return true;
     }
 
     /**
