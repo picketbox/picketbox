@@ -40,6 +40,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
+import javax.naming.CompositeName;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
@@ -547,7 +548,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       if (userDN == null)
       {
           if (sr.isRelative() == true) {
-             userDN = name + ("".equals(baseDN) ? "" : "," + baseDN);
+             userDN = new CompositeName(name).get(0) + ("".equals(baseDN) ? "" : "," + baseDN);
           }
           else {
              throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);
