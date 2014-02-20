@@ -106,6 +106,10 @@ public class SecurityContextAssociation
     */
    public static void setClient()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextAssociation.class.getName() + ".setClient"));
+      }
      SERVER = false;
    }
    
@@ -205,6 +209,10 @@ public class SecurityContextAssociation
     */
    public static RunAs peekRunAsIdentity()
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextAssociation.class.getName() + ".peekRunAsIdentity"));
+      }
       RunAs ra = null;
       SecurityContext sc = SecurityContextAssociation.getSecurityContext();
       if (sc != null)

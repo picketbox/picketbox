@@ -54,6 +54,10 @@ public class ExternalPasswordCache implements PasswordCache {
    }
 
    public static ExternalPasswordCache getExternalPasswordCacheInstance() {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(ExternalPasswordCache.class.getName() + ".getExternalPasswordCacheInstance"));
+      }
       return PASSWORD_CACHE;
    }
    

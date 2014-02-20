@@ -26,6 +26,7 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
+
 /**
  *  Factory to create roles
  *  @author Anil.Saldhana@redhat.com
@@ -85,11 +86,19 @@ public class RoleFactory
    
    public static void setSimpleRoleClass(String fqn)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(RoleFactory.class.getName() + ".setSimpleRoleClass"));
+      }
       SIMPLE_ROLE_CLASS = fqn;
    }
    
    public static void setSimpleRoleGroupClass(String fqn)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(RoleFactory.class.getName() + ".setSimpleRoleGroupClass"));
+      }
       SIMPLE_ROLEGROUP_CLASS = fqn;
    }
 }

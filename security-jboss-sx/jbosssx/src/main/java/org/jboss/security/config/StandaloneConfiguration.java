@@ -60,7 +60,11 @@ public class StandaloneConfiguration extends Configuration implements Applicatio
    
    public static StandaloneConfiguration getInstance()
    {
-     if(_instance == null)
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(StandaloneConfiguration.class.getName() + ".getInstance"));
+      }
+      if(_instance == null)
         _instance = new StandaloneConfiguration();
      return _instance;
    }
