@@ -221,13 +221,15 @@ public class Util
          {
             PicketBoxLogger.LOGGER.traceQueryWithEmptyResult();
          }
-         
-         do
+         else
          {
-            String name = rs.getString(1);
-            roleGroup.addRole(new SimpleRole(name));
+           do
+           {
+              String name = rs.getString(1);
+              roleGroup.addRole(new SimpleRole(name));
+           }
+           while (rs.next());
          }
-         while (rs.next());
       }
       catch (NamingException ex)
       {
