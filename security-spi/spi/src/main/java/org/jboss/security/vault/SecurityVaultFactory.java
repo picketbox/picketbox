@@ -87,13 +87,16 @@ public class SecurityVaultFactory
     */
    public static SecurityVault get(ClassLoader classLoader, String fqn) throws SecurityVaultException
    {
+         if (classLoader == null){
+            throw PicketBoxMessages.MESSAGES.invalidNullArgument("classLoader");
+         }
+         if (fqn == null){
+            throw PicketBoxMessages.MESSAGES.invalidNullArgument("fqn");
+         }
 	      SecurityManager sm = System.getSecurityManager();
 	      if (sm != null) {
 	         sm.checkPermission(new RuntimePermission(SecurityVaultFactory.class.getName() + ".get"));
 	      }
-	      if(fqn == null)
-	         return get();
-
 	      if(vault == null)
 	      {
 	         Class<?> vaultClass = SecurityActions.loadClass(classLoader,fqn);

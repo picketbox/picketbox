@@ -68,25 +68,14 @@ public class SecurityActions
       {
          public Class<?> run()
          {
-            Class<?> loadedClass = null;
             try
             {
-               loadedClass = classLoader.loadClass(fqn);
+               return classLoader.loadClass(fqn);
             }
             catch (ClassNotFoundException e)
             {
             }
-            if(loadedClass == null)
-            {
-               try
-               {
-                  loadedClass = Thread.currentThread().getContextClassLoader().loadClass(fqn);
-               }
-               catch (ClassNotFoundException e)
-               {
-               }
-            }
-            return loadedClass;
+            return null;
          }
       });
    }
