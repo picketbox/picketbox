@@ -36,10 +36,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -68,6 +70,31 @@ public class SecurityVaultUnitTestCase
       assertNotNull(vault);
       assertTrue(vault instanceof PicketBoxSecurityVault);
       assertFalse(vault.isInitialized());
+   }
+
+   @Test
+   public void testClassLoaderVault() throws Exception
+   {
+      //Back up the existing vault and reset it
+      Field field = SecurityVaultFactory.class.getDeclaredField("vault");
+      field.setAccessible(true);
+      Object existingVault = field.get(null);
+      try
+      {
+         field.set(null, null);
+         ClassLoader cl = SecurityVaultFactory.class.getClassLoader();
+         SecurityVault vault = SecurityVaultFactory.get(cl, TestVault.class.getName());
+         assertNotNull(vault);
+         assertTrue(vault instanceof TestVault);
+         assertFalse(vault.isInitialized());
+      }
+      finally
+      {
+         if (existingVault != null)
+         {
+            field.set(null, existingVault);
+         }
+      }
    }
    
    @Test
