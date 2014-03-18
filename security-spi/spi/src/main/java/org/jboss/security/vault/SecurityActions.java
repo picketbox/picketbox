@@ -2,7 +2,7 @@
  * JBoss, Home of Professional Open Source.
  * Copyright 2008, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
- * distribution for a full listing of individual contributors. 
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -44,7 +44,7 @@ public class SecurityActions
                loadedClass = cl.loadClass(fqn);
             }
             catch (ClassNotFoundException e)
-            { 
+            {
             }
             if(loadedClass == null)
             {
@@ -53,12 +53,30 @@ public class SecurityActions
                   loadedClass = Thread.currentThread().getContextClassLoader().loadClass(fqn);
                }
                catch (ClassNotFoundException e)
-               {   
-               } 
+               {
+               }
             }
             return loadedClass;
          }
       });
-      
+
+   }
+
+   static Class<?> loadClass(final ClassLoader classLoader, final String fqn)
+   {
+      return AccessController.doPrivileged(new PrivilegedAction<Class<?>>()
+      {
+         public Class<?> run()
+         {
+            try
+            {
+               return classLoader.loadClass(fqn);
+            }
+            catch (ClassNotFoundException e)
+            {
+            }
+            return null;
+         }
+      });
    }
 }
