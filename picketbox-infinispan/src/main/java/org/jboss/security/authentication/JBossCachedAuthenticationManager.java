@@ -133,7 +133,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
    public boolean isValid(Principal principal, Object credential, Subject activeSubject)
    {
       // first check cache
-      DomainInfo cachedEntry = getCacheInfo(principal);
+      DomainInfo cachedEntry = getCacheInfo(principal != null ? principal : new org.jboss.security.SimplePrincipal("null"));
       PicketBoxLogger.LOGGER.traceBeginIsValid(principal, cachedEntry != null ? cachedEntry.toString() : null);
 
       boolean isValid = false;
@@ -423,7 +423,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
    private Subject updateCache(LoginContext loginContext, Subject subject, Principal principal, Object credential)
    {
       // If we don't have a cache there is nothing to update
-      if (domainCache == null || principal == null)
+      if (domainCache == null)
          return subject;
 
       DomainInfo info = new DomainInfo();
@@ -470,7 +470,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 
       // If the user already exists another login is active. Currently
       // only one is allowed so remove the old and insert the new
-      domainCache.put(principal, info);
+      domainCache.put(principal != null ? principal : new org.jboss.security.SimplePrincipal("null"), info);
       PicketBoxLogger.LOGGER.traceInsertedCacheInfo(info.toString());
       return info.subject;
    }
