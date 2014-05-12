@@ -672,17 +672,7 @@ public class PicketBoxSecurityVault implements SecurityVault
      * @return
      */
     private KeyStore getKeyStore(String keystoreURL) {
-        
-        try {
-            return KeyStoreUtil.getKeyStore(keyStoreType, keystoreURL, keyStorePWD);
-        }
-        catch (IOException e) {
-            // deliberately empty
-        }
-        catch (GeneralSecurityException e) {
-            throw PicketBoxMessages.MESSAGES.unableToGetKeyStore(e, keystoreURL);
-        }
-        
+
         try {
             if (createKeyStore) {
                 return KeyStoreUtil.createKeyStore(keyStoreType, keyStorePWD);
@@ -691,8 +681,16 @@ public class PicketBoxSecurityVault implements SecurityVault
         catch (Throwable e) {
             throw PicketBoxMessages.MESSAGES.unableToGetKeyStore(e, keystoreURL);
         }
-        
-        return null;
+
+        try {
+            return KeyStoreUtil.getKeyStore(keyStoreType, keystoreURL, keyStorePWD);
+        }
+        catch (IOException e) {
+            throw PicketBoxMessages.MESSAGES.unableToGetKeyStore(e, keystoreURL);
+        }
+        catch (GeneralSecurityException e) {
+            throw PicketBoxMessages.MESSAGES.unableToGetKeyStore(e, keystoreURL);
+        }
     }
-    
+
 }
