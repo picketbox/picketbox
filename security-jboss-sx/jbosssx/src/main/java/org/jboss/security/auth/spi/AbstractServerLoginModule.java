@@ -77,7 +77,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
   
    private static final String[] ALL_VALID_OPTIONS =
    {
-	   PASSWORD_STACKING,USE_FIRST_PASSWORD,PRINCIPAL_CLASS,UNAUTHENTICATED_IDENTITY,
+	   PASSWORD_STACKING,PRINCIPAL_CLASS,UNAUTHENTICATED_IDENTITY,
 	   SecurityConstants.SECURITY_DOMAIN_OPTION
    };
    
