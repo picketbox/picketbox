@@ -26,6 +26,7 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import javax.crypto.Mac;
@@ -68,7 +69,7 @@ public class TimeBasedOTP
        
       String steps = "0";
       long T = ( timeInMilis - TIME_ZERO ) /  TIME_SLICE_X ; 
-      steps = Long.toHexString( T ).toUpperCase();
+      steps = Long.toHexString( T ).toUpperCase(Locale.ENGLISH);
       
       // Just get a 16 digit string
       while(steps.length() < 16) 
@@ -91,7 +92,7 @@ public class TimeBasedOTP
        
       String steps = "0";
       long T = ( timeInMilis - TIME_ZERO ) /  TIME_SLICE_X ; 
-      steps = Long.toHexString( T ).toUpperCase();
+      steps = Long.toHexString( T ).toUpperCase(Locale.ENGLISH);
       
       // Just get a 16 digit string
       while(steps.length() < 16) 
@@ -114,7 +115,7 @@ public class TimeBasedOTP
        
       String steps = "0";
       long T = ( timeInMilis - TIME_ZERO ) /  TIME_SLICE_X ; 
-      steps = Long.toHexString( T ).toUpperCase();
+      steps = Long.toHexString( T ).toUpperCase(Locale.ENGLISH);
       
       // Just get a 16 digit string
       while(steps.length() < 16) 

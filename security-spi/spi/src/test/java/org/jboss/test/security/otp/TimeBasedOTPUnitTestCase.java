@@ -24,6 +24,8 @@ package org.jboss.test.security.otp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Locale;
+
 import org.jboss.security.otp.TimeBasedOTP;
 import org.jboss.security.otp.TimeBasedOTPUtil;
 import org.junit.Test;
@@ -98,7 +100,7 @@ public class TimeBasedOTPUnitTestCase
       for(int i=0; i< testTime.length; i++) 
       {
          long T = ( testTime[i] - T0 ) / X;
-         steps = Long.toHexString( T ).toUpperCase();
+         steps = Long.toHexString( T ).toUpperCase(Locale.ENGLISH);
          
          // Just get a 16 digit string
          while(steps.length() < 16) 

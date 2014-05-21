@@ -23,6 +23,7 @@ package org.jboss.security.auth.certs;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 
 import org.jboss.security.CertificatePrincipal;
 import org.jboss.security.SimplePrincipal;
@@ -47,7 +48,7 @@ public class SubjectCNMapping
       Principal cn = null;
       Principal subject = certs[0].getSubjectDN();
       // Look for a cn=... entry in the subject DN
-      String dn = subject.getName().toLowerCase();
+      String dn = subject.getName().toLowerCase(Locale.ENGLISH);
       int index = dn.indexOf("cn=");
       if( index >= 0 )
       {

@@ -6,6 +6,7 @@
  */
 package org.jboss.security.config;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -58,7 +59,7 @@ public class IdentityTrustInfo extends BaseSecurityInfo<IdentityTrustModuleEntry
          IdentityTrustModuleEntry entry = moduleEntries.get(i);
          writer.writeStartElement(Element.TRUST_MODULE.getLocalName());
          writer.writeAttribute(Attribute.CODE.getLocalName(), entry.getName());
-         writer.writeAttribute(Attribute.FLAG.getLocalName(), entry.getControlFlag().toString().toLowerCase());
+         writer.writeAttribute(Attribute.FLAG.getLocalName(), entry.getControlFlag().toString().toLowerCase(Locale.ENGLISH));
          Map<String, ?> options = entry.getOptions();
          if (options != null && options.size() > 0)
          {

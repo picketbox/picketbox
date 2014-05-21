@@ -23,6 +23,7 @@ package org.jboss.security.config;
 
 import java.security.Principal;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -259,7 +260,7 @@ public class ApplicationPolicy
     */
    public MappingInfo getMappingInfo(String mappingType)
    {
-      mappingType = mappingType.toLowerCase();
+      mappingType = mappingType.toLowerCase(Locale.ENGLISH);
       MappingInfo bai = null;
       ApplicationPolicy ap = this.getBaseApplicationPolicy();
       if (ap != null)
@@ -284,7 +285,7 @@ public class ApplicationPolicy
     */
    public void setMappingInfo(String mappingType, MappingInfo info)
    {
-      mappingType = mappingType.toLowerCase();
+      mappingType = mappingType.toLowerCase(Locale.ENGLISH);
       // if there is a registered info for the specified type, merge the modules.
       if(this.mappingInfos.containsKey(mappingType))
          this.mappingInfos.get(mappingType).add(info.getModuleEntries());
