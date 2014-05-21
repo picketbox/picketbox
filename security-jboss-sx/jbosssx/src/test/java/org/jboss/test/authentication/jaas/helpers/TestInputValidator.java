@@ -21,6 +21,7 @@
  */
 package org.jboss.test.authentication.jaas.helpers;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,7 +83,7 @@ public class TestInputValidator implements InputValidator
     */
    public boolean matchesBlackList(String expression)
    {
-      String exprUpperCase = expression.toUpperCase();
+      String exprUpperCase = expression.toUpperCase(Locale.ENGLISH);
       for (String token : this.blackList)
       {
          if (exprUpperCase.indexOf(token) != -1)

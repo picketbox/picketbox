@@ -21,6 +21,7 @@
   */
 package org.jboss.security.config;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -75,7 +76,7 @@ public class AuthorizationInfo extends BaseSecurityInfo<AuthorizationModuleEntry
          AuthorizationModuleEntry entry = moduleEntries.get(i);
          writer.writeStartElement(Element.POLICY_MODULE.getLocalName());
          writer.writeAttribute(Attribute.CODE.getLocalName(), entry.getPolicyModuleName());
-         writer.writeAttribute(Attribute.FLAG.getLocalName(), entry.getControlFlag().toString().toLowerCase());
+         writer.writeAttribute(Attribute.FLAG.getLocalName(), entry.getControlFlag().toString().toLowerCase(Locale.ENGLISH));
          Map<String, ?> options = entry.getOptions();
          if (options != null && options.size() > 0)
          {

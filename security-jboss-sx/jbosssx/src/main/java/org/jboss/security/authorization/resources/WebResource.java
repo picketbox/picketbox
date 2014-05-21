@@ -23,6 +23,7 @@ package org.jboss.security.authorization.resources;
 
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
@@ -68,7 +69,7 @@ public class WebResource extends JavaEEResource
    
    static
    {
-      auditFlag = SecurityActions.getSystemProperty(WEB_AUDIT_FLAG, " ").toLowerCase();
+      auditFlag = SecurityActions.getSystemProperty(WEB_AUDIT_FLAG, " ").toLowerCase(Locale.ENGLISH);
    }
    /**
     * Create a new WebResource.

@@ -23,6 +23,7 @@ package org.jboss.security.auth.login;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import javax.security.auth.login.AppConfigurationEntry;
 
@@ -79,7 +80,7 @@ public class ConfigUtil
       if (flag != null)
       {
          // Lower case is what is used by the jdk1.4.1 implementation
-         flag = flag.toLowerCase();
+         flag = flag.toLowerCase(Locale.ENGLISH);
          if (AppConfigurationEntry.LoginModuleControlFlag.REQUIRED.toString().indexOf(flag) > 0)
             controlFlag = AppConfigurationEntry.LoginModuleControlFlag.REQUIRED;
          else if (AppConfigurationEntry.LoginModuleControlFlag.REQUISITE.toString().indexOf(flag) > 0)

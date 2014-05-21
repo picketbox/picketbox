@@ -23,6 +23,7 @@ package org.jboss.security.acl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.authorization.Resource;
@@ -139,7 +140,7 @@ public class Util
             {
                // in case of error, try executing the field getter method.
                String fieldName = field.getName();
-               String methodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+               String methodName = "get" + fieldName.substring(0, 1).toUpperCase(Locale.ENGLISH) + fieldName.substring(1);
                resourceKey = executeNoArgMethod(resource, methodName);
             }
             break;

@@ -24,6 +24,7 @@ package org.jboss.security.auth.login;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -123,8 +124,9 @@ public class AuthenticationInfo extends BaseAuthenticationInfo
             Entry e = (Entry) iter.next();
             String name = (String) e.getKey();
             String value = e.getValue() == null ? "" : e.getValue().toString();
-            if (name.toLowerCase().equals("password") || name.toLowerCase().equals("bindcredential")
-                  || name.toLowerCase().equals(Context.SECURITY_CREDENTIALS))
+            String nameToLower = name.toLowerCase(Locale.ENGLISH);
+            if (nameToLower.equals("password") || nameToLower.equals("bindcredential")
+                  || nameToLower.equals(Context.SECURITY_CREDENTIALS))
                value = "****";
             buffer.append("name=" + name);
             buffer.append(", value=" + value);

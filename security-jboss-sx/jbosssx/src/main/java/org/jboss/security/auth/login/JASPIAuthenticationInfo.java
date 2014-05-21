@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -272,7 +273,7 @@ public class JASPIAuthenticationInfo extends BaseAuthenticationInfo
          AuthModuleEntry entry = (AuthModuleEntry) moduleEntries.get(i);
          writer.writeStartElement(Element.AUTH_MODULE.getLocalName());
          writer.writeAttribute(Attribute.CODE.getLocalName(), entry.getAuthModuleName());
-         writer.writeAttribute(Attribute.FLAG.getLocalName(), entry.getControlFlag().toString().toLowerCase());
+         writer.writeAttribute(Attribute.FLAG.getLocalName(), entry.getControlFlag().toString().toLowerCase(Locale.ENGLISH));
          writer.writeAttribute(Attribute.LOGIN_MODULE_STACK_REF.getLocalName(), entry.getLoginModuleStackHolderName());
          Map<String, ?> options = entry.getOptions();
          if (options != null && options.size() > 0)
