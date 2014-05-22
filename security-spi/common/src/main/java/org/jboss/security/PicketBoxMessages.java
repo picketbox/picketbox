@@ -2,6 +2,7 @@ package org.jboss.security;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyException;
 import java.security.ProviderException;
@@ -456,4 +457,8 @@ public interface PicketBoxMessages {
 
     @Message(id = 140, value = "Unable to get keystore (%s)")
     RuntimeException unableToGetKeyStore(@Cause Throwable throwable, String file);
+    
+    @Message(id = 141, value = "Unable to parse referral absolute name: %s")
+    RuntimeException unableToParseReferralAbsoluteName(@Cause URISyntaxException cause, String absoluteName);
+
 }
