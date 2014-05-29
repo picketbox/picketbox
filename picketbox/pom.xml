@@ -78,9 +78,9 @@
       </dependency>
       <!-- these dependencies are needed because ACL impl classes are annotated - this must be fixed as we don't want to bring these deps in -->
       <dependency>
-         <groupId>javax.persistence</groupId>
-         <artifactId>persistence-api</artifactId>
-         <version>1.0</version>
+         <groupId>org.hibernate.javax.persistence</groupId>
+         <artifactId>hibernate-jpa-2.0-api</artifactId>
+         <version>1.0.1.Final</version>
          <scope>test</scope>
       </dependency>
       <dependency>
