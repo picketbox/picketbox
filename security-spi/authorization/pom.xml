@@ -31,10 +31,12 @@
      <dependency>
          <groupId>org.picketbox</groupId>
          <artifactId>common-spi</artifactId>
+         <version>${project.version}</version>
      </dependency>
      <dependency>
         <groupId>org.picketbox</groupId>
         <artifactId>identity-spi</artifactId>
+        <version>${project.version}</version>
      </dependency>
      <dependency>
         <groupId>junit</groupId>
