@@ -83,12 +83,6 @@
          <version>1.0.1.Final</version>
          <scope>test</scope>
       </dependency>
-      <dependency>
-         <groupId>org.hibernate</groupId>
-         <artifactId>hibernate-annotations</artifactId>
-         <version>3.3.0.ga</version>
-         <scope>test</scope>
-      </dependency>
     </dependencies>
     <build>
         <plugins>

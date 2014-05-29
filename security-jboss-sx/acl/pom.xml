@@ -64,12 +64,6 @@
       </dependency>
       <dependency>
          <groupId>org.hibernate</groupId>
-         <artifactId>hibernate-annotations</artifactId>
-         <version>3.3.0.ga</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.hibernate</groupId>
          <artifactId>hibernate-entitymanager</artifactId>
          <version>3.6.6.Final</version>
          <scope>compile</scope>
