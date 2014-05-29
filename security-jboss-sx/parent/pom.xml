@@ -110,12 +110,6 @@
          <version>4.4</version>
          <scope>test</scope>
       </dependency>
-      <dependency>
-         <groupId>org.jboss</groupId>
-         <artifactId>jboss-test</artifactId>
-         <version>1.0.4.GA</version>
-         <scope>test</scope>
-      </dependency>
    </dependencies>
   </dependencyManagement>
 
