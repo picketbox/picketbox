@@ -1,14 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <parent>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-parent</artifactId>
-      <version>5</version>
+      <version>11-redhat-1</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-parent</artifactId>
    <packaging>pom</packaging>
-   <version>4.0.19.SP7</version>
+   <version>4.0.19.SP7-redhat-SNAPSHOT</version>
    <name>JBossSX - Parent</name>
    <url>http://jboss.org/picketbox</url>
    <description>PicketBox is a security project for Java Applications.</description>
@@ -31,7 +32,6 @@
      <plugins>
         <plugin>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.0-beta-6</version>
           <configuration>
             <tagBase>https://svn.jboss.org/repos/picketbox/security-jboss-sx/tags</tagBase>
           </configuration>
@@ -41,7 +41,6 @@
        <plugins>
           <plugin>
              <artifactId>maven-surefire-plugin</artifactId>
-             <version>2.4.3</version>
              <configuration>
                <printSummary>true</printSummary>
                <disableXmlReport>false</disableXmlReport>
@@ -59,7 +58,6 @@
           <plugin>
           	<groupId>org.eclipse.m2e</groupId>
           	<artifactId>lifecycle-mapping</artifactId>
-          	<version>1.0.0</version>
           	<configuration>
           		<lifecycleMappingMetadata>
           			<pluginExecutions>
@@ -85,31 +83,6 @@
        </plugins>
      </pluginManagement>
    </build>
-  
-   <repositories>
-    <repository>
-      <id>repository.jboss.org</id>
-      <name>Developer Group Repository</name>
-      <layout>default</layout>
-      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>snapshots.jboss.org</id>
-      <name>JBoss Snapshots Repository</name>
-      <layout>default</layout>
-      <url>http://snapshots.jboss.org/maven2/</url>
-      <snapshots>
-         <enabled>true</enabled>
-      </snapshots>
-      <releases>
-         <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
   
   <dependencyManagement>
     <dependencies>
