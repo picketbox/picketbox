@@ -198,39 +198,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jnpserver</artifactId>
-            <version>4.2.3.GA</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>sun-opends</groupId>
-            <artifactId>OpenDS</artifactId>
-            <version>1.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>sleepycat</groupId>
-            <artifactId>je</artifactId>
-            <version>3.2.43</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.picketbox</groupId>
             <artifactId>picketbox-commons</artifactId>
             <version>1.0.0.final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.2.4</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
