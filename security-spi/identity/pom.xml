@@ -31,6 +31,7 @@
       <dependency>
         <groupId>org.picketbox</groupId>
         <artifactId>common-spi</artifactId>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
 </project>
