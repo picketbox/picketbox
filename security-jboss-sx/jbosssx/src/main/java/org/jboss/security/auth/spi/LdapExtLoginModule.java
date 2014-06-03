@@ -471,7 +471,14 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          SearchControls constraints = new SearchControls();
          constraints.setSearchScope(searchScope);
          constraints.setTimeLimit(searchTimeLimit);
-         constraints.setReturningAttributes(new String[0]);
+         String[] attrList;
+         if (referralUserAttributeIDToCheck != null) 
+         {
+             attrList = new String[] {roleAttributeID, referralUserAttributeIDToCheck};
+         } else {
+             attrList = new String[] {roleAttributeID};
+         }
+         constraints.setReturningAttributes(attrList);
          rolesSearch(ctx, constraints, username, userDN, recursion, 0);
       }
       catch(Exception e)
