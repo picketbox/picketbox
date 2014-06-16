@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -320,7 +321,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 					   try
 					   {
 						   SubjectActions.setContextClassLoader(newTCCL);
-						   return proceedWithJaasLogin(principal, credential, theSubject);
+						   return proceedWithJaasLogin(principal, credential, theSubject, newTCCL);
 					   }
 					   finally
 					   {
@@ -330,11 +331,11 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 			   }
 		   }
 	   }
-	   return proceedWithJaasLogin(principal, credential, theSubject);
+	   return proceedWithJaasLogin(principal, credential, theSubject, null);
    }
    
 
-   private boolean proceedWithJaasLogin(Principal principal, Object credential, Subject theSubject)
+   private boolean proceedWithJaasLogin(Principal principal, Object credential, Subject theSubject, ClassLoader contextClassLoader)
    {
 	   Subject subject = null;
 	   boolean authenticated = false;
@@ -360,7 +361,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 
 			   authenticated = true;
 			   // Build the Subject based DomainInfo cache value
-			   updateCache(lc, subject, principal, credential);
+			   updateCache(lc, subject, principal, credential, contextClassLoader);
 		   }
 	   }
 	   catch (LoginException e)
@@ -420,7 +421,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
     * @param credential user's proof of identity
     * @return authenticated {@link Subject}
     */
-   private Subject updateCache(LoginContext loginContext, Subject subject, Principal principal, Object credential)
+   private Subject updateCache(LoginContext loginContext, Subject subject, Principal principal, Object credential, ClassLoader contextClassLoader)
    {
       // If we don't have a cache there is nothing to update
       if (domainCache == null)
@@ -431,6 +432,19 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
       info.subject = new Subject();
       SubjectActions.copySubject(subject, info.subject, true, this.deepCopySubjectOption);
       info.credential = credential;
+      ClassLoader lcClassLoader = contextClassLoader;
+      if (lcClassLoader == null) {
+          lcClassLoader = java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<ClassLoader>() {
+              public ClassLoader run() {
+                  ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                  if (loader == null) {
+                      loader = ClassLoader.getSystemClassLoader();
+                  }
+                  return loader;
+              }
+          });
+      }
+      info.contextClassLoader = lcClassLoader;
 
       PicketBoxLogger.LOGGER.traceUpdateCache(SubjectActions.toString(subject), SubjectActions.toString(info.subject));
 
@@ -476,6 +490,21 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
    }
 
    /**
+     * Release cache entries got the specified ClassLoader.
+     *
+     * @param classLoader the ClassLoader.
+     */
+    public void releaseModuleEntries(final ClassLoader classLoader) {
+        if (domainCache != null) {
+            for (Entry<Principal, DomainInfo> entry : domainCache.entrySet()) {
+                if ((classLoader == null && entry.getValue().contextClassLoader == null) || classLoader.equals(entry.getValue().contextClassLoader)) {
+                    flushCache(entry.getKey());
+                }
+            }
+        }
+    }
+
+    /**
     * A cache value. Holds information about the authentication process.
     * 
     * @author <a href="mmoyses@redhat.com">Marcus Moyses</a>
@@ -491,6 +520,8 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
       protected Object credential;
 
       protected Principal callerPrincipal;
+
+      protected ClassLoader contextClassLoader = null;
 
       public void logout()
       {
