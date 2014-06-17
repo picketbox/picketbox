@@ -86,6 +86,9 @@ public class SecurityUtilUnitTestCase
    {
       String passwordCmd = "{CLASS}org.jboss.security.plugins.TmpFilePassword:${java.io.tmpdir}/tmp.password";
       passwordCmd = StringPropertyReplacer.replaceProperties(passwordCmd);
+      if (!Util.isPasswordCommand(passwordCmd)) {
+         fail(passwordCmd + " should be treated as external password with comand");
+      }
       char[] password = Util.loadPassword(passwordCmd);
       assertTrue("password1", Arrays.equals(password, "password1".toCharArray()));
    }
@@ -97,6 +100,9 @@ public class SecurityUtilUnitTestCase
    {
       String passwordCmd = "{CLASS}org.jboss.security.plugins.FilePassword:${java.io.tmpdir}/tst.password";
       passwordCmd = StringPropertyReplacer.replaceProperties(passwordCmd);
+      if (!Util.isPasswordCommand(passwordCmd)) {
+         fail(passwordCmd + " should be treated as class call password");
+      }
       char[] password = Util.loadPassword(passwordCmd);
       assertTrue("password2", Arrays.equals(password, "password2".toCharArray()));
    }
@@ -108,6 +114,9 @@ public class SecurityUtilUnitTestCase
    {
       String passwordCmd = buildExtCommand("EXT");
       log.info("Executing password command:" + passwordCmd);
+      if (!Util.isPasswordCommand(passwordCmd)) {
+         fail(passwordCmd + " should be treated as external password with comand");
+      }
       char[] password = Util.loadPassword(passwordCmd);
       assertTrue("password3", Arrays.equals(password, "password3".toCharArray()));
    }
@@ -119,6 +128,9 @@ public class SecurityUtilUnitTestCase
       
       String passwordCmd = buildExtCommand("EXTC");
       char[] password = Util.loadPassword(passwordCmd + " 4");
+      if (!Util.isPasswordCommand(passwordCmd)) {
+         fail(passwordCmd + " should be treated as external password with comand");
+      }
       assertTrue("password4", Arrays.equals(password, "password4".toCharArray()));
       char[] cachedPassword = Util.loadPassword(passwordCmd + " 4");
       assertTrue("password4 cached:1", Arrays.equals(password, "password4".toCharArray()));
@@ -147,6 +159,9 @@ public class SecurityUtilUnitTestCase
       final String TO = "500";
       
       String passwordCmd = buildExtCommand("EXTC:" + TO);
+      if (!Util.isPasswordCommand(passwordCmd)) {
+         fail(passwordCmd + " should be treated as external password with comand");
+      }
       char[] password4 = Util.loadPassword(passwordCmd + " 4 timeOut");
       assertTrue("password4 timeOut = " + TO, Arrays.equals(new String(password4).substring(0,  9).toCharArray(), "password4".toCharArray()));
 
@@ -172,8 +187,42 @@ public class SecurityUtilUnitTestCase
       
    }
    
+   /**
+    * Test {CMD}org.jboss.test.security.helpers.ExecPasswordCmd
+    * @throws Exception
+    */
+   public void testCmdPassword() throws Exception
+   {
+      String passwordCmd = buildExtCommand("CMD", ',');
+      if (!Util.isPasswordCommand(passwordCmd)) {
+         fail(passwordCmd + " should be treated as external password with comand");
+      }
+      log.info("Executing password command:" + passwordCmd);
+      char[] password = Util.loadPassword(passwordCmd);
+      assertTrue("password3", Arrays.equals(password, "password3".toCharArray()));
+
+      String passwordCmdWithParam = passwordCmd + ",Parameter 1";
+      log.info("Executing password command:" + passwordCmdWithParam);
+      password = Util.loadPassword(passwordCmdWithParam);
+      assertTrue("passwordParameter 1", Arrays.equals(password, "passwordParameter 1".toCharArray()));
+
+      passwordCmdWithParam = passwordCmd + ",Parameter\\,1";
+      log.info("Executing password command:" + passwordCmdWithParam);
+      password = Util.loadPassword(passwordCmdWithParam);
+      assertTrue("passwordParameter,1", Arrays.equals(password, "passwordParameter,1".toCharArray()));
+
+      String passwordCmdWithTwoParams = passwordCmd + ",Parameter,1";
+      log.info("Executing password command:" + passwordCmdWithTwoParams);
+      password = Util.loadPassword(passwordCmdWithTwoParams);
+      assertTrue("passwordParameter", Arrays.equals(new String(password).substring(0, "passwordParameter".length()).toCharArray(), "passwordParameter".toCharArray()));
+      assertTrue("passwordParameter", new String(password).substring("passwordParameter".length()).matches("^\\d+$"));
+   }
 
    private String buildExtCommand(String extOption) {
+      return buildExtCommand(extOption, ' ');
+   }
+   
+   private String buildExtCommand(String extOption, char delim) {
       // First check for java.exe or java as the binary
       File java = new File(System.getProperty("java.home"), "/bin/java");
       File javaExe = new File(System.getProperty("java.home"), "/bin/java.exe");
@@ -184,10 +233,10 @@ public class SecurityUtilUnitTestCase
          jre = javaExe.getAbsolutePath();
       // Build the command to run this jre
       String cmd = jre
-      + " -cp "+System.getProperty("java.class.path")
-      + " org.jboss.test.security.helpers.ExecPasswordCmd";
-      
+      + delim + "-cp" + delim + System.getProperty("java.class.path")
+      + delim + "org.jboss.test.security.helpers.ExecPasswordCmd";
+
       return "{" + extOption +"}"+cmd;
    }
-   
+
 }

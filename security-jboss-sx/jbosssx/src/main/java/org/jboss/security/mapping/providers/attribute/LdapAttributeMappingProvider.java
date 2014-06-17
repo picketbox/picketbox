@@ -134,7 +134,7 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
             return;
          }
          String bindCredential = (String) options.get(BIND_CREDENTIAL);
-         if (bindCredential.startsWith("{EXT}"))
+         if (org.jboss.security.Util.isPasswordCommand(bindCredential))
             try
             {
                bindCredential = new String(org.jboss.security.Util.loadPassword(bindCredential));

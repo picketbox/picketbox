@@ -21,11 +21,14 @@
  */
 package org.jboss.test.security.vault;
 
+import org.jboss.security.Util;
 import org.jboss.security.plugins.PBEUtils;
 import org.jboss.security.vault.SecurityVault;
 import org.jboss.security.vault.SecurityVaultException;
 import org.jboss.security.vault.SecurityVaultFactory;
 import org.jboss.security.vault.SecurityVaultUtil;
+import org.jboss.test.SecurityActions;
+import org.junit.Assume;
 import org.junit.Test;
 import org.picketbox.plugins.vault.PicketBoxSecurityVault;
 
@@ -42,8 +45,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
-
-import junit.framework.Assert;
 
 import static org.junit.Assert.*;
 
@@ -164,7 +165,97 @@ public class SecurityVaultUnitTestCase
       assertFalse(vault.exists(vaultBlock+"1", attributeName+"2"));
    }
    
-   
+   @Test
+   public void testClassBasedKeystorePassword() throws Exception
+   {
+
+      setInitialVaulConditions("src/test/resources/keystore/vault.jks", "target/vaults/vault2/vault.jks",
+            "src/test/resources/keystore/vault_data", "target/vaults/vault2/vault_data");
+
+      Map<String,Object> options = getVaultOptionsMap(
+            "target/vaults/vault2/vault.jks",
+            "target/vaults/vault2/vault_data",
+            "vault", "12438567", 50, "{CLASS}org.jboss.test.security.vault.KeystorePasswordProvider");
+
+      String vaultBlock = "aBlock";
+      String attributeName = "anAttribute";
+
+      char[] attributeValue = "aValue".toCharArray();
+
+      SecurityVault vault = getNewSecurityVaultInstance();
+
+      vault.init(options);
+      assertTrue(vault.isInitialized());
+
+      Map<String,Object> handshakeOptions = new HashMap<String,Object>();
+
+      byte[] sharedKey = vault.handshake(handshakeOptions);
+      assertNotNull(sharedKey);
+
+      vault.store(vaultBlock, attributeName, attributeValue , sharedKey);
+
+      assertTrue(vault.exists(vaultBlock, attributeName));
+      //Now retrieve
+      assertEquals(new String(attributeValue), new String(vault.retrieve(vaultBlock, attributeName, sharedKey)));
+
+      vault.store(vaultBlock+"1", attributeName+"2", attributeValue, sharedKey);
+      assertEquals(new String(attributeValue), new String(vault.retrieve(vaultBlock+"1", attributeName+"2", sharedKey)));
+
+      System.out.println("Currently storing:" + vault.keyList());
+
+      assertTrue(vault.remove(vaultBlock+"1", attributeName+"2", sharedKey));
+      assertFalse(vault.exists(vaultBlock+"1", attributeName+"2"));
+   }
+
+   @Test
+   public void testExtCmdBasedKeystorePassword() throws Exception
+   {
+      // since this test uses an external BASH script it is valid for Linux systems only
+      String OS_NAME = SecurityActions.getProperty("os.name", null);
+      Assume.assumeTrue(OS_NAME.startsWith("Linux") || OS_NAME.startsWith("LINUX"));
+
+      setInitialVaulConditions("src/test/resources/keystore/vault.jks", "target/vaults/vault2/vault.jks",
+            "src/test/resources/keystore/vault_data", "target/vaults/vault2/vault_data");
+
+      String absolutePathToAskPass = SecurityVaultUnitTestCase.class.getResource("/bin/askpass.sh").getFile();
+      System.out.println("absolutePathToAskPass: " + absolutePathToAskPass);
+
+      // 'Enter passphrase for *' is hard-coded into kwalletaskpass for example
+      Map<String,Object> options = getVaultOptionsMap(
+            "target/vaults/vault2/vault.jks",
+            "target/vaults/vault2/vault_data",
+            "vault", "12438567", 50, "{CMD}/bin/sh," + absolutePathToAskPass + ",Enter passphrase for askpass test");
+
+      String vaultBlock = "aBlock";
+      String attributeName = "anAttribute";
+
+      char[] attributeValue = "aValue".toCharArray();
+
+      SecurityVault vault = getNewSecurityVaultInstance();
+
+      vault.init(options);
+      assertTrue(vault.isInitialized());
+
+      Map<String,Object> handshakeOptions = new HashMap<String,Object>();
+
+      byte[] sharedKey = vault.handshake(handshakeOptions);
+      assertNotNull(sharedKey);
+
+      vault.store(vaultBlock, attributeName, attributeValue , sharedKey);
+
+      assertTrue(vault.exists(vaultBlock, attributeName));
+      //Now retrieve
+      assertEquals(new String(attributeValue), new String(vault.retrieve(vaultBlock, attributeName, sharedKey)));
+
+      vault.store(vaultBlock+"1", attributeName+"2", attributeValue, sharedKey);
+      assertEquals(new String(attributeValue), new String(vault.retrieve(vaultBlock+"1", attributeName+"2", sharedKey)));
+
+      System.out.println("Currently storing:" + vault.keyList());
+
+      assertTrue(vault.remove(vaultBlock+"1", attributeName+"2", sharedKey));
+      assertFalse(vault.exists(vaultBlock+"1", attributeName+"2"));
+   }
+
    /**
     * See src/test/resources/vault-v0/readme.txt for initial vault setup (including secured attributes).
     * @throws Exception
@@ -345,6 +436,9 @@ public class SecurityVaultUnitTestCase
    
    private String getMaskedPassword(String pwd, String salt, int iterationCount) throws Exception
    {
+      if (Util.isPasswordCommand(pwd))
+         return pwd;
+
       String algo = "PBEwithMD5andDES";
       
       // Create the PBE secret key 
@@ -357,7 +451,7 @@ public class SecurityVaultUnitTestCase
       
       String maskedPass = PBEUtils.encode64(pwd.getBytes(), algo, cipherKey, cipherSpec);
       
-      return new String(PicketBoxSecurityVault.PASS_MASK_PREFIX) + maskedPass; 
+      return PicketBoxSecurityVault.PASS_MASK_PREFIX + maskedPass;
    }
    
 
