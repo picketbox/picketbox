@@ -719,4 +719,9 @@ public interface PicketBoxLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.ERROR)
     @Message(id = 374, value = "Error getting ServerAuthContext for authContextId %s and security domain %s")
     void errorGettingServerAuthContext(String authContextId, String securityDomain, @Cause Throwable cause);
+    
+    @LogMessage(level = Logger.Level.ERROR)
+    @Message(id = 375, value = "Error getting the module classloader informations for cache")
+    void errorGettingModuleInformation(@Cause Throwable cause);
+    
 }
