@@ -476,7 +476,7 @@ public class CryptoUtil
       boolean hasUnlimitedCrypto = false;
       try
       { 
-         hasUnlimitedCrypto = javax.crypto.Cipher.getMaxAllowedKeyLength("Blowfish") > 128;
+         hasUnlimitedCrypto = javax.crypto.Cipher.getMaxAllowedKeyLength("Blowfish") == Integer.MAX_VALUE;
       }
       catch(Throwable e)
       {
