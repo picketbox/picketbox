@@ -57,7 +57,7 @@ public class Util
     * password.
     * EXTC variant will cache the passwords for expiration_in_millis milliseconds. 
     * Default cache expiration is 0 = infinity.
-    * '{CMD}...' or '{CMDC}...' for a general command to execute. The general
+    * '{CMD}...' or '{CMDC[:expiration_in_millis]}...' for a general command to execute. The general
     * command is a string delimited by ',' where the first part is the actual
     * command and further parts represents its parameters. The comma can be
     * backslashed in order to keep it as a part of the parameter.
@@ -386,7 +386,7 @@ public class Util
             && (passwordCmd.startsWith("{EXT}")
                   || passwordCmd.startsWith("{EXTC")  // it has to be without closing brace to cover :<time in millis>
                   || passwordCmd.startsWith("{CMD}")
-                  || passwordCmd.startsWith("{CMDC}")
+                  || passwordCmd.startsWith("{CMDC")  // it has to be without closing brace to cover :<time in millis>
                   || passwordCmd.startsWith("{CLASS}"));
    }
 
