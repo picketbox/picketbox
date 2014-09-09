@@ -167,7 +167,7 @@ public class Util
    static Properties loadProperties(String defaultsName, String propertiesName)
       throws IOException
    {
-      Properties bundle = null;
+      Properties bundle = new Properties();
       ClassLoader loader = SecurityActions.getContextClassLoader();
       URL defaultUrl = null;
       URL url = null;
@@ -212,54 +212,34 @@ public class Util
          throw PicketBoxMessages.MESSAGES.unableToFindPropertiesFile(propertiesFiles);
       }
 
-      Properties defaults = new Properties();
-      if( defaultUrl != null )
-      {
-         InputStream is = null; 
-         try
-         {
-            is = defaultUrl.openStream();
-            defaults.load(is);
-            PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(defaultsName, defaults.keySet());
-         }
-         catch(Throwable e)
-         {
-            PicketBoxLogger.LOGGER.debugFailureToLoadPropertiesFile(defaultsName, e);
-         }
-         finally
-         {
-            safeClose(is);
-         }
-      }
-
-      bundle = new Properties(defaults);
-      if( url != null )
-      {
-         InputStream is = null;
-         try
-         {
-            is = SecurityActions.openStream(url);
-         }
-         catch (PrivilegedActionException e)
-         {
-            throw new IOException(e.getLocalizedMessage());
-         }
-         if (is != null)
-         {
-            try
-            {
-               bundle.load(is);
-            }
-            finally
-            {
-               safeClose(is);
-            }
-         }
-         else
-         {
-            throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
-         }
-         PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
+      if (url != null) {
+          InputStream is = null;
+          try {
+              is = SecurityActions.openStream(url);
+          } catch (PrivilegedActionException e) {
+              throw new IOException(e.getLocalizedMessage());
+          }
+          if (is != null) {
+              try {
+                  bundle.load(is);
+              } finally {
+                  safeClose(is);
+              }
+          } else {
+              throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
+          }
+          PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
+      } else {
+          InputStream is = null;
+          try {
+              is = defaultUrl.openStream();
+              bundle.load(is);
+              PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(defaultsName, bundle.keySet());
+          } catch (Throwable e) {
+              PicketBoxLogger.LOGGER.debugFailureToLoadPropertiesFile(defaultsName, e);
+          } finally {
+              safeClose(is);
+          }
       }
 
       return bundle;
