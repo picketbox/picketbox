@@ -29,7 +29,7 @@ import java.security.PrivilegedAction;
  * @author Anil.Saldhana@redhat.com
  * @since Aug 12, 2011
  */
-public class SecurityActions
+class SecurityActions
 {
    static Class<?> loadClass(final Class<?> clazz, final String fqn)
    {

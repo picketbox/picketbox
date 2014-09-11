@@ -32,7 +32,7 @@ import java.security.PrivilegedAction;
  *  @since  Nov 18, 2007 
  *  @version $Revision$
  */
-public class SecurityActions
+class SecurityActions
 {
    @SuppressWarnings("unchecked")
    public static Class<?> getClass(final String FQN)
