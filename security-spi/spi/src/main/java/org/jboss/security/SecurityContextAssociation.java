@@ -56,11 +56,11 @@ public class SecurityContextAssociation
       new RuntimePermission("org.jboss.security.setRunAsRole");
    
    private static final RuntimePermission GetContextInfo =
-      new RuntimePermission("org.jboss.security.accessContextInfo", "get");
+      new RuntimePermission("org.jboss.security.accessContextInfo:get");
 
    private static final RuntimePermission SetContextInfo =
-      new RuntimePermission("org.jboss.security.accessContextInfo", "set");
-   
+      new RuntimePermission("org.jboss.security.accessContextInfo:set");
+
    /**
     * Flag to indicate whether threads that are spawned inherit the security context from parent
     * Set this to false if you do not want inheritance. By default the context is inherited.
@@ -225,8 +225,8 @@ public class SecurityContextAssociation
    /**
     * Get the current thread context info. If a security manager is present,
     * then this method calls the security manager's <code>checkPermission</code>
-    * method with a <code> RuntimePermission("org.jboss.security.accessContextInfo",
-    * "get") </code> permission to ensure it's ok to access context information.
+    * method with a <code> RuntimePermission("org.jboss.security.accessContextInfo:get")
+    * </code> permission to ensure it's ok to access context information.
     * If not, a <code>SecurityException</code> will be thrown.
     * @param key - the context key
     * @return the mapping for the key in the current thread context
@@ -249,11 +249,11 @@ public class SecurityContextAssociation
    /**
     * Set the current thread context info. If a security manager is present,
     * then this method calls the security manager's <code>checkPermission</code>
-    * method with a <code> RuntimePermission("org.jboss.security.accessContextInfo",
-    * "set") </code> permission to ensure it's ok to access context information.
+    * method with a <code> RuntimePermission("org.jboss.security.accessContextInfo:set")
+    * </code> permission to ensure it's ok to access context information.
     * If not, a <code>SecurityException</code> will be thrown.
     * @param key - the context key
-    * @param value - the context value to associate under key
+    * @param value - the conSetContextInfotext value to associate under key
     * @return the previous mapping for the key if one exists
     */
    public static Object setContextInfo(String key, Object value)
