@@ -41,7 +41,7 @@ import org.jboss.security.SecurityContextAssociation;
  @author Scott.Stark@jboss.org
  @version $Revision$
  */
-public class SecurityActions
+class SecurityActions
 {
    interface PolicyContextActions
    {
