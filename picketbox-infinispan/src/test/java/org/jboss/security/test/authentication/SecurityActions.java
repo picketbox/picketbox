@@ -37,7 +37,7 @@ import javax.security.jacc.PolicyContext;
  *  @since  Sep 25, 2007 
  *  @version $Revision$
  */
-public class SecurityActions
+class SecurityActions
 {
    public static void addPrincipalToSubject(final Subject subj, final Principal p)
    {
