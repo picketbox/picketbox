@@ -47,7 +47,7 @@ public abstract class AbstractPasswordCredentialLoginModule extends AbstractServ
    }
 
    /** This removes the javax.security.auth.login.name and
-    * javax.security.auth.login.password settings from the sharteState map
+    * javax.security.auth.login.password settings from the sharedState map
     * along with any PasswordCredential found in the PrivateCredentials set
     */
    protected void removeCredentials()
