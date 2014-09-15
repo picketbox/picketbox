@@ -87,6 +87,39 @@ public class Base64UtilsTestCase
       assertEquals("0000", Base64Utils.tob64(baos.toByteArray(), true));
       baos.write(0);
       assertEquals("__000000", Base64Utils.tob64(baos.toByteArray(), true));
+      baos.write(0);
+//      assertArrayEquals(new byte[] {115, 117, 114, 101, 46}, Base64Utils.fromb64("_c3VyZS4"));
    }
 
+   
+   @Test
+   public void encodeDecodeTest() {
+      doEncodeDecodeTest(generateData(252));
+      doEncodeDecodeTest(generateData(253));
+      doEncodeDecodeTest(generateData(254));
+      doEncodeDecodeTest(generateData(255));
+   }
+   
+   private void doEncodeDecodeTest(byte[] inputData) {
+ 
+      String s = Base64Utils.tob64(inputData); 
+      String sp = Base64Utils.tob64(inputData, true);
+
+      byte[] decoded = Base64Utils.fromb64(s);
+      byte[] decodedp = Base64Utils.fromb64(sp);
+       
+      //assertTrue("Whole result data has to be within the range for base64", isInRange(result));
+
+      assertArrayEquals("Encode-Decode test failed, results are not the same.", inputData, decoded);
+      assertArrayEquals("Encode-Decode test for padding failed, results are not the same.", inputData, decodedp);
+   }
+   
+   private byte[] generateData(final int len) {
+       byte[] data = new byte[len];
+       for (int i = 0; i < len ; i++) {
+           data[i] = (byte)i;
+       }
+       return data;
+   }
+   
 }
