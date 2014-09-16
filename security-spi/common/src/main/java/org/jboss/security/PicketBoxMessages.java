@@ -464,4 +464,7 @@ public interface PicketBoxMessages {
     @Message(id = 142, value = "Keystore password should be either masked or prefixed with one of {EXT}, {EXTC}, {CMD}, {CMDC}, {CLASS}")
     String invalidKeystorePasswordFormatMessage();
 
+    @Message(id = 143, value = "Unable to initialize login context")
+    String unableToInitializeLoginContext(@Cause Throwable cause);
+
 }
