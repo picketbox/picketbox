@@ -94,4 +94,14 @@ public interface AuthenticationManager extends BaseSecurityManager
     * @return principal from a target security domain
     */
    Principal getTargetPrincipal(Principal anotherDomainPrincipal, Map<String,Object> contextMap);
+
+    /**
+     * This method must be invoked to perform the logout of the incoming principal. The {@code Subject} associated with
+     * the principal is also provided, allowing implementations to perform any special cleanup based on the information
+     * contained in the {@code Subject}.
+     *
+     * @param principal the {@code Principal} being logged out.
+     * @param subject the {@code Subject} associated with the principal being logged out.
+     */
+   public void logout(Principal principal, Subject subject);
 }

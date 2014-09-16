@@ -143,5 +143,15 @@ public class NullSecurityManager
         HashSet<Principal> roles = new HashSet<Principal>();
         roles.add(AnybodyPrincipal.ANYBODY_PRINCIPAL);
         return roles;
-    }  
+    }
+
+    /**
+     * No-op implementation.
+     *
+     * @param principal the {@code Principal} being logged out.
+     * @param subject the {@code Subject} associated with the principal being logged out.
+     */
+    public void logout(Principal principal, Subject subject) {
+        // nothing to do.
+    }
 }
