@@ -349,7 +349,6 @@ public class PicketBoxSecurityVault implements SecurityVault
 
          maskedString = maskedString.substring(PASS_MASK_PREFIX.length());
          String decodedValue = PBEUtils.decode64(maskedString, pbeAlgo, cipherKey, cipherSpec);
-
          maskedString = decodedValue;
       }
       return maskedString;

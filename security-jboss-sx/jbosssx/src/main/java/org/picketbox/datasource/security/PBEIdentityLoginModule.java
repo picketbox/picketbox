@@ -230,7 +230,15 @@ public class PBEIdentityLoginModule
       SecretKeyFactory factory = SecretKeyFactory.getInstance(pbealgo);
       SecretKey cipherKey = factory.generateSecret(keySpec);
       // Decode the secret
-      byte[] encoding = Base64Utils.fromb64(secret);
+      byte[] encoding;
+      try {
+         encoding = Base64Utils.fromb64(secret);
+      }
+      catch (IllegalArgumentException e) {
+         // fallback when original string is was created with faulty version of Base64 
+         encoding = Base64Utils.fromb64("0" + secret);
+         PicketBoxLogger.LOGGER.wrongBase64StringUsed("0" + secret);
+      }
       Cipher cipher = Cipher.getInstance(pbealgo);
       cipher.init(Cipher.DECRYPT_MODE, cipherKey, cipherSpec);
       byte[] decode = cipher.doFinal(encoding);

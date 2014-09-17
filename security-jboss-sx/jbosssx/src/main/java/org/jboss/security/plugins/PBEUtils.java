@@ -28,6 +28,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
 import org.jboss.security.Base64Utils;
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
 
 /** Ecrypt a password using the JaasSecurityDomain password
@@ -77,7 +78,15 @@ public class PBEUtils
       SecretKey cipherKey, PBEParameterSpec cipherSpec)
       throws Exception
    {
-      byte[] encoding = Base64Utils.fromb64(secret);
+      byte [] encoding;
+      try {
+         encoding = Base64Utils.fromb64(secret);
+      }
+      catch (IllegalArgumentException e) {
+         // fallback when original string is was created with faulty version of Base64 
+         encoding = Base64Utils.fromb64("0" + secret);
+         PicketBoxLogger.LOGGER.wrongBase64StringUsed("0" + secret);
+      }
       byte[] decode = decode(encoding, cipherAlgorithm, cipherKey, cipherSpec);
       return new String(decode, "UTF-8");
    }
