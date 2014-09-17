@@ -123,6 +123,34 @@ public class SecurityVaultUnitTestCase
       assertFalse("Shared key returned from hadshake cannot contain line break character", containsLineBreaks);
    }
 
+   
+   @Test
+   public void testMaskedPasswordFallback() throws Exception {
+
+      setInitialVaulConditions(
+              "src/test/resources/vault-fallback/vault-fallback.keystore", "target/vaults/vault-fallback/vault-fallback.keystore", 
+              "src/test/resources/vault-fallback/vault_data", "target/vaults/vault-fallback/vault_data");
+      
+      // see src/test/resources/vault-fallback/readme.txt
+      // this test uses wrongly generated maked password value and should fallback to correct one 
+      final Map<String, Object> options = getVaultOptionsMap(
+            "target/vaults/vault-fallback/vault-fallback.keystore", 
+            "target/vaults/vault-fallback/vault_data", 
+            "valias", "bdfbdf12", 12, "MASK-UWB5tlhOmKYzJVl9KZaPN");
+      
+      SecurityVault vault = getNewSecurityVaultInstance();
+      assertFalse(vault.isInitialized());
+      
+      vault.init(options);
+      assertTrue(vault.isInitialized());
+      
+      vault.handshake(null);
+      
+      // let's try to check if proper values are stored in the vault
+      assertSecretValue(vault, "vblock", "attr1", "secret1");
+      
+   }
+   
    @Test
    public void testStoreAndRetrieve() throws Exception
    {
@@ -439,6 +467,9 @@ public class SecurityVaultUnitTestCase
       if (Util.isPasswordCommand(pwd))
          return pwd;
 
+      if (pwd.startsWith(PicketBoxSecurityVault.PASS_MASK_PREFIX)) 
+         return pwd;
+      
       String algo = "PBEwithMD5andDES";
       
       // Create the PBE secret key 
