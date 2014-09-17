@@ -724,4 +724,8 @@ public interface PicketBoxLogger extends BasicLogger {
     @Message(id = 375, value = "Error getting the module classloader informations for cache")
     void errorGettingModuleInformation(@Cause Throwable cause);
     
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 376, value = "Wrong Base64 string used with masked password utility. Following is correct (%s)")
+    void wrongBase64StringUsed(String fixedBase64);
+
 }
