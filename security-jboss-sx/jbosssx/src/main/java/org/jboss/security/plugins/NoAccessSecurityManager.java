@@ -138,5 +138,15 @@ public class NoAccessSecurityManager
         HashSet<Principal> roles = new HashSet<Principal>();
         roles.add(NobodyPrincipal.NOBODY_PRINCIPAL);
         return roles;
-    } 
+    }
+
+    /**
+     * No-op implementation: no user was previously authenticated by this manager so there's no state left to cleanup.
+     *
+     * @param principal the {@code Principal} being logged out.
+     * @param subject the {@code Subject} associated with the principal being logged out.
+     */
+    public void logout(Principal principal, Subject subject) {
+        // nothing to do here
+    }
 }

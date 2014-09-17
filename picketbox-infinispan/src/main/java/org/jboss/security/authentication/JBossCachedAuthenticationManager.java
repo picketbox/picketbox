@@ -160,17 +160,20 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
    public void flushCache()
    {
       PicketBoxLogger.LOGGER.traceFlushWholeCache();
-      if (domainCache != null)
-         domainCache.clear();
+      if (domainCache != null) {
+         for (Principal principal : domainCache.keySet()) {
+            this.flushCache(principal);
+         }
+      }
    }
 
    @Override
    public void flushCache(Principal key)
    {
-      if (domainCache != null && key != null) {
-         PicketBoxLogger.LOGGER.traceFlushCacheEntry(key.getName());
-         domainCache.remove(key);
-      }
+      if (key != null && this.domainCache != null && this.domainCache.containsKey(key))
+         // this is currently done to preserve backwards compatibility - logout removes the entry from the cache and performs
+         // the JAAS logout.
+         this.logout(key, null);
    }
 
    @Override
@@ -521,6 +524,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 
       protected ClassLoader contextClassLoader = null;
 
+      @Deprecated
       public void logout()
       {
          if (loginContext != null)
@@ -535,5 +539,52 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
             }
          }
       }
+   }
+
+   @Override
+   public void logout(Principal principal, Subject subject) {
+       LoginContext context = null;
+
+       // if a cache is active, remove the principal from the cache and try to perform the logout using the cached context.
+       if (domainCache != null && principal != null) {
+           PicketBoxLogger.LOGGER.traceFlushCacheEntry(principal.getName());
+           DomainInfo info = domainCache.get(principal);
+           domainCache.remove(principal);
+           if (info != null && info.loginContext != null) {
+               context = info.loginContext;
+               subject = info.subject;
+           }
+       }
+
+       // if no cached context was found, create a new one with the incoming subject.
+       if (context == null) {
+          Object[] securityInfo = {principal, null};
+          CallbackHandler theHandler = null;
+          if (subject == null)
+              subject = new Subject();
+          try
+          {
+             theHandler = callbackHandler.getClass().newInstance();
+             setSecurityInfo.invoke(theHandler, securityInfo);
+             context = SubjectActions.createLoginContext(securityDomain, subject, theHandler);
+          }
+          catch (Throwable e)
+          {
+             LoginException le = new LoginException(PicketBoxMessages.MESSAGES.unableToInitializeLoginContext(e));
+             le.initCause(e);
+             SubjectActions.setContextInfo("org.jboss.security.exception", le);
+             return;
+          }
+       }
+
+       // perform the JAAS logout.
+       try {
+           context.logout();
+           PicketBoxLogger.LOGGER.traceLogoutSubject(context.toString(), SubjectActions.toString(subject));
+       }
+       catch (LoginException le) {
+           SubjectActions.setContextInfo("org.jboss.security.exception", le);
+       }
+
    }
 }

@@ -724,4 +724,8 @@ public interface PicketBoxLogger extends BasicLogger {
     @Message(id = 376, value = "Wrong Base64 string used with masked password utility. Following is correct (%s)")
     void wrongBase64StringUsed(String fixedBase64);
 
+    @LogMessage(level = Logger.Level.TRACE)
+    @Message(id = 377, value = "JAAS logout, login context: %s, subject: %s")
+    void traceLogoutSubject(String loginContext, String subject);
+
 }

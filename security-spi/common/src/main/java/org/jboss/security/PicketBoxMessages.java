@@ -470,4 +470,7 @@ public interface PicketBoxMessages {
     @Message(id = 144, value = "Trying to load null or empty class")
     RuntimeException loadingNullorEmptyClass();
 
+    @Message(id = 145, value = "Unable to initialize login context")
+    String unableToInitializeLoginContext(@Cause Throwable cause);
+
 }
