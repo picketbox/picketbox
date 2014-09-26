@@ -1,14 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <parent>
      <groupId>org.jboss</groupId>
      <artifactId>jboss-parent</artifactId>
-     <version>5</version>
+     <version>11-redhat-1</version>
    </parent>
 
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.picketbox</groupId>
    <artifactId>picketbox-bare</artifactId>
-   <version>4.1.0.Beta2</version>
+   <version>4.1.0.Beta2-redhat-SNAPSHOT</version>
    <packaging>jar</packaging>
    <name>Picketbox</name>
    <url>http://jboss.org/picketbox</url>
@@ -94,7 +95,6 @@
            <plugin>
                 <groupId>org.jboss.maven.plugins</groupId>
                 <artifactId>maven-injection-plugin</artifactId>
-                <version>1.0.2</version>
                 <executions>
                     <execution>
                         <phase>compile</phase>
