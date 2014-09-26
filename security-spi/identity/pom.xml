@@ -2,7 +2,7 @@
    <parent>
       <groupId>org.picketbox</groupId>
       <artifactId>picketbox-spi-parent</artifactId>
-      <version>4.1.0.Beta2-SNAPSHOT</version>
+      <version>4.1.0.Beta2</version>
       <relativePath>../parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
@@ -22,9 +22,9 @@
        <url>http://www.jboss.org</url>
     </organization>
     <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/security-spi/tags/4.1.0.Beta2-SNAPSHOT</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/security-spi/tags/4.1.0.Beta2-SNAPSHOT</developerConnection>
-      <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/picketbox/security-spi/tags/4.1.0.Beta2-SNAPSHOT</url>
+      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/security-spi/tags/4.1.0.Beta2</connection>
+      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/security-spi/tags/4.1.0.Beta2</developerConnection>
+      <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/picketbox/security-spi/tags/4.1.0.Beta2</url>
     </scm>
     <dependencies>
       <dependency>
