@@ -28,7 +28,11 @@ public class LogAuditProvider extends AbstractAuditProvider
 { 
 
    public void audit(AuditEvent auditEvent)
-   {  
+   {
+      if(!PicketBoxLogger.AUDIT_LOGGER.isTraceEnabled())
+      {
+          return;
+      }
       Exception e = auditEvent.getUnderlyingException();
       if(e != null)
       {
