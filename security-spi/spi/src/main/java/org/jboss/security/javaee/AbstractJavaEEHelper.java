@@ -95,9 +95,10 @@ public abstract class AbstractJavaEEHelper
    {
       if(securityContext.getAuditManager() == null)
          return;
-      Map<String,Object> auditContextMap = new HashMap<String,Object>();
-      auditContextMap.putAll(resource.getMap());
-      auditContextMap.put("Resource:", resource.toString());
+      Map<String, Object> contextualMap = resource.getMap();
+      Map<String,Object> auditContextMap = new HashMap<String,Object>(contextualMap.size() + 3);
+      auditContextMap.putAll(contextualMap);
+      auditContextMap.put("Resource:", resource);
       auditContextMap.put("Action", "authorization");
       if (e != null) {
          //Authorization Exception stacktrace is huge. Scale it down
