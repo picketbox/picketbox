@@ -112,9 +112,13 @@ public class SimpleRole implements Role, Cloneable
    @Override
    public boolean equals(Object obj)
    {
+      if (obj == this)
+      {
+         return true;
+      }
       if (obj instanceof SimpleRole)
       {
-         SimpleRole other = SimpleRole.class.cast(obj);
+         SimpleRole other = (SimpleRole) obj;
          return parent != null ? (roleName.equals(other.roleName) && parent.equals(other.parent)) :
                  (roleName.equals(other.roleName) && other.parent == null);
       }
