@@ -211,10 +211,10 @@ public interface PicketBoxMessages {
     @Message(id = 61, value = "Invalid null TransactionManager")
     IllegalStateException invalidNullTransactionManager();
 
-    @Message(id = 62, value = "No matching username found found in principals")
+    @Message(id = 62, value = "No matching username found in principals")
     FailedLoginException noMatchingUsernameFoundInPrincipals();
 
-    @Message(id = 63, value = "No matching username found found in roles")
+    @Message(id = 63, value = "No matching username found in roles")
     FailedLoginException noMatchingUsernameFoundInRoles();
 
     @Message(id = 64, value = "Error looking up DataSource from %s")
