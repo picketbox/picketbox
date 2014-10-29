@@ -30,6 +30,9 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
+import org.jboss.security.plugins.ClassLoaderLocator;
+import org.jboss.security.plugins.ClassLoaderLocatorFactory;
+
 
 /**
  *  Privileged Blocks
@@ -84,14 +87,22 @@ class SecurityActions
        });
    }
 
-   static Class<?> loadClass(final String name) throws PrivilegedActionException
+   static Class<?> loadClass(final String name, final String jbossModuleName) throws PrivilegedActionException
    {
       return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>()
       {
          public Class<?> run() throws ClassNotFoundException
          {
+            ClassLoader moduleCL = null;
+            if (jbossModuleName != null && jbossModuleName.length() > 0) 
+            {
+                ClassLoaderLocator locator = ClassLoaderLocatorFactory.get();
+                if (locator != null)
+                   moduleCL = locator.get(jbossModuleName);
+            }
             ClassLoader[] cls = new ClassLoader[] {
                   getContextClassLoader(), // User defined classes
+                  moduleCL, // user defined module class loader
                   SecurityActions.class.getClassLoader(), // PB classes (not always on TCCL [modular env])
                   ClassLoader.getSystemClassLoader() }; // System loader, usually has app class path
 
@@ -113,5 +124,10 @@ class SecurityActions
             throw e != null ? e : new ClassNotFoundException(name);
          }
       });
+   }
+
+   static Class<?> loadClass(final String name) throws PrivilegedActionException
+   {
+      return loadClass(name, null);
    }
 }
