@@ -74,10 +74,11 @@ public abstract class AbstractServerLoginModule implements LoginModule
    private static final String USE_FIRST_PASSWORD = "useFirstPass";
    private static final String PRINCIPAL_CLASS = "principalClass";
    private static final String UNAUTHENTICATED_IDENTITY = "unauthenticatedIdentity";
-  
+   private static final String MODULE = "module";
+
    private static final String[] ALL_VALID_OPTIONS =
    {
-	   PASSWORD_STACKING,USE_FIRST_PASSWORD,PRINCIPAL_CLASS,UNAUTHENTICATED_IDENTITY,
+	   PASSWORD_STACKING,USE_FIRST_PASSWORD,PRINCIPAL_CLASS,UNAUTHENTICATED_IDENTITY,MODULE,
 	   SecurityConstants.SECURITY_DOMAIN_OPTION
    };
    
@@ -98,6 +99,8 @@ public abstract class AbstractServerLoginModule implements LoginModule
    protected String principalClassName;
    /** the principal to use when a null username and password are seen */
    protected Principal unauthenticatedIdentity;
+   /** jboss module name to load Callback class etc */
+   protected String jbossModuleName;
 
    protected Logger log = Logger.getLogger(AbstractServerLoginModule.class);
 
@@ -165,6 +168,8 @@ public abstract class AbstractServerLoginModule implements LoginModule
             PicketBoxLogger.LOGGER.warnFailureToCreateUnauthIdentity(e);
          }
       }
+
+      jbossModuleName = (String)options.get(MODULE);
    }
 
    /** Looks for javax.security.auth.login.name and javax.security.auth.login.password

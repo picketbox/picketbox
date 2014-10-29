@@ -24,6 +24,7 @@ package org.jboss.security.auth.spi;
 import org.jboss.crypto.digest.DigestCallback;
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
+import org.jboss.security.plugins.ClassLoaderLocatorFactory;
 import org.jboss.security.vault.SecurityVaultException;
 import org.jboss.security.vault.SecurityVaultUtil;
 
@@ -31,6 +32,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
@@ -171,7 +173,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
       {
          try
          {
-            Class<?> validatorClass = SecurityActions.loadClass(flag); 
+            Class<?> validatorClass = SecurityActions.loadClass(flag, jbossModuleName);
             this.inputValidator = (InputValidator) validatorClass.newInstance();
          }
          catch(Exception e)
@@ -409,7 +411,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
       {
          try
          {
-            Class<?> callbackClass = SecurityActions.loadClass(callbackClassName);
+            Class<?> callbackClass = SecurityActions.loadClass(callbackClassName, jbossModuleName);
             callback = (DigestCallback) callbackClass.newInstance();
             PicketBoxLogger.LOGGER.traceCreateDigestCallback(callbackClassName);
          }
