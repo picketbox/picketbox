@@ -27,11 +27,14 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+
+import org.jboss.modules.Module;
+import org.jboss.modules.ModuleIdentifier;
+import org.jboss.modules.ModuleLoader;
 
 
 /**
@@ -61,9 +64,10 @@ public class Util
     * command is a string delimited by ',' where the first part is the actual
     * command and further parts represents its parameters. The comma can be
     * backslashed in order to keep it as a part of the parameter.
-    * '{CLASS}classname[:ctorargs]' where the '[:ctorargs]' is an optional
+    * '{CLASS[@jboss_module_spec]}classname[:ctorargs]' where the '[:ctorargs]' is an optional
     * string delimited by the ':' from the classname that will be passed to the
     * classname ctor. The ctorargs itself is a comma delimited list of strings.
+    * The jboss_module is JBoss Modules module identifier to load the CLASS from.
     * The password is obtained from classname by invoking a
     * 'char[] toCharArray()' method if found, otherwise, the 'String toString()'
     * method is used.
@@ -122,8 +126,12 @@ public class Util
          } else if (passwordCmdType.startsWith("EXT") || passwordCmdType.startsWith("CMD")) {
             // non-cached variant
             password = switchCommandExecution(passwordCmdType, passwordCmd);
-         } else if (passwordCmdType.equals("CLASS")) {
-            password = invokePasswordClass(passwordCmd);
+         } else if (passwordCmdType.startsWith("CLASS")) {
+            String module = null;
+            if (passwordCmdType.indexOf('@') > -1) {
+               module = passwordCmdType.split("@")[1];
+            }
+            password = invokePasswordClass(passwordCmd, module);
          } else {
             throw PicketBoxMessages.MESSAGES.invalidPasswordCommandType(passwordCmdType);
          }
@@ -156,7 +164,7 @@ public class Util
       return password.toCharArray();
    }
 
-   private static char[] invokePasswordClass(String passwordCmd)
+   private static char[] invokePasswordClass(String passwordCmd, String moduleSpec)
          throws Exception
    {
       char[] password = null;
@@ -170,8 +178,7 @@ public class Util
          classname = passwordCmd.substring(0, colon);
          ctorArgs = passwordCmd.substring(colon+1);
       }
-      ClassLoader loader = AccessController.doPrivileged(GetTCLAction.ACTION);
-      Class<?> c = loader.loadClass(classname);
+      Class<?> c = loadClass(classname, moduleSpec);
       Object instance = null;
       // Check for a ctor(String,...) if ctorArg is not null
       if( ctorArgs != null )
@@ -208,15 +215,29 @@ public class Util
       return password;
    }
 
-   private static class GetTCLAction implements PrivilegedAction<ClassLoader>
-   {
-      static PrivilegedAction<ClassLoader> ACTION = new GetTCLAction();
-      public ClassLoader run()
-      {
-         return Thread.currentThread().getContextClassLoader();
-      }
+   private static Class<?> loadClass(final String fqn, final String module) {
+      try {
+         Class<?> passwdClass = AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
+             @Override
+             public Class<?> run() throws Exception {
+                 if (fqn == null || fqn.isEmpty()) {
+                     throw PicketBoxMessages.MESSAGES.loadingNullorEmptyClass();
+                 } else if (module == null ) {
+                     ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                     return cl.loadClass(fqn);
+                 } else {
+                     ModuleLoader loader = Module.getCallerModuleLoader();
+                     final Module pwdClassModule = loader.loadModule(ModuleIdentifier.fromString(module));
+                     return pwdClassModule.getClassLoader().loadClass(fqn);
+                 }
+             }
+         });
+         return passwdClass;
+     } catch (PrivilegedActionException e) {
+         throw PicketBoxMessages.MESSAGES.unableToLoadPasswordClass(e.getCause(), fqn);
+     }
    }
-
+   
    private static String execCmd(String cmd) throws Exception
    {
       SecurityManager sm = System.getSecurityManager();
@@ -387,7 +408,7 @@ public class Util
                   || passwordCmd.startsWith("{EXTC")  // it has to be without closing brace to cover :<time in millis>
                   || passwordCmd.startsWith("{CMD}")
                   || passwordCmd.startsWith("{CMDC")  // it has to be without closing brace to cover :<time in millis>
-                  || passwordCmd.startsWith("{CLASS}"));
+                  || passwordCmd.startsWith("{CLASS")); // it has to be without losing brace to cover @jboss_module
    }
 
    /**
