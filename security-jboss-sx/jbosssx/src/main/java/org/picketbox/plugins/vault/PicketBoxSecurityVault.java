@@ -76,7 +76,7 @@ import java.util.StringTokenizer;
  * command is a string delimited by ',' where the first part is the actual
  * command and further parts represents its parameters. The comma can be
  * backslashed in order to keep it as the part of a parameter.
- * '{CLASS}classname[:ctorargs]' where the '[:ctorargs]' is an optional
+ * '{CLASS[@modulename]}classname[:ctorargs]' where the '[:ctorargs]' is an optional
  * string delimited by the ':' from the classname that will be passed to the
  * classname ctor. The ctorargs itself is a comma delimited list of strings.
  * The password is obtained from classname by invoking a
@@ -197,7 +197,7 @@ public class PicketBoxSecurityVault implements SecurityVault
 
       
       createKeyStore = (options.get(CREATE_KEYSTORE) != null ? Boolean.parseBoolean((String) options.get(CREATE_KEYSTORE))
-            : createKeyStore);
+            : false);
       keyStoreType = (options.get(KEYSTORE_TYPE) != null ? (String) options.get(KEYSTORE_TYPE) : defaultKeyStoreType);
 
       try {
@@ -375,6 +375,9 @@ public class PicketBoxSecurityVault implements SecurityVault
           adminKey = sk; 
       }
       else {
+          if (!createKeyStore) {
+              throw PicketBoxMessages.MESSAGES.vaultDoesnotContainSecretKey(alias);
+          }
           // try to generate new admin key and store it under specified alias
           EncryptionUtil util = new EncryptionUtil(encryptionAlgorithm, keySize);
           sk = util.generateKey();
