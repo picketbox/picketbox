@@ -464,4 +464,10 @@ public interface PicketBoxMessages {
     @Message(id = 142, value = "Keystore password should be either masked or prefixed with one of {EXT}, {EXTC}, {CMD}, {CMDC}, {CLASS}")
     String invalidKeystorePasswordFormatMessage();
 
+    @Message(id = 143, value = "Unable to load password class (%s). Try to specify module to load class from using '{CLASS@module}class_name'")
+    RuntimeException unableToLoadPasswordClass(@Cause Throwable t, String classToLoad);
+
+    @Message(id = 144, value = "Trying to load null or empty class")
+    RuntimeException loadingNullorEmptyClass();
+
 }
