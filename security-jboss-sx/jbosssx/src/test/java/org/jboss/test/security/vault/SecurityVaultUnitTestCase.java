@@ -130,7 +130,7 @@ public class SecurityVaultUnitTestCase
       Map<String,Object> options = getVaultOptionsMap(
             "target/vaults/long_alias_keystore/vault.jks", 
             "target/vaults/long_alias_keystore/vault_data", 
-            "superverylongvaultname", "87654321", 23, "password1234"); 
+            "superverylongvaultname", "87654321", 23, "password1234", Boolean.TRUE);
 
       vault.init(options);
       assertTrue("Vault is supposed to be inicialized", vault.isInitialized());
@@ -514,7 +514,7 @@ public class SecurityVaultUnitTestCase
    
 
    private Map<String, Object> getVaultOptionsMap(String keystore, String encDataDir, String alias, String salz, int iter,
-         String password) throws Exception {
+         String password, Boolean createKeystore) throws Exception {
       Map<String, Object> options = new HashMap<String, Object>();
       options.put(PicketBoxSecurityVault.KEYSTORE_URL, keystore);
       options.put(PicketBoxSecurityVault.KEYSTORE_PASSWORD, getMaskedPassword(password, salz, iter));
@@ -522,9 +522,18 @@ public class SecurityVaultUnitTestCase
       options.put(PicketBoxSecurityVault.SALT, salz);
       options.put(PicketBoxSecurityVault.ITERATION_COUNT, String.valueOf(iter));
       options.put(PicketBoxSecurityVault.ENC_FILE_DIR, encDataDir);
+      if (createKeystore != null) {
+         options.put(PicketBoxSecurityVault.CREATE_KEYSTORE, createKeystore.toString());
+      }
       return options;
    }
-   
+
+   private Map<String, Object> getVaultOptionsMap(String keystore, String encDataDir, String alias, String salz, int iter,
+                                                   String password) throws Exception {
+      return getVaultOptionsMap(keystore, encDataDir, alias, salz, iter, password, null);
+   }
+
+
    public static void setInitialVaulConditions(String originalKeyStoreFile, String targetKeyStoreFile,
          String originalVaultContentDir, String targetVaultContentDir) throws Exception {
 
