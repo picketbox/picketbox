@@ -389,4 +389,45 @@ public class JaasSecurityManagerBase
       PicketBoxLogger.LOGGER.traceDefaultLoginSubject(lc.toString(), SubjectActions.toString(subject));
       return lc;
    }
+
+    /**
+     * Performs the JAAS logout. The incoming {@code Subject} is used to create the {@code LoginContext}
+     * and passed to the JAAS login modules so that proper cleanup can be performed by each module.
+     *
+     * @param principal the {@code Principal} being logged out.
+     * @param subject the {@code Subject} associated with the principal being logged out.
+     */
+    public void logout(Principal principal, Subject subject) {
+
+        if (subject == null)
+            subject = new Subject();
+
+        LoginContext context = null;
+
+        // create the login context using the incoming principal and subject.
+        Object[] securityInfo = {principal, null};
+        CallbackHandler theHandler = null;
+        try
+        {
+            theHandler = handler.getClass().newInstance();
+            setSecurityInfo.invoke(theHandler, securityInfo);
+            context = SubjectActions.createLoginContext(securityDomain, subject, theHandler);
+        }
+        catch (Throwable e)
+        {
+            LoginException le = new LoginException(PicketBoxMessages.MESSAGES.unableToInitializeLoginContext(e));
+            le.initCause(e);
+            SubjectActions.setContextInfo("org.jboss.security.exception", le);
+            return;
+        }
+
+        // perform the JAAS logout.
+        try {
+            context.logout();
+            PicketBoxLogger.LOGGER.traceLogoutSubject(context.toString(), SubjectActions.toString(subject));
+        }
+        catch (LoginException le) {
+            SubjectActions.setContextInfo("org.jboss.security.exception", le);
+        }
+    }
 }
