@@ -21,8 +21,6 @@
 */
 package org.jboss.security;
 
-import java.security.AccessController;
-
 import javax.security.auth.AuthPermission;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.AppConfigurationEntry;
@@ -44,7 +42,10 @@ public class AuthenticationInfo
     */
     public AppConfigurationEntry[] getAppConfigurationEntry()
     {
-        AccessController.checkPermission(GET_CONFIG_ENTRY_PERM);
+        SecurityManager manager = System.getSecurityManager();
+        if (manager != null) {
+            manager.checkPermission(GET_CONFIG_ENTRY_PERM);
+        }
         return loginModules;
     }
     /** Set an application authentication configuration. This requires an
@@ -52,7 +53,10 @@ public class AuthenticationInfo
     */
     public void setAppConfigurationEntry(AppConfigurationEntry[] loginModules)
     {
-        AccessController.checkPermission(SET_CONFIG_ENTRY_PERM);
+        SecurityManager manager = System.getSecurityManager();
+        if (manager !=  null) {
+            manager.checkPermission(SET_CONFIG_ENTRY_PERM);
+        }
         this.loginModules = loginModules;
     }
 
