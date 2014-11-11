@@ -21,7 +21,6 @@
 */
 package org.jboss.security;
 
-import java.security.AccessController;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.KeyStore;
@@ -103,12 +102,18 @@ public class AppPolicy
 
     public AuthenticationInfo getLoginInfo()
     {
-        AccessController.checkPermission(AuthenticationInfo.GET_CONFIG_ENTRY_PERM);
+        SecurityManager manager = System.getSecurityManager();
+        if (manager != null) {
+            manager.checkPermission(AuthenticationInfo.GET_CONFIG_ENTRY_PERM);
+        }
         return loginInfo;
     }
     public void setLoginInfo(AuthenticationInfo loginInfo)
     {
-        AccessController.checkPermission(AuthenticationInfo.SET_CONFIG_ENTRY_PERM);
+        SecurityManager manager = System.getSecurityManager();
+        if (manager != null) {
+            manager.checkPermission(AuthenticationInfo.SET_CONFIG_ENTRY_PERM);
+        }
         this.loginInfo = loginInfo;
     }
     public AuthorizationInfo getPermissionInfo()
