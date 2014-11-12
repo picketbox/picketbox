@@ -2,7 +2,7 @@
    <parent>
       <groupId>org.picketbox</groupId>
       <artifactId>picketbox-spi-parent</artifactId>
-      <version>4.0.21.Final</version>
+      <version>4.0.22.Beta1-SNAPSHOT</version>
       <relativePath>parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
