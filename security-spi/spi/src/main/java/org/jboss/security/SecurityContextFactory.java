@@ -155,6 +155,10 @@ public class SecurityContextFactory
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("security domain");
       if(fqnClass == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("fqnClass");
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".createSecurityContext"));
+      }
       defaultSecurityContextClass = getContextClass(fqnClass, classLoader);
       defaultSecurityContextConstructor = (Constructor<SecurityContext>) defaultSecurityContextClass.getConstructor(CONTEXT_CONSTRUCTOR_TYPES);
       return createSecurityContext(securityDomain, defaultSecurityContextConstructor);
