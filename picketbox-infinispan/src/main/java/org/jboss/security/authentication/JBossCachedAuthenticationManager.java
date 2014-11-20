@@ -75,6 +75,8 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 
    private boolean deepCopySubjectOption = false;
 
+   protected ThreadLocal<CompoundInfo> validatedDomainInfo = new ThreadLocal<CompoundInfo>();
+
    /**
     * Create a new JBossCachedAuthenticationManager using the
     * default security domain and {@link CallbackHandler} implementation.
@@ -143,7 +145,14 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
       {
          isValid = validateCache(cachedEntry, credential, activeSubject);
       }
-
+      if (!isValid)
+      {
+         CompoundInfo threadDomainInfo = validatedDomainInfo.get();
+         if (threadDomainInfo != null && threadDomainInfo.getPrincipal().equals(principal))
+         {
+            isValid = validateCache(threadDomainInfo.getDomainInfo(), credential, activeSubject);
+         }
+      }
       if (!isValid)
          isValid = authenticate(principal, credential, activeSubject);
 
@@ -166,6 +175,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
             this.flushCache(principal);
          }
       }
+      validatedDomainInfo.remove();
    }
 
    @Override
@@ -175,6 +185,10 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
          // this is currently done to preserve backwards compatibility - logout removes the entry from the cache and performs
          // the JAAS logout.
          this.logout(key, null);
+         if(validatedDomainInfo.get() != null && validatedDomainInfo.get().getPrincipal().equals(key))
+         {
+             validatedDomainInfo.remove();
+         }
    }
 
    @Override
@@ -487,6 +501,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
       // If the user already exists another login is active. Currently
       // only one is allowed so remove the old and insert the new
       domainCache.put(principal != null ? principal : new org.jboss.security.SimplePrincipal("null"), info);
+      validatedDomainInfo.set(new CompoundInfo(principal != null ? principal : new org.jboss.security.SimplePrincipal("null"), info));
       PicketBoxLogger.LOGGER.traceInsertedCacheInfo(info.toString());
       return info.subject;
    }
@@ -586,5 +601,28 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
            SubjectActions.setContextInfo("org.jboss.security.exception", le);
        }
 
+   }
+   
+   public static class CompoundInfo implements Serializable
+   {
+       private static final long serialVersionUID = 6166340683654430183L;
+       private final Principal principal;
+
+       private final DomainInfo domainInfo;
+
+       public CompoundInfo(Principal principal, DomainInfo domainInfo)
+       {
+           this.principal = principal;
+           this.domainInfo = domainInfo;
+       }
+       public Principal getPrincipal()
+       {
+           return principal;
+       }
+
+       public DomainInfo getDomainInfo()
+       {
+           return domainInfo;
+       }
    }
 }
