@@ -728,4 +728,7 @@ public interface PicketBoxLogger extends BasicLogger {
     @Message(id = 377, value = "JAAS logout, login context: %s, subject: %s")
     void traceLogoutSubject(String loginContext, String subject);
 
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 378, value = "Attempt to create the second Security Vault [%s] is invalid. Only one Security Vault is supported. Change your configuration, please.")
+    void attemptToCreateSecondVault(String code);
 }

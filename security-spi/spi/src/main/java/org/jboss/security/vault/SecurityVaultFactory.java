@@ -21,6 +21,7 @@
  */
 package org.jboss.security.vault;
 
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
 
 /**
@@ -74,6 +75,9 @@ public class SecurityVaultFactory
             throw new SecurityVaultException(PicketBoxMessages.MESSAGES.unableToCreateVaultMessage(), e);
          }
       }
+      else {
+         secondVaultInfo(null, fqn);
+      }
       return vault;
    }
 
@@ -111,6 +115,13 @@ public class SecurityVaultFactory
 	            throw new SecurityVaultException(PicketBoxMessages.MESSAGES.unableToCreateVaultMessage(), e);
 	         }
 	      }
+          else {
+             secondVaultInfo(classLoader.toString(), fqn);
+          }
 	      return vault;
-	   }
+   }
+
+   private static void secondVaultInfo(String module, String className) {
+      PicketBoxLogger.LOGGER.attemptToCreateSecondVault(module != null ? className + " @ " + module : className);
+   }
 }
