@@ -266,7 +266,19 @@ public class SecurityContextFactory
     */
    public static SecurityContextUtil createUtil(SecurityContext sc) throws Exception
    {
-      return createUtil(sc, SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class));
+       SecurityManager sm = System.getSecurityManager();
+       if (sm != null) {
+           sm.checkPermission(new RuntimePermission(SecurityContextFactory.class.getName() + ".createUtil"));
+       }
+       Constructor<SecurityContextUtil> ctr = defaultUtilConstructor;
+
+       if(ctr == null)
+       {
+           Class<? extends SecurityContextUtil> clazz = (Class<? extends SecurityContextUtil>) loadClass(defaultUtilClassFQN,  SecuritySPIActions.getCurrentClassLoader(SecurityContextFactory.class));
+           defaultUtilClass = clazz;
+           ctr = defaultUtilConstructor = (Constructor<SecurityContextUtil>) clazz.getConstructor(CONTEXT_UTIL_CONSTRUCTOR_TYPES);
+       }
+       return ctr.newInstance(sc);
    }
    
    /**
