@@ -266,8 +266,8 @@ public abstract class AbstractServerLoginModule implements LoginModule
     */
    public boolean abort() throws LoginException
    {
-      PicketBoxLogger.LOGGER.traceBeginAbort();
-      return true;
+      PicketBoxLogger.LOGGER.traceBeginAbort(loginOk);
+      return loginOk;
    }
    
    /** Remove the user identity and roles added to the Subject during commit.

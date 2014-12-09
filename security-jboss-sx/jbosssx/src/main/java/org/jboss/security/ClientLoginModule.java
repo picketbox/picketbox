@@ -258,7 +258,7 @@ public class ClientLoginModule implements LoginModule
     */
    public boolean abort() throws LoginException
    {
-      PicketBoxLogger.LOGGER.traceBeginAbort();
+      PicketBoxLogger.LOGGER.traceBeginAbort(true);
       if( restoreLoginIdentity == true )
       {
          SecurityAssociationActions.setSecurityContext(this.cachedSecurityContext);
