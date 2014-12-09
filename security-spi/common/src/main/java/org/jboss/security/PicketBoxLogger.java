@@ -196,8 +196,8 @@ public interface PicketBoxLogger extends BasicLogger {
     void traceBeginLogout();
 
     @LogMessage(level = Logger.Level.TRACE)
-    @Message(id = 244, value = "Begin abort method")
-    void traceBeginAbort();
+    @Message(id = 244, value = "Begin abort method, overall result: %s")
+    void traceBeginAbort(boolean loginOk);
 
     @LogMessage(level = Logger.Level.TRACE)
     @Message(id = 245, value = "Found security domain: %s")
