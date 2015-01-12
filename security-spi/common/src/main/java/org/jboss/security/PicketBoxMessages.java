@@ -371,8 +371,8 @@ public interface PicketBoxMessages {
     @Message(id = 111, value = "Usage: Base64Encoder <string> <optional hash algorithm>")
     String base64EncoderMessage();
 
-    @Message(id = 112, value = "Invalid Base64 string: %s")
-    IllegalArgumentException invalidBase64String(String base64Str);
+    @Message(id = 112, value = "Invalid empty Base64 string")
+    NumberFormatException invalidEmptyBase64String();
 
     @Message(id = 113, value = "Illegal Base64 character")
     NumberFormatException illegalBase64Character();
