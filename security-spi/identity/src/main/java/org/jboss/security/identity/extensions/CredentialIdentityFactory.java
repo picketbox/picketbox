@@ -40,7 +40,7 @@ public class CredentialIdentityFactory extends IdentityFactory
     * An empty identity
     */
    @SuppressWarnings("unchecked")
-   public static final CredentialIdentity NULL_IDENTITY = CredentialIdentityFactory.createIdentity( null, null );
+   public static final CredentialIdentity NULL_IDENTITY = CredentialIdentityFactory.createIdentity( null, null, null );
    
    private static CredentialIdentityFactory _instance = null;
    
@@ -92,7 +92,13 @@ public class CredentialIdentityFactory extends IdentityFactory
 
          public String getName()
          { 
-            return principal.getName();
+            if(principal != null)
+            {
+                return principal.getName();
+            } else
+            {
+                return null;
+            }
          }
 
          public Role getRole()
