@@ -23,7 +23,10 @@ package org.jboss.security.auth.certs;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
-import java.util.Locale;
+
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 
 import org.jboss.security.CertificatePrincipal;
 import org.jboss.security.SimplePrincipal;
@@ -32,6 +35,7 @@ import org.jboss.security.SimplePrincipal;
  * SubjectDN CN='...' element as the principal.
  * 
  * @author Scott.Stark@jboss.org
+ * @author gautric@redhat.com 
  * @version $Revision$
  */
 public class SubjectCNMapping
@@ -46,19 +50,22 @@ public class SubjectCNMapping
    public Principal toPrincipal(X509Certificate[] certs)
    {
       Principal cn = null;
+      LdapName dn = null;
+
       Principal subject = certs[0].getSubjectDN();
-      // Look for a cn=... entry in the subject DN
-      String dn = subject.getName().toLowerCase(Locale.ENGLISH);
-      int index = dn.indexOf("cn=");
-      if( index >= 0 )
-      {
-         int comma = dn.indexOf(',', index);
-         if( comma < 0 )
-            comma = dn.length();
-         String name = dn.substring(index+3, comma);
-         cn = new SimplePrincipal(name);
+
+      try {
+         dn = new LdapName(subject.getName());
+         for(Rdn rdn : dn.getRdns()) {
+             if( rdn.getType().compareToIgnoreCase("cn") == 0 ) {
+                 cn = new SimplePrincipal(rdn.getValue().toString());
+             }	
+	  }
+      } catch (InvalidNameException e) {
+      // Hope we never get inside
       }
-      else
+      
+      if( cn == null )
       {
          // Fallback to the DN
          cn = subject;
