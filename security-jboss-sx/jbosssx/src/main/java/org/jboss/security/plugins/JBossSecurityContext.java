@@ -364,6 +364,6 @@ public class JBossSecurityContext implements SecurityContext, SecurityManagerLoc
          HashMap<String,Object> cmap = (HashMap<String,Object>)contextData;
          jsc.contextData = (Map<String, Object>) (cmap).clone();
       }
-      return super.clone();
+      return jsc;
    }
 } 
