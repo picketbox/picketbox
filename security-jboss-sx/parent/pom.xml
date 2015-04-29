@@ -113,13 +113,24 @@
   
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.jboss.logging</groupId>
-        <artifactId>jboss-logging-spi</artifactId>
-        <version>2.1.1.GA</version>
-        <scope>compile</scope>
-      </dependency>
-      <dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.2.1.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-processor</artifactId>
+            <version>2.0.0.Final</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-annotations</artifactId>
+            <version>2.0.0.Final</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
          <groupId>org.jboss.spec.javax.security.jacc</groupId>
          <artifactId>jboss-jacc-api_1.5_spec</artifactId>
          <version>1.0.0.Beta1</version>

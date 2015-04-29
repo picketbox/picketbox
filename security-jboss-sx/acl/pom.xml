@@ -52,9 +52,17 @@
       <dependency>
          <groupId>org.jboss.logging</groupId>
          <artifactId>jboss-logging</artifactId>
-         <version>3.1.0.GA</version>
-         <scope>provided</scope>
       </dependency>
+       <dependency>
+           <groupId>org.jboss.logging</groupId>
+           <artifactId>jboss-logging-annotations</artifactId>
+           <scope>provided</scope>
+       </dependency>
+       <dependency>
+           <groupId>org.jboss.logging</groupId>
+           <artifactId>jboss-logging-processor</artifactId>
+           <scope>provided</scope>
+       </dependency>
       <dependency>
          <groupId>org.hibernate</groupId>
          <artifactId>hibernate-core</artifactId>

@@ -1,6 +1,8 @@
 package org.jboss.security;
 
-import org.jboss.logging.*;
+import org.jboss.logging.BasicLogger;
+import org.jboss.logging.Logger;
+import org.jboss.logging.annotations.*;
 
 import javax.security.auth.Subject;
 import java.net.URL;
@@ -10,7 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-@MessageLogger(projectCode = "PBOX")
+@MessageLogger(projectCode = "PBOX", length = 5)
 public interface PicketBoxLogger extends BasicLogger {
 
     PicketBoxLogger LOGGER = Logger.getMessageLogger(PicketBoxLogger.class,
