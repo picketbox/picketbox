@@ -138,7 +138,10 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
    {
       // first check cache
       DomainInfo cachedEntry = getCacheInfo(principal != null ? principal : new org.jboss.security.SimplePrincipal("null"));
-      PicketBoxLogger.LOGGER.traceBeginIsValid(principal, cachedEntry != null ? cachedEntry.toString() : null);
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceBeginIsValid(principal, cachedEntry != null ? cachedEntry.toString() : null);
+      }
 
       boolean isValid = false;
       if (cachedEntry != null)
@@ -244,7 +247,10 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
    private boolean validateCache(DomainInfo info, Object credential, Subject theSubject)
    {
 
-      PicketBoxLogger.LOGGER.traceBeginValidateCache(info.toString(), credential != null ? credential.getClass() : null);
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceBeginValidateCache(info.toString(), credential != null ? credential.getClass() : null);
+      }
 
       Object subjectCredential = info.credential;
       boolean isValid = false;
