@@ -34,6 +34,7 @@ import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.RunAs;
 import org.jboss.security.RunAsIdentity;
+import org.jboss.security.SimplePrincipal;
 import org.jboss.security.authorization.AuthorizationContext;
 import org.jboss.security.authorization.PolicyRegistration;
 import org.jboss.security.authorization.Resource;
@@ -69,6 +70,8 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
    protected Set<SecurityRoleRef> securityRoleReferences = null;
    
    private final Role ANYBODY_ROLE = new SimpleRole(AnybodyPrincipal.ANYBODY);
+   private final Role STAR_ROLE = new SimpleRole("**");
+   private final Principal UNAUTHENTICATED_PRINCIPAL = new SimplePrincipal("anonymous");
    
    protected boolean ejbRestrictions = false;
    
@@ -130,16 +133,26 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
       PicketBoxLogger.LOGGER.debugEJBPolicyModuleDelegateState(ejbMethod.getName(), this.methodInterface, this.methodRoles.toString());
 
       // Check if the caller is allowed to access the method
-      if(methodRoles.containsAll(ANYBODY_ROLE) == false) 
+      if(methodRoles.containsAll(ANYBODY_ROLE) == false)
       {
          // The caller is using a the caller identity
          if (callerRunAs == null)
          { 
             //AuthorizationManager am = (AuthorizationManager)policyRegistration; 
-            
+
+             // if the principal is authenticated, add the star role to its set of roles.
+             if (ejbPrincipal != null && !ejbPrincipal.equals(UNAUTHENTICATED_PRINCIPAL)) {
+                 if (principalRole == null) {
+                     principalRole = new SimpleRoleGroup(STAR_ROLE.getRoleName());
+                 } else {
+                    principalRole.addRole(STAR_ROLE);
+                 }
+             }
+
             // Now actually check if the current caller has one of the required method roles
             if(principalRole == null)
                throw PicketBoxMessages.MESSAGES.invalidNullProperty("principalRole");
+
             if(methodRoles.containsAtleastOneRole(principalRole) == false)
             {
                //Set<Principal> userRoles = am.getUserRoles(ejbPrincipal);
@@ -156,7 +169,8 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
             if(callerRunAs instanceof RunAsIdentity)
             {
                RunAsIdentity callerRunAsIdentity = (RunAsIdentity) callerRunAs;
-               RoleGroup srg = new SimpleRoleGroup(callerRunAsIdentity.getRunAsRoles()); 
+               RoleGroup srg = new SimpleRoleGroup(callerRunAsIdentity.getRunAsRoles());
+               srg.addRole(STAR_ROLE);
                
                // Check that the run-as role is in the set of method roles
                if(srg.containsAtleastOneRole(methodRoles) == false)
