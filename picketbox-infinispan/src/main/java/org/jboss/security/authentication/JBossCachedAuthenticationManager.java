@@ -76,6 +76,8 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
    private boolean deepCopySubjectOption = false;
 
    protected ThreadLocal<CompoundInfo> validatedDomainInfo = new ThreadLocal<CompoundInfo>();
+   
+   protected volatile boolean threadLocalCacheEnabled = true;
 
    /**
     * Create a new JBossCachedAuthenticationManager using the
@@ -148,7 +150,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
       {
          isValid = validateCache(cachedEntry, credential, activeSubject);
       }
-      if (!isValid)
+      if (!isValid && threadLocalCacheEnabled)
       {
          CompoundInfo threadDomainInfo = validatedDomainInfo.get();
          if (threadDomainInfo != null && threadDomainInfo.getPrincipal().equals(principal))
@@ -178,7 +180,6 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
             this.flushCache(principal);
          }
       }
-      validatedDomainInfo.remove();
    }
 
    @Override
@@ -188,10 +189,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
          // this is currently done to preserve backwards compatibility - logout removes the entry from the cache and performs
          // the JAAS logout.
          this.logout(key, null);
-         if(validatedDomainInfo.get() != null && validatedDomainInfo.get().getPrincipal().equals(key))
-         {
-             validatedDomainInfo.remove();
-         }
+         threadLocalCacheEnabled = false;
    }
 
    @Override
@@ -508,6 +506,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
       // only one is allowed so remove the old and insert the new
       domainCache.put(principal != null ? principal : new org.jboss.security.SimplePrincipal("null"), info);
       validatedDomainInfo.set(new CompoundInfo(principal != null ? principal : new org.jboss.security.SimplePrincipal("null"), info));
+      threadLocalCacheEnabled = true;
       PicketBoxLogger.LOGGER.traceInsertedCacheInfo(info.toString());
       return info.subject;
    }
