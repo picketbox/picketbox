@@ -17,13 +17,13 @@ import javax.security.auth.login.LoginException;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 
-import org.jboss.logging.Cause;
-import org.jboss.logging.Message;
-import org.jboss.logging.MessageBundle;
 import org.jboss.logging.Messages;
-import org.jboss.logging.Param;
+import org.jboss.logging.annotations.Cause;
+import org.jboss.logging.annotations.Message;
+import org.jboss.logging.annotations.MessageBundle;
+import org.jboss.logging.annotations.Param;
 
-@MessageBundle(projectCode = "PBOX")
+@MessageBundle(projectCode = "PBOX", length = 5)
 public interface PicketBoxMessages {
 
     PicketBoxMessages MESSAGES = Messages.getBundle(PicketBoxMessages.class);
