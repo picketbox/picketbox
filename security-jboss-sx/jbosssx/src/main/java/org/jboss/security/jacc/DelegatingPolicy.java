@@ -28,6 +28,7 @@ import java.security.*;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * A JAAC Policy provider implementation that delegates any non-JACC permissions
@@ -48,12 +49,12 @@ public class DelegatingPolicy extends Policy
     * Map<String, ContextPolicy> for the JACC context IDs that have been
     * committed.
     */
-   private ConcurrentHashMap<String,ContextPolicy> activePolicies = new ConcurrentHashMap<String,ContextPolicy>();
+   private ConcurrentMap<String,ContextPolicy> activePolicies = new ConcurrentHashMap<String,ContextPolicy>();
    /**
     * Map<String, ContextPolicy> for the JACC policies that are in the open
     * state and should be excluded from the active permission set.
     */ 
-   private ConcurrentHashMap<String,ContextPolicy> openPolicies = new ConcurrentHashMap<String,ContextPolicy>(); 
+   private ConcurrentMap<String,ContextPolicy> openPolicies = new ConcurrentHashMap<String,ContextPolicy>();
    /**
     * The Policy proxy returned via the PolicyProxy attribute
     */

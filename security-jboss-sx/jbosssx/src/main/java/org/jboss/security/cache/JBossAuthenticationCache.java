@@ -25,6 +25,7 @@ import java.security.Principal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.security.auth.Subject;
 
@@ -49,7 +50,7 @@ public class JBossAuthenticationCache implements SecurityCache<Principal>
    /** Concurrency Level hint to the concurrent hashmap **/
    private int concurrencyLevel = 16; 
    
-   private ConcurrentHashMap<Principal,AuthCacheObject> cacheMap = null; 
+   private ConcurrentMap<Principal,AuthCacheObject> cacheMap = null;
    
    public JBossAuthenticationCache()
    { 

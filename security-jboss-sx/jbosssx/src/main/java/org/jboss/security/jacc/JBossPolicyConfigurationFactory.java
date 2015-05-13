@@ -24,6 +24,7 @@ package org.jboss.security.jacc;
 import java.net.URL;
 import java.security.Policy;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.security.jacc.PolicyConfiguration;
 import javax.security.jacc.PolicyConfigurationFactory;
@@ -41,7 +42,7 @@ import org.jboss.security.util.state.xml.StateMachineParser;
 public class JBossPolicyConfigurationFactory extends PolicyConfigurationFactory
 {
    private StateMachine configStateMachine;
-   private ConcurrentHashMap<String,JBossPolicyConfiguration> policyConfigMap 
+   private ConcurrentMap<String,JBossPolicyConfiguration> policyConfigMap
                    = new ConcurrentHashMap<String,JBossPolicyConfiguration>();
    private DelegatingPolicy policy;
 
