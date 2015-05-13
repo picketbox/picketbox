@@ -10,6 +10,7 @@ import java.security.PrivilegedActionException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.SecurityUtil;
@@ -33,7 +34,7 @@ import org.jboss.security.plugins.ClassLoaderLocatorFactory;
  */ 
 public class JBossAuditManager implements AuditManager
 {
-   private static ConcurrentHashMap<String,AuditContext> contexts = new ConcurrentHashMap<String,AuditContext>();
+   private static ConcurrentMap<String,AuditContext> contexts = new ConcurrentHashMap<String,AuditContext>();
    
    private static AuditContext defaultContext = null;
    
