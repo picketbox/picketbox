@@ -429,7 +429,10 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
       PicketBoxLogger.LOGGER.traceDefaultLoginPrincipal(principal);
       lc = SubjectActions.createLoginContext(securityDomain, subject, theHandler);
       lc.login();
-      PicketBoxLogger.LOGGER.traceDefaultLoginSubject(lc.toString(), SubjectActions.toString(subject));
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceDefaultLoginSubject(lc.toString(), SubjectActions.toString(subject));
+      }
       return lc;
    }
 
@@ -468,7 +471,10 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
             });
        }
         info.contextClassLoader = lcClassLoader;
-      PicketBoxLogger.LOGGER.traceUpdateCache(SubjectActions.toString(subject), SubjectActions.toString(info.subject));
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceUpdateCache(SubjectActions.toString(subject), SubjectActions.toString(info.subject));
+      }
 
       // Get the Subject callerPrincipal by looking for a Group called 'CallerPrincipal'
       Set<Group> subjectGroups = subject.getPrincipals(Group.class);
@@ -508,7 +514,11 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
       // only one is allowed so remove the old and insert the new
       domainCache.put(principal != null ? principal : new org.jboss.security.SimplePrincipal("null"), info);
       validatedDomainInfo.set(new CompoundInfo(principal != null ? principal : new org.jboss.security.SimplePrincipal("null"), info));
-      PicketBoxLogger.LOGGER.traceInsertedCacheInfo(info.toString());
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceInsertedCacheInfo(info.toString());
+      }
+
       return info.subject;
    }
     /**
@@ -568,7 +578,10 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 
        // if a cache is active, remove the principal from the cache and try to perform the logout using the cached context.
        if (domainCache != null && principal != null) {
-           PicketBoxLogger.LOGGER.traceFlushCacheEntry(principal.getName());
+           if (PicketBoxLogger.LOGGER.isTraceEnabled())
+           {
+              PicketBoxLogger.LOGGER.traceFlushCacheEntry(principal.getName());
+           }
            DomainInfo info = domainCache.get(principal);
            domainCache.remove(principal);
            if (info != null && info.loginContext != null) {
@@ -601,7 +614,10 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
        // perform the JAAS logout.
        try {
            context.logout();
-           PicketBoxLogger.LOGGER.traceLogoutSubject(context.toString(), SubjectActions.toString(subject));
+           if (PicketBoxLogger.LOGGER.isTraceEnabled())
+           {
+              PicketBoxLogger.LOGGER.traceLogoutSubject(context.toString(), SubjectActions.toString(subject));
+           }
        }
        catch (LoginException le) {
            SubjectActions.setContextInfo("org.jboss.security.exception", le);
