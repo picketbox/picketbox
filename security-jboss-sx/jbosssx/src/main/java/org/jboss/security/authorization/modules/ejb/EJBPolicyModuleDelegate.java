@@ -126,11 +126,17 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
        //Get the method permissions
       if (methodRoles == null)
       {
-         String method = this.ejbMethod.getName();
-         PicketBoxLogger.LOGGER.traceNoMethodPermissions(method, methodInterface);
+         if (PicketBoxLogger.LOGGER.isTraceEnabled())
+         {
+            String method = this.ejbMethod.getName();
+            PicketBoxLogger.LOGGER.traceNoMethodPermissions(method, methodInterface);
+         }
          return AuthorizationContext.DENY;
       }
-      PicketBoxLogger.LOGGER.debugEJBPolicyModuleDelegateState(ejbMethod.getName(), this.methodInterface, this.methodRoles.toString());
+      if (PicketBoxLogger.LOGGER.isDebugEnabled())
+      {
+         PicketBoxLogger.LOGGER.debugEJBPolicyModuleDelegateState(ejbMethod.getName(), this.methodInterface, this.methodRoles.toString());
+      }
 
       // Check if the caller is allowed to access the method
       if(methodRoles.containsAll(ANYBODY_ROLE) == false)
@@ -156,9 +162,12 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
             if(methodRoles.containsAtleastOneRole(principalRole) == false)
             {
                //Set<Principal> userRoles = am.getUserRoles(ejbPrincipal);
-               String method = this.ejbMethod.getName();
-               PicketBoxLogger.LOGGER.debugInsufficientMethodPermissions(this.ejbPrincipal, this.ejbName, method,
-                       this.methodInterface, this.methodRoles.toString(), principalRole.toString(), null);
+               if (PicketBoxLogger.LOGGER.isDebugEnabled())
+               {
+                  String method = this.ejbMethod.getName();
+                  PicketBoxLogger.LOGGER.debugInsufficientMethodPermissions(this.ejbPrincipal, this.ejbName, method,
+                          this.methodInterface, this.methodRoles.toString(), principalRole.toString(), null);
+               }
                allowed = false;
             } 
          }
@@ -176,8 +185,11 @@ public class EJBPolicyModuleDelegate extends AuthorizationModuleDelegate
                if(srg.containsAtleastOneRole(methodRoles) == false)
                {
                   String method = this.ejbMethod.getName();
-                  PicketBoxLogger.LOGGER.debugInsufficientMethodPermissions(this.ejbPrincipal, this.ejbName, method,
-                          this.methodInterface, this.methodRoles.toString(), null, callerRunAsIdentity.getRunAsRoles().toString());
+                  if (PicketBoxLogger.LOGGER.isDebugEnabled())
+                  {
+                     PicketBoxLogger.LOGGER.debugInsufficientMethodPermissions(this.ejbPrincipal, this.ejbName, method,
+                             this.methodInterface, this.methodRoles.toString(), null, callerRunAsIdentity.getRunAsRoles().toString());
+                  }
                   allowed = false;
                }           
             }
