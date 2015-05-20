@@ -55,6 +55,7 @@ public class LdapAttributeMappingProviderUnitTestCase extends OpenDSUnitTestsAda
    {
       TestSuite suite = new TestSuite();
       suite.addTest(new LdapAttributeMappingProviderUnitTestCase("testLDAPAttributes")); 
+      suite.addTest(new LdapAttributeMappingProviderUnitTestCase("testLDAPMultiValueAttributes")); 
       return suite;
    }
    
@@ -128,4 +129,51 @@ public class LdapAttributeMappingProviderUnitTestCase extends OpenDSUnitTestsAda
       assertTrue("Found Emp Type", foundEmployeeType);
       assertTrue("Found Emp Number", foundEmployeeNumber);
    } 
+
+   public void testLDAPMultiValueAttributes() throws Exception
+   {    
+      StaxBasedConfigParser parser = new StaxBasedConfigParser();
+      parser.parse(Thread.currentThread().getContextClassLoader().getResourceAsStream("ldap/ldap-attributes-config.xml"));
+      
+      SecurityContext sc = SecurityContextFactory.createSecurityContext("test");
+      MappingManager mm = sc.getMappingManager();
+      assertNotNull("MappingManager != null", mm);
+      
+      MappingContext<List<Attribute<String>>> mc = mm.getMappingContext(MappingType.ATTRIBUTE.name());
+      assertNotNull("MappingContext != null", mc);
+      assertEquals("1 module", 1,mc.getModules().size());
+      HashMap<String,Object> map = new HashMap<String,Object>();
+     
+      map.put(SecurityConstants.PRINCIPAL_IDENTIFIER, new SimplePrincipal("jduke"));
+      
+      List<Attribute<String>> attList = new ArrayList<Attribute<String>>();
+      
+      mc.performMapping(map, attList);
+      attList = (List<Attribute<String>>) mc.getMappingResult().getMappedObject(); 
+      
+      boolean foundMobile1 = false;
+      boolean foundMobile2 = false;
+      boolean foundMobile3 = false;
+      
+      assertNotNull("Attribute List is not null?", attList);
+      
+      for(Attribute<String> att: attList)
+      {
+         String attName = att.getName();
+         if(attName.equals("mobile"))
+         {
+           if( att.getValue().equals("1") )
+             foundMobile1 = true;
+           else if( att.getValue().equals("2") )
+             foundMobile2 = true;
+           else if( att.getValue().equals("3") )
+             foundMobile3 = true;
+         }
+      }
+
+      assertTrue("Found mobile1", foundMobile1);
+      assertTrue("Found mobile2", foundMobile2);
+      assertTrue("Found mobile3", foundMobile3);
+   } 
+
 }

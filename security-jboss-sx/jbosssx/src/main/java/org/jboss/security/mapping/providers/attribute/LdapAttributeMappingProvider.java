@@ -244,6 +244,12 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
                      {
                         attributeList.add(AttributeFactory.createEmailAddress((String) ldapAtt.get()));   
                      }
+                     else if( ldapAtt.size() > 1 ) {
+                         for( int i = 0; i < ldapAtt.size(); i++ ) {
+                             attributeList.add(AttributeFactory.createAttribute(ldapAtt.getID(),
+                                 (String)ldapAtt.get(i)));  
+                         }
+                     }
                      else
                         attributeList.add(AttributeFactory.createAttribute(ldapAtt.getID(), 
                               (String)ldapAtt.get())); 
