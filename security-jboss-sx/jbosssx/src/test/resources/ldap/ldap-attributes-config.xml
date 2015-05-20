@@ -10,7 +10,7 @@
 			code="org.jboss.security.mapping.providers.attribute.LdapAttributeMappingProvider"
 			type="attribute">
 			<module-option 
-			name="attributeList">mail,cn,commonname,givenname,surname,employeeType,employeeNumber,facsimileTelephoneNumber</module-option>
+			name="attributeList">mail,cn,commonname,givenname,surname,employeeType,employeeNumber,facsimileTelephoneNumber,mobile</module-option>
 			<module-option name="bindDN">cn=Directory Manager</module-option>
 			<module-option name="bindCredential">password</module-option>
 			<module-option name="baseFilter">(uid={0})</module-option>
