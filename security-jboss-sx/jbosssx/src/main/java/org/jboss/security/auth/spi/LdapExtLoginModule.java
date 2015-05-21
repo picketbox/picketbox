@@ -691,7 +691,11 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                String[] attrNames = {roleAttributeID};
                Attributes result = null;
                if (sr.isRelative()) {
-                  result = ldapCtx.getAttributes(quoteDN(dn), attrNames);
+                  // SECURITY-891
+                  result = sr.getAttributes();
+                  if (result.size() == 0) {
+                     result = ldapCtx.getAttributes(quoteDN(dn), attrNames);
+                  }
                }
                else {
                   result = getAttributesFromReferralEntity(sr, user, userDN); 
