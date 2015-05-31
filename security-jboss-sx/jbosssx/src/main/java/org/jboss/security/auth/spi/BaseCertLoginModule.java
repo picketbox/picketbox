@@ -119,13 +119,19 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
          if (tempDomain instanceof SecurityDomain)
          {
             domain = tempDomain;
-            PicketBoxLogger.LOGGER.traceSecurityDomainFound(domain.getClass().getName());
+            if (PicketBoxLogger.LOGGER.isTraceEnabled())
+            {
+               PicketBoxLogger.LOGGER.traceSecurityDomainFound(domain.getClass().getName());
+            }
          }
          else {
             tempDomain = new InitialContext().lookup(SecurityConstants.JAAS_CONTEXT_ROOT + sd + "/jsse");
             if (tempDomain instanceof JSSESecurityDomain) {
                domain = tempDomain;
-               PicketBoxLogger.LOGGER.traceSecurityDomainFound(domain.getClass().getName());
+               if (PicketBoxLogger.LOGGER.isTraceEnabled())
+               {
+                  PicketBoxLogger.LOGGER.traceSecurityDomainFound(domain.getClass().getName());
+               }
             }
             else
             {
@@ -203,7 +209,10 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
       if (alias == null && credential == null)
       {
          identity = unauthenticatedIdentity;
-         PicketBoxLogger.LOGGER.traceUsingUnauthIdentity(identity.toString());
+         if (PicketBoxLogger.LOGGER.isTraceEnabled())
+         {
+            PicketBoxLogger.LOGGER.traceUsingUnauthIdentity(identity.toString());
+         }
       }
 
       if (identity == null)
@@ -303,7 +312,10 @@ public class BaseCertLoginModule extends AbstractServerLoginModule
             if (tmpCert instanceof X509Certificate)
             {
                cert = (X509Certificate) tmpCert;
-               PicketBoxLogger.LOGGER.traceCertificateFound(cert.getSerialNumber().toString(16), cert.getSubjectDN().getName());
+               if (PicketBoxLogger.LOGGER.isTraceEnabled())
+               {
+                  PicketBoxLogger.LOGGER.traceCertificateFound(cert.getSerialNumber().toString(16), cert.getSubjectDN().getName());
+               }
             }
             else if( tmpCert instanceof X509Certificate[] )
             {

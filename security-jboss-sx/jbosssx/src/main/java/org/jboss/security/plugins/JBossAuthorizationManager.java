@@ -146,7 +146,10 @@ implements AuthorizationManager
    {
       boolean hasRole = false;
       RoleGroup roles = this.getCurrentRoles(principal);
-      PicketBoxLogger.LOGGER.traceBeginDoesUserHaveRole(principal, roles != null ? roles.toString() : "");
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceBeginDoesUserHaveRole(principal, roles != null ? roles.toString() : "");
+      }
       if(roles != null)
       {
          Iterator<Principal> iter = rolePrincipals.iterator();
@@ -378,14 +381,20 @@ implements AuthorizationManager
             
             //Append the principals also
             contextMap.put(SecurityConstants.PRINCIPALS_SET_IDENTIFIER, subject.getPrincipals());
-            PicketBoxLogger.LOGGER.traceRolesBeforeMapping(userRoles != null ? userRoles.toString() : "");
+            if (PicketBoxLogger.LOGGER.isTraceEnabled())
+            {
+               PicketBoxLogger.LOGGER.traceRolesBeforeMapping(userRoles != null ? userRoles.toString() : "");
+            }
 
             if(userRoles == null)
                userRoles = this.getEmptyRoleGroup();
             
             mc.performMapping(contextMap, userRoles);
             mappedUserRoles = mc.getMappingResult().getMappedObject();
-            PicketBoxLogger.LOGGER.traceRolesAfterMapping(userRoles.toString());
+            if (PicketBoxLogger.LOGGER.isTraceEnabled())
+            {
+               PicketBoxLogger.LOGGER.traceRolesAfterMapping(userRoles.toString());
+            }
          }
          securityContext.getData().put(ROLES_IDENTIFIER, mappedUserRoles);
       } 

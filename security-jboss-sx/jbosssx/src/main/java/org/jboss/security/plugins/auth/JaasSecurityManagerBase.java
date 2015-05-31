@@ -386,7 +386,10 @@ public class JaasSecurityManagerBase
       PicketBoxLogger.LOGGER.traceDefaultLoginPrincipal(principal);
       lc = SubjectActions.createLoginContext(securityDomain, subject, theHandler);
       lc.login();
-      PicketBoxLogger.LOGGER.traceDefaultLoginSubject(lc.toString(), SubjectActions.toString(subject));
+      if (PicketBoxLogger.LOGGER.isDebugEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceDefaultLoginSubject(lc.toString(), SubjectActions.toString(subject));
+      }
       return lc;
    }
 
@@ -424,7 +427,10 @@ public class JaasSecurityManagerBase
         // perform the JAAS logout.
         try {
             context.logout();
-            PicketBoxLogger.LOGGER.traceLogoutSubject(context.toString(), SubjectActions.toString(subject));
+            if (PicketBoxLogger.LOGGER.isTraceEnabled())
+            {
+               PicketBoxLogger.LOGGER.traceLogoutSubject(context.toString(), SubjectActions.toString(subject));
+            }
         }
         catch (LoginException le) {
             SubjectActions.setContextInfo("org.jboss.security.exception", le);

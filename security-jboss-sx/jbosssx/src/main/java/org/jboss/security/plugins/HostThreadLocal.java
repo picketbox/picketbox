@@ -36,13 +36,19 @@ public class HostThreadLocal
    public static String get() 
    {
       String hostName = host.get();
-      PicketBoxLogger.LOGGER.traceHostThreadLocalGet(hostName, Thread.currentThread().getId());
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceHostThreadLocalGet(hostName, Thread.currentThread().getId());
+      }
       return hostName;
    }
 
    public static void set(String hostVal) 
    {
-      PicketBoxLogger.LOGGER.traceHostThreadLocalSet(hostVal, Thread.currentThread().getId());
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceHostThreadLocalSet(hostVal, Thread.currentThread().getId());
+      }
       host.set(hostVal);
    }
 

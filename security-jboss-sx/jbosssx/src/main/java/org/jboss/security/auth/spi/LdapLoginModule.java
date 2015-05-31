@@ -361,7 +361,10 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
          if (currentTCCL != null)
             SecurityActions.setContextClassLoader(null);
          ctx = new InitialLdapContext(env, null);
-         PicketBoxLogger.LOGGER.traceSuccessfulLogInToLDAP(ctx.toString());
+         if (PicketBoxLogger.LOGGER.isTraceEnabled())
+         {
+            PicketBoxLogger.LOGGER.traceSuccessfulLogInToLDAP(ctx.toString());
+         }
 
          if (bindDN != null)
          {
@@ -454,8 +457,11 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
                controls.setReturningAttributes(roleAttr);
                controls.setTimeLimit(searchTimeLimit);
                Object[] filterArgs = {userToMatch};
-               PicketBoxLogger.LOGGER.traceRolesDNSearch(rolesCtxDN, roleFilter.toString(), userToMatch,
-                       Arrays.toString(roleAttr), searchScope, searchTimeLimit);
+               if (PicketBoxLogger.LOGGER.isTraceEnabled())
+               {
+                  PicketBoxLogger.LOGGER.traceRolesDNSearch(rolesCtxDN, roleFilter.toString(), userToMatch,
+                          Arrays.toString(roleAttr), searchScope, searchTimeLimit);
+               }
                answer = ctx.search(rolesCtxDN, roleFilter.toString(), filterArgs, controls);
                while (answer.hasMore())
                {

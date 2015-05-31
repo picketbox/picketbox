@@ -163,7 +163,10 @@ public class CallerIdentityLoginModule
          if (user != null)
          {
             username = user.getName();
-            PicketBoxLogger.LOGGER.traceCurrentCallingPrincipal(username, Thread.currentThread().getName());
+            if (PicketBoxLogger.LOGGER.isTraceEnabled())
+            {
+               PicketBoxLogger.LOGGER.traceCurrentCallingPrincipal(username, Thread.currentThread().getName());
+            }
 
             // Check for a RunAsIdentity
             RunAsIdentity runAs = GetPrincipalInfoAction.peekRunAsIdentity();
