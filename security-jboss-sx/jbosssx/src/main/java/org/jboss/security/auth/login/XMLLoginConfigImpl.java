@@ -120,7 +120,10 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
    @Override
    public AppConfigurationEntry[] getAppConfigurationEntry(String appName)
    {
-      PicketBoxLogger.LOGGER.traceBeginGetAppConfigEntry(appName, appConfigs.size());
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceBeginGetAppConfigEntry(appName, appConfigs.size());
+      }
 
       // Load the config if PolicyConfig is empty
       if (this.appConfigs.size() == 0)
@@ -134,7 +137,10 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
 
       if (authInfo == null)
       {
-         PicketBoxLogger.LOGGER.traceGetAppConfigEntryViaParent(appName, parentConfig != null ? parentConfig.toString() : null);
+         if (PicketBoxLogger.LOGGER.isTraceEnabled())
+         {
+            PicketBoxLogger.LOGGER.traceGetAppConfigEntryViaParent(appName, parentConfig != null ? parentConfig.toString() : null);
+         }
          if (parentConfig != null)
             entry = parentConfig.getAppConfigurationEntry(appName);
          if (entry == null)
@@ -147,7 +153,10 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
 
       if (authInfo != null)
       {
-         PicketBoxLogger.LOGGER.traceEndGetAppConfigEntryWithSuccess(appName, authInfo.toString());
+         if (PicketBoxLogger.LOGGER.isTraceEnabled())
+         {
+            PicketBoxLogger.LOGGER.traceEndGetAppConfigEntryWithSuccess(appName, authInfo.toString());
+         }
          // Make a copy of the authInfo object
          final BaseAuthenticationInfo theAuthInfo = authInfo;
          PrivilegedAction<AppConfigurationEntry[]> action = new PrivilegedAction<AppConfigurationEntry[]>()
@@ -237,7 +246,10 @@ public class XMLLoginConfigImpl extends Configuration implements Serializable, A
          sm.checkPermission(REFRESH_PERM);
       AuthenticationInfo authInfo = new AuthenticationInfo(appName);
       authInfo.setAppConfigurationEntry(entries);
-      PicketBoxLogger.LOGGER.traceAddAppConfig(appName, authInfo.toString());
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceAddAppConfig(appName, authInfo.toString());
+      }
       ApplicationPolicy aPolicy = new ApplicationPolicy(appName, authInfo);
       appConfigs.add(aPolicy);
       SecurityConfiguration.addApplicationPolicy(aPolicy);

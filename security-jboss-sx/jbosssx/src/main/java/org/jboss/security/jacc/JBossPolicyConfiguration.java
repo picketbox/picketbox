@@ -157,7 +157,10 @@ public class JBossPolicyConfiguration implements PolicyConfiguration
    public void linkConfiguration(PolicyConfiguration link)
       throws PolicyContextException
    {
-      PicketBoxLogger.LOGGER.traceLinkConfiguration(link.getContextID());
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceLinkConfiguration(link.getContextID());
+      }
       validateState("linkConfiguration");
       policy.linkConfiguration(contextID, link);
    }

@@ -228,13 +228,19 @@ public class Util
           } else {
               throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
           }
-          PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
+          if (PicketBoxLogger.LOGGER.isTraceEnabled())
+          {
+             PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
+          }
       } else {
           InputStream is = null;
           try {
               is = defaultUrl.openStream();
               bundle.load(is);
-              PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(defaultsName, bundle.keySet());
+              if (PicketBoxLogger.LOGGER.isTraceEnabled())
+              {
+                 PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(defaultsName, bundle.keySet());
+              }
           } catch (Throwable e) {
               PicketBoxLogger.LOGGER.debugFailureToLoadPropertiesFile(defaultsName, e);
           } finally {
@@ -321,7 +327,10 @@ public class Util
          {
             throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
          }
-         PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
+         if (PicketBoxLogger.LOGGER.isTraceEnabled())
+         {
+            PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
+         }
       }
 
       return bundle;

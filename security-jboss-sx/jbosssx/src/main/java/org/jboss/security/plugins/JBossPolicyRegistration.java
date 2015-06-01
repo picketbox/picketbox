@@ -90,7 +90,10 @@ public class JBossPolicyRegistration implements PolicyRegistration, Serializable
       InputStream is = null;
       try
       {
-         PicketBoxLogger.LOGGER.traceRegisterPolicy(contextID, type, location != null ? location.getPath() : null);
+         if (PicketBoxLogger.LOGGER.isTraceEnabled())
+         {
+            PicketBoxLogger.LOGGER.traceRegisterPolicy(contextID, type, location != null ? location.getPath() : null);
+         }
          is = location.openStream();
          registerPolicy(contextID, type, is);
       }

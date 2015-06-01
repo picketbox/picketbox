@@ -199,7 +199,10 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
          //REQUISITE case
          if(flag == ControlFlag.REQUISITE)
          {
-            PicketBoxLogger.LOGGER.debugRequisiteModuleFailure(module.getClass().getName());
+            if (PicketBoxLogger.LOGGER.isDebugEnabled())
+            {
+               PicketBoxLogger.LOGGER.debugRequisiteModuleFailure(module.getClass().getName());
+            }
             if(moduleException == null)
                moduleException = new IdentityTrustException(PicketBoxMessages.MESSAGES.identityTrustValidationFailedMessage());
             else
@@ -208,7 +211,10 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
          //REQUIRED Case
          if(flag == ControlFlag.REQUIRED)
          {
-             PicketBoxLogger.LOGGER.debugRequiredModuleFailure(module.getClass().getName());
+             if (PicketBoxLogger.LOGGER.isDebugEnabled())
+             {
+                PicketBoxLogger.LOGGER.debugRequiredModuleFailure(module.getClass().getName());
+             }
              encounteredRequiredDeny = true;
          }
          if(flag == ControlFlag.OPTIONAL)

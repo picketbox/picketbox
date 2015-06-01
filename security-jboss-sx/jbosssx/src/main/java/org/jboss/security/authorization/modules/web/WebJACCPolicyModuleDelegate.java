@@ -193,7 +193,10 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
       WebResourcePermission perm = new WebResourcePermission(this.canonicalRequestURI, 
                                                      request.getMethod());
       boolean allowed = checkPolicy(perm, requestPrincipal, caller, role );
-      PicketBoxLogger.LOGGER.traceHasResourcePermission(perm.toString(), allowed);
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceHasResourcePermission(perm.toString(), allowed);
+      }
       return allowed;
    }
 
@@ -244,7 +247,10 @@ public class WebJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
       {
          PicketBoxLogger.LOGGER.debugIgnoredException(e);
       }
-      PicketBoxLogger.LOGGER.traceHasUserDataPermission(perm.toString(), ok);
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.traceHasUserDataPermission(perm.toString(), ok);
+      }
       return ok;
    }
 

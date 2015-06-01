@@ -124,7 +124,10 @@ public class Util
       {
          throw PicketBoxMessages.MESSAGES.unableToLoadPropertiesFile(propertiesName);
       }
-      PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
+      if (PicketBoxLogger.LOGGER.isTraceEnabled())
+      {
+         PicketBoxLogger.LOGGER.tracePropertiesFileLoaded(propertiesName, bundle.keySet());
+      }
 
       return bundle;
    }

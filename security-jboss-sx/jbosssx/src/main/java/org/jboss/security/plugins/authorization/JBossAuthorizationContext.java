@@ -245,7 +245,10 @@ public class JBossAuthorizationContext extends AuthorizationContext
          //REQUISITE case
          if (flag == ControlFlag.REQUISITE)
          {
-            PicketBoxLogger.LOGGER.debugRequisiteModuleFailure(module.getClass().getName());
+            if (PicketBoxLogger.LOGGER.isDebugEnabled())
+            {
+               PicketBoxLogger.LOGGER.debugRequisiteModuleFailure(module.getClass().getName());
+            }
             if (moduleException == null)
                moduleException = new AuthorizationException(PicketBoxMessages.MESSAGES.authorizationFailedMessage());
             else
@@ -254,7 +257,10 @@ public class JBossAuthorizationContext extends AuthorizationContext
          //REQUIRED Case
          if (flag == ControlFlag.REQUIRED)
          {
-            PicketBoxLogger.LOGGER.debugRequiredModuleFailure(module.getClass().getName());
+            if (PicketBoxLogger.LOGGER.isDebugEnabled())
+            {
+               PicketBoxLogger.LOGGER.debugRequiredModuleFailure(module.getClass().getName());
+            }
             if (encounteredRequiredError == false)
                encounteredRequiredError = true;
          }

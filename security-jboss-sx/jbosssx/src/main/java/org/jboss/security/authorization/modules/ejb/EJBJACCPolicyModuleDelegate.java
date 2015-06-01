@@ -109,12 +109,12 @@ public class EJBJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
     * @param role
     * @return
     */
-   private int process(Subject callerSubject, Role role) 
-   {  
-      EJBMethodPermission methodPerm = 
-         new EJBMethodPermission(ejbName, methodInterface, ejbMethod); 
-      boolean policyDecision = checkWithPolicy(methodPerm, callerSubject, role); 
-      if( policyDecision == false )
+   private int process(Subject callerSubject, Role role)
+   {
+      EJBMethodPermission methodPerm =
+         new EJBMethodPermission(ejbName, methodInterface, ejbMethod);
+      boolean policyDecision = checkWithPolicy(methodPerm, callerSubject, role);
+      if( policyDecision == false && PicketBoxLogger.LOGGER.isDebugEnabled() )
       {
           PicketBoxLogger.LOGGER.debugJACCDeniedAccess(methodPerm.toString(), callerSubject,
                   role != null ? role.toString() : null);
@@ -123,11 +123,11 @@ public class EJBJACCPolicyModuleDelegate extends AbstractJACCModuleDelegate
    }
    
    private int checkRoleRef(Subject callerSubject, RoleGroup callerRoles)
-   { 
-      //This has to be the EJBRoleRefPermission  
-      EJBRoleRefPermission ejbRoleRefPerm = new EJBRoleRefPermission(ejbName,roleName); 
-      boolean policyDecision = checkWithPolicy(ejbRoleRefPerm, callerSubject, callerRoles); 
-      if( policyDecision == false )
+   {
+      //This has to be the EJBRoleRefPermission
+      EJBRoleRefPermission ejbRoleRefPerm = new EJBRoleRefPermission(ejbName,roleName);
+      boolean policyDecision = checkWithPolicy(ejbRoleRefPerm, callerSubject, callerRoles);
+      if( policyDecision == false && PicketBoxLogger.LOGGER.isDebugEnabled() )
       {
          PicketBoxLogger.LOGGER.debugJACCDeniedAccess(ejbRoleRefPerm.toString(), callerSubject,
                  callerRoles != null ? callerRoles.toString() : null);

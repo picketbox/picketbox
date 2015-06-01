@@ -116,7 +116,10 @@ public class StandaloneConfiguration extends Configuration implements Applicatio
 
       if (authInfo == null)
       {
-          PicketBoxLogger.LOGGER.traceGetAppConfigEntryViaParent(appName, parentConfig != null ? parentConfig.toString() : null);
+         if (PicketBoxLogger.LOGGER.isTraceEnabled())
+         {
+            PicketBoxLogger.LOGGER.traceGetAppConfigEntryViaParent(appName, parentConfig != null ? parentConfig.toString() : null);
+         }
          if (parentConfig != null)
             entry = parentConfig.getAppConfigurationEntry(appName);
          if (entry == null)
@@ -129,7 +132,10 @@ public class StandaloneConfiguration extends Configuration implements Applicatio
 
       if (authInfo != null)
       {
-         PicketBoxLogger.LOGGER.traceEndGetAppConfigEntryWithSuccess(appName, authInfo.toString());
+         if (PicketBoxLogger.LOGGER.isTraceEnabled())
+         {
+            PicketBoxLogger.LOGGER.traceEndGetAppConfigEntryWithSuccess(appName, authInfo.toString());
+         }
          // Make a copy of the authInfo object
          final BaseAuthenticationInfo theAuthInfo = authInfo;
          PrivilegedAction<AppConfigurationEntry[]> action = new PrivilegedAction<AppConfigurationEntry[]>()
