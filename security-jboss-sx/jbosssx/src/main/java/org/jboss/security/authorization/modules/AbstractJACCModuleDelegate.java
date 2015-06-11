@@ -22,8 +22,8 @@
 package org.jboss.security.authorization.modules;
 
 import java.security.Principal;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.security.auth.Subject;
@@ -69,7 +69,7 @@ public abstract class AbstractJACCModuleDelegate extends AuthorizationModuleDele
       if(role instanceof RoleGroup)
       {
          RoleGroup rg = (RoleGroup) role;
-         List<Role> rolesList = rg.getRoles();
+         Collection<Role> rolesList = rg.getRoles();
          for(Role r: rolesList)
          {
            principalsSet.add(new SimplePrincipal(r.getRoleName()));      

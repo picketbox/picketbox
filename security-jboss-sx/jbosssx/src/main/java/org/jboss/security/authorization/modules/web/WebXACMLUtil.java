@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -85,7 +85,7 @@ public class WebXACMLUtil extends JBossXACMLUtil
                   "jboss.org",
                   principal.getName()));
 
-      List<Role> rolesList = callerRoles.getRoles();
+      Collection<Role> rolesList = callerRoles.getRoles();
       if(rolesList != null)
       {
          for(Role role:rolesList)
