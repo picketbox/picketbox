@@ -160,6 +160,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
                   
                   Map options = new HashMap();
                   
+                  options.putAll(ame.getOptions());
                   sam.initialize(null, null, callbackHandler, options);
                   modules.add(sam);
                }
@@ -177,6 +178,7 @@ public class JBossServerAuthConfig implements ServerAuthConfig
                   ServerAuthModule sam = this.createSAM(moduleCL, ame.getAuthModuleName());
                   
                   Map options = new HashMap(); 
+                  options.putAll(ame.getOptions());
                   sam.initialize(null, null, callbackHandler, options);
                   modules.add(sam);
                }
