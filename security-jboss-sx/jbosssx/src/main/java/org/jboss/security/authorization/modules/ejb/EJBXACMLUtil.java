@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.util.List;
+import java.util.Collection;
 
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
@@ -205,10 +205,10 @@ public class EJBXACMLUtil extends JBossXACMLUtil
      //Create a subject type
      SubjectType subject = new SubjectType();
      AttributeType attribute = RequestAttributeFactory.createStringAttributeType( subjectID_NS, "jboss.org", principalName );
-     
-     subject.getAttribute().add( attribute ); 
-     
-     List<Role> rolesList = callerRoles.getRoles();
+
+     subject.getAttribute().add( attribute );
+
+     Collection<Role> rolesList = callerRoles.getRoles();
      if(rolesList != null)
      {
         for(Role role:rolesList)

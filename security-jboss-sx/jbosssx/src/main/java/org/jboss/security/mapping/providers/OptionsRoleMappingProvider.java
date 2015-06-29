@@ -7,7 +7,7 @@
 package org.jboss.security.mapping.providers;
   
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 
@@ -68,7 +68,7 @@ public class OptionsRoleMappingProvider implements MappingProvider<RoleGroup>
       ArrayList<Role> removeMembers = new ArrayList<Role>();
       ArrayList<Role> addMembers = new ArrayList<Role>(); 
 
-      List<Role> rolesList = mappedObject.getRoles();
+      Collection<Role> rolesList = mappedObject.getRoles();
       if(rolesList != null)
       {
          for(Role r: rolesList)

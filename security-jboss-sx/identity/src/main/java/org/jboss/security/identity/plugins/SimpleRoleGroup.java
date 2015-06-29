@@ -21,12 +21,19 @@
   */
 package org.jboss.security.identity.plugins;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectInputStream.GetField;
+import java.io.ObjectOutputStream;
+import java.io.ObjectOutputStream.PutField;
+import java.io.ObjectStreamField;
 import java.security.Principal;
 import java.security.acl.Group;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -47,7 +54,10 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
 {
    private static final long serialVersionUID = 1L;
 
-   private ArrayList<Role> roles = new ArrayList<Role>();
+   // roles used to be ArrayList<Role>
+   // we use do this so don't break the serialized form
+   private static final ObjectStreamField[] serialPersistentFields = {new ObjectStreamField("roles", ArrayList.class)};
+   private volatile HashSet<Role> roles = new HashSet<Role>();
 
    private static final String ROLES_IDENTIFIER = "Roles";
 
@@ -56,11 +66,11 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
       super(roleName);
    }
 
-   public SimpleRoleGroup(String roleName, List<Role> roles)
+   public SimpleRoleGroup(String roleName, Collection<Role> roles)
    {
       super(roleName);
       if (this.roles == null)
-         this.roles = new ArrayList<Role>();
+         this.roles = new HashSet<Role>();
       addAll(roles);
    }
 
@@ -101,25 +111,18 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
     */
    public synchronized void addRole(Role role)
    {
-      if (!this.roles.contains(role))
-         this.roles.add(role);
+      this.roles.add(role);
    }
 
    /*
     * (non-Javadoc)
     * @see org.jboss.security.identity.RoleGroup#addAll(java.util.List)
     */
-   public synchronized void addAll(List<Role> roles)
+   public synchronized void addAll(Collection<Role> roles)
    {
       if (roles != null)
       {
-         for (Role role : roles)
-         {
-            if (!this.roles.contains(role))
-            {
-               this.roles.add(role);
-            }
-         }
+         this.roles.addAll(roles);
       }
    }
 
@@ -145,10 +148,10 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
     * (non-Javadoc)
     * @see org.jboss.security.identity.RoleGroup#getRoles()
     */
-   public List<Role> getRoles()
+   public Collection<Role> getRoles()
    {
       // unmodifiable view: clients must update the roles through the addRole and removeRole methods.
-      return Collections.unmodifiableList(roles);
+      return Collections.unmodifiableSet(this.roles);
    }
 
    /*
@@ -160,8 +163,28 @@ public class SimpleRoleGroup extends SimpleRole implements RoleGroup
    {
       SimpleRoleGroup clone = (SimpleRoleGroup) super.clone();
       if (clone != null)
-         clone.roles = (ArrayList<Role>) this.roles.clone();
+         clone.roles = (HashSet<Role>) this.roles.clone();
       return clone;
+   }
+
+
+   private void writeObject(ObjectOutputStream out) throws IOException
+   {
+      PutField putFields = out.putFields();
+      putFields.put("roles", new ArrayList<Role>(this.roles));
+      out.writeFields();
+   }
+
+   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
+   {
+      GetField getField = in.readFields();
+      Object fieldValue = (ArrayList<?>) getField.get("roles", null);
+      if (fieldValue instanceof ArrayList) {
+         ArrayList<?> stringList = (ArrayList<?>) fieldValue;
+         this.roles = new HashSet<Role>((ArrayList<Role>) stringList);
+      } else {
+         this.roles = new HashSet<Role>();
+      }
    }
 
    /*

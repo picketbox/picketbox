@@ -44,9 +44,9 @@ public class SimpleRoleGroupUnitTestCase extends TestCase
    {
       Set<Principal> principalSet = new HashSet<Principal>();
       principalSet.add(new SimplePrincipal("aRole"));
-      
+
       SimpleRoleGroup sr = new SimpleRoleGroup(principalSet);
       assertNotNull(sr);
-      assertEquals("aRole",sr.getRoles().get(0).getRoleName());
+      assertEquals("aRole",sr.getRoles().iterator().next().getRoleName());
    }
 }

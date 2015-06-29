@@ -25,11 +25,11 @@ import static org.jboss.security.SecurityConstants.ROLES_IDENTIFIER;
 
 import java.security.Principal;
 import java.security.acl.Group;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -277,7 +277,7 @@ implements AuthorizationManager
       if( roles != null )
       {
          userRoles = new HashSet<Principal>();
-         List<Role> rolesList = roles.getRoles();
+         Collection<Role> rolesList = roles.getRoles();
          for(Role r: rolesList)
          {
             userRoles.add(new SimplePrincipal(r.getRoleName()));
