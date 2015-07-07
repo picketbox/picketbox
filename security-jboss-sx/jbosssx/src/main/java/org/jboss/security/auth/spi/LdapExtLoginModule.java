@@ -953,19 +953,28 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          usernameEndString = (String) options.get(USERNAME_END_STRING);
          int beginIndex = 0;
          if (usernameBeginString != null && !usernameBeginString.equals(""))
-            beginIndex = username.indexOf(usernameBeginString) + usernameBeginString.length();
-         if (beginIndex == -1) // not allowed. reset
+            beginIndex = username.indexOf(usernameBeginString);
+         if (beginIndex == -1)
+         { // not allowed. reset
             beginIndex = 0;
-         int endIndex = username.length();
-         if (usernameEndString != null && !usernameEndString.equals(""))
-            endIndex = username.substring(beginIndex).indexOf(usernameEndString);
-         if (endIndex == -1) // not allowed. reset
+         } 
+         else 
+         {
+             beginIndex += usernameBeginString.length();
+         }
+
+         if(usernameEndString == null || usernameEndString.equals(""))
+         {
+             return username.substring(beginIndex,username.length());
+         }
+
+         int endIndex = username.indexOf(usernameEndString, beginIndex);
+         if (endIndex == -1) 
+         { // not allowed. reset
             endIndex = username.length();
-         else
-            endIndex += beginIndex;
+         } 
          username = username.substring(beginIndex, endIndex);
       }
       return username;
    }
- 
 }
