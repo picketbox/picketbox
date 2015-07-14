@@ -307,14 +307,14 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 	   if(theAppPolicy != null)
 	   {
 		   BaseAuthenticationInfo authInfo = theAppPolicy.getAuthenticationInfo();
-		   String jbossModuleName = authInfo.getJBossModuleName();
-		   if(jbossModuleName != null)
+		   Set<String> jbossModuleNames = authInfo.getJBossModuleNames();
+		   if(!jbossModuleNames.isEmpty())
 		   {
 			   ClassLoader currentTccl = SubjectActions.getContextClassLoader();
 			   ClassLoaderLocator theCLL = ClassLoaderLocatorFactory.get();
 			   if(theCLL != null)
 			   {
-				   ClassLoader newTCCL = theCLL.get(jbossModuleName);
+				   ClassLoader newTCCL = theCLL.get(jbossModuleNames);
 				   if(newTCCL != null)
 				   {
 					   try

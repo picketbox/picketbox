@@ -9,6 +9,7 @@ package org.jboss.security.plugins.audit;
 import java.security.PrivilegedActionException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -64,13 +65,13 @@ public class JBossAuditManager implements AuditManager
     		  AuditInfo ai = ap.getAuditInfo();
     		  if(ai != null)
     		  {  
-    			  String jbossModuleName = ai.getJBossModuleName();
-    			  if(jbossModuleName != null)
+    			  Set<String> jbossModuleNames = ai.getJBossModuleNames();
+    			  if(!jbossModuleNames.isEmpty())
     			  {
     				  ClassLoaderLocator cll = ClassLoaderLocatorFactory.get();
     				   if(cll != null)
     				   {
-    					   moduleCL = cll.get(jbossModuleName);
+    					   moduleCL = cll.get(jbossModuleNames);
     				   }
     			  }
 				  ac = instantiate(moduleCL, ai);

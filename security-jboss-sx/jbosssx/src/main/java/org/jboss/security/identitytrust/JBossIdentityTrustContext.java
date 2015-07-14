@@ -25,6 +25,7 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
+import java.util.Set;
 
 import javax.security.auth.login.LoginException;
 
@@ -107,13 +108,13 @@ public class JBossIdentityTrustContext extends IdentityTrustContext
       IdentityTrustInfo iti = aPolicy.getIdentityTrustInfo();
       if(iti == null)
          return;
-      String jbossModuleName = iti.getJBossModuleName();
-      if(jbossModuleName != null)
+      Set<String> jbossModuleNames = iti.getJBossModuleNames();
+      if(!jbossModuleNames.isEmpty())
       {
     	  ClassLoaderLocator cll = ClassLoaderLocatorFactory.get();
     	  if(cll != null)
     	  {
-    		  moduleCL = cll.get(jbossModuleName);
+    		  moduleCL = cll.get(jbossModuleNames);
     	  }
       }
       IdentityTrustModuleEntry[] itmearr = iti.getIdentityTrustModuleEntry();

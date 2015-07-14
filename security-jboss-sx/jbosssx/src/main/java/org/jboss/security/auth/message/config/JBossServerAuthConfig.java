@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -139,12 +140,12 @@ public class JBossServerAuthConfig implements ServerAuthConfig
 
          // establish the module classloader if a jboss-module has been specified.
          ClassLoader moduleCL = null;
-         String jbossModule = jai.getJBossModuleName();
-         if (jbossModule != null && !jbossModule.isEmpty())
+         Set<String> jbossModuleNames = jai.getJBossModuleNames();
+         if (!jbossModuleNames.isEmpty())
          {
             ClassLoaderLocator locator = ClassLoaderLocatorFactory.get();
             if (locator != null)
-               moduleCL = locator.get(jbossModule);
+               moduleCL = locator.get(jbossModuleNames);
          }
 
          for(AuthModuleEntry ame: amearr)

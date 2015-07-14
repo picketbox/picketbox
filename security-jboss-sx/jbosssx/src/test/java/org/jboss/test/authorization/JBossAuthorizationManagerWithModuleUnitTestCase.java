@@ -21,6 +21,8 @@
  */
 package org.jboss.test.authorization;
 
+import java.util.Set;
+
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.AuthorizationInfo;
 import org.jboss.security.config.SecurityConfiguration;
@@ -41,13 +43,13 @@ public class JBossAuthorizationManagerWithModuleUnitTestCase extends
 		super.setSecurityConfiguration();
 		ApplicationPolicy ap = SecurityConfiguration.getApplicationPolicy("other");
 		AuthorizationInfo ai = ap.getAuthorizationInfo();
-		ai.setJBossModuleName("org.picketbox");
+		ai.addJBossModuleName("org.picketbox");
 		ap.setAuthorizationInfo(ai);
 		SecurityConfiguration.addApplicationPolicy(ap);
 		
 		ClassLoaderLocatorFactory.set(new ClassLoaderLocator() {
 			
-			public ClassLoader get(String key) {
+			public ClassLoader get(Set<String> modules) {
 				return Thread.currentThread().getContextClassLoader();
 			}
 		});

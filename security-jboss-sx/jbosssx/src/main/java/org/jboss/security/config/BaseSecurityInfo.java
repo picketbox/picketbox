@@ -22,7 +22,9 @@
 package org.jboss.security.config;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.security.auth.AuthPermission;
 
@@ -48,7 +50,7 @@ public abstract class BaseSecurityInfo<T>
     * Name of the JBoss Module that can be optionally configured for
     * custom login modules etc
     */
-   protected String jbossModuleName;
+   protected Set<String> jbossModuleNames = new HashSet<String>();
 
    public BaseSecurityInfo()
    {
@@ -94,18 +96,19 @@ public abstract class BaseSecurityInfo<T>
     * Get the name of the JBoss Module
     * @return
     */
-   public String getJBossModuleName() 
+   public Set<String> getJBossModuleNames()
    {
-	   return jbossModuleName;
+	   return jbossModuleNames;
    }
 
    /**
     * Set the name of the JBoss Module
     * @param jbossModuleName
     */
-   public void setJBossModuleName(String jbossModuleName) 
+   public void addJBossModuleName(String jbossModuleName)
    {
-	   this.jbossModuleName = jbossModuleName;
+       if (jbossModuleName != null && !jbossModuleName.isEmpty())
+	       this.jbossModuleNames.add(jbossModuleName);
    }
 
    protected abstract BaseSecurityInfo<T> create(String name);

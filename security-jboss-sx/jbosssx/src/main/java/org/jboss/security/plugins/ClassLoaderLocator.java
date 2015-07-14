@@ -21,6 +21,9 @@
  */
 package org.jboss.security.plugins;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * An interface to locate a {@code ClassLoader}}
  * The primary use of this interface is in the JBoss Application Server,
@@ -31,9 +34,15 @@ package org.jboss.security.plugins;
 public interface ClassLoaderLocator 
 {
 	/**
-	 * Given a key, return a {@code ClassLoader}
-	 * @param key
-	 * @return
+	 * Given a module name, return a {@code ClassLoader}
+	 * @param module the name of the module for which we want a {@link ClassLoader}.
+	 * @return the module {@link java.lang.ClassLoader}.
 	 */
-	ClassLoader get(String key);
+	default ClassLoader get(String module) {
+        Set<String> modules = new HashSet<>();
+        modules.add(module);
+        return get(modules);
+    }
+
+    ClassLoader get(Set<String> modules);
 }

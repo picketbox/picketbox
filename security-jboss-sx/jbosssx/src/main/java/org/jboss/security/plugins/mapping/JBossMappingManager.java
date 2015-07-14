@@ -22,6 +22,7 @@
 package org.jboss.security.plugins.mapping;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
@@ -101,13 +102,13 @@ public class JBossMappingManager implements MappingManager
    private <T> MappingContext<T> generateMappingContext(MappingContext<T> mc, MappingInfo rmi)
    {
 	   ClassLoader moduleCL = null;
-	   String jbossModuleName = rmi.getJBossModuleName();
-	   if(jbossModuleName != null)
+	   Set<String> jbossModuleNames = rmi.getJBossModuleNames();
+	   if(!jbossModuleNames.isEmpty())
 	   {
 		   ClassLoaderLocator cll = ClassLoaderLocatorFactory.get();
 		   if(cll != null)
 		   {
-			   moduleCL = cll.get(jbossModuleName);
+			   moduleCL = cll.get(jbossModuleNames);
 		   }
 	   }
 	   MappingModuleEntry[] mpe = rmi.getMappingModuleEntry();
