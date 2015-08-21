@@ -73,6 +73,7 @@ public class ClientLoginModule implements LoginModule
    private static final String MULTI_TREADED = "multi-threaded";
    private static final String RESTORE_LOGIN_IDENTITY = "restore-login-identity";
    private static final String PASSWORD_STACKING = "password-stacking";
+   private static final String USE_FIRST_PASSWORD = "useFirstPass";
    private static final String PRINCIPAL_CLASS = "principalClass";
 
    private static final String[] ALL_VALID_OPTIONS =
@@ -156,7 +157,8 @@ public class ClientLoginModule implements LoginModule
           validate any shared password.
        */
       String passwordStacking = (String) options.get(PASSWORD_STACKING);
-      useFirstPass = passwordStacking != null;
+      if(passwordStacking != null && passwordStacking.equalsIgnoreCase(USE_FIRST_PASSWORD))
+         useFirstPass = true;
       PicketBoxLogger.LOGGER.debugModuleOption(PASSWORD_STACKING, passwordStacking);
 
       //Cache the existing security context
