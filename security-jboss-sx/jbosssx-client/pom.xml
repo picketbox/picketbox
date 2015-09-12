@@ -34,7 +34,6 @@
           </archive>
           <classesDirectory>../jbosssx/target/classes</classesDirectory>
           <includes>
-             <include>JBossORG-EULA.txt</include>
              <include>org/jboss/crypto/JBossSXProvider.class</include>
              <include>org/jboss/crypto/CryptoUtil.class</include>
              <include>org/jboss/crypto/digest/*</include>
