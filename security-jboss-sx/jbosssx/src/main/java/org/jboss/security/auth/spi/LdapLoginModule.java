@@ -185,7 +185,6 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
    private static final String SEARCH_SCOPE_OPT = "searchScope";
    private static final String SECURITY_DOMAIN_OPT = "jaasSecurityDomain";
    private static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
-   private static final String BIND_CREDENTIAL = "bindCredential";
 
    private static final String[] ALL_VALID_OPTIONS =
    {
@@ -219,7 +218,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
       Context.LANGUAGE,
       Context.APPLET
    };
-   
+
    public LdapLoginModule()
    {
    }
@@ -231,7 +230,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
       addValidOptions(ALL_VALID_OPTIONS);
       super.initialize(subject, callbackHandler, sharedState, options);
    }
-   
+
    private transient SimpleGroup userRoles = new SimpleGroup("Roles");
 
    /** Overridden to return an empty password string as typically one cannot
@@ -249,7 +248,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
     least a Group named "Roles" that contains the roles assigned to the user.
     A second common group is "CallerPrincipal" that provides the application
     identity of the user rather than the security domain identity.
-    @return Group[] containing the sets of roles 
+    @return Group[] containing the sets of roles
     */
    protected Group[] getRoleSets() throws LoginException
    {
@@ -297,7 +296,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
       }
       return isValid;
    }
-   
+
    private void createLdapInitContext(String username, Object credential) throws Exception
    {
       Properties env = new Properties();
@@ -338,7 +337,7 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
       {
     	  bindCredential = SecurityVaultUtil.getValueAsString(bindCredential);
       }
-      
+
       String principalDNPrefix = (String) options.get(PRINCIPAL_DN_PREFIX_OPT);
       if (principalDNPrefix == null)
          principalDNPrefix = "";
@@ -565,8 +564,6 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
       tmp.putAll(env);
       if (tmp.containsKey(Context.SECURITY_CREDENTIALS))
          tmp.setProperty(Context.SECURITY_CREDENTIALS, "******");
-      if (tmp.containsKey(BIND_CREDENTIAL))
-         tmp.setProperty(BIND_CREDENTIAL, "******");
       PicketBoxLogger.LOGGER.traceLDAPConnectionEnv(tmp);
    }
 
