@@ -74,7 +74,7 @@ import org.jboss.security.vault.SecurityVaultUtil;
  search both the __baseDN__ and __rolesCtxDN__ trees for the user and roles. The
  user DN to authenticate against is queried using the filter specified by the
  __baseFilter__ attribute (see the __baseFilter__ option description for its
- syntax). 
+ syntax).
  # The resulting user DN is then authenticated by binding to ldap server using
  the user DN as the InitialLdapContext environment Context.SECURITY_PRINCIPAL.
 
@@ -144,7 +144,7 @@ import org.jboss.security.vault.SecurityVaultUtil;
  anonymous login by some ldap servers and this may not be a desirable feature.
  Set this to false to reject empty passwords, true to have the ldap server
  validate the empty password. The default is true.
- 
+
  @author Andy Oliver
  @author Scott.Stark@jboss.org
  @version $Revision$ */
@@ -213,7 +213,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       Context.LANGUAGE,
       Context.APPLET
    };
-   
+
    protected String bindDN;
 
    protected String bindCredential;
@@ -231,34 +231,34 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    protected String roleNameAttributeID;
 
    protected boolean roleAttributeIsDN;
-   
+
    protected boolean parseRoleNameFromDN;
 
    protected int recursion = 0;
 
    protected int searchTimeLimit = 10000;
 
-   protected int searchScope = SearchControls.SUBTREE_SCOPE; 
-   
+   protected int searchScope = SearchControls.SUBTREE_SCOPE;
+
    protected String distinguishedNameAttribute;
-   
+
    protected boolean parseUsername;
-   
+
    protected String usernameBeginString;
-   
+
    protected String usernameEndString;
-   
+
    // simple flag to indicate is the validatePassword method was called
    protected boolean isPasswordValidated = false;
 
    protected String referralUserAttributeIDToCheck = null;
-   
+
    public LdapExtLoginModule()
    {
    }
 
    private transient SimpleGroup userRoles = new SimpleGroup("Roles");
-   
+
    @SuppressWarnings("unchecked")
    public void initialize(Subject subject, CallbackHandler callbackHandler, Map sharedState, Map options)
    {
@@ -375,8 +375,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    }
 
    /**
-    Bind to the LDAP server for authentication. 
-    
+    Bind to the LDAP server for authentication.
+
     @param username
     @param credential
     @return true if the bind for authentication succeeded
@@ -415,11 +415,11 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          roleNameAttributeID = "name";
 
       referralUserAttributeIDToCheck = (String) options.get(REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK);
-      
+
       //JBAS-4619:Parse Role Name from DN
       String parseRoleNameFromDNOption = (String) options.get(PARSE_ROLE_NAME_FROM_DN_OPT);
       parseRoleNameFromDN = Boolean.valueOf(parseRoleNameFromDNOption).booleanValue();
-      
+
       rolesCtxDN = (String) options.get(ROLES_CTX_DN_OPT);
       String strRecursion = (String) options.get(ROLE_RECURSION);
       try
@@ -469,7 +469,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          constraints.setSearchScope(searchScope);
          constraints.setTimeLimit(searchTimeLimit);
          String[] attrList;
-         if (referralUserAttributeIDToCheck != null) 
+         if (referralUserAttributeIDToCheck != null)
          {
              attrList = new String[] {roleAttributeID, referralUserAttributeIDToCheck};
          } else {
@@ -496,9 +496,9 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     @param credential - the bind credential
     @param baseDN - base DN to search the ctx from
     @param filter - the search filter string
-    @return the userDN string for the successful authentication 
+    @return the userDN string for the successful authentication
     @throws NamingException
-    */ 
+    */
    protected String bindDNAuthentication(InitialLdapContext ctx, String user, Object credential, String baseDN,
          String filter) throws NamingException
    {
@@ -511,9 +511,9 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       NamingEnumeration results = null;
 
       Object[] filterArgs = {user};
-      
+
       LdapContext ldapCtx = ctx;
-      
+
       boolean referralsLeft = true;
       SearchResult sr = null;
       while (referralsLeft) {
@@ -532,13 +532,13 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
             }
          }
       }
-      
+
       if (sr == null)
       {
          results.close();
          throw PicketBoxMessages.MESSAGES.failedToFindBaseContextDN(baseDN);
       }
-      
+
       String name = sr.getName();
       String userDN = null;
       Attributes attrs = sr.getAttributes();
@@ -550,10 +550,10 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
               userDN = (String) dn.get();
           }
       }
-      
+
       results.close();
       results = null;
-      
+
       if (userDN == null)
       {
           if (sr.isRelative() == true) {
@@ -567,7 +567,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
               }
           }
           else {
-             userDN = bindDNReferralAuthentication(sr.getName(), credential); 
+             userDN = bindDNReferralAuthentication(sr.getName(), credential);
              if (userDN == null) {
                  throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);
              }
@@ -586,8 +586,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    }
 
    /**
-    * This method validates absoluteName and credential against referral LDAP and returns used user DN. 
-    * 
+    * This method validates absoluteName and credential against referral LDAP and returns used user DN.
+    *
     * <ol>
     * <li> Parses given absoluteName to URL and DN
     * <li> creates initial LDAP context of referral LDAP to validate credential
@@ -595,7 +595,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     * </ol>
     *
     * It uses all options from login module setup except of ProviderURL.
-    * 
+    *
     * @param absoluteName - absolute user DN
     * @param credential
     * @return used user DN for validation
@@ -607,21 +607,21 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
        URI uri;
        try {
            uri = new URI(absoluteName);
-       } 
-       catch (URISyntaxException e)  
+       }
+       catch (URISyntaxException e)
        {
            throw PicketBoxMessages.MESSAGES.unableToParseReferralAbsoluteName(e, absoluteName);
        }
        String name = uri.getPath().substring(1);
        String namingProviderURL = uri.getScheme() + "://" + uri.getAuthority();
-       
+
        Properties refEnv = constructLdapContextEnvironment(namingProviderURL, name, credential);
 
        InitialLdapContext refCtx = new InitialLdapContext(refEnv, null);
        refCtx.close();
 	   return name;
    }
-   
+
    /**
     @param ctx
     @param constraints
@@ -630,12 +630,17 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     @param recursionMax
     @param nesting
     @throws NamingException
-    */ 
+    */
    protected void rolesSearch(LdapContext ctx, SearchControls constraints, String user, String userDN,
          int recursionMax, int nesting) throws NamingException
    {
+      if (rolesCtxDN == null || roleFilter == null || rolesCtxDN.isEmpty() || roleFilter.isEmpty()) {
+          // no role search initial DN nor role filter specified, so assigning no roles
+          return;
+      }
+
       LdapContext ldapCtx = ctx;
-      
+
       Object[] filterArgs = {user, sanitizeDN(userDN)};
       boolean referralsExist = true;
       while (referralsExist) {
@@ -645,7 +650,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
             while (results.hasMore())
             {
                SearchResult sr = (SearchResult) results.next();
-               
+
                String dn;
                if (sr.isRelative()) {
                   dn = canonicalize(sr.getName());
@@ -681,7 +686,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                      }
                   }
                }
-   
+
                // Query the context for the roleDN values
                String[] attrNames = {roleAttributeID};
                Attributes result = null;
@@ -693,7 +698,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                   }
                }
                else {
-                  result = getAttributesFromReferralEntity(sr, user, userDN); 
+                  result = getAttributesFromReferralEntity(sr, user, userDN);
                }
                if (result != null && result.size() > 0)
                {
@@ -719,7 +724,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                            else {
                               result2 = getAttributesFromReferralEntity(sr, user, userDN);
                            }
-                                                      
+
                            Attribute roles2 = (result2 != null ? result2.get(roleNameAttributeID) : null);
                            if (roles2 != null)
                            {
@@ -742,7 +747,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                      }
                   }
                }
-   
+
                if (nesting < recursionMax)
                {
                   rolesSearch(ldapCtx, constraints, user, dn, recursionMax, nesting + 1);
@@ -760,11 +765,11 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          }
       } // while (referralsExist)
    }
- 
+
    /**
-    * Remove enclosing quotes, if any, from dn. 
+    * Remove enclosing quotes, if any, from dn.
     * This has to be done, because some LDAPs choke on quotes in ldap search parameter.
-    *   
+    *
     * @param dn
     * @return
     */
@@ -779,7 +784,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    /**
     * In case dn contains slash character, it should be enclosed in quotes.
     * If it is already quoted, nothing is done.
-    * 
+    *
     * @param dn
     * @return
     */
@@ -794,7 +799,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    /**
     * Returns Attributes from referral entity and check them if they belong to user or userDN currently in evaluation.
     * Returns null in case of user is not validated.
-    * 
+    *
     * @param sr SearchResult
     * @param users to check
     * @return
@@ -819,18 +824,18 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       }
       return (chkSuccessful ? result : null);
    }
-   
+
    private InitialLdapContext constructInitialLdapContext(String dn, Object credential) throws NamingException
    {
        String protocol = (String)options.get(Context.SECURITY_PROTOCOL);
        String providerURL = (String) options.get(Context.PROVIDER_URL);
        if (providerURL == null)
           providerURL = "ldap://localhost:" + ((protocol != null && protocol.equals("ssl")) ? "636" : "389");
-       
+
        Properties env = constructLdapContextEnvironment(providerURL, dn, credential);
        return new InitialLdapContext(env, null);
    }
-   
+
    private Properties constructLdapContextEnvironment(String namingProviderURL, String principalDN, Object credential) {
        Properties env = new Properties();
        Iterator iter = options.entrySet().iterator();
@@ -850,7 +855,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
        String authType = env.getProperty(Context.SECURITY_AUTHENTICATION);
        if (authType == null)
           env.setProperty(Context.SECURITY_AUTHENTICATION, "simple");
-       
+
        if (namingProviderURL != null) {
            env.setProperty(Context.PROVIDER_URL, namingProviderURL);
        }
@@ -863,7 +868,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
        this.traceLDAPEnv(env);
        return env;
    }
-   
+
 
    /**
     * <p>
@@ -917,7 +922,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          }
       }
    }
-   
+
    private void parseRole(String dn)
    {
       parseRole(dn, roleNameAttributeID);
@@ -952,8 +957,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          if (beginIndex == -1)
          { // not allowed. reset
             beginIndex = 0;
-         } 
-         else 
+         }
+         else
          {
              beginIndex += usernameBeginString.length();
          }
@@ -964,10 +969,10 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          }
 
          int endIndex = username.indexOf(usernameEndString, beginIndex);
-         if (endIndex == -1) 
+         if (endIndex == -1)
          { // not allowed. reset
             endIndex = username.length();
-         } 
+         }
          username = username.substring(beginIndex, endIndex);
       }
       return username;
