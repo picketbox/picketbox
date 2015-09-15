@@ -367,6 +367,13 @@ public class LdapLoginModule extends UsernamePasswordLoginModule
 
          if (bindDN != null)
          {
+            try {
+               ctx.close();
+            }
+            catch (NamingException e) {
+               PicketBoxLogger.LOGGER.warnProblemClosingOriginalLdapContextDuringRebind(e);
+            }
+
             // Rebind the ctx to the bind dn/credentials for the roles searches
             PicketBoxLogger.LOGGER.traceRebindWithConfiguredPrincipal(bindDN);
             env.setProperty(Context.SECURITY_PRINCIPAL, bindDN);
