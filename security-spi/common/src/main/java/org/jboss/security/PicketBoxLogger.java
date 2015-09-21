@@ -4,6 +4,7 @@ import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.*;
 
+import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import java.net.URL;
 import java.security.*;
@@ -669,7 +670,7 @@ public interface PicketBoxLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.INFO)
     @Message(id = 361, value = "Default Security Vault Implementation Initialized and Ready")
     void infoVaultInitialized();
-    
+
     @LogMessage(level = Logger.Level.ERROR)
     @Message(id = 362, value = "Cannot get MD5 algorithm instance for hashing password commands. Using NULL.")
     void errorCannotGetMD5AlgorithmInstance();
@@ -721,11 +722,11 @@ public interface PicketBoxLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.ERROR)
     @Message(id = 374, value = "Error getting ServerAuthContext for authContextId %s and security domain %s")
     void errorGettingServerAuthContext(String authContextId, String securityDomain, @Cause Throwable cause);
-    
+
     @LogMessage(level = Logger.Level.ERROR)
     @Message(id = 375, value = "Error getting the module classloader informations for cache")
     void errorGettingModuleInformation(@Cause Throwable cause);
-    
+
     @LogMessage(level = Logger.Level.WARN)
     @Message(id = 376, value = "Wrong Base64 string used with masked password utility. Following is correct (%s)")
     void wrongBase64StringUsed(String fixedBase64);
@@ -733,5 +734,9 @@ public interface PicketBoxLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.TRACE)
     @Message(id = 377, value = "JAAS logout, login context: %s, subject: %s")
     void traceLogoutSubject(String loginContext, String subject);
+
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 378, value = "Problem when closing original LDAP context during role search rebind. Trying to create new LDAP context.")
+    void warnProblemClosingOriginalLdapContextDuringRebind(@Cause NamingException e);
 
 }

@@ -2,7 +2,7 @@
  * JBoss, Home of Professional Open Source.
  * Copyright 2008, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
- * distribution for a full listing of individual contributors. 
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -49,7 +49,7 @@ import org.jboss.security.mapping.MappingResult;
 
 /**
  * Maps attributes from LDAP
- * 
+ *
  * The options include whatever options your LDAP JNDI provider
  supports. Examples of standard property names are:
 
@@ -57,57 +57,57 @@ import org.jboss.security.mapping.MappingResult;
  * Context.SECURITY_PROTOCOL = "java.naming.security.protocol"
  * Context.PROVIDER_URL = "java.naming.provider.url"
  * Context.SECURITY_AUTHENTICATION = "java.naming.security.authentication"
- * 
+ *
  * Other Module Options:-
- * 
+ *
  * bindDN:The DN used to bind against the ldap server for the user and
  roles queries. This is some DN with read/search permissions on the baseCtxDN and
  rolesCtxDN values.
- * 
+ *
  * bindCredential: The password for the bindDN. This can be encrypted if the
  jaasSecurityDomain is specified.
- * 
+ *
  * baseCtxDN: The fixed DN of the context to start the user search from.
- * 
+ *
  * baseFilter:A search filter used to locate the context of the user to
  authenticate. The input username/userDN as obtained from the login module
  callback will be substituted into the filter anywhere a "{0}" expression is
  seen. This substituion behavior comes from the standard
  __DirContext.search(Name, String, Object[], SearchControls cons)__ method. An
  common example search filter is "(uid={0})".
- 
+
  * searchTimeLimit:The timeout in milliseconds for the user/role searches.
  Defaults to 10000 (10 seconds).
- 
- * attributeList: A comma-separated list of attributes for the user 
+
+ * attributeList: A comma-separated list of attributes for the user
  * (Example:  mail,cn,sn,employeeType,employeeNumber)
- * 
+ *
  * jaasSecurityDomain: The JMX ObjectName of the JaasSecurityDomain to use
  to decrypt the java.naming.security.principal. The encrypted form of the
  password is that returned by the JaasSecurityDomain#encrypt64(byte[]) method.
  The org.jboss.security.plugins.PBEUtils can also be used to generate the
  encrypted form.
- * 
+ *
  * @author Anil.Saldhana@redhat.com
  * @since August 5, 2009
  */
 public class LdapAttributeMappingProvider implements MappingProvider<List<Attribute<String>>>
 {
    private Map<String, Object> options;
-   
+
    protected int searchTimeLimit = 10000;
-   
+
    private static final String BIND_DN = "bindDN";
 
    private static final String BIND_CREDENTIAL = "bindCredential";
 
    private static final String BASE_CTX_DN = "baseCtxDN";
 
-   private static final String BASE_FILTER_OPT = "baseFilter"; 
+   private static final String BASE_FILTER_OPT = "baseFilter";
 
    private static final String SEARCH_TIME_LIMIT_OPT = "searchTimeLimit";
-   
-   private static final String ATTRIBUTE_LIST_OPT = "attributeList"; 
+
+   private static final String ATTRIBUTE_LIST_OPT = "attributeList";
 
    private static final String SECURITY_DOMAIN_OPT = "jaasSecurityDomain";
 
@@ -121,12 +121,12 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
    public void performMapping(Map<String, Object> map, List<Attribute<String>> mappedObject)
    {
       List<Attribute<String>> attributeList = new ArrayList<Attribute<String>>();
-      
+
       Principal principal = (Principal) map.get(SecurityConstants.PRINCIPAL_IDENTIFIER);
       if(principal != null)
       {
          String user = principal.getName();
-         
+
          String bindDN = (String) options.get(BIND_DN);
          if(bindDN == null || bindDN.length() == 0)
          {
@@ -152,15 +152,15 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
                ObjectName serviceName = new ObjectName(securityDomain);
                char[] tmp = MappingProvidersDecodeAction.decode(bindCredential, serviceName);
                bindCredential = new String(tmp);
-            } 
+            }
             catch (Exception e)
             {
                PicketBoxLogger.LOGGER.errorDecryptingBindCredential(e);
                return;
             }
          }
-         
-         InitialLdapContext ctx;
+
+         InitialLdapContext ctx = null;
          ClassLoader currentTCCL = SecurityActions.getContextClassLoader();
          try
          {
@@ -170,9 +170,17 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
          }
          catch (NamingException e)
          {
+            if (ctx != null) {
+               try {
+                  ctx.close();
+               }
+               catch (NamingException ne){
+                  PicketBoxLogger.LOGGER.debugIgnoredException(ne);
+               }
+            }
             throw new RuntimeException(e);
-         } 
-         
+         }
+
          String timeLimit = (String) options.get(SEARCH_TIME_LIMIT_OPT);
          if (timeLimit != null)
          {
@@ -187,20 +195,20 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
          }
          if(searchTimeLimit == 0)
             searchTimeLimit = 10000;
-         
-         String baseDN = (String) options.get(BASE_CTX_DN); 
+
+         String baseDN = (String) options.get(BASE_CTX_DN);
          String baseFilter = (String) options.get(BASE_FILTER_OPT);
-         
+
          SearchControls constraints = new SearchControls();
          constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-         
+
          constraints.setTimeLimit(searchTimeLimit);
-         
+
          String attributePattern = (String) options.get(ATTRIBUTE_LIST_OPT);
-         
+
          //Take care of the attributes we want
          String neededAttributes[] = getNeededAttributes(attributePattern);
-         
+
          constraints.setReturningAttributes(neededAttributes);
 
          NamingEnumeration<SearchResult> results = null;
@@ -225,56 +233,63 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
                throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);
 
             results.close();
-            
+
             //Finished Authentication.  Lets look for the attributes
             filterArgs = new Object[]{user, userDN};
             results = ctx.search(userDN, baseFilter, filterArgs, constraints);
-            try
+            while (results.hasMore())
             {
-               while (results.hasMore())
-               {
-                  sr = (SearchResult) results.next(); 
-                  Attributes attributes = sr.getAttributes();
-                  NamingEnumeration<? extends javax.naming.directory.Attribute> ne = attributes.getAll();
-                  
-                  while(ne != null && ne.hasMoreElements())
+            sr = (SearchResult) results.next();
+            Attributes attributes = sr.getAttributes();
+            NamingEnumeration<? extends javax.naming.directory.Attribute> ne = attributes.getAll();
+
+            while(ne != null && ne.hasMoreElements())
+            {
+               javax.naming.directory.Attribute ldapAtt = ne.next();
+                  if("mail".equalsIgnoreCase(ldapAtt.getID()))
                   {
-                     javax.naming.directory.Attribute ldapAtt = ne.next();
-                     if("mail".equalsIgnoreCase(ldapAtt.getID()))
-                     {
-                        attributeList.add(AttributeFactory.createEmailAddress((String) ldapAtt.get()));   
+                     attributeList.add(AttributeFactory.createEmailAddress((String) ldapAtt.get()));
+                  }
+                  else if( ldapAtt.size() > 1 ) {
+                     for (int i = 0; i < ldapAtt.size(); i++) {
+                        attributeList.add(AttributeFactory.createAttribute(ldapAtt.getID(),
+                             (String) ldapAtt.get(i)));
                      }
-                     else if( ldapAtt.size() > 1 ) {
-                         for( int i = 0; i < ldapAtt.size(); i++ ) {
-                             attributeList.add(AttributeFactory.createAttribute(ldapAtt.getID(),
-                                 (String)ldapAtt.get(i)));  
-                         }
-                     }
-                     else
-                        attributeList.add(AttributeFactory.createAttribute(ldapAtt.getID(), 
-                              (String)ldapAtt.get())); 
-                  } 
-               }       
+                  }
+                  else
+                     attributeList.add(AttributeFactory.createAttribute(ldapAtt.getID(),
+                          (String) ldapAtt.get()));
+               }
             }
-            finally
+
+         }
+         catch(NamingException ne)
+         {
+            PicketBoxLogger.LOGGER.debugIgnoredException(ne);
+            return;
+         }
+         finally
+         {
+            try
             {
                if (results != null)
                   results.close();
                if (ctx != null)
                   ctx.close();
-               if (currentTCCL != null)
-                  SecurityActions.setContextClassLoader(currentTCCL);
-            }            
-         }catch(NamingException ne)
-         {
-            PicketBoxLogger.LOGGER.debugIgnoredException(ne);
-            return;
-         } 
+            }
+            catch (NamingException namingException)
+            {
+               PicketBoxLogger.LOGGER.debugIgnoredException(namingException);
+            }
+            if (currentTCCL != null)
+               SecurityActions.setContextClassLoader(currentTCCL);
+         }
+
          results = null;
       }
-      
+
       mappedObject.addAll(attributeList);
-      mappingResult.setMappedObject(mappedObject);   
+      mappingResult.setMappedObject(mappedObject);
    }
 
    public void setMappingResult(MappingResult<List<Attribute<String>>> result)
@@ -283,14 +298,14 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
    }
 
    public boolean supports(Class<?> clazz)
-   { 
+   {
       if(Attribute.class.isAssignableFrom(clazz))
         return true;
-      
+
       return false;
-   } 
-   
-   
+   }
+
+
    private InitialLdapContext constructInitialLdapContext(String dn, Object credential) throws NamingException
    {
       Properties env = new Properties();
@@ -356,6 +371,6 @@ public class LdapAttributeMappingProvider implements MappingProvider<List<Attrib
          }
       }
       String[] strArr = new String[arrayList.size()];
-      return arrayList.toArray(strArr); 
+      return arrayList.toArray(strArr);
    }
 }
