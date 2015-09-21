@@ -73,12 +73,13 @@ public abstract class AbstractServerLoginModule implements LoginModule
    private static final String PASSWORD_STACKING = "password-stacking";
    private static final String USE_FIRST_PASSWORD = "useFirstPass";
    private static final String PRINCIPAL_CLASS = "principalClass";
+   private static final String PRINCIPAL_CLASS_MODULE = "principalClassModule";
    private static final String UNAUTHENTICATED_IDENTITY = "unauthenticatedIdentity";
    private static final String MODULE = "module";
   
    private static final String[] ALL_VALID_OPTIONS =
    {
-	   PASSWORD_STACKING,PRINCIPAL_CLASS,UNAUTHENTICATED_IDENTITY,MODULE,
+	   PASSWORD_STACKING,PRINCIPAL_CLASS,PRINCIPAL_CLASS_MODULE,UNAUTHENTICATED_IDENTITY,MODULE,
 	   SecurityConstants.SECURITY_DOMAIN_OPTION
    };
    
@@ -97,6 +98,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
    protected boolean loginOk;
    /** An optional custom Principal class implementation */
    protected String principalClassName;
+   protected String principalClassModuleName;
    /** the principal to use when a null username and password are seen */
    protected Principal unauthenticatedIdentity;
    /** jboss module name to load Callback class etc */
@@ -153,6 +155,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
 
       // Check for a custom Principal implementation
       principalClassName = (String) options.get(PRINCIPAL_CLASS);
+      principalClassModuleName = (String) options.get(PRINCIPAL_CLASS_MODULE);
 
       // Check for unauthenticatedIdentity option.
       String name = (String) options.get(UNAUTHENTICATED_IDENTITY);
@@ -361,8 +364,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
       }
       else
       {
-            ClassLoader loader = SecurityActions.getContextClassLoader();
-            Class clazz = loader.loadClass(principalClassName);
+            Class clazz = SecurityActions.loadClass(principalClassName, principalClassModuleName);
             Class[] ctorSig = {String.class};
             Constructor ctor = clazz.getConstructor(ctorSig);
             Object[] ctorArgs = {username};
