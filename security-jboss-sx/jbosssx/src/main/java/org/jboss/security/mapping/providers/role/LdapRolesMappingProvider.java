@@ -267,8 +267,15 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
    protected void rolesSearch(InitialLdapContext ctx, SearchControls constraints, String user, int recursionMax,
          int nesting, RoleGroup roleGroup) throws NamingException
    {
+      rolesSearch(ctx, constraints, user, null, recursionMax, nesting, roleGroup);
+   }
+
+   protected void rolesSearch(InitialLdapContext ctx, SearchControls constraints, String user, String previousRoleDn,
+                              int recursionMax, int nesting, RoleGroup roleGroup) throws NamingException
+   {
       Object[] filterArgs = {user};
-      NamingEnumeration<SearchResult> results = ctx.search(rolesCtxDN, roleFilter, filterArgs, constraints);
+      String searchFilter = previousRoleDn == null ? roleFilter : "member=" + previousRoleDn;
+      NamingEnumeration<SearchResult> results = ctx.search(rolesCtxDN, searchFilter, filterArgs, constraints);
       try
       {
          while (results.hasMore())
@@ -323,7 +330,7 @@ public class LdapRolesMappingProvider extends AbstractRolesMappingProvider
 
             if (nesting < recursionMax)
             {
-               rolesSearch(ctx, constraints, user, recursionMax, nesting + 1, roleGroup);
+               rolesSearch(ctx, constraints, user, dn, recursionMax, nesting + 1, roleGroup);
             }
          }
       }
