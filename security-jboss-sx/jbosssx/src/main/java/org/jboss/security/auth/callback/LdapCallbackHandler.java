@@ -2,7 +2,7 @@
  * JBoss, Home of Professional Open Source.
  * Copyright 2011, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
- * distribution for a full listing of individual contributors. 
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -51,7 +51,7 @@ import org.jboss.security.PicketBoxMessages;
  * <p>
  * There are two callbacks that can be passed to this handler.
  * <ol>
- * <li>{@code PasswordCallback}:  Passing this callback will get the password for the user. 
+ * <li>{@code PasswordCallback}:  Passing this callback will get the password for the user.
  *                                The returned password will not be in clear text. It will
  *                                be in the hashed form the ldap server has stored.
  * </li>
@@ -68,13 +68,13 @@ import org.jboss.security.PicketBoxMessages;
  * <li>bindDN   :  DN used to bind against the ldap server with read/write permissions for baseCtxDN.</li>
  * <li>bindCredential : Password for the bindDN. This can be encrypted if the jaasSecurityDomain is specified.</li>
  * <li>baseCtxDN : The fixed DN of the context to start the user search from.</li>
- * <li>baseFilter: A search filter used to locate the context of the user to authenticate. 
- *                 The input username/userDN as provided by the {@code NameCallback} 
- *                 will be substituted into the filter anywhere a "{0}" expression is seen. 
+ * <li>baseFilter: A search filter used to locate the context of the user to authenticate.
+ *                 The input username/userDN as provided by the {@code NameCallback}
+ *                 will be substituted into the filter anywhere a "{0}" expression is seen.
  *                 This substitution behavior comes from the standard.</li>
  * <li>searchTimeLimit : The timeout in milliseconds for the user/role searches. Defaults to 10000 (10 seconds).</li>
- * <li>jaasSecurityDomain : The JMX ObjectName of the JaasSecurityDomain to use to decrypt the java.naming.security.principal. 
- *                          The encrypted form of the password is that returned by the JaasSecurityDomain#encrypt64(byte[]) method. 
+ * <li>jaasSecurityDomain : The JMX ObjectName of the JaasSecurityDomain to use to decrypt the java.naming.security.principal.
+ *                          The encrypted form of the password is that returned by the JaasSecurityDomain#encrypt64(byte[]) method.
  *                          The org.jboss.security.plugins.PBEUtils can also be used to generate the encrypted form.</li>
  * <li>distinguishedNameAttribute : Used in ldap servers such as Active Directory where the ldap provider has a property (distinguishedName)
  *                                  to return the relative CN of the user. Default: distinguishedName</li>
@@ -103,7 +103,7 @@ import org.jboss.security.PicketBoxMessages;
  * @author Anil Saldhana
  * @since Nov 1, 2011
  */
-public class LdapCallbackHandler extends AbstractCallbackHandler implements CallbackHandler 
+public class LdapCallbackHandler extends AbstractCallbackHandler implements CallbackHandler
 {
 	private static final String PASSWORD_ATTRIBUTE_ID = "passwordAttributeID";
 
@@ -113,12 +113,12 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 
 	private static final String BASE_CTX_DN = "baseCtxDN";
 
-	private static final String BASE_FILTER_OPT = "baseFilter"; 
+	private static final String BASE_FILTER_OPT = "baseFilter";
 
-	private static final String SEARCH_TIME_LIMIT_OPT = "searchTimeLimit"; 
+	private static final String SEARCH_TIME_LIMIT_OPT = "searchTimeLimit";
 
 	private static final String SECURITY_DOMAIN_OPT = "jaasSecurityDomain";
-	   
+
 	private static final String DISTINGUISHED_NAME_ATTRIBUTE_OPT = "distinguishedNameAttribute";
 
 	protected String bindDN;
@@ -126,20 +126,20 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 	protected String bindCredential;
 
 	protected String passwordAttributeID = "userPassword";
- 
+
 	protected int searchTimeLimit = 10000;
 
 	protected String distinguishedNameAttribute;
 
 	// simple flag to indicate is the validatePassword method was called
 	protected boolean isPasswordValidated = false;
-	
+
 	protected Map<String,String> options = new HashMap<String, String>();
-	
+
 	public LdapCallbackHandler()
-	{	
+	{
 	}
-	
+
 	public void setConfiguration(Map<String,String> config)
 	{
 		if(config != null)
@@ -149,7 +149,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 	}
 
 	public void handle(Callback[] callbacks) throws IOException,
-	UnsupportedCallbackException 
+	UnsupportedCallbackException
 	{
 		if(userName == null)
 		{
@@ -158,47 +158,47 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		for (int i = 0; i < callbacks.length; i++)
 		{
 			Callback callback = callbacks[i];
-			try 
+			try
 			{
 				this.handleCallBack( callback );
-			} 
-			catch (NamingException e) 
+			}
+			catch (NamingException e)
 			{
 				throw new IOException(e);
-			} 
+			}
 		}
 	}
-	
+
 	/**
 	 * Handle a {@code Callback}
 	 * @param c callback
 	 * @throws UnsupportedCallbackException If the callback is not supported by this handler
-	 * @throws NamingException 
+	 * @throws NamingException
 	 */
 	protected void handleCallBack( Callback c ) throws UnsupportedCallbackException, NamingException
-	{ 
+	{
 		if(c instanceof VerifyPasswordCallback)
 		{
 			verifyPassword((VerifyPasswordCallback) c);
 			return;
 		}
-		
+
 		if(c instanceof PasswordCallback == false)
 			return;
 
 		PasswordCallback passwdCallback = (PasswordCallback) c;
 
 		String bindDN = getBindDN();
-		
-		String bindCredential = getBindCredential(); 
-		
+
+		String bindCredential = getBindCredential();
+
 		String tmp = options.get(PASSWORD_ATTRIBUTE_ID);
 		if(tmp != null && tmp.length() > 0)
 		{
 			passwordAttributeID = tmp;
 		}
 
-		InitialLdapContext ctx;
+		InitialLdapContext ctx = null;
 		ClassLoader currentTCCL = SecurityActions.getContextClassLoader();
 		try
 		{
@@ -208,8 +208,12 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		}
 		catch (NamingException e)
 		{
+			safeClose(ctx);
+			if (currentTCCL != null)
+				SecurityActions.setContextClassLoader(currentTCCL);
+
 			throw new RuntimeException(e);
-		} 
+		}
 
 		String timeLimit = (String) options.get(SEARCH_TIME_LIMIT_OPT);
 		if (timeLimit != null)
@@ -260,39 +264,36 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 			//Finished Authentication.  Lets look for the attributes
 			filterArgs = new Object[]{userName, userDN};
 			results = ctx.search(userDN, baseFilter, filterArgs, constraints);
-			try
+			while (results.hasMore())
 			{
-				while (results.hasMore())
-				{
-					sr = results.next();
-					Attributes attributes = sr.getAttributes();
-					NamingEnumeration<? extends javax.naming.directory.Attribute> ne = attributes.getAll();
+				sr = results.next();
+				Attributes attributes = sr.getAttributes();
+				NamingEnumeration<? extends javax.naming.directory.Attribute> ne = attributes.getAll();
 
-					while(ne != null && ne.hasMoreElements())
+				while(ne != null && ne.hasMoreElements())
+				{
+					javax.naming.directory.Attribute ldapAtt = ne.next();
+					if(passwordAttributeID.equalsIgnoreCase(ldapAtt.getID()))
 					{
-						javax.naming.directory.Attribute ldapAtt = ne.next();
-						if(passwordAttributeID.equalsIgnoreCase(ldapAtt.getID()))
-						{
-							Object thePass = ldapAtt.get();
-							setPasswordCallbackValue(thePass, passwdCallback);
-						}
-					} 
-				}       
+						Object thePass = ldapAtt.get();
+						setPasswordCallbackValue(thePass, passwdCallback);
+					}
+				}
 			}
-			finally
-			{
-				safeClose(results);
-				safeClose(ctx);
-				if (currentTCCL != null)
-					SecurityActions.setContextClassLoader(currentTCCL);
-			}            
 		}
 		catch(NamingException ne)
 		{
 			PicketBoxLogger.LOGGER.error(ne);
 		}
+		finally
+		{
+			safeClose(results);
+			safeClose(ctx);
+			if (currentTCCL != null)
+				SecurityActions.setContextClassLoader(currentTCCL);
+		}
 	}
-	
+
 	protected void verifyPassword( VerifyPasswordCallback vpc) throws NamingException
 	{
 		String credential = vpc.getValue();
@@ -308,7 +309,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		bindDNAuthentication(ctx, userName, credential, baseDN, baseFilter);
 		vpc.setVerified(true);
 	}
-	
+
 	protected String getBindDN()
 	{
 		String bindDN = options.get(BIND_DN);
@@ -318,7 +319,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		}
 		return bindDN;
 	}
-	
+
 	protected String getBindCredential()
 	{
 		String bindCredential = options.get(BIND_CREDENTIAL);
@@ -331,7 +332,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 			catch (Exception e1)
 			{
 				PicketBoxLogger.LOGGER.errorDecryptingBindCredential(e1);
-			}			
+			}
 		}
 		String securityDomain = options.get(SECURITY_DOMAIN_OPT);
 		if (securityDomain != null)
@@ -341,7 +342,7 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 				ObjectName serviceName = new ObjectName(securityDomain);
 				char[] tmp = DecodeAction.decode(bindCredential, serviceName);
 				bindCredential = new String(tmp);
-			} 
+			}
 			catch (Exception e)
 			{
 				PicketBoxLogger.LOGGER.errorDecryptingBindCredential(e);
@@ -349,9 +350,9 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		}
 		return bindCredential;
 	}
-	
+
 	protected void setPasswordCallbackValue(Object thePass, PasswordCallback passwdCallback)
-	{ 
+	{
 		String tmp;
 		if(thePass instanceof String)
 		{
@@ -360,19 +361,19 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 		}
 		else if(thePass instanceof char[])
 		{
-			passwdCallback.setPassword((char[])thePass); 
-		} 
+			passwdCallback.setPassword((char[])thePass);
+		}
 		else if(thePass instanceof byte[])
 		{
 			byte[] theBytes = (byte[]) thePass;
-			passwdCallback.setPassword((new String(theBytes).toCharArray())); 
-		} 
+			passwdCallback.setPassword((new String(theBytes).toCharArray()));
+		}
 		else
 		{
 			throw PicketBoxMessages.MESSAGES.invalidPasswordType(thePass != null ? thePass.getClass() : null);
 		}
 	}
-	
+
 	private InitialLdapContext constructInitialLdapContext(String dn, Object credential) throws NamingException
 	{
 		Properties env = new Properties();
@@ -397,12 +398,12 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 			providerURL = "ldap://localhost:" + ((protocol != null && protocol.equals("ssl")) ? "636" : "389");
 
 		env.setProperty(Context.PROVIDER_URL, providerURL);
-		
+
 		distinguishedNameAttribute = options.get(DISTINGUISHED_NAME_ATTRIBUTE_OPT);
 	      if (distinguishedNameAttribute == null)
 	          distinguishedNameAttribute = "distinguishedName";
 
-	      
+
 		// JBAS-3555, allow anonymous login with no bindDN and bindCredential
 		if (dn != null)
 			env.setProperty(Context.SECURITY_PRINCIPAL, dn);
@@ -411,16 +412,16 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
         this.traceLDAPEnv(env);
         return new InitialLdapContext(env, null);
 	}
-	
+
 	/**
     @param ctx - the context to search from
     @param user - the input username
     @param credential - the bind credential
     @param baseDN - base DN to search the ctx from
     @param filter - the search filter string
-    @return the userDN string for the successful authentication 
+    @return the userDN string for the successful authentication
     @throws NamingException
-    */ 
+    */
    @SuppressWarnings("rawtypes")
    protected String bindDNAuthentication(InitialLdapContext ctx, String user, Object credential, String baseDN,
          String filter) throws NamingException
@@ -463,10 +464,10 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 
       safeClose(results);
       results = null;
-      
+
       InitialLdapContext userCtx = constructInitialLdapContext(userDN, credential);
       safeClose(userCtx);
-      
+
       return userDN;
    }
 
@@ -493,23 +494,23 @@ public class LdapCallbackHandler extends AbstractCallbackHandler implements Call
 	{
 		if(results != null)
 		{
-			try 
+			try
 			{
 				results.close();
 			} catch (NamingException e) {}
 		}
 	}
-	
+
 	protected void safeClose(InitialLdapContext ic)
 	{
 		if(ic != null)
 		{
-			try 
+			try
 			{
 				ic.close();
-			} 
-			catch (NamingException e) 
-			{ 
+			}
+			catch (NamingException e)
+			{
 			}
 		}
 	}
