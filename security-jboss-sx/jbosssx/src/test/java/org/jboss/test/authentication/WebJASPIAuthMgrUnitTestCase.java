@@ -42,7 +42,7 @@ import org.jboss.test.util.TestHttpServletRequest;
 
 /**
  * Unit tests for the JBossAuthenticationManager with JASPI
- * 
+ *
  * @author Anil.Saldhana@redhat.com
  * @since May 10, 2007
  * @version $Revision$
@@ -77,7 +77,7 @@ public class WebJASPIAuthMgrUnitTestCase extends JBossAuthenticationManagerUnitT
       HttpServletRequest hsr = getHttpServletRequest("jduke", "BAD");
       MessageInfo mi = new GenericMessageInfo(hsr, (HttpServletResponse) null);
       ServerAuthenticationManager am = new JASPIServerAuthenticationManager(securityDomain, acbh);
-      assertFalse(am.isValid(mi, (Subject)null, "HTTP", null));
+      assertFalse(am.isValid(mi, (Subject)null, "HTTP", new JBossCallbackHandler()));
    }
 
    private void establishSecurityConfiguration()
