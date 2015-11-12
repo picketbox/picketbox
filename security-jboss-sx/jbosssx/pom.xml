@@ -76,7 +76,7 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>**/*.dtd</include>
-                    <include>**/*.xsd</include>
+                    <include>**/security-config*.xsd</include>
                 </includes>
             </resource>
             <resource>
