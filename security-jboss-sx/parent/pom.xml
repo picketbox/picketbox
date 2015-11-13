@@ -26,7 +26,7 @@
       <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/security-jboss-sx/tags/4.9.4.Beta1-SNAPSHOT</connection>
       <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/security-jboss-sx/tags/4.9.4.Beta1-SNAPSHOT</developerConnection>
    </scm>
-  
+
    <build>
      <plugins>
         <plugin>
@@ -39,6 +39,15 @@
      </plugins>
      <pluginManagement>
        <plugins>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <version>3.3</version>
+               <configuration>
+                   <source>1.8</source>
+                   <target>1.8</target>
+               </configuration>
+           </plugin>
           <plugin>
              <artifactId>maven-surefire-plugin</artifactId>
              <version>2.4.3</version>
@@ -85,7 +94,7 @@
        </plugins>
      </pluginManagement>
    </build>
-  
+
    <repositories>
     <repository>
       <id>repository.jboss.org</id>
@@ -110,7 +119,7 @@
       </releases>
     </repository>
   </repositories>
-  
+
   <dependencyManagement>
     <dependencies>
         <dependency>
