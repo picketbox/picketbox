@@ -1,0 +1,50 @@
+dn: dc=jboss,dc=org
+objectclass: dcObject
+objectclass: organization
+o: JBoss
+dc: JBoss
+
+dn: ou=People,dc=jboss,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: People
+
+# Define jduke person
+dn: uid=jduke,ou=People,dc=jboss,dc=org
+objectclass: top
+objectclass: person
+objectclass: inetOrgPerson
+uid: jduke
+cn: Java Duke
+sn: Duke
+userPassword: Password1
+
+# Define the Roles role
+dn: ou=Roles,dc=jboss,dc=org
+objectClass: top
+objectClass: organizationalUnit
+ou: Roles
+
+dn: cn=R1,ou=Roles,dc=jboss,dc=org
+objectClass: groupOfNames
+objectClass: top
+cn: R1
+member: uid=jduke,ou=People,dc=jboss,dc=org
+
+dn: cn=R2,ou=Roles,dc=jboss,dc=org
+objectClass: groupOfNames
+objectClass: top
+cn: R2
+member: cn=R1,ou=Roles,dc=jboss,dc=org
+
+dn: cn=R3,ou=Roles,dc=jboss,dc=org
+objectClass: groupOfNames
+objectClass: top
+cn: R3
+member: cn=R2,ou=Roles,dc=jboss,dc=org
+
+dn: cn=R4,ou=Roles,dc=jboss,dc=org
+objectClass: groupOfNames
+objectClass: top
+cn: R4
+member: cn=R3,ou=Roles,dc=jboss,dc=org
