@@ -470,6 +470,7 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
     */
    protected void setValidateError(Throwable validateError)
    {
+      PicketBoxLogger.LOGGER.passwordValidationFailed(validateError);
       this.validateError = validateError;
    }
 
