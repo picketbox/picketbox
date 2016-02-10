@@ -951,7 +951,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
       {
          usernameBeginString = (String) options.get(USERNAME_BEGIN_STRING);
          usernameEndString = (String) options.get(USERNAME_END_STRING);
-         int beginIndex = 0;
+         int beginIndex = -1;
          if (usernameBeginString != null && !usernameBeginString.equals(""))
             beginIndex = username.indexOf(usernameBeginString);
          if (beginIndex == -1)
