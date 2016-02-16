@@ -7,7 +7,7 @@
   <fileSets>
     <fileSet>
       <directory>../jbosssx/src/main/java</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>./</outputDirectory>
       <includes>
         <include>org/jboss/crypto/JBossSXProvider.java</include>
         <include>org/jboss/crypto/CryptoUtil.java</include>

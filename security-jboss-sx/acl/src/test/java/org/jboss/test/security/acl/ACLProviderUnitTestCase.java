@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
-
 import org.jboss.security.acl.ACLEntry;
 import org.jboss.security.acl.ACLEntryImpl;
 import org.jboss.security.acl.ACLPersistenceStrategy;
@@ -156,6 +155,12 @@ public class ACLProviderUnitTestCase extends TestCase
       entries = new ArrayList<ACLEntry>();
       entries.add(new ACLEntryImpl(new CompositeACLPermission(BasicACLPermission.READ), this.identity));
       registration.registerACL(this.resources[9], entries);
+   }
+
+   @Override
+   protected void tearDown() throws Exception {
+      // deregisters the ACLs.
+      for (Resource resource : this.resources) { this.registration.deRegisterACL(resource); }
    }
 
    /**

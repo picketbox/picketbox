@@ -1,26 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
-      <groupId>org.picketbox</groupId>
-      <artifactId>jbosssx-parent</artifactId>
-      <version>4.9.4.Beta1-SNAPSHOT</version>
-      <relativePath>../parent</relativePath>
-   </parent>
+    <parent>
+        <groupId>org.picketbox</groupId>
+        <artifactId>jbosssx-pom</artifactId>
+        <version>4.9.4.Beta1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
    <modelVersion>4.0.0</modelVersion>
    <artifactId>picketbox-identity-impl</artifactId>
    <packaging>jar</packaging>
    <name>PicketBox Identity Implementation</name>
    <url>http://jboss.org/picketbox</url>
    <description>PicketBox is a security project for Java Applications.</description>
-   <licenses>
-      <license>
-         <name>lgpl</name>
-         <url>http://repository.jboss.com/licenses/lgpl.txt</url>
-      </license>
-   </licenses>
-   <organization>
-      <name>JBoss Inc.</name>
-      <url>http://www.jboss.org</url>
-   </organization>
    <profiles>
     <!--    mvn install -Psecurity-manager    -->
     <profile>

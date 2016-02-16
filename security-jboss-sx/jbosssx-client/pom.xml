@@ -1,9 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
-      <groupId>org.jboss</groupId>
-      <artifactId>jboss-parent</artifactId>
-      <version>5</version>
-   </parent>
+    <parent>
+        <groupId>org.picketbox</groupId>
+        <artifactId>jbosssx-pom</artifactId>
+        <version>4.9.4.Beta1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-client</artifactId>
@@ -17,7 +18,7 @@
       <plugin>
          <groupId>org.apache.maven.plugins</groupId>
          <artifactId>maven-jar-plugin</artifactId>
-         <version>2.3</version>
+         <version>${version.jar.plugin}</version>
          <executions>
             <execution>
                <goals>
@@ -55,7 +56,6 @@
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.1</version>
         <executions>
           <execution>
             <phase>package</phase>

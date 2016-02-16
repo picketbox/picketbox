@@ -1,9 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
-      <groupId>org.jboss</groupId>
-      <artifactId>jboss-parent</artifactId>
-      <version>5</version>
-   </parent>
+    <parent>
+        <groupId>org.picketbox</groupId>
+        <artifactId>picketbox-parent</artifactId>
+        <version>4.9.4.Beta1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-pom</artifactId>
@@ -12,43 +13,9 @@
    <name>PicketBox Implementation - Parent</name>
    <url>http://jboss.org/picketbox</url>
    <description>PicketBox is a security project for Java Applications.</description>
-   <licenses>
-      <license>
-         <name>lgpl</name>
-         <url>http://repository.jboss.com/licenses/lgpl.txt</url>
-      </license>
-   </licenses>
-   <organization>
-      <name>JBoss Inc.</name>
-      <url>http://www.jboss.org</url>
-   </organization>
-   <repositories>
-    <repository>
-      <id>repository.jboss.org</id>
-      <name>JBoss Repository</name>
-      <layout>default</layout>
-      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
 
-    <repository>
-      <id>snapshots.jboss.org</id>
-      <name>JBoss Snapshots Repository</name>
-      <layout>default</layout>
-      <url>http://snapshots.jboss.org/maven2/</url>
-      <snapshots>
-         <enabled>true</enabled>
-      </snapshots>
-      <releases>
-         <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
   
    <modules>
-     <module>parent</module>
      <module>identity</module>
      <module>acl</module>
      <module>jbosssx</module>
@@ -71,19 +38,4 @@
       </modules>
     </profile>
    </profiles>
-  
-   <distributionManagement>
-    <repository>
-      <!-- Copy the distribution jar file to a local checkout of the maven repositry
-        -  This variable can be set in $MAVEN_HOME/conf/settings.xml -->
-      <id>repository.jboss.org</id>
-      <url>file://${maven.repository.root}</url>
-    </repository>
-    <snapshotRepository>
-      <id>snapshots.jboss.org</id>
-      <name>JBoss Inc. Repository</name>
-      <layout>default</layout>
-      <url>dav:https://snapshots.jboss.org/maven2/</url>
-    </snapshotRepository>
-   </distributionManagement>
 </project>

@@ -66,13 +66,14 @@ public class StaxConfigParser2UnitTestCase extends TestCase
    {
       Configuration.setConfiguration(StandaloneConfiguration.getInstance());
       ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-      InputStream is = tcl.getResourceAsStream("config/securityConfig5.xml");
-      StaxBasedConfigParser parser = new StaxBasedConfigParser(); 
+      StaxBasedConfigParser parser = new StaxBasedConfigParser();
+      try (InputStream is = tcl.getResourceAsStream("config/securityConfig5.xml")) {
+         parser.schemaValidate(is);
+      }
       
-      parser.schemaValidate(is);
-      
-      is = tcl.getResourceAsStream("config/securityConfig5.xml");
-      parser.parse2(is);
+      try (InputStream is = tcl.getResourceAsStream("config/securityConfig5.xml")) {
+         parser.parse2(is);
+      }
       
       TestSecurityConfig5.validateJAASConfiguration();
       TestSecurityConfig5.validateJASPIConfiguration();
@@ -84,12 +85,14 @@ public class StaxConfigParser2UnitTestCase extends TestCase
    {
       Configuration.setConfiguration(StandaloneConfiguration.getInstance());
       ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-      InputStream is = tcl.getResourceAsStream("config/identitytrust-config.xml");
-      StaxBasedConfigParser parser = new StaxBasedConfigParser(); 
-      parser.schemaValidate(is);
+      StaxBasedConfigParser parser = new StaxBasedConfigParser();
+      try (InputStream is = tcl.getResourceAsStream("config/identitytrust-config.xml")) {
+         parser.schemaValidate(is);
+      }
       
-      is = tcl.getResourceAsStream("config/identitytrust-config.xml");
-      parser.parse2(is);
+      try (InputStream is = tcl.getResourceAsStream("config/identitytrust-config.xml")) {
+         parser.parse2(is);
+      }
       
       TestIdentityTrustConfig.testConfJavaEE();
    }

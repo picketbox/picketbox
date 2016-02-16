@@ -7,22 +7,22 @@
   <fileSets>
     <fileSet>
       <directory>../identity/src/main/java</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>./</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>../jbosssx/src/main/java</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>./</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>../jbosssx/src/main/resources</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>./</outputDirectory>
       <excludes>
         <exclude>security-policies-service.xml</exclude>
       </excludes>
     </fileSet>
     <fileSet>
       <directory>../acl/src/main/java</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>./</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>

@@ -22,15 +22,14 @@
 package org.jboss.test.security.mapping;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.security.auth.login.Configuration;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextFactory;
@@ -54,13 +53,13 @@ public class LdapAttributeMappingProvider2UnitTestCase extends OpenDSUnitTestsAd
    public static Test suite() throws Exception
    {
       TestSuite suite = new TestSuite();
-      suite.addTest(new LdapAttributeMappingProvider2UnitTestCase("testLDAPAttributes")); 
+      suite.addTest(new LdapAttributeMappingProvider2UnitTestCase("testLDAPAttributes"));
       return suite;
    }
-   
+
    public LdapAttributeMappingProvider2UnitTestCase(String name)
    {
-      super(name); 
+      super(name);
    }
 
    protected void setUp() throws Exception
@@ -77,11 +76,18 @@ public class LdapAttributeMappingProvider2UnitTestCase extends OpenDSUnitTestsAd
       boolean op = util.addLDIF(serverHost, port, adminDN, adminPW, new File(fileName).toURI().toURL());
       assertTrue(op);
    }
+
+   @Override
+   public void tearDown() throws Exception {
+      super.tearDown();
+   }
    
    public void testLDAPAttributes() throws Exception
    {    
       StaxBasedConfigParser parser = new StaxBasedConfigParser();
-      parser.parse2(Thread.currentThread().getContextClassLoader().getResourceAsStream("ldap/ldap-attributes-config.xml"));
+      try (InputStream is =  Thread.currentThread().getContextClassLoader().getResourceAsStream("ldap/ldap-attributes-config.xml")) {
+         parser.parse2(is);
+      }
       
       SecurityContext sc = SecurityContextFactory.createSecurityContext("test");
       MappingManager mm = sc.getMappingManager();
