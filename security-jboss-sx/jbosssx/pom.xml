@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>org.picketbox</groupId>
-        <artifactId>jbosssx-parent</artifactId>
+        <artifactId>jbosssx-pom</artifactId>
         <version>4.9.4.Beta1-SNAPSHOT</version>
-        <relativePath>../parent</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>jbosssx-bare</artifactId>
@@ -12,16 +12,7 @@
     <name>PicketBox implementation</name>
     <url>http://jboss.org/picketbox</url>
     <description>PicketBox is a security project for Java Applications.</description>
-    <licenses>
-        <license>
-            <name>lgpl</name>
-            <url>http://repository.jboss.com/licenses/lgpl.txt</url>
-        </license>
-    </licenses>
-    <organization>
-        <name>JBoss Inc.</name>
-        <url>http://www.jboss.org</url>
-    </organization>
+
     <profiles>
         <!--    mvn install -Psecurity-manager    -->
         <profile>
@@ -64,7 +55,7 @@
     </profiles>
 
     <build>
-        <finalName>${artifactId}</finalName>
+        <finalName>${project.artifactId}</finalName>
         <resources>
             <resource>
                 <directory>src/main/java</directory>
@@ -97,7 +88,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>javacc-maven-plugin</artifactId>
-                <version>2.6</version>
+                <version>${version.javacc.plugin}</version>
                 <configuration>
                     <packageName>org/jboss/security/auth/login</packageName>
                     <sourceDirectory>src/main/java</sourceDirectory>
@@ -111,6 +102,14 @@
                         <id>javacc</id>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+
+                <configuration>
+                    <forkMode>always</forkMode>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -149,12 +148,6 @@
             <artifactId>picketbox-acl-impl</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jboss-common-core</artifactId>
-                    <groupId>jboss</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.picketbox</groupId>
@@ -165,25 +158,10 @@
         <dependency>
             <groupId>org.jboss.spec.javax.security.jacc</groupId>
             <artifactId>jboss-jacc-api_1.5_spec</artifactId>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>sun-jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jboss.spec.javax.resource</groupId>
             <artifactId>jboss-connector-api_1.6_spec</artifactId>
-            <version>1.0.0.Final</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>sun-jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jboss.logging</groupId>
@@ -206,21 +184,14 @@
         <dependency>
             <groupId>org.jboss.security</groupId>
             <artifactId>jbossxacml</artifactId>
-            <version>2.0.4</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.jboss</groupId>
             <artifactId>jnpserver</artifactId>
             <version>4.2.3.GA</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.2</version>
-            <scope>test</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>sun-opends</groupId>
             <artifactId>OpenDS</artifactId>
@@ -236,13 +207,14 @@
         <dependency>
             <groupId>org.picketbox</groupId>
             <artifactId>picketbox-commons</artifactId>
-            <version>1.0.0.final</version>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.2.4</version>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
 </project>

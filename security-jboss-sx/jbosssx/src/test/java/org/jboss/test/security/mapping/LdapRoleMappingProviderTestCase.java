@@ -22,6 +22,13 @@
 
 package org.jboss.test.security.mapping;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import javax.security.auth.login.Configuration;
+
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextFactory;
@@ -39,13 +46,6 @@ import org.jboss.security.mapping.MappingManager;
 import org.jboss.security.mapping.MappingProvider;
 import org.jboss.security.mapping.MappingType;
 import org.jboss.test.security.ldap.OpenDSUnitTestsAdapter;
-
-import javax.security.auth.login.Configuration;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * @author Ryan Emerson
@@ -67,6 +67,11 @@ public class LdapRoleMappingProviderTestCase extends OpenDSUnitTestsAdapter {
         String fileName = targetDir + "ldap" + fs + "ldapRoleMapping.ldif";
         boolean op = util.addLDIF(serverHost, port, adminDN, adminPW, new File(fileName).toURI().toURL());
         assertTrue(op);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
     }
 
     public void testRoleRecursion() throws Exception {

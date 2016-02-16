@@ -1,24 +1,210 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
-     <groupId>org.picketbox</groupId>
-     <artifactId>picketbox-parent</artifactId>
-     <version>4.9.4.Beta1-SNAPSHOT</version>
-     <relativePath>parent</relativePath>
-   </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>20</version>
+        <relativePath/>
+    </parent>
 
-   <modelVersion>4.0.0</modelVersion>
-   <groupId>org.picketbox</groupId>
-   <artifactId>picketbox-aggregator-pom</artifactId>
-   <packaging>pom</packaging>
-   <name> PicketBox - Aggregator</name>
-   <url>http://jboss.org/picketbox</url>
-   <description>PicketBox is a security framework</description>
-   <modules>
-     <module>parent</module>
-     <module>security-spi</module>
-     <module>security-jboss-sx</module>
-     <module>picketbox</module>
-     <module>picketbox-infinispan</module>
-     <module>assembly</module>
-   </modules>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.picketbox</groupId>
+    <artifactId>picketbox-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>PicketBox- Parent</name>
+    <url>http://jboss.org/picketbox</url>
+    <description>PicketBox is a security framework for authentication, authorization, audit and mapping</description>
+    <version>4.9.4.Beta1-SNAPSHOT</version>
+
+
+    <licenses>
+        <license>
+            <name>lgpl</name>
+            <url>http://repository.jboss.com/licenses/lgpl.txt</url>
+        </license>
+    </licenses>
+    <organization>
+        <name>JBoss Inc.</name>
+        <url>http://www.jboss.org</url>
+    </organization>
+    <scm>
+        <connection>scm:git:git@github.com:picketbox/picketbox.git</connection>
+        <developerConnection>scm:git:git@github.com:picketbox/picketbox.git</developerConnection>
+        <url>https://github.com/picketbox/picketbox.git</url>
+    </scm>
+    <properties>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+
+
+        <version.org.infinispan>8.1.0.Final</version.org.infinispan>
+        <version.org.hibernate>5.0.7.Final</version.org.hibernate>
+        <version.org.jboss.security.jbossxacml>2.0.8.Final</version.org.jboss.security.jbossxacml>
+        <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.0.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
+    </properties>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${version.surefire.plugin}</version>
+                    <configuration>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <printSummary>true</printSummary>
+                        <disableXmlReport>false</disableXmlReport>
+                        <testFailureIgnore>false</testFailureIgnore>
+                        <includes>
+                            <include>**/**TestCase.java</include>
+                        </includes>
+                        <argLine>${surefire.jvm.args}</argLine>
+                        <useFile>false</useFile>
+                        <trimStackTrace>false</trimStackTrace>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>3.2.1.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging-annotations</artifactId>
+                <version>2.0.0.Final</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging-processor</artifactId>
+                <version>2.0.0.Final</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.picketbox</groupId>
+                <artifactId>picketbox-spi-bare</artifactId>
+                <version>${project.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.picketbox</groupId>
+                <artifactId>jbosssx-bare</artifactId>
+                <version>${project.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-core</artifactId>
+                <version>${version.org.infinispan}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.11</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.spec.javax.security.jacc</groupId>
+                <artifactId>jboss-jacc-api_1.5_spec</artifactId>
+                <version>1.0.0.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.spec.javax.security.auth.message</groupId>
+                <artifactId>jboss-jaspi-api_1.1_spec</artifactId>
+                <version>1.0.0.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.spec.javax.resource</groupId>
+                <artifactId>jboss-connector-api_1.6_spec</artifactId>
+                <version>1.0.0.Final</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.security</groupId>
+                <artifactId>jbossxacml</artifactId>
+                <version>${version.org.jboss.security.jbossxacml}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.modules</groupId>
+                <artifactId>jboss-modules</artifactId>
+                <version>1.5.1.Final</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.picketbox</groupId>
+                <artifactId>picketbox-commons</artifactId>
+                <version>1.0.0.final</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>2.3.3</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate.javax.persistence</groupId>
+                <artifactId>hibernate-jpa-2.1-api</artifactId>
+                <version>${version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${version.org.hibernate}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-entitymanager</artifactId>
+                <version>${version.org.hibernate}</version>
+            </dependency>
+        </dependencies>
+
+
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>repository.jboss.org</id>
+            <name>JBoss Repository</name>
+            <layout>default</layout>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>snapshots.jboss.org</id>
+            <name>JBoss Snapshots Repository</name>
+            <layout>default</layout>
+            <url>http://snapshots.jboss.org/maven2/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+
+    <modules>
+        <module>security-spi</module>
+        <module>security-jboss-sx</module>
+        <module>picketbox</module>
+        <module>picketbox-infinispan</module>
+        <module>assembly</module>
+    </modules>
 </project>

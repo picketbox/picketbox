@@ -23,7 +23,6 @@ package org.jboss.test.authentication.jaas;
 
 import java.io.File;
 import java.util.HashMap;
-
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
@@ -107,6 +106,11 @@ public class LdapLoginModuleDecodeActionUnitTestCase extends OpenDSUnitTestCase
       {
          e.printStackTrace();
       }
+   }
+
+   @Override
+   public void tearDown() throws Exception {
+      super.tearDown();
    }
    
    public void testLDAPAddDelete() throws Exception

@@ -22,8 +22,9 @@
 package org.jboss.test.security.ldap;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Hashtable;
-
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.DirContext;
@@ -32,6 +33,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import junit.framework.TestCase;
+import org.opends.server.core.DirectoryServer;
 
 /**
  *  Test Basic OpenDS functionality
@@ -56,13 +58,14 @@ public class OpenDSUnitTestCase extends TestCase
          "com.sun.jndi.ldap.LdapCtxFactory");
 
    protected String baseDir = System.getProperty("user.dir");
-   protected String fs = System.getProperty("file.separator");
+   protected String fs = File.separator;
    
    //System property when running in eclipse (-Declipse=jbosssx/ )
    private String eclipsePath = System.getProperty("eclipse","");
    
+   //protected String targetDir = eclipsePath + "target" + fs + "test-classes" + fs + getName() + fs;
    protected String targetDir = eclipsePath + "target" + fs + "test-classes" + fs;
-   protected String openDSDir =   targetDir + "opends" ; 
+   protected String openDSDir =   targetDir + "opends" ;
    
    protected OpenDS opends = null;
    
@@ -79,17 +82,19 @@ public class OpenDSUnitTestCase extends TestCase
       File openDSDirFile = new File(openDSDir);
       if(openDSDirFile.exists())
       {
-         File dbDir = new File(openDSDir + fs + "db");
+         File dbDir = new File(openDSDir, "db");
          assertTrue("Deletion of opendsDir db success", recursiveDeleteDir(dbDir));
          assertTrue("Creation of opendsDir DB success", dbDir.mkdirs());
-      }   
-      
+      }
+
       serverHost = "localhost";
       
       opends = new OpenDS();
-      opends.intialize(openDSDir);
-      if(opends.isRunning())
+
+      if (opends.isRunning()) {
          opends.stopServer();
+      }
+      opends.intialize(openDSDir);
       opends.startServer();
       assertTrue(opends.isRunning()); 
    }
@@ -101,7 +106,7 @@ public class OpenDSUnitTestCase extends TestCase
       assertTrue("DS is running",opends.isRunning());
       shutdown();
       assertFalse("DS is not running",opends.isRunning());
-   } 
+   }
    
    public void testLDAPAddDelete() throws Exception
    {
@@ -165,26 +170,22 @@ public class OpenDSUnitTestCase extends TestCase
       return new InitialDirContext(env);   
    }
    
-   private boolean recursiveDeleteDir(File dirPath)
-   {
-      if( dirPath.exists() ) 
+   private boolean recursiveDeleteDir(File dirPath) throws IOException {
+      if( dirPath.exists() )
       {
          File[] files = dirPath.listFiles();
-         for(int i=0; i<files.length; i++) 
-         {
-            if(files[i].isDirectory()) 
-            {
-               recursiveDeleteDir(files[i]);
-            }
-            else 
-            {
-              files[i].delete();
+         for (File file : files) {
+            if (file.isDirectory()) {
+               recursiveDeleteDir(file);
+            } else {
+               Files.delete(file.toPath());
             }
          }
        }
-       if(dirPath.exists())
-          return dirPath.delete();
-       else
-          return true; 
+       if(Files.exists(dirPath.toPath())) {
+          Files.delete(dirPath.toPath());
+       }
+
+      return true;
    }
 }

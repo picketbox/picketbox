@@ -21,6 +21,12 @@
  */
 package org.jboss.test.security.acl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -34,6 +40,9 @@ import org.jboss.security.acl.ACLPersistenceStrategy;
 import org.jboss.security.acl.BasicACLPermission;
 import org.jboss.security.acl.JPAPersistenceStrategy;
 import org.jboss.security.identity.plugins.IdentityFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * <p>
@@ -43,16 +52,15 @@ import org.jboss.security.identity.plugins.IdentityFactory;
  * 
  * @author <a href="mailto:sguilhen@redhat.com">Stefan Guilhen</a>
  */
-public class JPAStrategyUnitTestCase extends TestCase
-{
+public class JPAStrategyUnitTestCase {
    private TestResource[] resources;
 
    private Collection<ACL> createdACLs;
 
    private ACLPersistenceStrategy strategy;
 
-   @Override
-   protected void setUp() throws Exception
+   @Before
+   public void setUp() throws Exception
    {
       // create some test resources to be used by the tests.
       this.resources = new TestResource[10];
@@ -62,8 +70,8 @@ public class JPAStrategyUnitTestCase extends TestCase
       this.strategy = new JPAPersistenceStrategy(new TestResourceFactory());
    }
 
-   @Override
-   protected void tearDown() throws Exception
+   @After
+   public void tearDown() throws Exception
    {
       for (ACL acl : this.createdACLs)
          this.strategy.removeACL(acl);
@@ -76,6 +84,7 @@ public class JPAStrategyUnitTestCase extends TestCase
     * 
     * @throws Exception if an error occurs when running the test.
     */
+   @Test
    public void testACLCreation() throws Exception
    {
       // assert no ACL exists for any of the resources.
@@ -117,6 +126,7 @@ public class JPAStrategyUnitTestCase extends TestCase
     * 
     * @throws Exception if an error occurs when running the test.
     */
+   @Test
    public void testACLUpdate() throws Exception
    {
       // create an empty ACL.
@@ -160,6 +170,7 @@ public class JPAStrategyUnitTestCase extends TestCase
     * 
     * @throws Exception if an error occurs when running the test.
     */
+   @Test
    public void testACLRemoval() throws Exception
    {
       ACL[] acls = new ACL[this.resources.length];
@@ -193,6 +204,7 @@ public class JPAStrategyUnitTestCase extends TestCase
     * 
     * @throws Exception if an error occurs when running the test.
     */
+   @Test
    public void testStrategyWithResourceFactory() throws Exception
    {
       ACL[] acls = new ACL[this.resources.length];

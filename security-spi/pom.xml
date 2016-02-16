@@ -1,24 +1,62 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
-      <groupId>org.picketbox</groupId>
-      <artifactId>picketbox-spi-parent</artifactId>
-      <version>4.9.4.Beta1-SNAPSHOT</version>
-      <relativePath>parent</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-   <artifactId>picketbox-spi-pom</artifactId>
-   <packaging>pom</packaging>
-   <name>PicketBox SPI - Aggregator</name>
-   <url>http://jboss.org/picketbox</url>
-   <description>PicketBox is a security project for Java Applications</description>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.picketbox</groupId>
+        <artifactId>picketbox-parent</artifactId>
+        <version>4.9.4.Beta1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>picketbox-spi-pom</artifactId>
+    <packaging>pom</packaging>
+    <name>PicketBox SPI - Aggregator</name>
+    <url>http://jboss.org/picketbox</url>
+    <description>PicketBox is a security project for Java Applications</description>
 
-   <modules>
-     <module>parent</module>
-     <module>common</module>
-     <module>identity</module>
-     <module>authorization</module>
-     <module>acl</module>
-     <module>spi</module>
-     <module>assembly</module>
-   </modules>
+    <modules>
+        <module>common</module>
+        <module>identity</module>
+        <module>authorization</module>
+        <module>acl</module>
+        <module>spi</module>
+        <module>assembly</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.spec.javax.security.auth.message</groupId>
+                <artifactId>jboss-jaspi-api_1.1_spec</artifactId>
+                <version>1.0.0.Final</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.picketbox</groupId>
+                <artifactId>common-spi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.picketbox</groupId>
+                <artifactId>identity-spi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.picketbox</groupId>
+                <artifactId>authorization-spi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>2.5</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.8.2</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 </project>

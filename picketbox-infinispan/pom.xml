@@ -1,64 +1,50 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
-     <groupId>org.jboss</groupId>
-     <artifactId>jboss-parent</artifactId>
-     <version>5</version>
-   </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.picketbox</groupId>
+        <artifactId>picketbox-parent</artifactId>
+        <version>4.9.4.Beta1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-   <modelVersion>4.0.0</modelVersion>
-   <groupId>org.picketbox</groupId>
-   <artifactId>picketbox-infinispan</artifactId>
-   <version>4.9.4.Beta1-SNAPSHOT</version>
-   <packaging>jar</packaging>
-   <name>Picketbox Infinispan</name>
-   <url>http://jboss.org/picketbox</url>
-   <description>PicketBox Infinispan adds cluster and cache capabilities to PicketBox.</description>
-   
-   <properties>
-   	<version.org.infinispan>4.2.1.FINAL</version.org.infinispan>
-   </properties>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.picketbox</groupId>
+    <artifactId>picketbox-infinispan</artifactId>
+    <version>4.9.4.Beta1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>Picketbox Infinispan</name>
+    <url>http://jboss.org/picketbox</url>
+    <description>PicketBox Infinispan adds cluster and cache capabilities to PicketBox.</description>
 
     <dependencies>
-      <dependency>
-         <groupId>org.jboss.logging</groupId>
-         <artifactId>jboss-logging</artifactId>
-         <version>3.2.1.Final</version>
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.logging</groupId>
-         <artifactId>jboss-logging-annotations</artifactId>
-         <version>2.0.0.Final</version>
-         <scope>provided</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.logging</groupId>
-         <artifactId>jboss-logging-processor</artifactId>
-         <version>2.0.0.Final</version>
-         <scope>provided</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.picketbox</groupId>
-         <artifactId>picketbox-spi-bare</artifactId>
-         <version>${project.version}</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.picketbox</groupId>
-         <artifactId>jbosssx-bare</artifactId>
-         <version>${project.version}</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-core</artifactId>
-         <version>${version.org.infinispan}</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-         <version>4.8.2</version>
-         <scope>test</scope>
-      </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>picketbox-spi-bare</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>jbosssx-bare</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
     </dependencies>
 </project>

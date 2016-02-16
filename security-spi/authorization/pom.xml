@@ -1,59 +1,44 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
-      <groupId>org.picketbox</groupId>
-      <artifactId>picketbox-spi-parent</artifactId>
-      <version>4.9.4.Beta1-SNAPSHOT</version>
-      <relativePath>../parent</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-   <artifactId>authorization-spi</artifactId>
-   <packaging>jar</packaging>
-   <name>PicketBox Authorization SPI</name>
-   <url>http://jboss.org/picketbox</url>
-   <description>PicketBox is a security project for Java Applications.</description>
-    <licenses>
-       <license>
-          <name>lgpl</name>
-          <url>http://repository.jboss.com/licenses/lgpl.txt</url>
-       </license>
-    </licenses>
-    <organization>
-       <name>JBoss Inc.</name>
-       <url>http://www.jboss.org</url>
-    </organization>
-    <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketbox/security-spi/tags/4.9.4.Beta1-SNAPSHOT</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketbox/security-spi/tags/4.9.4.Beta1-SNAPSHOT</developerConnection>
-      <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/picketbox/security-spi/tags/4.9.4.Beta1-SNAPSHOT</url>
-    </scm>
-   <dependencies>
-     <dependency>
-         <groupId>org.picketbox</groupId>
-         <artifactId>common-spi</artifactId>
-     </dependency>
-     <dependency>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
         <groupId>org.picketbox</groupId>
-        <artifactId>identity-spi</artifactId>
-     </dependency>
-     <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <scope>test</scope>
-     </dependency>
-  </dependencies>
-   <reporting>
-    <plugins>
-     <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-surefire-report-plugin</artifactId>
-     </plugin>
-     <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-javadoc-plugin</artifactId>
-       <configuration>
-         <aggregate>true</aggregate>
-       </configuration>
-     </plugin>
-    </plugins>
-   </reporting>
+        <artifactId>picketbox-spi-pom</artifactId>
+        <version>4.9.4.Beta1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>authorization-spi</artifactId>
+    <packaging>jar</packaging>
+    <name>PicketBox Authorization SPI</name>
+    <url>http://jboss.org/picketbox</url>
+    <dependencies>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>common-spi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>identity-spi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <aggregate>true</aggregate>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>
