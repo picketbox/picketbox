@@ -634,8 +634,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
    protected void rolesSearch(LdapContext ctx, SearchControls constraints, String user, String userDN,
          int recursionMax, int nesting) throws NamingException
    {
-      if (rolesCtxDN == null || roleFilter == null || rolesCtxDN.isEmpty() || roleFilter.isEmpty()) {
-          // no role search initial DN nor role filter specified, so assigning no roles
+      if (rolesCtxDN == null || roleFilter == null) {
+          // no role search - initial DN nor role filter specified, so assigning no roles
           return;
       }
 
