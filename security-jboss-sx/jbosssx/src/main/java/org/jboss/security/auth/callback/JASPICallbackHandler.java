@@ -22,8 +22,10 @@
 package org.jboss.security.auth.callback;
 
 import java.security.Principal;
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -32,10 +34,13 @@ import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.security.auth.message.callback.PasswordValidationCallback;
 
+import static org.jboss.security.SecurityConstants.ROLES_IDENTIFIER;
+
 import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextUtil;
+import org.jboss.security.SimpleGroup;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.identity.Identity;
 import org.jboss.security.identity.IdentityFactory;
@@ -109,6 +114,34 @@ public class JASPICallbackHandler extends JBossCallbackHandler
                 subject.getPublicCredentials().addAll(currentSubject.getPublicCredentials());
                 subject.getPrivateCredentials().addAll(currentSubject.getPrivateCredentials());
             }
+            
+            //Set the ROLES_IDENTIFIER principal as expected by JbossAuthorizationManager.getCurrentRoles
+            if ( sizeOfRoles > 0 ) {
+
+	            // get the Roles principal from the subject
+	            Set<Group> groupPrincipals = subject.getPrincipals(Group.class);
+	            Group rolesGroup = null;
+	            
+	            for (Group candidate : groupPrincipals) {
+	            	if ( candidate.getName().equals(ROLES_IDENTIFIER) ) {
+	            		rolesGroup = candidate;
+	            		break;
+	            	}
+	            }
+            
+	            if(rolesGroup == null) {
+	            	rolesGroup = new SimpleGroup(ROLES_IDENTIFIER);
+	            	subject.getPrincipals().add(rolesGroup);
+	            }
+	            
+            	for( int i = 0; i < sizeOfRoles ; i++ )
+            	{
+            		Principal rolePrincipal = new SimplePrincipal( rolesArray[ i ] );
+            		rolesGroup.addMember(rolePrincipal);
+            	}
+            	
+            }
+            
             currentSC.getSubjectInfo().setAuthenticatedSubject(subject);
          }
       }
