@@ -21,11 +21,10 @@
  */
 package org.jboss.security.plugins;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
- * An interface to locate a {@code ClassLoader}}
+ * An interface to locate a {@code ClassLoader}
  * The primary use of this interface is in the JBoss Application Server,
  * which needs to inject a module class loader for custom login modules etc
  * @author Anil Saldhana
@@ -34,15 +33,24 @@ import java.util.Set;
 public interface ClassLoaderLocator 
 {
 	/**
-	 * Given a module name, return a {@code ClassLoader}
+	 * Given a module name, return a {@link ClassLoader}
 	 * @param module the name of the module for which we want a {@link ClassLoader}.
 	 * @return the module {@link java.lang.ClassLoader}.
 	 */
-	default ClassLoader get(String module) {
-        Set<String> modules = new HashSet<>();
-        modules.add(module);
-        return get(modules);
-    }
+	ClassLoader get(String module);
 
-    ClassLoader get(Set<String> modules);
+	/**
+	 * Given a list of module names, return a {@link ClassLoader} that combines all module loaders. This method was made
+	 * default to ensure API compatibility in WildFly. Implementations that are meant to provide support for multiple modules
+	 * must override this default method implementation, which uses only the first module found in the list.
+	 *
+	 * @param modules the set of modules for which we want a {@link ClassLoader}.
+	 * @return the combined {@link ClassLoader}
+     */
+    default ClassLoader get(List<String> modules) {
+		if (modules != null && modules.size() > 0) {
+			return this.get(modules.get(0));
+		}
+        return null;
+    }
 }

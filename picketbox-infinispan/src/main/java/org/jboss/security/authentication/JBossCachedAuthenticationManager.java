@@ -22,13 +22,13 @@
 package org.jboss.security.authentication;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.security.acl.Group;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -307,7 +307,7 @@ public class JBossCachedAuthenticationManager implements AuthenticationManager, 
 	   if(theAppPolicy != null)
 	   {
 		   BaseAuthenticationInfo authInfo = theAppPolicy.getAuthenticationInfo();
-		   Set<String> jbossModuleNames = authInfo.getJBossModuleNames();
+		   List<String> jbossModuleNames = authInfo.getJBossModuleNames();
 		   if(!jbossModuleNames.isEmpty())
 		   {
 			   ClassLoader currentTccl = SubjectActions.getContextClassLoader();

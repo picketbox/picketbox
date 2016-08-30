@@ -21,8 +21,6 @@
  */
 package org.jboss.test.authorization;
 
-import java.util.Set;
-
 import org.jboss.security.config.ApplicationPolicy;
 import org.jboss.security.config.AuthorizationInfo;
 import org.jboss.security.config.SecurityConfiguration;
@@ -49,7 +47,7 @@ public class JBossAuthorizationManagerWithModuleUnitTestCase extends
 		
 		ClassLoaderLocatorFactory.set(new ClassLoaderLocator() {
 			
-			public ClassLoader get(Set<String> modules) {
+			public ClassLoader get(String module) {
 				return Thread.currentThread().getContextClassLoader();
 			}
 		});

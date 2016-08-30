@@ -27,7 +27,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -182,7 +181,7 @@ public class JBossAuthorizationContext extends AuthorizationContext
          throw PicketBoxMessages.MESSAGES.failedToObtainAuthorizationInfo(securityDomainName);
 
       ClassLoader moduleCL = null;
-      Set<String> jbossModuleNames = authzInfo.getJBossModuleNames();
+      List<String> jbossModuleNames = authzInfo.getJBossModuleNames();
       if(!jbossModuleNames.isEmpty())
       {
     	  ClassLoaderLocator cll = ClassLoaderLocatorFactory.get();

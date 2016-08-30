@@ -22,9 +22,8 @@
 package org.jboss.security.config;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.security.auth.AuthPermission;
 
@@ -44,13 +43,12 @@ public abstract class BaseSecurityInfo<T>
 
    protected String name;
 
-   protected ArrayList<T> moduleEntries = new ArrayList<T>();
-   
+   protected List<T> moduleEntries = new ArrayList<T>();
+
    /**
-    * Name of the JBoss Module that can be optionally configured for
-    * custom login modules etc
+    * New implementation - allow the specification of multiple jboss module names.
     */
-   protected Set<String> jbossModuleNames = new HashSet<String>();
+   protected List<String> jbossModuleNames = new ArrayList<String>();
 
    public BaseSecurityInfo()
    {
@@ -96,15 +94,42 @@ public abstract class BaseSecurityInfo<T>
     * Get the name of the JBoss Module
     * @return
     */
-   public Set<String> getJBossModuleNames()
-   {
-	   return jbossModuleNames;
+   @Deprecated
+   public String getJBossModuleName() {
+      if (!this.jbossModuleNames.isEmpty())
+         return this.jbossModuleNames.get(0);
+      return null;
    }
 
    /**
     * Set the name of the JBoss Module
     * @param jbossModuleName
     */
+   @Deprecated
+   public void setJBossModuleName(String jbossModuleName) {
+      if (jbossModuleName != null && !jbossModuleName.isEmpty()) {
+         if (this.jbossModuleNames.isEmpty())
+            this.jbossModuleNames.add(jbossModuleName);
+         else
+            this.jbossModuleNames.set(0, jbossModuleName);
+      }
+   }
+
+   /**
+    * Obtains the list of all configured jboss module names.
+    *
+    * @return the {@link List} containing all configured jboss module names.
+     */
+   public List<String> getJBossModuleNames()
+   {
+	  return Collections.unmodifiableList(this.jbossModuleNames);
+   }
+
+   /**
+    * Adds a new jboss module name.
+    *
+    * @param jbossModuleName the name of the module to be added.
+     */
    public void addJBossModuleName(String jbossModuleName)
    {
        if (jbossModuleName != null && !jbossModuleName.isEmpty())

@@ -24,6 +24,7 @@ package org.jboss.security.plugins.auth;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -292,7 +293,7 @@ public class JaasSecurityManagerBase
 	   if(theAppPolicy != null)
 	   {
 		   BaseAuthenticationInfo authInfo = theAppPolicy.getAuthenticationInfo();
-		   Set<String> jbossModuleNames = authInfo.getJBossModuleNames();
+		   List<String> jbossModuleNames = authInfo.getJBossModuleNames();
 		   if(!jbossModuleNames.isEmpty())
 		   {
 			   ClassLoader currentTccl = SubjectActions.getContextClassLoader();
