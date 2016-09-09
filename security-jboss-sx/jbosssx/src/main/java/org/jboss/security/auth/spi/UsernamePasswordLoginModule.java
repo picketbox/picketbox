@@ -487,8 +487,33 @@ public abstract class UsernamePasswordLoginModule extends AbstractServerLoginMod
       if( ignorePasswordCase == true )
          valid = inputPassword.equalsIgnoreCase(expectedPassword);
       else
-         valid = inputPassword.equals(expectedPassword);
+         valid = slowEquals(inputPassword, expectedPassword);
       return valid;
+   }
+
+
+
+   /**
+    * Compares two strings in length-constant time. This comparison method
+    * is used so that passwords or password hashes cannot be extracted
+    * using a timing attack.
+    *
+    * @param stinga the first string
+    * @param stringb the second string
+    * @return {@code true} if both byte strings are the equal, {@code false} if not
+    * @see java.security.MessageDigest#isEqual(byte[], byte[])
+    */
+   private static boolean slowEquals(String stinga, String stringb)
+   {
+       int aLength = stinga.length();
+       int bLength = stringb.length();
+       int diff = aLength ^ bLength;
+       int lenght = Math.min(aLength, bLength);
+       for(int i = 0; i < lenght; i++)
+       {
+           diff |= stinga.charAt(i) ^ stringb.charAt(i);
+       }
+       return diff == 0;
    }
 
 
