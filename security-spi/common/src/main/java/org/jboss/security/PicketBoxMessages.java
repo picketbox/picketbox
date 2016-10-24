@@ -76,7 +76,7 @@ public interface PicketBoxMessages {
     @Message(id = 16, value = "Access denied: authentication failed")
     String authenticationFailedMessage();
 
-    @Message(id = 17, value = "Acces denied: authorization failed")
+    @Message(id = 17, value = "Access denied: authorization failed")
     String authorizationFailedMessage();
 
     @Message(id = 18, value = "Subject contains a null set of roles")
