@@ -87,25 +87,29 @@ public class DeploymentRoleToRolesMappingProvider implements MappingProvider<Rol
       RoleGroup newRoles = new SimpleRoleGroup(SecurityConstants.ROLES_IDENTIFIER);
       
       RoleGroup assignedRoles = (SimpleRoleGroup)contextMap.get(SecurityConstants.ROLES_IDENTIFIER);
-      
-      for (Role r: assignedRoles.getRoles()) {
 
-         boolean mappedRoleIncluded = false;
-         for (String mappedRole: roleToRolesMap.keySet()) {
-            if (roleToRolesMap.get(mappedRole).contains(r.getRoleName())) {
-               newRoles.addRole(new SimpleRole(mappedRole));
-               mappedRoleIncluded = true;
+      if(assignedRoles != null){      
+         for (Role r: assignedRoles.getRoles()) {
+
+            boolean mappedRoleIncluded = false;
+            for (String mappedRole: roleToRolesMap.keySet()) {
+               if (roleToRolesMap.get(mappedRole).contains(r.getRoleName())) {
+                  newRoles.addRole(new SimpleRole(mappedRole));
+                  mappedRoleIncluded = true;
+               }
             }
-         }
          
-         if (!mappedRoleIncluded) {
-            newRoles.addRole(r);
-         }
+            if (!mappedRoleIncluded) {
+               newRoles.addRole(r);
+            }
          
+         }
       }
 
-      mappedObject.clearRoles();
-      mappedObject.addAll(newRoles.getRoles()); 
+      if(assignedRoles != null){
+         mappedObject.clearRoles();
+         mappedObject.addAll(newRoles.getRoles());
+      } 
       result.setMappedObject(mappedObject);
       
    } 
