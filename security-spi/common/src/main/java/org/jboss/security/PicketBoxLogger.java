@@ -739,4 +739,8 @@ public interface PicketBoxLogger extends BasicLogger {
     @Message(id = 378, value = "Problem when closing original LDAP context during role search rebind. Trying to create new LDAP context.")
     void warnProblemClosingOriginalLdapContextDuringRebind(@Cause NamingException e);
 
+    @LogMessage(level = Logger.Level.DEBUG)
+    @Message(id = 379, value = "Password validation failed")
+    void passwordValidationFailed(@Cause Throwable cause);
+
 }
