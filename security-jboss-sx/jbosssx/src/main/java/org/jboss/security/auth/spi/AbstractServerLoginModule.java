@@ -265,7 +265,7 @@ public abstract class AbstractServerLoginModule implements LoginModule
    }
 
    /** Method to abort the authentication process (phase 2).
-    @return true alaways
+    @return true always
     */
    public boolean abort() throws LoginException
    {
