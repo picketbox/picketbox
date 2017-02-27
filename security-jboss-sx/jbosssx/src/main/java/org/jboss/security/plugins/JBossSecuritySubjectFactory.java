@@ -24,6 +24,7 @@ package org.jboss.security.plugins;
 import java.security.Principal;
 
 import javax.security.auth.Subject;
+import javax.security.auth.login.LoginException;
 
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.ISecurityManagement;
@@ -81,7 +82,16 @@ public class JBossSecuritySubjectFactory implements SubjectFactory
       {
          SubjectActions.setContextClassLoader(this.getClass().getClassLoader());
          if (!authenticationManager.isValid(principal, SubjectActions.getCredential(), subject))
-            throw new SecurityException(PicketBoxMessages.MESSAGES.authenticationFailedMessage());
+         {
+            LoginException loginException = SubjectActions.getContextLoginException();
+            if (loginException == null) {
+                throw new SecurityException(PicketBoxMessages.MESSAGES.authenticationFailedMessage());
+            }
+            else
+            {
+                throw new SecurityException(PicketBoxMessages.MESSAGES.authenticationFailedMessage(), loginException);
+            }
+         }
       }
       finally
       {

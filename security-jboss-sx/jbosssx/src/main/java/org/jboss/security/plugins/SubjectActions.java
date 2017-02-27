@@ -28,6 +28,7 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.security.auth.Subject;
@@ -376,6 +377,23 @@ class SubjectActions
       SetContextInfoAction action = new SetContextInfoAction(key, value);
       Object prevInfo = AccessController.doPrivileged(action);
       return prevInfo;
+   }
+
+   static LoginException getContextLoginException()
+   {
+      LoginException exp = null;
+      SecurityContext sc = getSecurityContext();
+      if (sc != null) {
+          Map<String, Object> ctxInfo = sc.getData();
+          if (ctxInfo != null) {
+              for (Object obj: ctxInfo.values()) {
+                  if (obj != null && obj instanceof LoginException) {
+                      return (LoginException)obj;
+                  }
+              }
+          }
+      }
+      return exp;
    }
 
    static void pushSubjectContext(Principal principal, Object credential,
