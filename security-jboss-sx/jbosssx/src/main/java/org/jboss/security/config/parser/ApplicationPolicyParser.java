@@ -120,7 +120,7 @@ public class ApplicationPolicyParser implements XMLStreamConstants
             xmlEvent = xmlEventReader.nextEvent();
             AuthenticationConfigParser parser = new AuthenticationConfigParser();
             Set<AppConfigurationEntry> entries = parser.parse(xmlEventReader);
-            AuthenticationInfo authInfo = new AuthenticationInfo();
+            AuthenticationInfo authInfo = new AuthenticationInfo(appPolicy.getName());
              
             authInfo.setAppConfigurationEntry(new ArrayList(entries));
             appPolicy.setAuthenticationInfo(authInfo); 
