@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
@@ -47,17 +49,17 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
    /**
     * Map of String key to provider.
     */
-   private Map<String, AuthConfigProvider> keyToAuthConfigProviderMap = new HashMap<String, AuthConfigProvider>();
+   private ConcurrentMap<String, AuthConfigProvider> keyToAuthConfigProviderMap = new ConcurrentHashMap<String, AuthConfigProvider>();
 
    /**
     * Map of key to listener.
     */
-   private Map<String, RegistrationListener> keyToRegistrationListenerMap = new HashMap<String, RegistrationListener>();
+   private ConcurrentMap<String, RegistrationListener> keyToRegistrationListenerMap = new ConcurrentHashMap<String, RegistrationListener>();
 
    /**
     * Map of key to registration context.
     */
-   private Map<String, RegistrationContext> keyToRegistrationContextMap = new HashMap<String, RegistrationContext>();
+   private ConcurrentMap<String, RegistrationContext> keyToRegistrationContextMap = new ConcurrentHashMap<String, RegistrationContext>();
     
    /**
     * <p>
@@ -105,7 +107,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
 
       if (origListener == listener)
       {
-          keyToRegistrationListenerMap.remove(key);
+          keyToRegistrationListenerMap.remove(key, listener);
          // Get the ID List
       }
       return arr;
@@ -124,7 +126,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
 
       AuthConfigProvider acp = null;
       String key = null;
-      for (int i = 0; i < 4; i++)
+      for (int i = 0; i < 4 && acp == null; i++)
       {
          if (i == 0)
             key = input;
@@ -135,11 +137,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
          if (i == 3)
             key = general;
 
-         if (this.keyToAuthConfigProviderMap.containsKey(key))
-         {
-            acp = this.keyToAuthConfigProviderMap.get(key);
-            break;
-         }
+         acp = this.keyToAuthConfigProviderMap.get(key);
       }
 
       //
@@ -284,8 +282,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       RegistrationContext rc = this.keyToRegistrationContextMap.get(registrationID);
 
       // remove the provider and notify listener of the change.
-      boolean removed = this.keyToAuthConfigProviderMap.containsKey(registrationID);
-      this.keyToAuthConfigProviderMap.remove(registrationID);
+      boolean removed = (this.keyToAuthConfigProviderMap.remove(registrationID) != null);
       if (removed && listener != null)
          listener.notify(rc.getMessageLayer(), rc.getAppContext());
       this.keyToRegistrationContextMap.remove(registrationID);
