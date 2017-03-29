@@ -26,6 +26,7 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509KeyManager;
 
 /**
@@ -33,7 +34,7 @@ import javax.net.ssl.X509KeyManager;
  * 
  * @author <a href="mmoyses@redhat.com">Marcus Moyses</a>
  */
-public class SecurityKeyManager implements X509KeyManager
+public class SecurityKeyManager extends X509ExtendedKeyManager
 {
    private X509KeyManager delegate;
    
