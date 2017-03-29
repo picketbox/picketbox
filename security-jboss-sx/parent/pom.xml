@@ -8,7 +8,7 @@
    <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-parent</artifactId>
    <packaging>pom</packaging>
-   <version>5.0.0.Beta2-SNAPSHOT</version>
+   <version>5.0.0.Final</version>
    <name>JBossSX - Parent</name>
    <url>http://jboss.org/picketbox</url>
    <description>PicketBox is a security project for Java Applications.</description>
@@ -165,6 +165,6 @@
 
   <properties>
     <org.jboss.javaee.version>GA</org.jboss.javaee.version>
-    <org.jboss.security.spi.version>5.0.0.Beta2-SNAPSHOT</org.jboss.security.spi.version>
+    <org.jboss.security.spi.version>5.0.0.Final</org.jboss.security.spi.version>
   </properties>
 </project>
