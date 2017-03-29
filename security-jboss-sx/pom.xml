@@ -7,7 +7,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-pom</artifactId>
-   <version>5.0.1.Beta1-SNAPSHOT</version>
+   <version>5.0.1.Final</version>
    <packaging>pom</packaging>
    <name>PicketBox Implementation - Parent</name>
    <url>http://jboss.org/picketbox</url>
