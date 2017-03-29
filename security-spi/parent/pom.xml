@@ -8,7 +8,7 @@
    <groupId>org.picketbox</groupId>
    <artifactId>picketbox-spi-parent</artifactId>
    <packaging>pom</packaging>
-   <version>5.0.1.Final</version>
+   <version>5.0.2.Beta1-SNAPSHOT</version>
    <name>PicketBox SPI - Parent</name>
    <url>http://jboss.org/picketbox</url>
    <description>PicketBox is a security project for Java Applications.</description>
