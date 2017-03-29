@@ -8,7 +8,7 @@
    <groupId>org.picketbox</groupId>
    <artifactId>picketbox-parent</artifactId>
    <packaging>pom</packaging>
-   <version>5.0.0.Final</version>
+   <version>5.0.1.Beta1-SNAPSHOT</version>
    <name>PicketBox- Parent</name>
    <url>http://jboss.org/picketbox</url>
    <description>PicketBox is a security framework for authentication, authorization, audit and mapping</description>
