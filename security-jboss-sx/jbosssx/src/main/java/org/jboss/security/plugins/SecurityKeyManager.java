@@ -26,6 +26,7 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509KeyManager;
 
@@ -101,4 +102,17 @@ public class SecurityKeyManager extends X509ExtendedKeyManager
       return delegate.getServerAliases(keyType, issuers);
    }
 
+   @Override
+   public String chooseEngineClientAlias(String[] strings, Principal[] principals, SSLEngine sslEngine) {
+      if (delegate instanceof X509ExtendedKeyManager)
+         return ((X509ExtendedKeyManager) delegate).chooseEngineClientAlias(strings, principals, sslEngine);
+      return super.chooseEngineClientAlias(strings, principals, sslEngine);
+   }
+
+   @Override
+   public String chooseEngineServerAlias(String s, Principal[] principals, SSLEngine sslEngine) {
+      if (delegate instanceof X509ExtendedKeyManager)
+         return ((X509ExtendedKeyManager) delegate).chooseEngineServerAlias(s, principals, sslEngine);
+      return super.chooseEngineServerAlias(s, principals, sslEngine);
+   }
 }
