@@ -7,7 +7,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.picketbox</groupId>
    <artifactId>jbosssx-client</artifactId>
-   <version>5.0.2.Beta1-SNAPSHOT</version>
+   <version>5.0.2.Final</version>
    <packaging>jar</packaging>
    <name>PicketBox Client</name>
    <url>http://www.jboss.org/picketbox</url>
