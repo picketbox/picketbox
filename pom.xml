@@ -13,6 +13,14 @@
    <name> PicketBox - Aggregator</name>
    <url>http://jboss.org/picketbox</url>
    <description>PicketBox is a security framework</description>
+
+   <licenses>
+      <license>
+         <name>GNU Lesser General Public License v2.1 only</name>
+         <url>http://repository.jboss.org/licenses/lgpl-2.1.txt</url>
+      </license>
+   </licenses>
+
    <modules>
      <module>parent</module>
      <module>security-spi</module>
