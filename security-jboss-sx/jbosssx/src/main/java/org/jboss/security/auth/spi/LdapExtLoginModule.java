@@ -567,19 +567,26 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
               }
           }
           else {
-             userDN = bindDNReferralAuthentication(sr.getName(), credential);
+             userDN = bindDNReferralAuthentication(null, sr.getName(), credential);
              if (userDN == null) {
                  throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);
              }
           }
       }
       else {
-          if (isPasswordValidated)
-          {
-             // Bind as the user dn to authenticate the user
-             InitialLdapContext userCtx = constructInitialLdapContext(userDN, credential);
-             userCtx.close();
-          }
+         if (sr.isRelative() == true) {
+            if (isPasswordValidated) {
+               // Bind as the user dn to authenticate the user
+               InitialLdapContext userCtx = constructInitialLdapContext(userDN, credential);
+               userCtx.close();
+            }
+         }
+         else {
+            userDN = bindDNReferralAuthentication(userDN, sr.getName(), credential);
+            if (userDN == null) {
+               throw PicketBoxMessages.MESSAGES.unableToFollowReferralForAuth(name);
+            }
+         }
       }
 
       return userDN;
@@ -596,12 +603,13 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     *
     * It uses all options from login module setup except of ProviderURL.
     *
+    * @param userDN - userDN which has to be used instead of parsed absoluteName (if is null, use absoluteName) - value is gained using distinguishedNameAttribute
     * @param absoluteName - absolute user DN
     * @param credential
     * @return used user DN for validation
     * @throws NamingException
     */
-   private String bindDNReferralAuthentication(String absoluteName, Object credential)
+   private String bindDNReferralAuthentication(final String userDN, String absoluteName, Object credential)
            throws NamingException
    {
        URI uri;
@@ -612,7 +620,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
        {
            throw PicketBoxMessages.MESSAGES.unableToParseReferralAbsoluteName(e, absoluteName);
        }
-       String name = uri.getPath().substring(1);
+       String name = (userDN != null ? userDN : uri.getPath().substring(1));
        String namingProviderURL = uri.getScheme() + "://" + uri.getAuthority();
 
        Properties refEnv = constructLdapContextEnvironment(namingProviderURL, name, credential);
