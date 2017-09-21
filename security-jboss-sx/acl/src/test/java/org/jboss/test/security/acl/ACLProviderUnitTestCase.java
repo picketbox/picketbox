@@ -158,6 +158,14 @@ public class ACLProviderUnitTestCase extends TestCase
       registration.registerACL(this.resources[9], entries);
    }
 
+   @Override
+   protected void tearDown() throws Exception {
+      // deregister ACLs.
+      for (Resource resource : this.resources) {
+         this.registration.deRegisterACL(resource);
+      }
+   }
+
    /**
     * <p>
     * Tests the behavior of the {@code getEntitlements} method.

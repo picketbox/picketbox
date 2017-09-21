@@ -158,7 +158,7 @@ public class JBossTimeBasedOTPLoginModuleUnitTestCase
             if( WEB_REQUEST_KEY.equals( key ))
             {  
                TestHttpServletRequest tsr = new TestHttpServletRequest();
-               tsr.setParameter( "totp", totp );
+               tsr.setParameter( "totp", new String[]{totp} );
                
                return tsr; 
             } 

@@ -60,11 +60,11 @@ public class AuthorizationContex2tUnitTestCase extends TestCase
       TestSuite suite = new TestSuite();
       suite.addTest(new TestSuite(AuthorizationContex2tUnitTestCase.class));
       // Create an initializer for the test suite
-      TestSetup wrapper = new TestSetup(suite)
-      { 
+      return new TestSetup(suite)
+      {
          protected void setUp() throws Exception
          {
-            super.setUp(); 
+            super.setUp();
             ClassLoader tcl = Thread.currentThread().getContextClassLoader();
             URL url = tcl.getResource("authorization/config/authorization-policy.xml");
             if(url == null)
@@ -73,11 +73,10 @@ public class AuthorizationContex2tUnitTestCase extends TestCase
             loadXMLConfig(url);
          }
          protected void tearDown() throws Exception
-         {  
-            super.tearDown(); 
+         {
+            super.tearDown();
          }
       };
-      return wrapper; 
    } 
 
 
@@ -164,10 +163,10 @@ public class AuthorizationContex2tUnitTestCase extends TestCase
 
    private int getResult(String policyName) throws Exception
    {
-      int result = AuthorizationContext.DENY;
+      int result;
 
       Configuration config = Configuration.getConfiguration();
-      if(config instanceof ApplicationPolicyRegistration == false)
+      if(!(config instanceof ApplicationPolicyRegistration))
          throw new IllegalStateException("JAAS Configuration does not support application policy registration");
       ApplicationPolicyRegistration appPolicyRegistration = (ApplicationPolicyRegistration) config;
 
@@ -186,8 +185,7 @@ public class AuthorizationContex2tUnitTestCase extends TestCase
                return ResourceType.WEB;
             }
 
-            @SuppressWarnings("unchecked")
-            public Map getMap()
+            public Map<String,Object> getMap()
             {
                return contextMap;
             }

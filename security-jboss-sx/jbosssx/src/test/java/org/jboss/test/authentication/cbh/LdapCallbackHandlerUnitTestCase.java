@@ -56,7 +56,12 @@ public class LdapCallbackHandlerUnitTestCase extends OpenDSUnitTestsAdapter
 		boolean op = util.addLDIF(serverHost, port, adminDN, adminPW, new File(fileName).toURI().toURL());
 		assertTrue(op);
 	}
-	
+
+	@Override
+	public void tearDown() throws Exception {
+		super.tearDown();
+	}
+
 	@Test
 	public void testSuccessfulCBH() throws Exception
 	{

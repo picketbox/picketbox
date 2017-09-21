@@ -1,122 +1,125 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
-      <groupId>org.picketbox</groupId>
-      <artifactId>jbosssx-parent</artifactId>
-      <version>5.0.3.Beta1-SNAPSHOT</version>
-      <relativePath>../parent</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-   <artifactId>picketbox-acl-impl</artifactId>
-   <packaging>jar</packaging>
-   <name>PicketBox ACL Implementation</name>
-   <url>http://jboss.org/picketbox</url>
-   <description>PicketBox is a security project for Java Applications.</description>
-   <profiles>
-    <!--    mvn install -Psecurity-manager    -->
-    <profile>
-      <id>security-manager</id>
-      <activation>
-         <activeByDefault>false</activeByDefault>
-      </activation>
-      <properties>
-         <test.env>-Dtest.basedir=${basedir}/target/test-classes</test.env>
-         <policy.file>${basedir}/src/tests/resources/java.policy</policy.file>
-         <surefire.jvm.args>-Djava.security.manager -Djava.security.policy=${policy.file} ${test.env}</surefire.jvm.args>
-      </properties>
-    </profile>
-    <!--     mvn install -Psecurity-manager-debug   -->
-    <!-- Best Practice:    mvn install -Psecurity-manager-debug  2>&1 > logfile2>&1 > logfile -->
-    <profile>
-      <id>security-manager-debug</id>
-      <activation>
-         <activeByDefault>false</activeByDefault>
-      </activation>
-      <properties>
-         <test.env>-Dtest.basedir=${basedir}/target/test-classes</test.env>
-         <policy.file>${basedir}/src/tests/resources/java.policy</policy.file>
-         <surefire.jvm.args>-Djava.security.manager -Djava.security.policy=${policy.file} -Djava.security.debug=failure,access ${test.env}</surefire.jvm.args>
-      </properties>
-    </profile>
-   </profiles>
-   <dependencies>
-      <dependency>
-         <groupId>org.jboss.logging</groupId>
-         <artifactId>jboss-logging</artifactId>
-      </dependency>
-       <dependency>
-           <groupId>org.jboss.logging</groupId>
-           <artifactId>jboss-logging-annotations</artifactId>
-           <scope>provided</scope>
-       </dependency>
-       <dependency>
-           <groupId>org.jboss.logging</groupId>
-           <artifactId>jboss-logging-processor</artifactId>
-           <scope>provided</scope>
-       </dependency>
-      <dependency>
-         <groupId>org.hibernate</groupId>
-         <artifactId>hibernate-core</artifactId>
-         <version>3.6.6.Final</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.hibernate</groupId>
-         <artifactId>hibernate-annotations</artifactId>
-         <version>3.3.0.ga</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.hibernate</groupId>
-         <artifactId>hibernate-entitymanager</artifactId>
-         <version>3.6.6.Final</version>
-         <scope>compile</scope>
-      </dependency>
-       <dependency>
-           <groupId>org.picketbox</groupId>
-           <artifactId>acl-spi</artifactId>
-           <version>${project.version}</version>
-           <scope>compile</scope>
-       </dependency>
-       <dependency>
-         <groupId>org.picketbox</groupId>
-         <artifactId>authorization-spi</artifactId>
-         <version>${project.version}</version>
-         <scope>compile</scope>
-      </dependency>
-       <dependency>
-           <groupId>org.picketbox</groupId>
-           <artifactId>common-spi</artifactId>
-           <version>${project.version}</version>
-           <scope>compile</scope>
-       </dependency>
-       <dependency>
-         <groupId>org.picketbox</groupId>
-         <artifactId>identity-spi</artifactId>
-         <version>${project.version}</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.picketbox</groupId>
-         <artifactId>picketbox-identity-impl</artifactId>
-         <version>${project.version}</version>
-         <scope>compile</scope>
-      </dependency>    
-      <dependency>
-         <groupId>javax.persistence</groupId>
-         <artifactId>persistence-api</artifactId>
-         <version>1.0</version>
-         <scope>compile</scope>
-      </dependency>    
-      <dependency>
-         <groupId>hsqldb</groupId>
-         <artifactId>hsqldb</artifactId>
-         <version>1.8.0.2</version>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-         <scope>test</scope>
-      </dependency>
-   </dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.picketbox</groupId>
+        <artifactId>jbosssx-pom</artifactId>
+        <version>5.0.3.Beta1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>picketbox-acl-impl</artifactId>
+    <packaging>jar</packaging>
+    <name>PicketBox ACL Implementation</name>
+    <description>PicketBox is a security project for Java Applications.</description>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkMode>always</forkMode>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-processor</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>acl-spi</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>authorization-spi</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>common-spi</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>identity-spi</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>picketbox-identity-impl</artifactId>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <!--    mvn install -Psecurity-manager    -->
+        <profile>
+            <id>security-manager</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <test.env>-Dtest.basedir=${basedir}/target/test-classes</test.env>
+                <policy.file>${basedir}/src/tests/resources/java.policy</policy.file>
+                <surefire.jvm.args>-Djava.security.manager -Djava.security.policy=${policy.file} ${test.env}
+                </surefire.jvm.args>
+            </properties>
+        </profile>
+        <!--     mvn install -Psecurity-manager-debug   -->
+        <!-- Best Practice:    mvn install -Psecurity-manager-debug  2>&1 > logfile2>&1 > logfile -->
+        <profile>
+            <id>security-manager-debug</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <test.env>-Dtest.basedir=${basedir}/target/test-classes</test.env>
+                <policy.file>${basedir}/src/tests/resources/java.policy</policy.file>
+                <surefire.jvm.args>-Djava.security.manager -Djava.security.policy=${policy.file}
+                    -Djava.security.debug=failure,access ${test.env}
+                </surefire.jvm.args>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>

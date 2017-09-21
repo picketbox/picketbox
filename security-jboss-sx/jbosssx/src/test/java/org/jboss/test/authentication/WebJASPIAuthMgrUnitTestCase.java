@@ -94,8 +94,8 @@ public class WebJASPIAuthMgrUnitTestCase extends JBossAuthenticationManagerUnitT
    public HttpServletRequest getHttpServletRequest(String username, String pass)
    {
       HttpServletRequest hsr = new TestHttpServletRequest(new SimplePrincipal(username), pass, "GET");
-      hsr.getParameterMap().put("j_username", username);
-      hsr.getParameterMap().put("j_password", pass);
+      hsr.getParameterMap().put("j_username", new String[]{username});
+      hsr.getParameterMap().put("j_password", new String[]{pass});
       return hsr;
    }
 }

@@ -179,6 +179,10 @@ public class WebAuthorizationHelperUnitTestCase extends TestCase
          {
          }
 
+         @Override
+         public void setContentLengthLong(long len) {
+         }
+
          public void setContentType(String arg0)
          {
          }

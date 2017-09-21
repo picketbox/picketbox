@@ -28,15 +28,14 @@ import java.security.KeyStore;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 
-import junit.framework.Assert;
-
 import org.jboss.security.CertificatePrincipal;
 import org.jboss.security.auth.certs.SubjectCNMapping;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class CertificateTestCase {
 
-	public static String KEYSTOREFILE = "src/test/resources/keystore/keystore.jks";
+	private static String KEYSTOREFILE = "src/test/resources/keystore/keystore.jks";
 
 	
 	@Test
