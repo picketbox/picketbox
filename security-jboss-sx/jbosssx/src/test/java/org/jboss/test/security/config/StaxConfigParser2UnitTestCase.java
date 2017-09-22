@@ -28,7 +28,6 @@ import java.util.Map;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.jboss.security.acl.config.ACLProviderEntry;
 import org.jboss.security.audit.config.AuditProviderEntry;
@@ -66,48 +65,51 @@ public class StaxConfigParser2UnitTestCase extends TestCase
    {
       Configuration.setConfiguration(StandaloneConfiguration.getInstance());
       ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-      InputStream is = tcl.getResourceAsStream("config/securityConfig5.xml");
-      StaxBasedConfigParser parser = new StaxBasedConfigParser(); 
-      
-      parser.schemaValidate(is);
-      
-      is = tcl.getResourceAsStream("config/securityConfig5.xml");
-      parser.parse2(is);
-      
+      StaxBasedConfigParser parser = new StaxBasedConfigParser();
+      try (InputStream is = tcl.getResourceAsStream("config/securityConfig5.xml")) {
+         parser.schemaValidate(is);
+      }
+
+      try (InputStream is = tcl.getResourceAsStream("config/securityConfig5.xml")) {
+         parser.parse2(is);
+      }
+
       TestSecurityConfig5.validateJAASConfiguration();
       TestSecurityConfig5.validateJASPIConfiguration();
       TestSecurityConfig5.validateCompleteConfiguration();
       TestSecurityConfig5.validateApplicationPolicyExtension();
    }
-   
+
    public void testIdentityTrustConfig() throws Exception
    {
       Configuration.setConfiguration(StandaloneConfiguration.getInstance());
       ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-      InputStream is = tcl.getResourceAsStream("config/identitytrust-config.xml");
-      StaxBasedConfigParser parser = new StaxBasedConfigParser(); 
-      parser.schemaValidate(is);
-      
-      is = tcl.getResourceAsStream("config/identitytrust-config.xml");
-      parser.parse2(is);
-      
+      StaxBasedConfigParser parser = new StaxBasedConfigParser();
+      try (InputStream is = tcl.getResourceAsStream("config/identitytrust-config.xml")) {
+         parser.schemaValidate(is);
+      }
+
+      try (InputStream is = tcl.getResourceAsStream("config/identitytrust-config.xml")) {
+         parser.parse2(is);
+      }
+
       TestIdentityTrustConfig.testConfJavaEE();
    }
-   
+
    private static ApplicationPolicy getApplicationPolicy(String domainName)
    {
       Configuration config = Configuration.getConfiguration();
-      if(config instanceof ApplicationPolicyRegistration == false)
+      if(!(config instanceof ApplicationPolicyRegistration))
          throw new RuntimeException("Config is not of type ApplicationPolicyRegistration");
-      
+
       ApplicationPolicyRegistration apr = (ApplicationPolicyRegistration) config;
       return apr.getApplicationPolicy(domainName);
    }
-   
+
    // Internal class to represent the securityConfig5.xml validation
    private static class TestSecurityConfig5
-   { 
-      public static void validateJAASConfiguration()
+   {
+      static void validateJAASConfiguration()
       {
          ApplicationPolicy jaasConfig = getApplicationPolicy("conf-jaas");
          BaseAuthenticationInfo authInfo = jaasConfig.getAuthenticationInfo();
@@ -141,7 +143,7 @@ public class StaxConfigParser2UnitTestCase extends TestCase
 
       }
 
-      public static void validateJASPIConfiguration()
+      static void validateJASPIConfiguration()
       {
          ApplicationPolicy jaspiConfig = getApplicationPolicy("conf-jaspi");
          BaseAuthenticationInfo authInfo = jaspiConfig.getAuthenticationInfo();
@@ -174,7 +176,7 @@ public class StaxConfigParser2UnitTestCase extends TestCase
          assertEquals("App Entries in LMSH=1", 1, appEntries.length);
 
          Object appEntry = appEntries[0];
-         assertTrue("Entry instanceof AppConfigurationEntry", appEntry instanceof AppConfigurationEntry);
+         assertTrue("Entry instanceof AppConfigurationEntry", appEntry != null);
          AppConfigurationEntry appace = (AppConfigurationEntry) appEntry;
          assertEquals("LM Name", "org.jboss.security.auth.spi.UsersRolesLoginModule", appace.getLoginModuleName());
          assertEquals("Optional", AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, appace.getControlFlag());
@@ -185,7 +187,7 @@ public class StaxConfigParser2UnitTestCase extends TestCase
          assertEquals("unauthenticatedIdentity=anonymous", "anonymous", appaceOptions.get("unauthenticatedIdentity"));
       }
 
-      public static void validateCompleteConfiguration()
+      static void validateCompleteConfiguration()
       {
          ApplicationPolicy completeConfig = getApplicationPolicy("conf-complete");
          BaseAuthenticationInfo authInfo = completeConfig.getAuthenticationInfo();
@@ -224,23 +226,23 @@ public class StaxConfigParser2UnitTestCase extends TestCase
          assertNotNull("Unexpected null set of acl entries", aclEntries);
          assertEquals("Invalid number of acl entries", 2, aclEntries.length);
          // first entry should be org.jboss.security.authz.ACLModule1.
-         Assert.assertEquals("org.jboss.security.authz.ACLModule1", aclEntries[0].getAclProviderName());
-         Assert.assertEquals("REQUIRED", aclEntries[0].getControlFlag().toString());
+         assertEquals("org.jboss.security.authz.ACLModule1", aclEntries[0].getAclProviderName());
+         assertEquals("REQUIRED", aclEntries[0].getControlFlag().toString());
          Map<String, ?> options = aclEntries[0].getOptions();
-         Assert.assertNotNull("Unexpected null options map", options);
-         Assert.assertTrue("Option aclOption1 was not found", options.containsKey("aclOption1"));
-         Assert.assertEquals("value1", options.get("aclOption1"));
-         Assert.assertTrue("Option aclOption2 was not found", options.containsKey("aclOption2"));
-         Assert.assertEquals("value2", options.get("aclOption2"));
+         assertNotNull("Unexpected null options map", options);
+         assertTrue("Option aclOption1 was not found", options.containsKey("aclOption1"));
+         assertEquals("value1", options.get("aclOption1"));
+         assertTrue("Option aclOption2 was not found", options.containsKey("aclOption2"));
+         assertEquals("value2", options.get("aclOption2"));
          // second entry should be the org.jboss.security.authz.ACLModule2.
-         Assert.assertEquals("org.jboss.security.authz.ACLModule2", aclEntries[1].getAclProviderName());
-         Assert.assertEquals("REQUIRED", aclEntries[1].getControlFlag().toString());
+         assertEquals("org.jboss.security.authz.ACLModule2", aclEntries[1].getAclProviderName());
+         assertEquals("REQUIRED", aclEntries[1].getControlFlag().toString());
          options = aclEntries[1].getOptions();
-         Assert.assertNotNull("Unexpected null options map", options);
-         Assert.assertTrue("Option aclOption3 was not found", options.containsKey("aclOption3"));
-         Assert.assertEquals("value3", options.get("aclOption3"));
-         Assert.assertTrue("Option aclOption4 was not found", options.containsKey("aclOption4"));
-         Assert.assertEquals("value4", options.get("aclOption4"));
+         assertNotNull("Unexpected null options map", options);
+         assertTrue("Option aclOption3 was not found", options.containsKey("aclOption3"));
+         assertEquals("value3", options.get("aclOption3"));
+         assertTrue("Option aclOption4 was not found", options.containsKey("aclOption4"));
+         assertEquals("value4", options.get("aclOption4"));
 
          // Mapping
          MappingInfo mappingInfo = completeConfig.getMappingInfo(MappingType.PRINCIPAL.toString());
@@ -251,7 +253,7 @@ public class StaxConfigParser2UnitTestCase extends TestCase
          assertEquals("org.jboss.test.mapping.MappingModule1", mappingEntry.getMappingModuleName());
          Map<String, ?> mappingOptions = mappingEntry.getOptions();
          assertEquals("Invalid number of options", 1, mappingOptions.size());
-         Assert.assertTrue("Option option1 was not found", mappingOptions.containsKey("option1"));
+         assertTrue("Option option1 was not found", mappingOptions.containsKey("option1"));
          assertEquals("value1", mappingOptions.get("option1"));
 
          // Role Mapping
@@ -292,7 +294,7 @@ public class StaxConfigParser2UnitTestCase extends TestCase
          assertEquals("dummy=dr", "dr", itieOptions.get("dummy"));
       }
 
-      public static void validateApplicationPolicyExtension()
+      static void validateApplicationPolicyExtension()
       {
          ApplicationPolicy completeConfig = getApplicationPolicy("conf-jaas-extend");
          assertNotNull("conf-jaas-extend is not null", completeConfig);
@@ -350,25 +352,25 @@ public class StaxConfigParser2UnitTestCase extends TestCase
          assertNotNull("Unexpected null jaspi configuration", authInfo);
          List<?> entries = authInfo.getModuleEntries();
          assertEquals("Invalid number of auth modules", 3, entries.size());
-      } 
+      }
    } //End class TestSecurityConfig5
-   
-   
+
+
    //Validate the identitytrust-config.xml
    private static class TestIdentityTrustConfig
    {
-      public static void testConfJavaEE()
-      { 
+      static void testConfJavaEE()
+      {
          ApplicationPolicy javaeeConfig = getApplicationPolicy("conf-javaee");
          IdentityTrustInfo identityTrust = javaeeConfig.getIdentityTrustInfo();
          assertNotNull("IdentityTrustInfo", identityTrust);
-         
+
          IdentityTrustModuleEntry[] itilist = identityTrust.getIdentityTrustModuleEntry();
-         assertEquals("IdentityTrustModuleEntry length=1", 1, itilist.length); 
-         
+         assertEquals("IdentityTrustModuleEntry length=1", 1, itilist.length);
+
          IdentityTrustModuleEntry itme = itilist[0];
          assertEquals("org.jboss.security.identitytrust.modules.JavaEETrustModule", itme.getName());
       }
    }
-   
+
 }

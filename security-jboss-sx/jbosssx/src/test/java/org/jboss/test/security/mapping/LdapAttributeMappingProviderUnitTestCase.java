@@ -78,7 +78,12 @@ public class LdapAttributeMappingProviderUnitTestCase extends OpenDSUnitTestsAda
       boolean op = util.addLDIF(serverHost, port, adminDN, adminPW, new File(fileName).toURI().toURL());
       assertTrue(op);
    }
-   
+
+   @Override
+   public void tearDown() throws Exception {
+      super.tearDown();
+   }
+
    public void testLDAPAttributes() throws Exception
    {    
       StaxBasedConfigParser parser = new StaxBasedConfigParser();

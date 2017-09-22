@@ -22,15 +22,14 @@
 package org.jboss.test.security.mapping;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.security.auth.login.Configuration;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.jboss.security.SecurityConstants;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextFactory;
@@ -54,13 +53,13 @@ public class LdapAttributeMappingProvider2UnitTestCase extends OpenDSUnitTestsAd
    public static Test suite() throws Exception
    {
       TestSuite suite = new TestSuite();
-      suite.addTest(new LdapAttributeMappingProvider2UnitTestCase("testLDAPAttributes")); 
+      suite.addTest(new LdapAttributeMappingProvider2UnitTestCase("testLDAPAttributes"));
       return suite;
    }
-   
+
    public LdapAttributeMappingProvider2UnitTestCase(String name)
    {
-      super(name); 
+      super(name);
    }
 
    protected void setUp() throws Exception
@@ -68,43 +67,50 @@ public class LdapAttributeMappingProvider2UnitTestCase extends OpenDSUnitTestsAd
       super.setUp();
       XMLLoginConfigImpl xmlLogin = XMLLoginConfigImpl.getInstance();
       Configuration.setConfiguration(xmlLogin);
-      
-      ApplicationPolicy ap = new ApplicationPolicy("test"); 
+
+      ApplicationPolicy ap = new ApplicationPolicy("test");
       SecurityConfiguration.addApplicationPolicy(ap);
-      
+
       //Let us add the ldapAttributes.ldif
       String fileName = targetDir + "ldap" + fs + "ldapAttributes.ldif";
       boolean op = util.addLDIF(serverHost, port, adminDN, adminPW, new File(fileName).toURI().toURL());
       assertTrue(op);
    }
-   
+
+   @Override
+   public void tearDown() throws Exception {
+      super.tearDown();
+   }
+
    public void testLDAPAttributes() throws Exception
-   {    
+   {
       StaxBasedConfigParser parser = new StaxBasedConfigParser();
-      parser.parse2(Thread.currentThread().getContextClassLoader().getResourceAsStream("ldap/ldap-attributes-config.xml"));
-      
+      try (InputStream is =  Thread.currentThread().getContextClassLoader().getResourceAsStream("ldap/ldap-attributes-config.xml")) {
+         parser.parse2(is);
+      }
+
       SecurityContext sc = SecurityContextFactory.createSecurityContext("test");
       MappingManager mm = sc.getMappingManager();
       assertNotNull("MappingManager != null", mm);
-      
+
       MappingContext<List<Attribute<String>>> mc = mm.getMappingContext(MappingType.ATTRIBUTE.name());
       assertNotNull("MappingContext != null", mc);
       assertEquals("1 module", 1,mc.getModules().size());
       HashMap<String,Object> map = new HashMap<String,Object>();
-     
+
       map.put(SecurityConstants.PRINCIPAL_IDENTIFIER, new SimplePrincipal("jduke"));
-      
+
       List<Attribute<String>> attList = new ArrayList<Attribute<String>>();
-      
+
       mc.performMapping(map, attList);
-      attList = (List<Attribute<String>>) mc.getMappingResult().getMappedObject(); 
-      
+      attList = (List<Attribute<String>>) mc.getMappingResult().getMappedObject();
+
       boolean foundEmail = false;
       boolean foundEmployeeType = false;
       boolean foundEmployeeNumber = false;
-      
+
       assertNotNull("Attribute List is not null?", attList);
-      
+
       for(Attribute<String> att: attList)
       {
          String attName = att.getName();
@@ -127,5 +133,5 @@ public class LdapAttributeMappingProvider2UnitTestCase extends OpenDSUnitTestsAd
       assertTrue("Found Email", foundEmail);
       assertTrue("Found Emp Type", foundEmployeeType);
       assertTrue("Found Emp Number", foundEmployeeNumber);
-   } 
+   }
 }

@@ -25,17 +25,27 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
+import javax.servlet.http.Part;
 
 //$Id$
 
@@ -51,7 +61,7 @@ public class TestHttpServletRequest implements HttpServletRequest
    private String uri;
    private String meth;
    
-   private Map<String,Object> parameterMap = new HashMap<String,Object>();
+   private Map<String,String[]> parameterMap = new HashMap<>();
    
    public TestHttpServletRequest()
    {   
@@ -81,6 +91,10 @@ public class TestHttpServletRequest implements HttpServletRequest
    public long getDateHeader(String arg0)
    { 
       return 0;
+   }
+
+   public DispatcherType getDispatcherType() {
+      return null;
    }
 
    public String getHeader(String arg0)
@@ -153,6 +167,11 @@ public class TestHttpServletRequest implements HttpServletRequest
       return null;
    }
 
+   @Override
+   public String changeSessionId() {
+      return null;
+   }
+
    public HttpSession getSession(boolean arg0)
    {
       return null;
@@ -176,6 +195,31 @@ public class TestHttpServletRequest implements HttpServletRequest
    public boolean isRequestedSessionIdFromUrl()
    {
       return false;
+   }
+
+   @Override
+   public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+      return false;
+   }
+
+   @Override
+   public void login(String username, String password) throws ServletException {
+
+   }
+
+   @Override
+   public void logout() throws ServletException {
+
+   }
+
+   @Override
+   public Collection<Part> getParts() throws IOException, ServletException {
+      return null;
+   }
+
+   @Override
+   public Part getPart(String name) throws IOException, ServletException {
+      return null;
    }
 
    public boolean isRequestedSessionIdValid()
@@ -208,6 +252,11 @@ public class TestHttpServletRequest implements HttpServletRequest
       return 0;
    }
 
+   @Override
+   public long getContentLengthLong() {
+      return 0;
+   }
+
    public String getContentType()
    {
       return null;
@@ -233,22 +282,28 @@ public class TestHttpServletRequest implements HttpServletRequest
       return 0;
    }
 
+   @Override
+   public ServletContext getServletContext() {
+      return null;
+   }
+
    public Locale getLocale()
    {
       return null;
    }
 
-   public Enumeration<String> getLocales()
+   public Enumeration<Locale> getLocales()
    {
       return null;
    }
 
    public String getParameter(String arg)
    {
-      return (String) parameterMap.get(arg);
+      String[] parameters = parameterMap.get(arg);
+      return (parameters == null || parameters.length == 0) ? null : parameters[0];
    }
 
-   public Map<String,Object> getParameterMap()
+   public Map<String,String[]> getParameterMap()
    {
      return parameterMap;
    }
@@ -328,10 +383,40 @@ public class TestHttpServletRequest implements HttpServletRequest
 
    public void setCharacterEncoding(String arg0) throws UnsupportedEncodingException
    { 
-   } 
-   
+   }
+
+   @Override
+   public AsyncContext startAsync() throws IllegalStateException {
+      return null;
+   }
+
+   @Override
+   public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+      return null;
+   }
+
+   @Override
+   public boolean isAsyncStarted() {
+      return false;
+   }
+
+   @Override
+   public boolean isAsyncSupported() {
+      return false;
+   }
+
+   @Override
+   public AsyncContext getAsyncContext() {
+      return null;
+   }
+
+   @Override
+   public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+      return null;
+   }
+
    //Non-standard methods
-   public void setParameter( String key, Object value )
+   public void setParameter( String key, String[] value )
    {
       parameterMap.put(key, value);
    }

@@ -70,10 +70,8 @@ public class ACLImpl implements ACL, Serializable
    @Transient
    private Map<String, ACLEntry> entriesMap;
 
-   @OneToMany(mappedBy = "acl", fetch = FetchType.EAGER, cascade =
+   @OneToMany(mappedBy = "acl", fetch = FetchType.EAGER, orphanRemoval = true, cascade =
    {CascadeType.REMOVE, CascadeType.PERSIST})
-   @Cascade(
-   {org.hibernate.annotations.CascadeType.DELETE_ORPHAN})
    private Collection<ACLEntryImpl> entries;
 
    /**
