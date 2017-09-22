@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
         <version>24</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -14,7 +13,7 @@
     <name>PicketBox- Parent</name>
     <url>http://jboss.org/picketbox</url>
     <description>PicketBox is a security framework for authentication, authorization, audit and mapping</description>
-    <version>5.0.3.Beta1-SNAPSHOT</version>
+    <version>5.0.3.Beta1</version>
 
     <licenses>
         <license>
@@ -27,7 +26,8 @@
         <connection>scm:git:git@github.com:picketbox/picketbox.git</connection>
         <developerConnection>scm:git:git@github.com:picketbox/picketbox.git</developerConnection>
         <url>https://github.com/picketbox/picketbox</url>
-    </scm>
+      <tag>5.0.3.Beta1</tag>
+  </scm>
 
     <modules>
         <module>security-spi</module>
