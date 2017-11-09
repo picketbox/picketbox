@@ -529,7 +529,7 @@ public interface PicketBoxLogger extends BasicLogger {
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 326, value = "%s processing failed")
-    void debugFailureExecutingMethod(String methodName, @Cause Throwable throwable);
+    void debugFailureExecutingMethod(String methodName);
 
     @LogMessage(level = Logger.Level.TRACE)
     @Message(id = 327, value = "Returning host %s from thread [id: %s]")
@@ -742,5 +742,9 @@ public interface PicketBoxLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 379, value = "Password validation failed")
     void passwordValidationFailed(@Cause Throwable cause);
+
+    @LogMessage(level = Logger.Level.TRACE)
+    @Message(id = 380, value = "%s processing failed")
+    void traceFailureExecutingMethod(String methodName, @Cause Throwable throwable);
 
 }

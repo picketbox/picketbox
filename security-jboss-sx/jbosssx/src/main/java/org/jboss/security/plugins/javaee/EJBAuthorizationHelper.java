@@ -190,7 +190,11 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       catch (Exception e)
       {
          isAuthorized = false;
-         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("isCallerInRole", e);
+         if (PicketBoxLogger.LOGGER.isTraceEnabled()) {
+             PicketBoxLogger.LOGGER.traceFailureExecutingMethod("isCallerInRole", e);
+         } else {
+             PicketBoxLogger.LOGGER.debugFailureExecutingMethod("isCallerInRole");
+         }
          authorizationAudit(AuditLevel.ERROR,ejbResource,e);
       } 
       return isAuthorized;  
@@ -256,7 +260,11 @@ public class EJBAuthorizationHelper extends AbstractEJBAuthorizationHelper
       catch (Exception e)
       {
          isAuthorized = false;
-         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("isCallerInRole", e);
+         if (PicketBoxLogger.LOGGER.isTraceEnabled()) {
+             PicketBoxLogger.LOGGER.traceFailureExecutingMethod("isCallerInRole", e);
+         } else {
+             PicketBoxLogger.LOGGER.debugFailureExecutingMethod("isCallerInRole");
+         }
          authorizationAudit(AuditLevel.ERROR,ejbResource,e);
       } 
       return isAuthorized; 

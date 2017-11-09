@@ -125,7 +125,11 @@ extends AbstractWebAuthorizationHelper
       catch (AuthorizationException e)
       {
          isAuthorized = false;
-         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("hasResourcePermission", e);
+         if (PicketBoxLogger.LOGGER.isTraceEnabled()) {
+             PicketBoxLogger.LOGGER.traceFailureExecutingMethod("hasResourcePermission", e);
+         } else {
+             PicketBoxLogger.LOGGER.debugFailureExecutingMethod("hasResourcePermission");
+         }
          if(this.enableAudit)
             authorizationAudit(AuditLevel.ERROR,webResource,e); 
       }
@@ -203,7 +207,11 @@ extends AbstractWebAuthorizationHelper
       catch (AuthorizationException e)
       {
          hasTheRole = false;
-         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("hasRole", e);
+         if (PicketBoxLogger.LOGGER.isTraceEnabled()) {
+             PicketBoxLogger.LOGGER.traceFailureExecutingMethod("hasRole", e);
+         } else {
+             PicketBoxLogger.LOGGER.debugFailureExecutingMethod("hasRole");
+         }
          if(this.enableAudit)
             authorizationAudit(AuditLevel.ERROR,webResource,e); 
       }
@@ -274,7 +282,11 @@ extends AbstractWebAuthorizationHelper
       catch (AuthorizationException e)
       {
          hasPerm = false;
-         PicketBoxLogger.LOGGER.debugFailureExecutingMethod("hasUserDataPermission", e);
+         if (PicketBoxLogger.LOGGER.isTraceEnabled()) {
+             PicketBoxLogger.LOGGER.traceFailureExecutingMethod("hasUserDataPermission", e);
+         } else {
+             PicketBoxLogger.LOGGER.debugFailureExecutingMethod("hasUserDataPermission");
+         }
          if(this.enableAudit)
             authorizationAudit(AuditLevel.ERROR,webResource,e); 
       }
