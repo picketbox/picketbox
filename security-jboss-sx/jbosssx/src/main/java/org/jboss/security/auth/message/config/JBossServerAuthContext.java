@@ -35,6 +35,7 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 
+import org.jboss.security.PicketBoxLogger;
 import org.jboss.security.PicketBoxMessages;
 import org.jboss.security.config.ControlFlag;
 
@@ -154,24 +155,30 @@ public class JBossServerAuthContext implements ServerAuthContext
          AuthStatus decision = AuthStatus.FAILURE;
          try
          {
+            PicketBoxLogger.LOGGER.debug("Validating request with module " + module);
             decision = module.validateRequest(messageInfo, clientSubject, serviceSubject);
+            PicketBoxLogger.LOGGER.debug("ServerAuthModule returned " + str(decision));
          }
          catch(Exception ae)
-         { 
+         {
+            PicketBoxLogger.LOGGER.debugIgnoredException(ae);
             decision = AuthStatus.FAILURE;
             if(moduleException == null)
                moduleException = new AuthException(ae.getMessage());
          }
-         
-         if(decision == AuthStatus.SUCCESS)
-         { 
+         if(decision == AuthStatus.SUCCESS) {
             overallDecision =  AuthStatus.SUCCESS;
             //SUFFICIENT case
             if(flag == ControlFlag.SUFFICIENT && encounteredRequiredError == false)
-               return AuthStatus.SUCCESS;
+               return overallDecision;
             continue; //Continue with the other modules
          }
-         //Go through the failure cases 
+         if(decision == AuthStatus.SEND_SUCCESS || decision == AuthStatus.SEND_FAILURE || decision==AuthStatus.SEND_CONTINUE) {
+              PicketBoxLogger.LOGGER.debug("AuthModule already send something to client, skip next AuthModules");
+              overallDecision = decision;
+              break;
+         }
+         PicketBoxLogger.LOGGER.debug("Go through the failure cases checking flag:" + flag);
          //REQUISITE case
          if(flag == ControlFlag.REQUISITE)
          {
@@ -183,8 +190,7 @@ public class JBossServerAuthContext implements ServerAuthContext
          //REQUIRED Case
          if(flag == ControlFlag.REQUIRED)
          {
-            if(encounteredRequiredError == false)
-               encounteredRequiredError = true;
+            encounteredRequiredError = true;
          }
          if(flag == ControlFlag.OPTIONAL)
             encounteredOptionalError = true; 
@@ -196,9 +202,9 @@ public class JBossServerAuthContext implements ServerAuthContext
          throw new AuthException(PicketBoxMessages.MESSAGES.authenticationFailedMessage() + msg);
       if(overallDecision == AuthStatus.FAILURE && encounteredOptionalError)
          throw new AuthException(PicketBoxMessages.MESSAGES.authenticationFailedMessage() + msg);
-      if(overallDecision == AuthStatus.FAILURE)
+      if(overallDecision == AuthStatus.FAILURE || overallDecision==AuthStatus.SEND_FAILURE)
          throw new AuthException(PicketBoxMessages.MESSAGES.authenticationFailedMessage());
-      return AuthStatus.SUCCESS;
+      return overallDecision;
    }
    
 
@@ -208,5 +214,14 @@ public class JBossServerAuthContext implements ServerAuthContext
       if(e != null)
          msg.append(e.getLocalizedMessage());
       return msg.toString();
+   }
+   
+   private String str(AuthStatus status) {
+        if (status==AuthStatus.FAILURE) return "FAILURE";
+        if (status==AuthStatus.SUCCESS) return "SUCCESS";
+        if (status==AuthStatus.SEND_SUCCESS) return "SEND_SUCCESS";
+        if (status==AuthStatus.SEND_FAILURE) return "SEND_FAILURE";
+        if (status==AuthStatus.SEND_CONTINUE) return "SEND_CONTINUE";
+        return "Unknown AuthStatus:" + status;
    }
 }
