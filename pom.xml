@@ -13,7 +13,7 @@
     <name>PicketBox- Parent</name>
     <url>http://jboss.org/picketbox</url>
     <description>PicketBox is a security framework for authentication, authorization, audit and mapping</description>
-    <version>5.1.0.Beta1-SNAPSHOT</version>
+    <version>5.1.0.Final</version>
 
     <licenses>
         <license>
@@ -26,7 +26,7 @@
         <connection>scm:git:git@github.com:picketbox/picketbox.git</connection>
         <developerConnection>scm:git:git@github.com:picketbox/picketbox.git</developerConnection>
         <url>https://github.com/picketbox/picketbox</url>
-      <tag>HEAD</tag>
+      <tag>5.1.0.Final</tag>
   </scm>
 
     <modules>
