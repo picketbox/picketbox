@@ -23,6 +23,7 @@ package org.jboss.security.auth.message.config;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,17 +50,17 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
    /**
     * Map of String key to provider.
     */
-   private ConcurrentMap<String, AuthConfigProvider> keyToAuthConfigProviderMap = new ConcurrentHashMap<String, AuthConfigProvider>();
+   private Map<String, AuthConfigProvider> keyToAuthConfigProviderMap = Collections.synchronizedMap(new HashMap<>());
 
    /**
     * Map of key to listener.
     */
-   private ConcurrentMap<String, RegistrationListener> keyToRegistrationListenerMap = new ConcurrentHashMap<String, RegistrationListener>();
+   private Map<String, RegistrationListener> keyToRegistrationListenerMap = Collections.synchronizedMap(new HashMap<>());
 
    /**
     * Map of key to registration context.
     */
-   private ConcurrentMap<String, RegistrationContext> keyToRegistrationContextMap = new ConcurrentHashMap<String, RegistrationContext>();
+   private Map<String, RegistrationContext> keyToRegistrationContextMap = Collections.synchronizedMap(new HashMap<>());
     
    /**
     * <p>
@@ -169,11 +170,12 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       }
       else
       {
-         // get all entries that have the supplied provider as value and store their keys.
-         for (Map.Entry<String, AuthConfigProvider> entry : this.keyToAuthConfigProviderMap.entrySet())
-         {
-            if (entry.getValue().equals(provider))
-               al.add(entry.getKey());
+         synchronized (this.keyToAuthConfigProviderMap) {
+            // get all entries that have the supplied provider as value and store their keys.
+            for (Map.Entry<String, AuthConfigProvider> entry : this.keyToAuthConfigProviderMap.entrySet()) {
+               if (entry.getValue().equals(provider))
+                  al.add(entry.getKey());
+            }
          }
       }
       String[] sarr = new String[al.size()];
