@@ -164,6 +164,46 @@ public final class Base64Encoder
       return buf[off+2] & 0x3f ;
    }
 
+   private static int writeValues(OutputStream out, int count, int c1, byte c2, byte c3, byte c4) throws IOException {
+       switch (count)
+       {
+           case 73:
+              out.write(c1);
+              out.write(c2);
+              out.write(c3);
+              out.write('\n');
+              out.write(c4);
+              return 1;
+            case 74:
+              out.write(c1);
+              out.write(c2);
+              out.write('\n');
+              out.write(c3);
+              out.write(c4);
+              return 2 ;
+            case 75:
+              out.write(c1);
+              out.write('\n');
+              out.write(c2);
+              out.write(c3);
+              out.write(c4);
+              return 3 ;
+            case 76:
+              out.write('\n');
+              out.write(c1);
+              out.write(c2);
+              out.write(c3);
+              out.write(c4);
+              return 4;
+            default:
+              out.write(c1);
+              out.write(c2);
+              out.write(c3);
+              out.write(c4);
+              return count + 4;
+       }
+   }
+
   /**
    * Process the data: encode the input stream to the output stream.
    * This method runs through the input stream, encoding it to the output
@@ -179,7 +219,7 @@ public final class Base64Encoder
       int  count    = 0 ;
       while ((got = in.read(buffer, off, BUFFER_SIZE-off)) > 0)
       {
-         if ( got >= 3 )
+         if ( got + off >= 3 )
          {
             got += off;
             off  = 0;
@@ -189,48 +229,7 @@ public final class Base64Encoder
                 int c2 = get2(buffer,off);
                 int c3 = get3(buffer,off);
                 int c4 = get4(buffer,off);
-                switch (count)
-                {
-                    case 73:
-                       out.write(encoding[c1]);
-                       out.write(encoding[c2]);
-                       out.write(encoding[c3]);
-                       out.write ('\n') ;
-                       out.write(encoding[c4]);
-                       count = 1 ;
-                       break ;
-                     case 74:
-                       out.write(encoding[c1]);
-                       out.write(encoding[c2]);
-                       out.write ('\n') ;
-                       out.write(encoding[c3]);
-                       out.write(encoding[c4]) ;
-                       count = 2 ;
-                       break ;
-                     case 75:
-                       out.write(encoding[c1]);
-                       out.write ('\n') ;
-                       out.write(encoding[c2]);
-                       out.write(encoding[c3]);
-                       out.write(encoding[c4]) ;
-                       count = 3 ;
-                       break ;
-                     case 76:
-                       out.write('\n') ;
-                       out.write(encoding[c1]);
-                       out.write(encoding[c2]);
-                       out.write(encoding[c3]);
-                       out.write(encoding[c4]);
-                       count = 4;
-                       break;
-                     default:
-                       out.write(encoding[c1]);
-                       out.write(encoding[c2]);
-                       out.write(encoding[c3]);
-                       out.write(encoding[c4]);
-                       count += 4;
-                       break;
-                }
+                count = writeValues(out, count, encoding[c1], encoding[c2], encoding[c3], encoding[c4]);
                 off += 3;
             }
             // Copy remaining bytes to beginning of buffer:
@@ -247,18 +246,11 @@ public final class Base64Encoder
       // Manage the last bytes, from 0 to off:
       switch (off) {
         case 1:
-            out.write(encoding[get1(buffer, 0)]);
-            out.write(encoding[get2(buffer, 0)]);
-            out.write('=');
-            out.write('=');
+            writeValues(out, count, encoding[get1(buffer, 0)], encoding[get2(buffer, 0)], (byte) '=', (byte) '=');
             break ;
         case 2:
-            out.write(encoding[get1(buffer, 0)]);
-            out.write(encoding[get2(buffer, 0)]);
-            out.write(encoding[get3(buffer, 0)]);
-            out.write('=');
+            writeValues(out, count, encoding[get1(buffer, 0)], encoding[get2(buffer, 0)], encoding[get3(buffer, 0)], (byte) '=');
       }
       return;
    }
 }
-
