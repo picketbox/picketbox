@@ -69,7 +69,7 @@ public class SimpleRole implements Role, Cloneable
     */
    public boolean containsAll(Role anotherRole)
    {
-      if (anotherRole.getType() == RoleType.simple)
+      if (anotherRole.getType() == RoleType.simple && roleName != null)
       {
          if (ANYBODY.equals(roleName))
             return true;
@@ -99,13 +99,15 @@ public class SimpleRole implements Role, Cloneable
    {
       return roleName;
    }
-   
+
    @Override
-   public int hashCode()
-   {
-      int hashCode = roleName.hashCode();
-      if (parent != null)
-         hashCode += parent.hashCode();
+   public int hashCode() {
+      int hashCode = 0;
+      if (roleName != null) {
+         hashCode = roleName.hashCode();
+         if (parent != null)
+            hashCode += parent.hashCode();
+      }
       return hashCode;
    }
 
@@ -116,7 +118,7 @@ public class SimpleRole implements Role, Cloneable
       {
          return true;
       }
-      if (obj instanceof SimpleRole)
+      if (obj instanceof SimpleRole && roleName != null)
       {
          SimpleRole other = (SimpleRole) obj;
          return parent != null ? (roleName.equals(other.roleName) && parent.equals(other.parent)) :
