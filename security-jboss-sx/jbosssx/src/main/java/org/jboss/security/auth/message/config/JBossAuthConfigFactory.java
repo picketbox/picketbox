@@ -27,8 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
@@ -127,7 +125,7 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
 
       AuthConfigProvider acp = null;
       String key = null;
-      for (int i = 0; i < 4 && acp == null; i++)
+      for (int i = 0; i < 4; i++)
       {
          if (i == 0)
             key = input;
@@ -137,8 +135,11 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
             key = allContext;
          if (i == 3)
             key = general;
-
-         acp = this.keyToAuthConfigProviderMap.get(key);
+         
+         if (this.keyToAuthConfigProviderMap.containsKey(key)) {
+            acp = this.keyToAuthConfigProviderMap.get(key);
+            break;
+         }       
       }
 
       //
@@ -164,20 +165,16 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
    public String[] getRegistrationIDs(AuthConfigProvider provider)
    {
       List<String> al = new ArrayList<String>();
-      if (provider == null)
-      {
-         al.addAll(keyToAuthConfigProviderMap.keySet());
-      }
-      else
-      {
-         synchronized (this.keyToAuthConfigProviderMap) {
-            // get all entries that have the supplied provider as value and store their keys.
-            for (Map.Entry<String, AuthConfigProvider> entry : this.keyToAuthConfigProviderMap.entrySet()) {
-               if (entry.getValue().equals(provider))
-                  al.add(entry.getKey());
-            }
+      synchronized (this.keyToAuthConfigProviderMap) {
+         // get all entries that have the supplied provider as value and store their keys.
+         AuthConfigProvider acp = null;
+         for (Map.Entry<String, AuthConfigProvider> entry : this.keyToAuthConfigProviderMap.entrySet()) {
+            acp = entry.getValue();
+            if ((acp != null && acp.equals(provider)) || provider == null)
+               al.add(entry.getKey());
          }
       }
+
       String[] sarr = new String[al.size()];
       al.toArray(sarr);
       return sarr;
@@ -218,8 +215,9 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       String registrationID = new StringBuilder().append(layer).append(appContext).toString();
       
       // check if we already have a registration for the layer/appContext key.
-      AuthConfigProvider oldProvider = this.keyToAuthConfigProviderMap.put(registrationID, acp);
-      if (oldProvider != null)
+      boolean providerAlreadyRegistered = this.keyToAuthConfigProviderMap.containsKey(registrationID);
+      this.keyToAuthConfigProviderMap.put(registrationID, acp);
+      if (providerAlreadyRegistered)
       {
          // registration already exists and provider has been replaced. Update the registration context.
          JBossRegistrationContext context = (JBossRegistrationContext) this.keyToRegistrationContextMap.get(registrationID);
@@ -249,8 +247,9 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
       String registrationID = new StringBuilder().append(layer).append(appContext).toString();
 
        // check if we already have a registration for the layer/appContext key.
-      AuthConfigProvider oldProvider = this.keyToAuthConfigProviderMap.put(registrationID, provider);
-      if (oldProvider != null)
+      boolean providerAlreadyRegistered = this.keyToAuthConfigProviderMap.containsKey(registrationID);
+      this.keyToAuthConfigProviderMap.put(registrationID, provider);
+      if (providerAlreadyRegistered)
       {
           // registration already exists and provider has been replaced. Update the registration context.
           JBossRegistrationContext context = (JBossRegistrationContext) this.keyToRegistrationContextMap.get(registrationID);
@@ -275,22 +274,26 @@ public class JBossAuthConfigFactory extends AuthConfigFactory
     * (non-Javadoc)
     * @see javax.security.auth.message.config.AuthConfigFactory#removeRegistration(java.lang.String)
     */
-   public boolean removeRegistration(String registrationID)
-   {
+    public boolean removeRegistration(String registrationID) {
       if (registrationID == null)
          throw PicketBoxMessages.MESSAGES.invalidNullArgument("registrationID");
 
-      RegistrationListener listener = this.keyToRegistrationListenerMap.get(registrationID);
-      RegistrationContext rc = this.keyToRegistrationContextMap.get(registrationID);
+      boolean removed = false;
+      if (this.keyToAuthConfigProviderMap.containsKey(registrationID)) {
 
-      // remove the provider and notify listener of the change.
-      boolean removed = (this.keyToAuthConfigProviderMap.remove(registrationID) != null);
-      if (removed && listener != null)
-         listener.notify(rc.getMessageLayer(), rc.getAppContext());
-      this.keyToRegistrationContextMap.remove(registrationID);
+         AuthConfigProvider acp = this.keyToAuthConfigProviderMap.get(registrationID);
+         RegistrationListener listener = this.keyToRegistrationListenerMap.get(registrationID);
+         RegistrationContext rc = this.keyToRegistrationContextMap.get(registrationID);
+
+         // remove the provider and notify listener of the change.
+         removed = (this.keyToAuthConfigProviderMap.remove(registrationID) != null) || (acp == null);
+         if (removed && listener != null)
+            listener.notify(rc.getMessageLayer(), rc.getAppContext());
+         this.keyToRegistrationContextMap.remove(registrationID);
+      }
 
       return removed;
-   }
+    }
 
    static class JBossRegistrationContext implements RegistrationContext {
 
