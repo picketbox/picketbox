@@ -25,6 +25,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
 import java.security.acl.Group;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -698,15 +700,12 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                // Query the context for the roleDN values
                String[] attrNames = {roleAttributeID};
                Attributes result = null;
+               // SECURITY-891
+               result = sr.getAttributes();
                if (sr.isRelative()) {
-                  // SECURITY-891
-                  result = sr.getAttributes();
                   if (result.size() == 0) {
                      result = ldapCtx.getAttributes(quoteDN(dn), attrNames);
                   }
-               }
-               else {
-                  result = getAttributesFromReferralEntity(sr, user, userDN);
                }
                if (result != null && result.size() > 0)
                {
@@ -730,7 +729,8 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
                               result2 = ldapCtx.getAttributes(roleDN, returnAttribute);
                            }
                            else {
-                              result2 = getAttributesFromReferralEntity(sr, user, userDN);
+                              SearchResult sr2  = findReferralEntry(ctx, roleDN, returnAttribute);
+                              result2 = getAttributesFromReferralEntity(sr2, user, userDN);
                            }
 
                            Attribute roles2 = (result2 != null ? result2.get(roleNameAttributeID) : null);
@@ -814,7 +814,6 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
     * @throws NamingException
     */
    private Attributes getAttributesFromReferralEntity(SearchResult sr, String... users) throws NamingException {
-
       Attributes result = sr.getAttributes();
       boolean chkSuccessful = false;
       if (referralUserAttributeIDToCheck != null) {
@@ -823,7 +822,7 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          for (int i = 0; usersToCheck != null && i < usersToCheck.size(); i++) {
             String userDNToCheck = (String) usersToCheck.get(i);
             for (String u: users) {
-               if (u.equals(userDNToCheck)) {
+               if (u.equalsIgnoreCase(userDNToCheck)) {
                   chkSuccessful = true;
                   break check;
                }
@@ -831,6 +830,68 @@ public class LdapExtLoginModule extends UsernamePasswordLoginModule
          }
       }
       return (chkSuccessful ? result : null);
+   }
+
+   /**
+    * Returns Result from search (with possible referral refs)
+    *
+    * @param ctx
+    * @param entryDn
+    * @param attrsToReturn
+    * @return
+    * @throws NamingException
+    */
+   protected SearchResult findReferralEntry(LdapContext ctx, String entryDn, String[] attrsToReturn) throws NamingException {
+      SearchControls constraints = new SearchControls();
+      constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
+      constraints.setTimeLimit(searchTimeLimit);
+
+      ArrayList<String> attrsToReturnList = new ArrayList<>();
+      attrsToReturnList.addAll(Arrays.asList(attrsToReturn));
+      if(referralUserAttributeIDToCheck != null) {
+         attrsToReturnList.add(referralUserAttributeIDToCheck);
+      }
+      constraints.setReturningAttributes(attrsToReturnList.toArray(new String[attrsToReturnList.size()]));
+
+      NamingEnumeration results = null;
+
+      StringTokenizer st = new StringTokenizer(entryDn, ",");
+
+      String filter;
+      if(st.hasMoreElements()) {
+          filter = "(" + st.nextToken() + ")";
+      } else {
+         filter = entryDn;
+      }
+
+      StringBuilder sb = new StringBuilder();
+      while (st.hasMoreElements()) {
+         if(sb.length() > 0) sb.append(",");
+         sb.append(st.nextElement());
+      }
+
+
+      LdapContext ldapCtx = ctx;
+
+      boolean referralsLeft = true;
+      SearchResult sr = null;
+      while (referralsLeft) {
+         try {
+            results = ldapCtx.search(sb.toString(), filter, constraints);
+            while (results.hasMore()) {
+               sr = (SearchResult) results.next();
+               break;
+            }
+            referralsLeft = false;
+         } catch (ReferralException e) {
+            ldapCtx = (LdapContext) e.getReferralContext();
+            if (results != null) {
+               results.close();
+            }
+         }
+      }
+
+      return sr;
    }
 
    private InitialLdapContext constructInitialLdapContext(String dn, Object credential) throws NamingException
